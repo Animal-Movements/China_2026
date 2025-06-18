@@ -116,10 +116,7 @@ Most important is that your movement dataset has the following variables:
 
 # Or list the files so we don't have to type so much
 # Create list
-lf <- list.files(path="D:/GitHub/Courses/China_2025/1_IntroMovementEcology/Data/", pattern = '.csv', all.files=FALSE, full.names=TRUE)
-lf
-
-lf <- list.files(path="./1_IntroMovEcology/Data/", pattern = '.csv', all.files=FALSE, full.names=TRUE)
+lf <- list.files(path="./Data/", pattern = '.csv', all.files=FALSE, full.names=TRUE)
 lf
 
 WB <- as.data.frame(read_csv(lf[2]))
@@ -143,17 +140,17 @@ names(WB.ref) <- gsub("-", "_", names(WB.ref))
 # Note: When pulling from Movebank, the data will contain a few more data fields than the uploaded CSV
 
 # Set Movebank Login Details
-# UN <- dlgInput("Enter Movebank UserName: ", Sys.info()[""])$res
-# PW <- dlgInput("Enter Movebank Password: ", Sys.info()[""])$res
-# 
-# # Details
-# login <- movebankLogin(username=UN, password=PW)
-#  
-# # Pull Data from Movebank and convert to a dataframe
-# WB <- as.data.frame(getMovebankData(study = "White-bearded wildebeest (Connochaetes taurinus) movements - Kenya", login = login))
-#  
-# # Reference Data - No need to import here, as data are already subset in Movebank
-# WB.ref <- getMovebankReferenceTable(study = "White-bearded wildebeest (Connochaetes taurinus) movements - Kenya", login = login)
+#UN <- dlgInput("Enter Movebank UserName: ", Sys.info()[""])$res
+#PW <- dlgInput("Enter Movebank Password: ", Sys.info()[""])$res
+
+# Details
+#login <- movebank_store_credentials(username=UN, password=PW)
+
+# Pull Data from Movebank and convert to a dataframe
+WB <- as.data.frame(movebank_download_study(study_id = "White-bearded wildebeest (Connochaetes taurinus) movements - Kenya"))#, login = login))
+
+# Reference Data - No need to import here, as data are already subset in Movebank
+WB.ref <- as.data.frame(movebank_download_deployment(study_id = "White-bearded wildebeest (Connochaetes taurinus) movements - Kenya"))#, login = login))
 ```
 
 ## Dataframe Verification
