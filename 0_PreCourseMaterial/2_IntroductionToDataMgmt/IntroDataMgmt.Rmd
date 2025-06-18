@@ -44,7 +44,7 @@ R-Studio will open your R script automatically after creating it.  Notice that t
 
 3. Save the R script in your working directly in the `Scripts` folder.  Name this file `IntroDataMgmt.R`. 
 
-![Figure 1: Create a script for running analyses](Fig1.png)
+![Figure 1: Create a script for running analyses](Figures/Fig1.png)
 <br>
 At the top of your script, provide brief information that describes the content of your script.  The content is up to you, but should briefly identify who created the file, when the file was created, and what the script does.  This will help when you return to the file at a later date or if you decide to share the file with a colleague in the future.  Remember that anything after the `#` symbol is a comment.  Use this symbol to make your code more readable, similar to below.  
 
@@ -85,7 +85,7 @@ rm(list=ls())
 The most basic R skill is to query and manipulate data tables. As a beginner programmer, it is imperative to familiarize yourself with how to manipulate data.  Reinforcing these skills is like expanding your vocabulary in the new language that you are learning and is a great way to improve your R proficiency. If you wish to become really good at R, but don't know where to start, start with data table manipulation! 
 
 <div style="float:right">
-<img width="150" height="150" src="dplyr.jpg">
+<img width="150" height="150" src="Figures/dplyr.jpg">
 </div>
 
 The base R functions that come with the default R installation have the capacity for almost all the table manipulation needs (e.g., `split(), subset(), apply(), sapply(), lapply(), tapply(), aggregate()`). However, sometimes their syntax are less user-friendly and intuitive than some of the special packages built for table manipulation purposes. So, here we are introducing a few of the most useful table manipulation functions within `dplyr` package. 
@@ -181,7 +181,7 @@ select(panda_data, !c(panda_name, age))
 
 `Filter()` is similar to `select()`, except that you are selecting specific rows that satisfy a requirement based on a column value.  This function is very similar to the base function `subset()`.  A few examples on how to use `filter()` are provided below: 
 
-![Artwork by [Allison Horst](https://allisonhorst.com/allison-horst)](dplyr_filter.png)
+![Artwork by [Allison Horst](https://allisonhorst.com/allison-horst)](Figures/dplyr_filter.png)
 
 <br>
 
@@ -249,7 +249,7 @@ panda_data %>%
 
 One of the most useful functions in `dplyr` package is `mutate()`.  Mutate allows the user to create new column(s), populating the columns with values that you define or from information in columns that already exist.  You can also use `mutate()` to control which columns are retained in the new object that you create by setting the `.keep` argument.
 
-![Artwork by [Allison Horst](https://allisonhorst.com/allison-horst)](dplyr_mutate.png)
+![Artwork by [Allison Horst](https://allisonhorst.com/allison-horst)](Figures/dplyr_mutate.png)
 
 <br>
 
@@ -284,7 +284,7 @@ panda_data %>%
 
 It is common to receive data in ways that we want to change or alter.  For instance, we might want to change the order of the columns, re-order the rows based on particular column values, or we may want to change the column headings.  `Mutate()` includes options to change the order of columns that you create (see `.before` and `.after` in the `help` for the function).  `Relocate()` can be used move columns around using the `.before` and `.after` commands, `arrange()` can be used to order the rows, and `rename()` can be used to give new names to column headings.  By default, `arrange` will arrange the selecting column in ascending order.  We can use `desc()` to arrange the column in descending order.
 
-![Artwork by [Allison Horst](https://allisonhorst.com/allison-horst)](dplyr_relocate.png)
+![Artwork by [Allison Horst](https://allisonhorst.com/allison-horst)](Figures/dplyr_relocate.png)
 
 <br>
 
@@ -395,7 +395,7 @@ head(panda_join_ex2)
 Now that you've been exposed to a few functions to better manage data in R, we will reinforce these tools by asking you to apply them to memory by practicing on a dataset of wildlife counts collected across the Naboisho conservancy.  Located in your `Data` folder and named `SampleData.csv`, these data are derived from our publication in the African Journal of Ecology that forms the foundation for this project.
 
 <div style="float:right">
-<img width="150" height="150" src="DataScience.png">
+<img width="150" height="150" src="Figures/DataScience.png">
 </div>
 
 Upon import you will note that the dataset is comprised of 5 columns:

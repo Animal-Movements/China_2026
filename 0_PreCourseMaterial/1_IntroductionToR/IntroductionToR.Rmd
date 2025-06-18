@@ -62,7 +62,7 @@ R-Studio has four separate panels to organize your workflow and project. The ent
 * Environment/History (upper right)
 * Files/Plots/Packages/Help (lower left)
 
-![Figure 1: R-Studio, showing the 4 panel interface: Source (code) Editor, Console, Environment/History, and Files/Plots/Packages/Help.](IntroToR_Fig2.png)
+![Figure 1: R-Studio, showing the 4 panel interface: Source (code) Editor, Console, Environment/History, and Files/Plots/Packages/Help.](Figures/IntroToR_Fig2.png)
 
 ## Getting Help
 
@@ -72,7 +72,7 @@ The internet also contains a vast quantity of useful information.  There are blo
 
 Note that it's important to read the error messages that R provides.  These help understand when you have typed something that the computer doesn't understand.  Google them (copy-and-paste) to figure out what they mean.
 
-![Artwork by [Allison Horst](https://allisonhorst.com/allison-horst)](AllisonHorst_Rerrors.png)
+![Artwork by [Allison Horst](https://allisonhorst.com/allison-horst)](Figures/AllisonHorst_Rerrors.png)
 
 <br>
 
@@ -115,7 +115,7 @@ setwd("C:/Documents/R_Practice")
 If you are using a pre-defined [RStudio](https://posit.co/download/rstudio-desktop/) instance, like we are here (see the `.Rproj` file), there is no need to set your working directory (R-Studio will do this for you automatically).  This is very convenient, as relative paths are maintained, allowing you to share your project with collaborators without a need to set the absolute path. Once you start working in projects, you should never need to run the `setwd()` command again, which is a very good thing.
 
 <div style="float:right">
-<img width="200" height="200" src="rproj-basic-organization.png">
+<img width="200" height="200" src="Figures/rproj-basic-organization.png">
 </div>
 
 The goal is to organize your project so that all of the files needed to complete your analyses are contained within the main folder (i.e., the folder contents are a compendium of your research).  This also means that you do not need to provide the full path to any of the files located in subfolders, as the relative path is maintained.  For example, you can point to the *Data* subfolder when reading in a table, as in the example below.  You can certainly provide the full directory to any data file, but it is unnecessary to do so.  Working with relative paths makes your code much more portable. 
@@ -366,7 +366,7 @@ R packages are the building blocks of computational reproducibility in R. Each p
 SWIRL is a user-generated program **package** (also called a **library**) for learning how to code in R.  To access the tutorial information, you must first install the package to make it accessible.  In the Console window (bottom left), type the following and press ENTER:
 
 <div style="float:center">
-<img width="400" height="200" src="swirl_new_large_final.png">
+<img width="400" height="200" src="Figures/swirl_new_large_final.png">
 </div>
 
 ```{r install, eval = F}
