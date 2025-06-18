@@ -119,7 +119,7 @@ Most important is that your movement dataset has the following variables:
 lf <- list.files(path="D:/GitHub/Courses/China_2025/1_IntroMovementEcology/Data/", pattern = '.csv', all.files=FALSE, full.names=TRUE)
 lf
 
-lf <- list.files(path="./a_IntroMovementEcology/Data/", pattern = '.csv', all.files=FALSE, full.names=TRUE)
+lf <- list.files(path="./1_IntroMovEcology/Data/", pattern = '.csv', all.files=FALSE, full.names=TRUE)
 lf
 
 WB <- as.data.frame(read_csv(lf[2]))
