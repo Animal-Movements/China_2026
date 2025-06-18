@@ -1,0 +1,11 @@
+panda_name,ID,age,weight_kg,sex,base,genetic_value1,genetic_value2,genetic_value3,year
+da_da,4415463,5,100,m,CD,99,50,60,2017
+mao_mao,4415522,4,120,f,CD,70,30,90,2017
+lan_lan,4416073,7,95,f,WL,80,NA,80,2017
+bei_bei,4416405,5,120,f,WL,80,NA,65,2017
+bao_bao,4417779,5,110,m,WL,75,60,76,2017
+tian_tian,4424490,4,89,m,WL,95,70,87,2017
+wei_wei,4424967,7,98,f,CD,60,NA,92,2017
+shuang_shuang,4424657,8,110,m,WL,92,NA,50,2017
+qiuqiu,4423758,9,130,f,CD,81,50,30,2018
+lang_lang,4427758,10,110,m,WL,60,NA,70,2018
