@@ -1,0 +1,468 @@
+---
+title: "Introduction to Animal Movement Analyses"
+author: "Jared Stabach, Smithsonian's National Zoo & Conservation Biology Institute"
+date: '`r format(Sys.time(), "%d %B %Y")`'
+output:
+  html_document:
+    toc: true
+    toc_depth: 4
+    toc_float: 
+      collapsed: true
+      smooth_scroll: true
+    number_sections: false
+    #theme: united
+    #highlight: tango
+pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+<a href="https://github.com/Animal-Movements/China_2025.git" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+# Introduction
+  >Example: White-bearded wildebeest (2010-2013)
+  
+We will use a dataset collected during my PhD field research for all future exercises in this course.  The dataset consists of 36 adult white-bearded wildebeest (*Connochaetes taurinus*) fitted with Lotek WildCell^TM^ GPS tracking devices that were tracked across three separate ecosystems (Amboseli Basin, Athi-Kaputiei Plains, and the Greater Maasai Mara) in southern Kenya from 2010-2013.  These data are freely available on [Movebank](https://www.movebank.org/).  Known to be particularly important to ecosystem function and diversity, many resident populations of wildebeest have become threatened with extinction over the past few decades.  The goal of this research was to understand how natural and anthropogenic change were affecting the movements of wildebeest fitted with tracking devices.
+
+<div style="float:right">
+<img width="270" height="176" src="Figures/DSC_0287.jpg">
+</div>
+
+These data can be referenced as:
+
+Stabach JA, Hughey LF, Crego RD, Fleming CH, Hopcraft JGC, Leimgruber P, Morrison TA, Ogutu JO, Reid RS, Worden JS, Boone RB. 2022. Increasing anthropogenic disturbance restricts wildebeest movement across East African grazing systems. Frontiers in Ecology and Evolution. [doi.org/10.3389/fevo.2022.846171](https://doi.org/10.3389/fevo.2022.846171)
+
+Stabach JA, Hughey LF, Reid RS, Worden JS, Leimgruber P, Boone RB. 2020. Data from: Comparison of movement strategies of three populations of white-bearded wildebeest. Movebank Data Repository. [doi:10.5441/001/1.h0t27719](https://www.datarepository.movebank.org/handle/10255/move.1095)
+
+In this exercise and those that follow, you will:
+
+  * Import and clean the animal movement trajectory for future analyses
+  * Summarize and Visualize movement path(s)
+
+# Data Preparation
+Here, we will prepare data for discrete time analyses.  As a first step, we must first clean the data received before taking any additional steps. This includes filtering the dataset for completeness, identifying duplicate records, removing invalid start or stop dates, identifying positions of poor data quality, and ordering the dataset sequentially.  Nearly all manufacturers report some type of positional quality, often reported as the type of position (e.g., 1D, 2D, or 3D) or Dilution of Position (DOP - horizontal or vertical).  Large DOPs indicate poor positional quality that can be filtered from the dataset.
+
+## Load Libraries
+Load the required libraries and remove everything held in [R's](https://cran.r-project.org/) memory.
+
+```{r Clean Libraries, message=FALSE, warning=FALSE}
+# Remove from memory
+rm(list=ls())
+
+# You may need to install these packages first
+#install.packages('svDialogs', 'tidyverse', 'move2', 'lubridate', 'tmap', 'sf', 'gt')
+
+# Load required libraries
+library(svDialogs)
+library(tidyverse)
+library(move)
+library(lubridate)
+library(tmap)
+library(sf)
+library(gt)
+```
+
+## Set Time Zone & Coordinate System
+I prefer to keep items that require user input to appear at the top of my scripts.  For me, this is helpful when transitioning between different studies because most of the introductory code is essentially the same.  I recommend importing your data in UTC time with geographic (Lat/Long) coordinates and then converting these values to your local time zone and coordinate system.
+
+Here, we will set the timezone and local projection.  When we import the movement data, we will update the UTC (Coordinated Universal Time) time to East Africa Time (EAT) since our data were collected in Kenya.  See the [wiki](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) for your appropriate timezone identifier. We will also project all geographic data to the Universe Tranverse Mercator (UTM) coordinate system, zone 37 south. The unit of measurement of this coordinate system is meters, advantageous for calculating relevant distances between sequential points in time. 
+
+Identifying the correct UTM zones is relatively simple, with multiple options:
+
+  1. Mathematical Approach
+      + Take a longitudinal coordinate (or calculate the mean value) from your dataset and add 180.  Then divide by 6 and round up to the nearest whole number.
+      + Example: -39 + 180 = 141 / 6 = 23.5 == 24
+      + 39$^\circ$W is UTM zone 24.  Then simply determine if the point is above (N) or below (S) the equator.
+  
+  2. Check the PRJ File
+      + Check the .prj file with an associated shapefile of your study area.   
+
+  3. Download the World UTM Grid
+      + ArcGIS (or similar GIS software) include downloadable [UTM Zones](https://hub.arcgis.com/datasets/esri::world-utm-grid/explore) data layers.  Loading this file with your point dataset will show you where your data overlap.
+
+  4. Check the Zone Number in Google Earth (might be difficult in China)
+      + Convert your dataset to a KMZ/KML file and load into Google Earth.  Be sure your units are set to UTMs in Google Earth.  The zone number will appear at the bottom center of your screen when you zoom into your file.
+  
+**NOTE**: The data we are using spans multiple UTM zones (UTM 36 south and UTM 37 south).  In this case, it isn't a problem because we will be subsetting our data and only using data that overlap with UTM 37 south.  Other coordinator systems, such as Lambert's or Alber's Equal-Area conic projections, could be used for datasets that span multiple UTM zones, minimizing distortion.  It's important to correctly input the parameters of your selected coordinate system.
+
+```{r Clean Timezone, message=FALSE, warning=FALSE}
+# Set TimeZone and UTM Zone
+# Other timezones can be found at: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+Timezone1 <- 'UTC'
+Timezone2 <- "Africa/Nairobi"
+ 
+# UTM Zone
+LatLong.proj <- "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"  # EPSG:4326
+#UtmZone.proj <- "+proj=utm +zone=37 +south +ellps=WGS84 +datum=WGS84 +units=m +no_defs" #This is EPSG:32737"
+UtmZone.proj <- "EPSG:32737"
+```
+
+## Load Collar Data
+All data are available via [Movebank](https://www.movebank.org/).  These data have already been downloaded and are available in your `/Data` folder as a `.csv`. Included is a reference file (also downloaded from [Movebank](https://www.movebank.org/)).  The reference file contains additional details (sex, age) about each animal.  
+
+Most important is that your movement dataset has the following variables:
+
+1) Unique Animal ID
+2) timestamp
+3) Coordinates (X/Y)
+
+**NOTE**: If you open the file provided in Excel, do **NOT** save the file before loading it in [R](https://cran.r-project.org/). Excel will change the timestamp column and set it to the time on your computer - obviously not what you want for most studies.
+
+```{r Load, message=FALSE, warning=FALSE}
+# We can upload each file directly and convert to a dataframe 
+#WB <- as.data.frame(read_csv("1_IntroMovementEcology/Data/White-bearded wildebeest (Connochaetes taurinus) movements - Kenya.csv"))
+
+# Or list the files so we don't have to type so much
+# Create list
+lf <- list.files(path="D:/Jared/GitHub/2_Courses/China_2025/1_IntroMovementEcology/Data/", pattern = '.csv', all.files=FALSE, full.names=TRUE)
+lf
+
+lf <- list.files(path="./1_IntroMovementEcology/Data/", pattern = '.csv', all.files=FALSE, full.names=TRUE)
+lf
+
+WB <- as.data.frame(read_csv(lf[2]))
+WB.ref <- as.data.frame(read_csv(lf[1]))
+
+# Look at the data
+# head(WB)
+# head(WB.ref)
+
+# Fix a few column name issues
+names(WB) <- gsub("-", "_", names(WB))
+names(WB) <- gsub(":", "_", names(WB))
+names(WB.ref) <- gsub("-", "_", names(WB.ref))
+
+# Check to identify the changes
+# head(WB)
+# head(WB.ref)
+
+# We could also pull the file directory from Movebank.  To do so, you will need a Movebank UserName and Password.
+# This is particularly useful when data continue to be collected (i.e., are actively streaming) on a study.
+# Note: When pulling from Movebank, the data will contain a few more data fields than the uploaded CSV
+
+# Set Movebank Login Details
+# UN <- dlgInput("Enter Movebank UserName: ", Sys.info()[""])$res
+# PW <- dlgInput("Enter Movebank Password: ", Sys.info()[""])$res
+# 
+# # Details
+# login <- movebankLogin(username=UN, password=PW)
+#  
+# # Pull Data from Movebank and convert to a dataframe
+# WB <- as.data.frame(getMovebankData(study = "White-bearded wildebeest (Connochaetes taurinus) movements - Kenya", login = login))
+#  
+# # Reference Data - No need to import here, as data are already subset in Movebank
+# WB.ref <- getMovebankReferenceTable(study = "White-bearded wildebeest (Connochaetes taurinus) movements - Kenya", login = login)
+```
+
+## Dataframe Verification
+It's always good practice to look at your data and make sure the dataset has been uploaded correctly.  We should have `r length(unique(WB$tag_local_identifer))` animals across `r length(unique(WB.ref$study_site))` distinct ecosystems.  The timezone should be UTC. We can also use some simple commands to summarize the dataset, including:
+
+* `head()` to view the first few lines of the data object
+* `tail()` to view the last few lines of the data object
+* `dim()` to print the dimensions of the data object (i.e., rows and columns)
+* `str()` to provide the structure of the data object
+
+**Questions :**
+
+* How would you view the first or last few lines of the dataset?  What would you do to view the first 10 rows?
+* What is the structure of the dataset?  What is the data type of the timestamp column?
+* How many rows and columns are there in the movement dataset?
+* What tags are included in the study?  How many?
+* How many study areas are included in the dataset?  What are the study area names?
+* What is the timezone of the dataset? (Hint: There is a function in the lubridate package)
+
+```{r Verify, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
+# View the dataset
+head(WB)
+tail(WB)
+head(WB, 10)
+WB[1:10,]
+
+# What is the structure of the dataset?
+# What is the data type of the time stamp column?
+str(WB)
+str(WB$timestamp)
+str(WB.ref)
+
+# How many rows and columns are there in the movement dataset?
+dim(WB)
+nrow(WB)
+ncol(WB)
+
+# How many tags?
+sort(unique(WB$tag_local_identifier))
+length(unique(WB$tag_local_identifier))
+
+# How many study sites?  What are there names?
+length(unique(WB.ref$study_site))
+unique(WB.ref$study_site)
+
+# What is the timezone of the dataset?
+tz(WB$timestamp)
+```
+
+## Dataframe Organization & Cleaning
+Many of the columns included in the dataframes are unnecessary (and quite long).  We need to clean and filter each dataframe and can do so with tools using 'piping' (e.g., %>%) from the [tidyverse](https://cran.r-project.org/web/packages/tidyverse/index.html) package.  This allows us to combine multiple sequential commands together.
+
+Here, we will update the timezone to the local time zone and subset the start/end dates for each animal to match with what we recorded in our reference dataset.  These dates represent the dates that the collar was deployed on the animal.  You will likely have a similar reference database.  To join the dataframes, we were match records based on a shared primary key (i.e., id). Lastly, we will check on the completeness of the dataset and filter out erroneous data points.
+
+**NOTE**: date/time fields can often present issues and be difficult to import.  If problems exist, you may need to properly format the date/time fields first.  See the [lubridate](https://cran.r-project.org/web/packages/lubridate/index.html)) package for some instructions and/or the [strptime](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/strptime) package to format your date/time field. Note the format of **YOUR** own dataset (e.g., "%Y-%m-%d %H:%M:%S").  
+
+Also note that some manufacturers put the date and time in separate columns.  If this occurs with your dataset, you'll need to put these columns together to create a timestamp.  For example, `timestamp = ymd_hms(paste(date,time),tz = 'Africa/Nairobi')`.
+
+```{r Clean Merge, message=FALSE, warning=FALSE, echo=TRUE}
+# Clean the reference file, selecting only the columns that you want to include
+WB <- 
+  WB %>%
+
+  # Pull in the WB.ref dataset to join the study site column
+  left_join(WB.ref, by = join_by("tag_local_identifier" == "tag_id")) %>%
+
+  # Rename columns and create local timestamp - UTC to local
+  # Select only columns of interest
+  transmute(id = tag_local_identifier,
+            animal_id = individual_local_identifier,
+            latitude = location_lat,
+            longitude = location_long,
+            sex = animal_sex,
+            DOP = gps_dop,
+            fixType = gps_fix_type_raw,
+            temp = external_temperature,
+            # Converting timestamp with 'with_tz' command
+            timestamp = with_tz(timestamp, tz=Timezone2),
+            deploy_on = with_tz(deploy_on_date, tz=Timezone2), # Field included in the reference dataset
+            deploy_off = with_tz(deploy_off_date, tz=Timezone2), # Field included in the reference dataset
+            study_site = study_site) %>% # Field included in the reference dataset
+
+  # The 'across' function allows me to apply a function (as.factor) across multiple fields 
+  mutate(across(c(id,sex,study_site), as.factor)) %>%
+
+  # Make sure no duplicate id and timestamp exist.
+  distinct(animal_id, timestamp, .keep_all = TRUE) %>%
+
+  # Remove any records that don't have a timestamp or a Lat/Long location
+  filter(!is.na(timestamp),
+         !is.na(latitude),
+         !is.na(longitude),
+         latitude != 0,
+         longitude != 0,
+
+         # Grab only the Athi-Kaputiei Data
+         study_site == "Athi-Kaputiei Plains",
+
+         # And use the deploy on and off dates to further subset
+         # This is just an example here, as data have already been subset
+         timestamp >= deploy_on & timestamp <= deploy_off) %>%
+
+  # Remove fields that are now unnecessary.  Dropping the deployment dates and the study area
+  dplyr::select(-c(deploy_on, deploy_off, study_site)) %>%
+  
+  # Remove extra levels (important since subsetting to a single study area)
+  # The droplevels function re-assess what levels are in the data and drops the rest
+  droplevels() %>%
+
+  # Arrange the dataset by id and timestamp
+  arrange(id, timestamp)
+
+# Look again (yes again!) at your data
+head(WB)
+```
+
+**Questions:**
+
+* How many records exist in the dataset now?
+* Are all the columns in the expected/required format?
+* What are the unique animals in the dataset?  How many?
+* Has the timezone changed?
+
+```{r Clean Verify, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
+# How many records
+dim(WB)
+nrow(WB)
+
+# What is the structure of the dataset?
+str(WB)
+
+# How many tags?
+sort(unique(WB$animal_id))
+length(unique(WB$animal_id))
+
+# What is the timezone of the dataset?
+tz(WB$timestamp) 
+```
+
+# Summarize
+To summarize results, we can easily provide a table of all data collected.  We will also convert our summarized results to a `gt` table, providing output that could be shared on a website or with your supervisor. 
+
+```{r Summarize, message=FALSE, warning=FALSE, echo=TRUE}
+# Create summary object
+wb.Summary <- WB %>% 
+  
+  summarize(
+    Locations = n(),
+    Sex = unique(sex),
+    Start = min(timestamp),
+    End = max(timestamp),
+    Duration = round(End - Start, digits = 1),
+    .by = animal_id) %>% 
+  
+  # Arrange results
+  arrange(animal_id, Start, desc(Locations))
+
+# Print Results
+wb.Summary
+
+# Now make prettier, saving the results to your Output folder 
+gt_gnu <- wb.Summary %>% 
+  
+  # initialize gt table
+  gt() %>%
+  
+  # Make the table easier to read with alternating grey bars
+  opt_row_striping() %>%
+  
+  # Add title and subtitle, pulling date of creation
+  tab_header(
+    title = "White-bearded Wildebeest in Kenya: Tracking Data Summary",
+    subtitle = Sys.Date()) %>%
+  
+  # Easy preset date formatting
+  fmt_date(
+    columns = c(Start, End),
+    date_style = 8) %>%
+  
+  # Change the column labels for the table
+  cols_label(animal_id = "Wildebeest ID",
+             Sex = "Sex",
+             Locations = "Total points",
+             Start = "First location",
+             End = "Last location",
+             Duration = "Tracking period (days)") %>%
+  
+  # Center text inside columns
+  cols_align(align = "center") 
+
+# Print result
+gt_gnu
+
+# Save as html table to send to the project manager, or a shiny app
+gtsave(gt_gnu, filename = "Output/summary_gnu.html")
+```
+
+# Visualize
+Now that the data have been imported and some preliminary cleaning has been done, let's visualize the data.  This is often a good, first check to determine if everything has been imported correctly.  Here, we will:
+
+* Create a simple plot
+* Convert the dataframe to a spatial object by transforming the data to UTMs
+* Display the data on top of available basemaps
+
+## Create a Simple Plot
+Here, we are simply plotting the x and y coordinates (i.e., the data are not spatial).
+```{r Visualize, message=FALSE, warning=FALSE, echo=TRUE}
+# Create very simple plot (non-spatial)
+plot(WB$longitude, WB$latitude,
+     col = WB$id,
+     pch = 16,
+     cex = 0.5,
+     ylab = 'Northing',
+     xlab = 'Easting',
+     asp = 1)
+```
+
+## Convert to Spatial Object
+Convert the dataframe to a [sf](https://cran.r-project.org/web/packages/sf/index.html) simple features object and plot.  Note the structure of the object once it has been converted to a spatial object.
+```{r Visualize1, message=FALSE, warning=FALSE, echo=TRUE}
+# Convert
+WB.sf <- WB %>% 
+  st_as_sf(coords = c('longitude', 'latitude'), 
+           crs = LatLong.proj) %>% 
+  st_transform(UtmZone.proj)
+
+# You could check the coordinate system by:
+#st_crs(WB.sf)
+
+# Look at the data
+#head(WB.sf)
+#str(WB.sf)
+class(WB.sf)
+```
+
+## Plot the Spatial Object
+Now, let's plot the spatial object, using [ggplot](https://cran.r-project.org/web/packages/ggplot2/index.html), which has some nice features for plotting.
+```{r Visualize2, message=FALSE, warning=FALSE, echo=TRUE}
+# Plot using basic R function
+# plot(WB.sf["animal_id"],
+#      main = paste("Wildebeest: Athi-Kaputiei Plains ( n = ", length(unique(WB.sf$animal_id)),")"))
+
+# GGPlot using the spatial object
+WB.sf %>%
+  ggplot() +
+  geom_sf(aes(fill = animal_id),
+          alpha = 0.6,
+          shape = 21,
+          col = "black") +
+  scale_fill_discrete(name = "Animal ID") +
+  ggtitle(paste("Wildebeest: Athi-Kaputiei Plains (n =", length(unique(WB.sf$animal_id)),")")) +
+  coord_sf(datum = st_crs(UtmZone.proj)) + # Note, this line is necessary unless we want the data plotted in Lat/Long
+  theme_minimal()
+
+# or use the facet_wrap command to separate each individual into its own plot
+# This is perhaps a bit more useful to look for potential errant points for each individual.
+# WB.sf %>%
+#   ggplot() +
+#   geom_sf(aes(fill = animal_id),
+#           alpha = 0.6,
+#           shape = 21,
+#           col = "black") +
+#   scale_fill_discrete(name = "Animal ID") +
+#   theme_minimal() +
+#   facet_wrap(~ animal_id)
+```
+
+## Tmap Plotting
+Perhaps more useful is plotting the data on top of available satellite or background basemaps.  Here, we will use [tmap](https://cran.r-project.org/web/packages/tmap/index.html).  Tmap has a variety of basemaps to choose from (see a list [here](https://leaflet-extras.github.io/leaflet-providers/preview/)) and can be used in "view" (known as "interactive" mode) or "plot" mode.  Plot mode is better for making static maps.  
+
+While in interactive mode, you can zoom in to investigate points from a particular animal. You can also toggle on and off the various basemap layers you have included using the tile icon in the top left corner. 
+
+```{r Visualize3, message=FALSE, warning=FALSE, echo=TRUE}
+tmap_mode("view")
+ 
+# Select from a range of basemaps:.
+# https://leaflet-extras.github.io/leaflet-providers/preview/
+# You can also type "providers$" in the console to see all the options, but this won't allow you to easily preview them.
+
+# We'll pull a world satellite map and a world street map.
+# Note that the format of tmap requires us to refer to variables in quotes
+
+Athi.Map <-
+  tm_basemap(c("Esri.WorldImagery",
+             "OpenStreetMap")) +
+  tm_shape(WB.sf,
+           #name = "Wildebeest Locations (Athi-Kaputiei)") +
+           name = paste("Wildebeest: Athi-Kaputiei Plains (n =", length(unique(WB.sf$animal_id)),")")) +
+  tm_dots(size = 0.025,
+          title = "Wildebeest ID",
+          col = "animal_id",
+          alpha = 0.5)
+
+# Create the map
+Athi.Map
+
+# Save Output
+tmap_save(Athi.Map, filename = "Output/Athi_GnuMap.html")
+```
+
+# Save
+Save the dataframe files so that we can use them in future exercises.  We can write each file as a `.rds` file or save the files together, writing the data to a `.rdata` file.
+
+```{r Save, message=FALSE, warning=FALSE, echo=TRUE}
+# Save individual file
+#write_rds(WB, file = "Data/wildebeest_WBonly.rds")
+# or use saveRDS(object, file = "my_data.rds")
+
+# Save both files together
+save(WB, WB.sf, file = "Data/wildebeest_data.rdata")
+```
+
