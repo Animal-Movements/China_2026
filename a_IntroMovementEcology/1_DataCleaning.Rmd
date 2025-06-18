@@ -57,7 +57,7 @@ rm(list=ls())
 # Load required libraries
 library(svDialogs)
 library(tidyverse)
-library(move)
+library(move2)
 library(lubridate)
 library(tmap)
 library(sf)
@@ -116,10 +116,10 @@ Most important is that your movement dataset has the following variables:
 
 # Or list the files so we don't have to type so much
 # Create list
-lf <- list.files(path="D:/Jared/GitHub/2_Courses/China_2025/1_IntroMovementEcology/Data/", pattern = '.csv', all.files=FALSE, full.names=TRUE)
+lf <- list.files(path="D:/GitHub/Courses/China_2025/1_IntroMovementEcology/Data/", pattern = '.csv', all.files=FALSE, full.names=TRUE)
 lf
 
-lf <- list.files(path="./1_IntroMovementEcology/Data/", pattern = '.csv', all.files=FALSE, full.names=TRUE)
+lf <- list.files(path="./a_IntroMovementEcology/Data/", pattern = '.csv', all.files=FALSE, full.names=TRUE)
 lf
 
 WB <- as.data.frame(read_csv(lf[2]))
