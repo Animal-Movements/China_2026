@@ -1,4 +1,4 @@
 # extract R code
 library(knitr)
-file.exists("IntroDataMgmt.Rmd")
-purl("IntroDataMgmt.Rmd")
+file.exists("2_IntroductionToDataMgmt/IntroDataMgmt.Rmd")
+purl("2_IntroductionToDataMgmt/IntroDataMgmt.Rmd")
