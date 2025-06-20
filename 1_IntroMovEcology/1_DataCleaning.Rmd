@@ -24,7 +24,7 @@ knitr::opts_chunk$set(echo = TRUE)
 # Introduction
   >Example: White-bearded wildebeest (2010-2013)
   
-We will use a dataset collected during my PhD field research for all future exercises in this course.  The dataset consists of 36 adult white-bearded wildebeest (*Connochaetes taurinus*) fitted with Lotek WildCell^TM^ GPS tracking devices that were tracked across three separate ecosystems (Amboseli Basin, Athi-Kaputiei Plains, and the Greater Maasai Mara) in southern Kenya from 2010-2013.  These data are freely available on [Movebank](https://www.movebank.org/).  Known to be particularly important to ecosystem function and diversity, many resident populations of wildebeest have become threatened with extinction over the past few decades.  The goal of this research was to understand how natural and anthropogenic change were affecting the movements of wildebeest fitted with tracking devices.
+Throughout introductory exercises focused on discrete-time analyses, we will use a dataset collected during my PhD field research.  The dataset consists of 36 adult white-bearded wildebeest (*Connochaetes taurinus*) fitted with Lotek WildCell^TM^ GPS tracking devices that were monitored across three ecosystems (Amboseli Basin, Athi-Kaputiei Plains, and the Greater Maasai Mara) in southern Kenya from 2010-2013.  These data are freely available on [Movebank](https://www.movebank.org/), accessible without creating a Movebank account.  Known to be particularly important to ecosystem function and diversity, many resident populations of wildebeest have become threatened with extinction over the past few decades.  Study goals were to understand how natural and anthropogenic change impact the movements of wildebeest fitted with tracking devices.
 
 <div style="float:right">
 <img width="270" height="176" src="Figures/DSC_0287.jpg">
@@ -36,10 +36,10 @@ Stabach JA, Hughey LF, Crego RD, Fleming CH, Hopcraft JGC, Leimgruber P, Morriso
 
 Stabach JA, Hughey LF, Reid RS, Worden JS, Leimgruber P, Boone RB. 2020. Data from: Comparison of movement strategies of three populations of white-bearded wildebeest. Movebank Data Repository. [doi:10.5441/001/1.h0t27719](https://www.datarepository.movebank.org/handle/10255/move.1095)
 
-In this exercise and those that follow, you will:
+In this exercise, you will:
 
   * Import and clean the animal movement trajectory for future analyses
-  * Summarize and Visualize movement path(s)
+  * Summarize and visualize movement path(s)
 
 # Data Preparation
 Here, we will prepare data for discrete time analyses.  As a first step, we must first clean the data received before taking any additional steps. This includes filtering the dataset for completeness, identifying duplicate records, removing invalid start or stop dates, identifying positions of poor data quality, and ordering the dataset sequentially.  Nearly all manufacturers report some type of positional quality, often reported as the type of position (e.g., 1D, 2D, or 3D) or Dilution of Position (DOP - horizontal or vertical).  Large DOPs indicate poor positional quality that can be filtered from the dataset.
@@ -52,22 +52,22 @@ Load the required libraries and remove everything held in [R's](https://cran.r-p
 rm(list=ls())
 
 # You may need to install these packages first
-#install.packages('svDialogs', 'tidyverse', 'move2', 'lubridate', 'tmap', 'sf', 'gt')
+#install.packages('tidyverse', 'move2', 'lubridate', 'tmap', 'sf', 'gt')
 
 # Load required libraries
-library(svDialogs)
+
 library(tidyverse)
 library(move2)
 library(lubridate)
-library(tmap)
-library(sf)
 library(gt)
+library(sf)
+library(tmap)
 ```
 
 ## Set Time Zone & Coordinate System
 I prefer to keep items that require user input to appear at the top of my scripts.  For me, this is helpful when transitioning between different studies because most of the introductory code is essentially the same.  I recommend importing your data in UTC time with geographic (Lat/Long) coordinates and then converting these values to your local time zone and coordinate system.
 
-Here, we will set the timezone and local projection.  When we import the movement data, we will update the UTC (Coordinated Universal Time) time to East Africa Time (EAT) since our data were collected in Kenya.  See the [wiki](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) for your appropriate timezone identifier. We will also project all geographic data to the Universe Tranverse Mercator (UTM) coordinate system, zone 37 south. The unit of measurement of this coordinate system is meters, advantageous for calculating relevant distances between sequential points in time. 
+Here, we will set the timezone and local projection.  When we import the movement data, we will update the UTC (Coordinated Universal Time) time to East Africa Time (EAT) since our data were collected in Kenya.  See the [wiki](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) for your appropriate timezone identifier. We will also project all geographic data to the Universe Transverse Mercator (UTM) coordinate system, zone 37 south. The unit of measurement of this coordinate system is meters, advantageous for calculating relevant distances between sequential points in time. 
 
 Identifying the correct UTM zones is relatively simple, with multiple options:
 
@@ -77,7 +77,7 @@ Identifying the correct UTM zones is relatively simple, with multiple options:
       + 39$^\circ$W is UTM zone 24.  Then simply determine if the point is above (N) or below (S) the equator.
   
   2. Check the PRJ File
-      + Check the .prj file with an associated shapefile of your study area.   
+      + Check a .prj file from a shapefile associated with your study area.   
 
   3. Download the World UTM Grid
       + ArcGIS (or similar GIS software) include downloadable [UTM Zones](https://hub.arcgis.com/datasets/esri::world-utm-grid/explore) data layers.  Loading this file with your point dataset will show you where your data overlap.
@@ -85,7 +85,7 @@ Identifying the correct UTM zones is relatively simple, with multiple options:
   4. Check the Zone Number in Google Earth (might be difficult in China)
       + Convert your dataset to a KMZ/KML file and load into Google Earth.  Be sure your units are set to UTMs in Google Earth.  The zone number will appear at the bottom center of your screen when you zoom into your file.
   
-**NOTE**: The data we are using spans multiple UTM zones (UTM 36 south and UTM 37 south).  In this case, it isn't a problem because we will be subsetting our data and only using data that overlap with UTM 37 south.  Other coordinator systems, such as Lambert's or Alber's Equal-Area conic projections, could be used for datasets that span multiple UTM zones, minimizing distortion.  It's important to correctly input the parameters of your selected coordinate system.
+**NOTE**: The data we are using spans multiple UTM zones (UTM 36 south and UTM 37 south).  In this case, there is no problem because we will be subsetting our data, only using data that overlap with UTM 37 south.  Other coordinator systems, such as Lambert's or Alber's Equal-Area conic projections, could be used for datasets that span multiple UTM zones, minimizing distortion.  It's important to correctly input the parameters of your selected coordinate system.
 
 ```{r Clean Timezone, message=FALSE, warning=FALSE}
 # Set TimeZone and UTM Zone
@@ -100,7 +100,7 @@ UtmZone.proj <- "EPSG:32737"
 ```
 
 ## Load Collar Data
-All data are available via [Movebank](https://www.movebank.org/).  These data have already been downloaded and are available in your `/Data` folder as a `.csv`. Included is a reference file (also downloaded from [Movebank](https://www.movebank.org/)).  The reference file contains additional details (sex, age) about each animal.  
+All data for this exercise are freely available via [Movebank](https://www.movebank.org/). These data have already been downloaded and are available in your `/Data` folder as a `.csv`. Included is a reference file which was also downloaded from Movebank.  The reference file contains additional details (sex, age) about each animal and are common files that often need to be merged with the tracking data.  
 
 Most important is that your movement dataset has the following variables:
 
@@ -108,36 +108,19 @@ Most important is that your movement dataset has the following variables:
 2) timestamp
 3) Coordinates (X/Y)
 
-**NOTE**: If you open the file provided in Excel, do **NOT** save the file before loading it in [R](https://cran.r-project.org/). Excel will change the timestamp column and set it to the time on your computer - obviously not what you want for most studies.
-
 ```{r Load, message=FALSE, warning=FALSE}
-# We can upload each file directly and convert to a dataframe 
-#WB <- as.data.frame(read_csv("1_IntroMovementEcology/Data/White-bearded wildebeest (Connochaetes taurinus) movements - Kenya.csv"))
+# Since these data are available on Movebank as open access, we don't need to provide any login details - we simply need to correctly specify the study id of interest.  Downloading directly from Movebank is particularly useful when data continue to be collected (i.e., are actively streaming) on a study.  This ensures that you are always working with the most up-to-date dataset being collected.
 
-# Or list the files so we don't have to type so much
-# Create list
-lf <- list.files(path="./Data/", pattern = '.csv', all.files=FALSE, full.names=TRUE)
-lf
+# Pull Data from Movebank and convert to a dataframe
+WB <- as.data.frame(movebank_download_study(study_id = "White-bearded wildebeest (Connochaetes taurinus) movements - Kenya"))
 
-WB <- as.data.frame(read_csv(lf[2]))
-WB.ref <- as.data.frame(read_csv(lf[1]))
+# Reference Dataset
+WB.ref <- as.data.frame(movebank_download_deployment(study_id = "White-bearded wildebeest (Connochaetes taurinus) movements - Kenya"))
 
-# Look at the data
-# head(WB)
-# head(WB.ref)
+#**NOTE**: If data are protected and you need to provide your login details, you could do the following:
 
-# Fix a few column name issues
-names(WB) <- gsub("-", "_", names(WB))
-names(WB) <- gsub(":", "_", names(WB))
-names(WB.ref) <- gsub("-", "_", names(WB.ref))
-
-# Check to identify the changes
-# head(WB)
-# head(WB.ref)
-
-# We could also pull the file directory from Movebank.  To do so, you will need a Movebank UserName and Password.
-# This is particularly useful when data continue to be collected (i.e., are actively streaming) on a study.
-# Note: When pulling from Movebank, the data will contain a few more data fields than the uploaded CSV
+# Use the svDialogs library to add a pop-up to your code so that you can add your Username and Password as you run your script
+#library(svDialogs)
 
 # Set Movebank Login Details
 #UN <- dlgInput("Enter Movebank UserName: ", Sys.info()[""])$res
@@ -146,15 +129,41 @@ names(WB.ref) <- gsub("-", "_", names(WB.ref))
 # Details
 #login <- movebank_store_credentials(username=UN, password=PW)
 
-# Pull Data from Movebank and convert to a dataframe
-WB <- as.data.frame(movebank_download_study(study_id = "White-bearded wildebeest (Connochaetes taurinus) movements - Kenya"))#, login = login))
+# Then do the same as before, but add your login details
+#WB <- as.data.frame(movebank_download_study(study_id = "White-bearded wildebeest (Connochaetes taurinus) movements - Kenya", login = login))
 
-# Reference Data - No need to import here, as data are already subset in Movebank
-WB.ref <- as.data.frame(movebank_download_deployment(study_id = "White-bearded wildebeest (Connochaetes taurinus) movements - Kenya"))#, login = login))
+# Reference Dataset
+#WB.ref <- as.data.frame(movebank_download_deployment(study_id = "White-bearded wildebeest (Connochaetes taurinus) movements - Kenya", login = login))
+
+
+# **********************
+# **********************
+
+# Alternatively, we can upload each file directly and convert to a dataframe using the 'read_csv()' function 
+
+#WB <- as.data.frame(read_csv("Data/WB_FullDataset.csv"))
+#WB.ref <- as.data.frame(read_csv("Data/WB_FullDataset_ref.csv"))
+
+#**NOTE**: If you open the file provided in Excel, do NOT save the file before loading it in R. Excel will change the timestamp column and set it to the time on your computer - obviously not what you want for most studies.
+
+# You could also list the files so you don't need to type so much
+# Create list
+#lf <- list.files(path="Data/", pattern = '.csv', all.files=FALSE, full.names=TRUE)
+#lf
+
+#WB <- as.data.frame(read_csv(lf[2]))
+#WB.ref <- as.data.frame(read_csv(lf[1]))
+
+# **********************
+# **********************
+
+# Look at the data
+head(WB)
+head(WB.ref)
 ```
 
 ## Dataframe Verification
-It's always good practice to look at your data and make sure the dataset has been uploaded correctly.  We should have `r length(unique(WB$tag_local_identifer))` animals across `r length(unique(WB.ref$study_site))` distinct ecosystems.  The timezone should be UTC. We can also use some simple commands to summarize the dataset, including:
+It's always good practice to look at your data and make sure the dataset has been uploaded correctly.  We should have `r length(unique(WB$individual_local_identifier))` animals across `r length(unique(WB.ref$study_site))` distinct ecosystems.  The timezone should be UTC. We can also use some simple commands to summarize the dataset, including:
 
 * `head()` to view the first few lines of the data object
 * `tail()` to view the last few lines of the data object
