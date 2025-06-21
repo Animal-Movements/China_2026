@@ -55,7 +55,6 @@ rm(list=ls())
 #install.packages('tidyverse', 'move2', 'lubridate', 'tmap', 'sf', 'gt')
 
 # Load required libraries
-
 library(tidyverse)
 library(move2)
 library(lubridate)
@@ -111,11 +110,20 @@ Most important is that your movement dataset has the following variables:
 ```{r Load, message=FALSE, warning=FALSE}
 # Since these data are available on Movebank as open access, we don't need to provide any login details - we simply need to correctly specify the study id of interest.  Downloading directly from Movebank is particularly useful when data continue to be collected (i.e., are actively streaming) on a study.  This ensures that you are always working with the most up-to-date dataset being collected.
 
-# Pull Data from Movebank and convert to a dataframe
-WB <- as.data.frame(movebank_download_study(study_id = "White-bearded wildebeest (Connochaetes taurinus) movements - Kenya"))
+# Pull Data from Movebank
+WB <- movebank_download_study(study_id = "White-bearded wildebeest (Connochaetes taurinus) movements - Kenya") 
 
-# Reference Dataset
-WB.ref <- as.data.frame(movebank_download_deployment(study_id = "White-bearded wildebeest (Connochaetes taurinus) movements - Kenya"))
+# You could use the output directly with functions in the move2 package.  Here, however, we will extract the X and Y coordinates and convert to a dataframe
+# Using piping operations
+WB <- WB %>% 
+  as_tibble() %>% # A tibble is a dataframe of dataframes 
+  mutate(longitude = st_coordinates(WB)[,1], # Pull out the X coordinates
+         latitude = st_coordinates(WB)[,2]) %>% # Pull out the y coordinates
+  select(-geometry) %>% # Remove the geometry
+  data.frame() # Make it a dataframe
+
+# Reference Dataset, import and convert to dataframe
+WB.ref <- data.frame(movebank_download_deployment(study_id = "White-bearded wildebeest (Connochaetes taurinus) movements - Kenya"))
 
 #**NOTE**: If data are protected and you need to provide your login details, you could do the following:
 
@@ -135,14 +143,13 @@ WB.ref <- as.data.frame(movebank_download_deployment(study_id = "White-bearded w
 # Reference Dataset
 #WB.ref <- as.data.frame(movebank_download_deployment(study_id = "White-bearded wildebeest (Connochaetes taurinus) movements - Kenya", login = login))
 
-
 # **********************
 # **********************
 
 # Alternatively, we can upload each file directly and convert to a dataframe using the 'read_csv()' function 
 
-#WB <- as.data.frame(read_csv("Data/WB_FullDataset.csv"))
-#WB.ref <- as.data.frame(read_csv("Data/WB_FullDataset_ref.csv"))
+#WB <- data.frame(read_csv("Data/WB_FullDataset.csv"))
+#WB.ref <- data.frame(read_csv("Data/WB_FullDataset_ref.csv"))
 
 #**NOTE**: If you open the file provided in Excel, do NOT save the file before loading it in R. Excel will change the timestamp column and set it to the time on your computer - obviously not what you want for most studies.
 
@@ -198,8 +205,8 @@ nrow(WB)
 ncol(WB)
 
 # How many tags?
-sort(unique(WB$tag_local_identifier))
-length(unique(WB$tag_local_identifier))
+sort(unique(WB$individual_local_identifier))
+length(unique(WB$individual_local_identifier))
 
 # How many study sites?  What are there names?
 length(unique(WB.ref$study_site))
@@ -210,9 +217,9 @@ tz(WB$timestamp)
 ```
 
 ## Dataframe Organization & Cleaning
-Many of the columns included in the dataframes are unnecessary (and quite long).  We need to clean and filter each dataframe and can do so with tools using 'piping' (e.g., %>%) from the [tidyverse](https://cran.r-project.org/web/packages/tidyverse/index.html) package.  This allows us to combine multiple sequential commands together.
+Many of the columns included in the dataframes are unnecessary (and quite long).  We need to clean and filter the dataframes. To do so, we will use 'piping' (e.g., %>%) from the [tidyverse](https://cran.r-project.org/web/packages/tidyverse/index.html) package.  This allows us to combine multiple sequential commands together.
 
-Here, we will update the timezone to the local time zone and subset the start/end dates for each animal to match with what we recorded in our reference dataset.  These dates represent the dates that the collar was deployed on the animal.  You will likely have a similar reference database.  To join the dataframes, we were match records based on a shared primary key (i.e., id). Lastly, we will check on the completeness of the dataset and filter out erroneous data points.
+Here, we will clean the data, filter out unnecessary information, and update the timezone to the local timezone.  We will then subset (i.e., filter) the start/end dates for each animal to match what has been recorded in our reference dataset.  These dates represent the dates that the collar was deployed on the animal. To join the dataframes, we will match records based on a shared primary key (i.e., id). Lastly, we will check on the completeness of the dataset and remove any (grossly) erroneous data points.
 
 **NOTE**: date/time fields can often present issues and be difficult to import.  If problems exist, you may need to properly format the date/time fields first.  See the [lubridate](https://cran.r-project.org/web/packages/lubridate/index.html)) package for some instructions and/or the [strptime](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/strptime) package to format your date/time field. Note the format of **YOUR** own dataset (e.g., "%Y-%m-%d %H:%M:%S").  
 
@@ -220,27 +227,27 @@ Also note that some manufacturers put the date and time in separate columns.  If
 
 ```{r Clean Merge, message=FALSE, warning=FALSE, echo=TRUE}
 # Clean the reference file, selecting only the columns that you want to include
-WB <- 
-  WB %>%
-
+WB <- # Note that this will overwrite the existing dataset
+  WB %>% 
+ 
   # Pull in the WB.ref dataset to join the study site column
-  left_join(WB.ref, by = join_by("tag_local_identifier" == "tag_id")) %>%
+  left_join(WB.ref, by = join_by("individual_local_identifier" == "individual_local_identifier")) %>%
 
-  # Rename columns and create local timestamp - UTC to local
-  # Select only columns of interest
-  transmute(id = tag_local_identifier,
-            animal_id = individual_local_identifier,
-            latitude = location_lat,
-            longitude = location_long,
-            sex = animal_sex,
-            DOP = gps_dop,
-            fixType = gps_fix_type_raw,
-            temp = external_temperature,
-            # Converting timestamp with 'with_tz' command
-            timestamp = with_tz(timestamp, tz=Timezone2),
-            deploy_on = with_tz(deploy_on_date, tz=Timezone2), # Field included in the reference dataset
-            deploy_off = with_tz(deploy_off_date, tz=Timezone2), # Field included in the reference dataset
-            study_site = study_site) %>% # Field included in the reference dataset
+  # Select columns of interest, rename if necessary
+  mutate(id = tag_local_identifier,
+         animal_id = individual_local_identifier,
+         latitude,
+         longitude,
+         sex,
+         DOP = gps_dop,
+         fixType = gps_fix_type_raw,
+         temp = external_temperature,
+         # Create local timestamp (UTC to local) using 'with_tz' command
+         timestamp = with_tz(timestamp, tz=Timezone2),
+         deploy_on = with_tz(deploy_on_timestamp, tz=Timezone2),
+         deploy_off = with_tz(deploy_off_timestamp, tz=Timezone2),
+         study_site,
+         .keep = "none") %>% 
 
   # The 'across' function allows me to apply a function (as.factor) across multiple fields 
   mutate(across(c(id,sex,study_site), as.factor)) %>%
@@ -259,11 +266,10 @@ WB <-
          study_site == "Athi-Kaputiei Plains",
 
          # And use the deploy on and off dates to further subset
-         # This is just an example here, as data have already been subset
          timestamp >= deploy_on & timestamp <= deploy_off) %>%
 
-  # Remove fields that are now unnecessary.  Dropping the deployment dates and the study area
-  dplyr::select(-c(deploy_on, deploy_off, study_site)) %>%
+  # Remove fields that are now unnecessary - > remove deployment fields
+  dplyr::select(-c(deploy_on, deploy_off)) %>%
   
   # Remove extra levels (important since subsetting to a single study area)
   # The droplevels function re-assess what levels are in the data and drops the rest
@@ -300,7 +306,7 @@ tz(WB$timestamp)
 ```
 
 # Summarize
-To summarize results, we can easily provide a table of all data collected.  We will also convert our summarized results to a `gt` table, providing output that could be shared on a website or with your supervisor. 
+To summarize results, we can easily provide a table of all data collected.  We will convert our summarized results to a `gt` table, providing output that could be shared on a website or with your supervisor. 
 
 ```{r Summarize, message=FALSE, warning=FALSE, echo=TRUE}
 # Create summary object
@@ -365,15 +371,15 @@ Now that the data have been imported and some preliminary cleaning has been done
 * Display the data on top of available basemaps
 
 ## Create a Simple Plot
-Here, we are simply plotting the x and y coordinates (i.e., the data are not spatial).
+Plot the x and y coordinates (i.e., right now, the data are not spatial).
 ```{r Visualize, message=FALSE, warning=FALSE, echo=TRUE}
 # Create very simple plot (non-spatial)
 plot(WB$longitude, WB$latitude,
      col = WB$id,
      pch = 16,
      cex = 0.5,
-     ylab = 'Northing',
-     xlab = 'Easting',
+     ylab = 'Latitude',
+     xlab = 'Longitude',
      asp = 1)
 ```
 
@@ -428,7 +434,7 @@ WB.sf %>%
 ```
 
 ## Tmap Plotting
-Perhaps more useful is plotting the data on top of available satellite or background basemaps.  Here, we will use [tmap](https://cran.r-project.org/web/packages/tmap/index.html).  Tmap has a variety of basemaps to choose from (see a list [here](https://leaflet-extras.github.io/leaflet-providers/preview/)) and can be used in "view" (known as "interactive" mode) or "plot" mode.  Plot mode is better for making static maps.  
+Perhaps more useful is plotting the data on top of available satellite or background basemaps.  This way, we can determine if the data are where they should be.  We will use [tmap](https://cran.r-project.org/web/packages/tmap/index.html).  Tmap includes a variety of basemaps (see a list [here](https://leaflet-extras.github.io/leaflet-providers/preview/)) and can be used in "view" (known as "interactive" mode) or "plot" mode.  Plot mode is better for making static maps.  
 
 While in interactive mode, you can zoom in to investigate points from a particular animal. You can also toggle on and off the various basemap layers you have included using the tile icon in the top left corner. 
 
