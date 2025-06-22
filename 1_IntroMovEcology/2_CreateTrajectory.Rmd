@@ -47,10 +47,12 @@ rm(list=ls())
 #install.packages('sf', 'adehabitatLT', 'gridExtra', 'tidyverse')
 
 # Load libraries
-library(sf)
 library(adehabitatLT)
-library(gridExtra)
+library(amt)
+library(sf)
 library(tidyverse)
+library(units)
+library(gridExtra)
 ```
 
 ## Set Reference Time Zone & Coordinate System
@@ -87,7 +89,9 @@ WB.data <- WB.sf %>%
   as_tibble() %>%
   mutate(X = st_coordinates(WB.sf)[ ,1],
          Y = st_coordinates(WB.sf)[ ,2]) %>%
-  dplyr::select(-geometry)
+  dplyr::select(-geometry) %>% 
+  drop_units()
+
 
 # Look at the data
 head(WB.data)
@@ -104,11 +108,11 @@ Lotek GPS collars (the manufacturer we are using here) are provided with a DOP m
 # Here I am being more restrictive on 2D positions (dop < 5.0) than 3D positions (dop < 10.0).
 
 # Let's first get a summary of how many records are in the dataset before removing records.  This way we can track how much this filtering impacts the size of the dataset.
-val1 <- nrow(WB.data)
+(val1 <- nrow(WB.data))
 
 # Plot 2D positions
 P1.FT2 <- 
-  ggplot(WB.data[WB.data$fixType %in% "2",], aes(x = DOP)) +
+  ggplot(WB.data[WB.data$fixType == "2D",], aes(x = DOP)) +
   geom_histogram(color = "black", fill = "white", bins = 25) +
   labs(title = "GPS Data (2D)", x = "DOP", y = "Frequency") +
   geom_vline(xintercept = 5, color = "red", linetype = "dotted", linewidth = 1) +
@@ -116,7 +120,7 @@ P1.FT2 <-
 
 # Plot 3D positions (most of data)
 P1.FT3 <- 
-  ggplot(WB.data[WB.data$fixType %in% "3",], aes(x = DOP)) +
+  ggplot(WB.data[WB.data$fixType == "3D",], aes(x = DOP)) +
   geom_histogram(color = "black", fill = "white", bins = 25) +
   labs(title = "GPS Data (3D)", x = "DOP", y = "Frequency") +
   geom_vline(xintercept = 10, color = "red", linetype = "dotted", linewidth = 1) +
@@ -126,21 +130,21 @@ P1.FT3 <-
 WB.data <- 
   WB.data %>% 
   filter(
-    fixType == 3 & DOP < 10 | fixType == 2 & DOP < 5) # Only accept position with a 3D fixtype and DOP less than 10 or a 2D fixtype and DOP less than 5
+    fixType == "3D" & DOP < 10 | fixType == "2D" & DOP < 5) # Only accept position with a 3D fixtype and DOP less than 10 or a 2D fixtype and DOP less than 5
 
 # How many records now after filtering?
-val2 <- nrow(WB.data)
+(val2 <- nrow(WB.data))
 
 # Plot again
 P2.FT2 <- 
-  ggplot(WB.data[WB.data$fixType %in% "2",], aes(x = DOP)) +
+  ggplot(WB.data[WB.data$fixType == "2D",], aes(x = DOP)) +
   geom_histogram(color = "black", fill = "white", bins = 25) +
   labs(title = "GPS Data (2D) - DOP Filtered", x = "DOP", y = "Frequency") +
   geom_vline(xintercept = 5, color = "red", linetype = "dotted", linewidth = 1) +
   theme_classic()
 
 P2.FT3 <- 
-  ggplot(WB.data[WB.data$fixType %in% "3",], aes(x = DOP)) +
+  ggplot(WB.data[WB.data$fixType == "3D",], aes(x = DOP)) +
   geom_histogram(color = "black", fill = "white", bins = 25) +
   labs(title = "GPS Data (3D) - DOP Filtered", x = "DOP", y = "Frequency") +
   geom_vline(xintercept = 10, color = "red", linetype = "dotted", linewidth = 1) +
