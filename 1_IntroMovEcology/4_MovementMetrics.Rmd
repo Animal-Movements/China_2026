@@ -1,0 +1,600 @@
+---
+title: "Introduction to Movement Metrics"
+author: "Wenjing Xu 徐雯靓 (wenjing.xu@senckenberg.de)"
+date: '`r format(Sys.time(), "%d %B %Y")`'
+output:
+  html_document:
+    toc: true
+    toc_depth: 4
+    toc_float: 
+      collapsed: true
+      smooth_scroll: true
+    number_sections: false
+    #theme: united
+    #highlight: tango
+pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE) # display both code and results 
+knitr::opts_chunk$set(fig.pos = 'H')
+```
+
+--------------------------------------------------------
+
+# Introduction
+This session introduces core movement metrics that allow us to transform raw tracking data into biologically meaningful insights. By calculating and interpreting metrics such as speed, turning angle, and displacement, we begin to characterize movement strategies and behavioral patterns. These metrics also form the foundation for more advanced analyses, from modeling behavioral states to inferring habitat preferences and assessing landscape connectivity.
+
+We will use `move2`(https://cran.r-project.org/web/packages/move2/index.html) and `amt` (https://cran.r-project.org/web/packages/amt/index.html) as example to see how some of the most frequently used metrics can be calculated. 
+
+In this exercise, we will cover:
+  1. Data exploration and step-level metrics with `move2`
+      + data exploration 
+      + step length, speed, and turning angle
+  2. Step-level metrics with `amt`
+      + data cleaning 
+      + calculating step length, speed, and turning angle
+      + turn angle correlation (tac), straightness, intensity_use, net-squared displacement (NSD)
+      + manipulating multiple individuals 
+  3. Space-use metrics with `amt` (discrete methods)
+      + calculating MCP and KDE for one individual
+      + calculating MCP and KDE for multiple individuals 
+
+
+## Load Libraries
+Load the required libraries and remove everything held in [R's](https://cran.r-project.org/) memory.
+
+```{r packages, warning=FALSE, message=FALSE, results='hide'}
+
+# if packaged not installed yet, run the line below with the the "#"
+# install.packages("tidyverse", "lubridate", "terra", "sf", "amt")
+
+library(tidyverse, quietly = TRUE) #the tidyverse is an collection of R packages designed for data science. All packages share an underlying design philosophy, grammar, and data structures. Relavant packages for us includ `dplyr` (for data manipulation), `lubridate` (for dealing with time), `ggplot2` (for data visualization). 
+library(sf, quietly = TRUE) #"simple features", lets us work with spatial vector data
+library(amt, quietly = TRUE) # amt = animal movement tool. It is used to manage and analyze animal movement data. It can be used to calculate home range, track statistics, and prep the data for further analysis such as resource selection function (which you will learn more on day 3)
+library(move2, quietly = TRUE) #handle, manipulate, and explore trajectory data with direct connection with MOVEBANK and sf 
+library(units, quietly = TRUE) #support for measurement units 
+library(rnaturalearth, quietly = TRUE)
+library(gridExtra, quietly = TRUE)
+library(leaflet,quietly = TRUE) # to create interactive maps 
+```
+
+# Data exploration and step-level metrics with `move2`
+
+One of the key strengths of `move2` is its native integration with Movebank (https://www.movebank.org/cms/movebank-main), a global platform for storing, managing, and sharing animal tracking data. Movebank provides a standardized and secure environment for trajectory data management, ensuring data quality, metadata consistency, and long-term accessibility. By linking directly to Movebank, `move2` allows us to efficiently import, explore, and analyze tracking datasets in a reproducible workflow—bridging robust data management with flexible analytical tools in R.
+
+Movebank allows data owners to control access to their tracking data through customizable permissions. Users can choose to make their data fully public, viewable but not downloadable, or completely private—facilitating data sharing while respecting ownership and confidentiality.
+
+Let's try to use move2 to download and explore a public cougar dataset from Brazil:
+
+Cavalcanti, S.M.C., Morato, R.G., Niebuhr, B.B. et al. 2021. A Onca-Parda na Bacia do Rio Tietê: O uso de um predador de topo de cadeia como ferramenta de conservacão da biodiversidade no Estado de Sao Paulo. Instituto para a Conservação dos Carnívoros Neotropicais (Pró-Carnívoros). Atibaia, São Paulo, Marco de 2021.
+
+## read data 
+
+First we need to set our movebank login (sign up here https://www.movebank.org/cms/movebank-registration). You only need to do it once and your computer will remember it for the next time. 
+```{r movebank credentials, eval = FALSE}
+movebank_store_credentials("myUserName", "myPassword") # replace user naem and password with your own credentials
+```
+
+
+Then you can access a specific study with its ID number: 
+```{r read data}
+dat.mv <- movebank_download_study(study_id = 577226894,  
+                        remove_movebank_outliers = T)
+dat.mv
+```
+
+Data downloaded from movebank is a spatial object. It includes both track information (aka the metadata of each track) and an event table (with locations and timestamp). We can see that there are 13 tracks. Let's visualize it:
+```{r m2 viz, message=FALSE, warning=FALSE}
+dat.lines <- dat.mv %>%
+  mt_track_lines() 
+
+pal <- colorFactor(palette = "Set1", domain = dat.lines$individual_local_identifier)
+
+dat.lines %>%
+  leaflet() %>%
+  addTiles() %>%
+  addPolylines(color = ~pal(individual_local_identifier), label = ~individual_local_identifier, weight = 2, opacity = 1) %>%
+  addLegend("bottomright", pal = pal, values = ~individual_local_identifier, title = "Track ID")
+```
+
+We will now look at a series of very useful functions in move2 that allow us to calculate the movement metrics we talked about earlier. Please note that before calculate any movement metrics, make sure your data is *ordered within tracks*. Specifically, we will look into:
+
++ `mt_time_lags()` # duration interval between consecutive locations 
++ `mt_distance()` # distance between consecutive locations
++ `mt_speed()` # speed between consecutive locations
++ `mt_azimuth()` # heading/azimuth/direction of movement of each segment between consecutive locations of a track.
++ `mt_turnangle()` # the relative angle between consecutive segments.
+
+## time lag (temporal intervals)
+```{r time lag} 
+# make sure the data is ordered
+dat.mv <- dat.mv %>%
+  group_by(individual_local_identifier) %>%
+  arrange(timestamp, .by_group = TRUE) %>%
+  ungroup()
+
+timeLags <- mt_time_lags(dat.mv)
+head(timeLags)
+```
+
+By default it uses the most convenient unit but we can change it or set it from the beginning.
+```{r time lag2} 
+timeLags <- units::set_units(timeLags, hours)
+
+dat.mv <- dat.mv %>% 
+  mutate(time_lags_h = mt_time_lags(., units = "hour")) 
+
+lag.summary <- dat.mv %>%
+  group_by(individual_local_identifier) %>%
+  summarise(median_interval = median(time_lags_h, na.rm=T),
+            sd_interval = round(sd(time_lags_h, na.rm=T),2))
+
+lag.summary
+```
+We can see that most data were collected at 1h interval, but some individuals, such as Pepira, experienced more variations (probably due to data transmission failure). 
+
+Note that timelag, distance, speed, and direction are properties of the segment (2 locations, not one). Therefore, the number of valid values will be `nrow() - 1` for each track, here we have 13 tracks and therefore 13 NAs. Hence we need to use `na.rm = T` when calculating summary statistics. 
+
+```{r time lag3} 
+table(is.na(dat.mv$time_lags_h))
+```
+
+## step length and speed
+Other metrics can be calculated following basically the same steps. But for calculating distances, we usually want to operate in a projected coordinate system.
+
+```{r step sped 1, warning = FALSE} 
+dat.mv <- st_transform(dat.mv, 29172)
+```
+
+Now we can calculate step length and speed: 
+```{r step sped 1, warning = FALSE} 
+dat.mv <- dat.mv %>%
+  mutate(
+    step_length_m = mt_distance(., units = "m"),
+    speed_m_s = mt_speed(., units = "m/s")
+  )
+
+p1 <- dat.mv %>% ggplot(aes(x = step_length_m)) +
+  geom_histogram(bins = 50) +
+  theme_minimal() 
+p2 <- dat.mv %>% ggplot(aes(x = speed_m_s)) +
+  geom_histogram(bins = 50) +
+  theme_minimal() 
+grid.arrange(p1, p2, ncol = 2)
+```
+
+For speed and step length, it is often helpful to look at the log scale.
+```{r step speed2, warning = FALSE}
+p3 <- dat.mv %>% ggplot(aes(x = log(step_length_m))) +
+  geom_histogram(bins = 50) +
+  theme_minimal() 
+p4 <- dat.mv %>% ggplot(aes(x = log(speed_m_s))) +
+  geom_histogram(bins = 50) +
+  theme_minimal() 
+grid.arrange(p3, p4, ncol = 2)
+```
+Very interesting twin-peak pattern of cougar activity! This indicates that cougar could have two different movement states. 
+
+## TASK 1: make a map of cougar movement, color the tracking location by speed. This would be a good way to explore the movement pattern further. Based on this map, is there any obvious pattern that could explain the distribution of step length and speed?
+
+```{r step/speed, echo = FALSE}
+  
+pal <- colorNumeric(palette = "viridis", domain = log(as.numeric(dat.mv$speed_m_s) + 0.00001), na.color = "transparent") 
+dat.mv %>%
+  st_transform(., 4326) %>% #leaflet maps require long-lat projection
+  mutate(speed_m_s = log(as.numeric(dat.mv$speed_m_s) + 0.00001)) %>%
+  leaflet() %>%
+  addTiles() %>%
+  addCircleMarkers(
+    radius = 3,
+    color = ~pal(speed_m_s),
+    stroke = FALSE,
+    fillOpacity = 0.8,
+    label = ~paste0("ID: ", individual_local_identifier, " Speed: ", round(speed_m_s, 2), " m/s"),
+    labelOptions = labelOptions(direction = "auto")
+  ) %>%
+  addLegend("bottomright", pal = pal, values = ~speed_m_s, title = "Speed (m/s)")
+
+```
+
+## heading and turning angles
+Turning angles are a property of 2 segments (3 locations), and angles are calculated in radians relative to the previous step, with 2 NAs per track (first and last value of each track). 
+
+```{r turning angles, warning = FALSE}
+dat.mv <- dat.mv %>% 
+  st_transform(., 4326) %>% # then the angle calculation require geographic coordinate system again 
+  mutate(turnAngles = mt_turnangle(.),
+         heading = mt_azimuth(.))
+
+p5 <- dat.mv %>% 
+  filter(individual_local_identifier %in% c("Piloto"),
+         timestamp > ymd("2019-03-24")) %>% 
+  mutate(state = ifelse(timestamp < ymd("2019-04-08"), "A", "B") ) %>%
+  ggplot(aes(x = turnAngles, fill = state)) +
+  geom_density(alpha = 0.8) +
+  theme_minimal()
+
+p6 <- dat.mv %>% 
+  filter(individual_local_identifier %in% c("Piloto"),
+         timestamp > ymd("2019-03-24")) %>% 
+  mutate(state = ifelse(timestamp < ymd("2019-04-08"), "A", "B") ) %>%
+  ggplot(aes(color = state)) + geom_sf() +
+  theme_minimal()
+  
+grid.arrange(p5, p6, ncol = 2)
+```
+We can see that turn angle distributions are different for Piloto at the two different movement sections. Hence, tun angle could be used as one of the metrics to characterize movement patterns. We will talk more about this later. 
+
+We can see that `move2` certain has its advantage due to its integration with movebank. The calculation of metrics are also intuitive. However, the metrics calculation might not be the most straightforward in terms of the different requirements in the coordinate reference systems. Next, we will introduce a different package with a cleaner workflow (but with its own limitation, which we will talk more about below).
+
+# Step-level metrics with `amt`
+The amt package (Animal Movement Tools) provides a comprehensive and flexible framework for analyzing animal movement data. One of its key strengths lies in its tidy, modular approach to constructing movement workflows—enabling users to easily calculate movement metrics, generate random steps, and fit step-selection functions. In contrast to packages that emphasize trajectory visualization or raw data handling, `amt` is designed to support hypothesis-driven analysis, especially in the context of habitat selection and movement ecology. Today we will focus on the metrics part of the workflow. 
+
+For this part, let's use the wildebeest data. 
+```{r Data Import, message=FALSE, warning=FALSE}
+load("./Data/wildebeest_data.rdata")
+```
+
+## step 1: data cleaning and track generation 
+
+Because of the hypothesis-driven workflow, `amt` has requirement for data quality, and the first step is data cleaning, including:
+  1. check whether the data set contains any missing location coordinates. If so, remove the incomplete relocation;
+  2. make sure a time stamp (date + time) column exist;
+  3. check for and remove any duplicated time stamps.
+
+```{r data clean}
+# check is all observations are complete 
+WB <- WB %>%
+  as_tibble() %>%
+  filter(
+    fixType == "3D" & as.numeric(DOP) < 10 | fixType == "2D" & as.numeric(DOP)  < 5)
+
+all(complete.cases(WB)) 
+``` 
+
+Cool. All cases are complete.
+
+Now check whether any time stamps are duplicated for each individual:
+```{r check duplication}
+WB %>% group_by(animal_id) %>% summarise(any(duplicated(timestamp)))
+```
+
+We have no duplicated timestamp within each individual. Great! 
+
+## step 2: Track creation 
+Like other packags, track is the base unit how `amt` handles movement data. Basically you tell `amt` which columns from the input data frame are locations, time, and individual ID (if exists), and any other associated information. 
+
+```{r create track}
+wb.trk <- make_track(WB, 
+                            # tell the function which column contains the coordinates
+                            .x = longitude, .y = latitude, 
+                            # tell the function which CRS the coordinates are based on. 
+                            crs = 4326, 
+                            .t = timestamp,
+                            # any additional information you want to attach to the track
+                            # such as animal ID and month
+                            id = animal_id, sex = sex, temp = temp) 
+
+class(wb.trk)
+```
+
+Now we have a movement track. But at the same time it is still a tibble. Hence, the pipe operations from `dyplr` still work for tracks created by `amt`.
+
+We can use function `summarize_sampling_rate` to look at the sampling rate.
+```{r samling rate}
+summarize_sampling_rate(wb.trk)
+```
+
+
+## step 3: calculating step-level metrics
+
+Like `move2`, `amt` can calculate basic movement metrics. Uniquely, `amt` provides us a quick and elegant way to calculate common step statistics all at once. 
+
+Because we want to calculate steps lengths, transform it to projected coordinate system first so the calculate unite would be in meters. 
+```{r amt step0}
+wb.trk.UTM <- transform_coords(wb.trk, 32737)
+```
+
+Let's start with one individual. 
+```{r amt step}
+# first we filter the data to the individual of interest
+one.wb.trk.UTM <- wb.trk.UTM %>% filter(id == "Sotua")
+
+one.wb.steps <- steps(one.wb.trk.UTM)
+
+head(one.wb.steps)
+```
+
+As demonstrated, using `steps()`, we can quickly calculate all the common step statistics for a track, in which `x1_` and `y1_` are the coordinates of the first location, and `x2_` and `y2_` are the coordinate of the second location. In the new tibble, we see the step length `sl_`, turning angle `ta_`, and step duration `dt_`. 
+
+## Working with several individuals concurrently 
+
+We often want movement characteristics calculated for several animals/tracks together. `amt` does not provide a infrastructure for dealing with several animal. However, list-columns from the `tidyverse` can be used to manage many animals. 
+
+Because a track is just a tibble all tidyverse verbs can be used. The general strategy consists of three steps:
+
+**1.** Nest a track by one or more columns (such as by ID). A nested data frame is a data frame where one (or more) columns is a list of data frames (hence basically tibble nested in a tibble).
+
+```{r nest}
+
+wb.trk.nested <- wb.trk.UTM %>% nest(data = -"id")
+
+wb.trk.nested
+  
+```
+
+Individual tracks are now stored is now stored in a new column called "data". 
+
+**2.** Now we can perform operations on the grouped data by using `mutate` and `map`. *`map` applies a function to each elephant of a vector/list.* 
+
+```{r turn to step}
+
+wb.step.nested <- wb.trk.nested %>% mutate (steps = map(data, function(x) {x %>% steps()} )) 
+
+wb.step.nested
+
+# let's look at one element in the column "steps"
+wb.step.nested$steps[1]
+```
+
+
+**3.** `select()` the relevant columns and `unnest()` to turn the data frame back to a data frame. 
+
+Because we are interested in making a steps data frame containing all individuals, we select column "id" and "steps" and unnest them into a new data frame. 
+
+```{r unnest}
+
+wb.step <- wb.step.nested %>% 
+  select (id, steps) %>% #select the two columns of interest
+  unnest(cols = steps) #unnest the steps column
+
+head(wb.step)
+```
+Now steps across all individuals with basic movement metrics calculated are in one big data frame. 
+
+We can now more easily compare movement metrics of different individuals. As an example, we can plot the step-length distributions of all individuals concurrently now: 
+
+```{r all individual sl distribution}
+
+wb.step %>% 
+  ggplot (aes(x = log(sl_+0.00001), fill = factor(id))) +  #sometimes animals have 0 step length. To avoid issue when doing "log", we can add a very small number to all steps
+  geom_density(alpha = 0.3) + #alpha determines transparency 
+  theme_minimal() +
+  labs ( x = "log step length", fill = "ID", title = "The Distribution of Wildebeest Step Length")
+
+```
+
+```{r all individual angle distribution, warning=F}
+
+wb.step %>% ggplot (aes(x = ta_, fill = factor(id))) +
+  geom_density(alpha = 0.3) + #alpha determines transparency
+  theme_minimal() +
+  labs (x = "turning angles (rad)", fill = "ID")
+
+```
+
+We can also plot the turn angle density distribution. This time let's try to plot them in a circular form and turn the radian to degree for easier interpretation.
+
+```{r circlur plotting}
+wb.step %>% 
+  mutate(ta_degree = ta_ * 180/pi) %>%
+  filter(!is.na(ta_degree)) %>%
+  ggplot(aes(x = ta_degree, fill = id)) +
+  geom_density(alpha = 0.4) +
+  coord_polar() +
+  theme_minimal() +
+  labs (x = "turning angles (degree)")
+
+```
+
+# Track-level metrics with `amt`
+In addition to these basic step-level metrics (based on the two consecutive steps), `amt` also has functions to calculate other useful track-level metrics (based on steps cross the track) such as:
+  + straightness 
+  + net squared displacement (nsd)
+  + mean squared displacement (msd)
+  + total movement distance (tot_dist)
+  + intensity use, calculated by dividing the total movement distance (tot_dist) by the square of the area of movement (100% MCP)
+  + mean turn angle correlation (tac)
+  
+These metrics can provide different information depending on your research question and the temporal scale of your analysis. 
+
+As an example: 
+```{r amt track metrics}
+wb.trk.nested  <-  wb.trk.nested %>% mutate (
+  tot_dist = map_dbl(data, function(x) {x %>% tot_dist()}),
+  straightness = map_dbl(data, function(x) {x %>% straightness()}), 
+  intensity_use = map_dbl(data, function(x) {x %>% intensity_use()})) 
+wb.trk.nested 
+```
+Now you get a quick overview of the different movement patterns across different individuals. For example, some individuals moved more distances than others (but not that the tracking duration might be different), and others use space more intensely than others. 
+
+Another very useful metric is NSD. It has been often used to study migration patterns (whether and how animals return to the starting location). 
+```{r amt track nsd}
+wb.trk.nsd <- wb.trk.nested %>% 
+  mutate (data = map(data, function(x) {x %>% add_nsd()})) %>% 
+  select (id, data) %>% #select the two columns of interest
+  unnest(cols = data)
+
+p_nsd <- wb.trk.nsd %>% ggplot(aes(x = t_, y = nsd_, color = id)) +
+  geom_line() +
+  theme_minimal() 
+p_nsd
+```
+
+
+# Home range estimation (discrete methods)
+
+Animal movement data can also tell us information about their space use. Depending on the temporal scale, the range estimate could correspond to daily range, seasonal range, or home range. Here we refer to these ranges generally as "home range" for simplicity. 
+
+There are many ways to calculate home range. Here we focus on using *MCP (Minimum Convex Polygon).* There are four mainly methods employed by `amt` - minimum convex polygon (mcp), kernel density estimate (kde), local convex hull (locoh), and autocorrelated kernel density estimate (akde). 
+
+We will only demonstrate the first three today, which view the tracking locations as discrete events. However, AKDE differs from other methods as it considers the autocorrelation among tracking locations, and the akde function in `amt` is a wrapper of functions from `ctmm` - which we will learn more about in the `ctmm` day! 
+
+## Calculating MCP, KDE, and locoh for one individual
+Note that argument `levels` defines the isopleth levels used for calculating home ranges.
+
+```{r mcp and kde and locoh for one wb}
+# estimate mcp at the level of 95%
+one.wb.mcp <- hr_mcp(one.wb.trk.UTM, levels = c(0.5, 0.95))
+
+# locoh
+one.wb.locoh <- hr_locoh(one.wb.trk.UTM, type = "r", n=2, levels = c(0.95))
+
+# Create a template raster for the KDE
+trast <- make_trast(one.wb.trk.UTM, res = 50)
+one.wb.kde <- hr_kde(one.wb.trk.UTM, trast = trast, levels = c(0.5, 0.9))
+
+par(mfrow = c(1, 3))
+plot(one.wb.mcp, main = "mcp")
+plot(one.wb.locoh, main = "locoh")
+plot(one.wb.kde, main = "kde")
+
+```
+
+<<<< --------------- WENJING STARTS FROM HERE ------------- >>>>>>>>>>
+
+
+#### Figure 14: elephant 5 MCP relative to the entire park  
+
+```{r plot_with_park_boundary}
+
+# first double check that data are in the save CRS:
+st_crs(etosha.boundary) == st_crs(one.elephant.mcp$mcp)
+
+p14 <-  ggplot() +
+  geom_sf(data = etosha.boundary, fill = "white", linetype = "longdash", linewidth = 1) + 
+  geom_sf(data = one.elephant.mcp$mcp, color = "orange") +
+  geom_point(aes(x = one.elephant.mcp$data$x_, y = one.elephant.mcp$data$y_), color = "orange", alpha = 0.3) +
+  theme_minimal() +
+  labs (x = "longitude", y = "latitude")
+p14
+```
+
+We can see from the map that elephant 5 mostly used the center of the park.
+
+### Calculating MCP area for one individual
+
+The area of the resulted MCP can be easily calculated as below: 
+```{r mcp area}
+hr_area(one.elephant.mcp)
+```
+### MCP of multiple levels for one individual
+
+Sometimes we want to know where is the core area that animals used. In this case, we can adjust the `levels` arguments to a smaller number. 
+
+```{r multiple levels mcp}
+one.elephant.mcp.2 <- hr_mcp(one.elephant.trk, levels = c(1, 0.9, 0.5))
+
+one.elephant.mcp.2$mcp
+```
+
+#### Figure 15: elephant 5 mcp with three levels
+
+```{r plot hrs}
+p15 <-  ggplot() +
+  geom_sf(data = one.elephant.mcp.2$mcp, aes(color = factor(level)), fill = NA, alpha = 0.4, linewidth = 0.8) +
+  geom_point(aes(x = one.elephant.mcp.2$data$x_, y = one.elephant.mcp$data$y_), color = "orange", alpha = 0.1, size = 0.3) +
+  theme_minimal() +
+  labs (x = "longitude", y = "latitude")
+p15
+
+```
+
+We can see that 100% MCP is the largest, but very close to the 90% MCP. In contrast, 50% MCP is much smaller. 
+
+Theoretically it is good to exclude points that are outliers, i.e. not typical of the individual's movement pattern or one-time forays into different areas. Yet as you can see from these plots, the MCP method is not so smart at reducing the home range to just the 'core' area. It essentially picked the points in the geographic center of the points. This has no ecological reasoning behind it, especially when the animal uses space heterogeneously. This is why there are other methods that try to add more information to make a more informed decision. 
+
+|           <span style="color:tomato"> **TASK 3**: Using code provided above to calculate areas of 50%, 75%, and 95% MCP range size for elephant 8. </span>
+<br/><br/>
+
+### MCP for multiple individual
+
+Calculting MCP for all individuals in `amt` follows the same logic as how we calculate movement metrics for multiple individuals, except for step 3 because we are dealing with list of `sf` objects and we cannot simply unnest sf objects into a data frame. 
+
+```{r mcp_all_ind, warning=FALSE}
+
+# step 1: nest the track by id
+
+elephants.nested <- elephants.trk %>% nest(data = -"id")
+
+# step 2: calculate mcp 
+
+elephants.nested <- elephants.nested %>% mutate(mcp = map(data, function(x) {
+    mcp = hr_mcp(x, levels = 0.95)
+    return(mcp$mcp)
+    }
+  ))
+
+# step 3: combine mcp of multiple individuals to one sf object
+
+elephants.mcp <- bind_rows(elephants.nested$mcp) %>% mutate (id = elephants.nested$id)
+
+elephants.mcp
+
+```
+|           <span style="color:tomato">**QUESTION 17:** which elephant has the largest 90% MCP?</span>
+<br/><br/>
+
+
+
+We can also make a plot to compare HR sizes across all individuals more directly:
+
+#### Figure 16: MCP home range areas of elephants
+```{r mcp area bar}
+
+elephants.mcp %>% ggplot() +
+  # turn area from m^2 to km^2 for easier interpretation
+  geom_bar(aes( x = id, y = as.numeric(area)/1000000), 
+           stat = "identity") +
+  theme_minimal() +
+  labs (y = "Area (km^2)")
+
+```
+
+
+|           <span style="color:tomato">**QUESTION 18:** What do you think could cause differences in space use?</span>
+<br/><br/>
+
+
+### Home ranges in the park
+
+Now we can easily plot the MCP for all individuals relative to the park: 
+
+#### Figure 17: all elephant 95% mcp in the park
+
+```{r all elephant mcp}
+p17 <-  ggplot() +
+  geom_sf(data = etosha.boundary, fill = "white", linetype = "longdash", linewidth = 1) + 
+  geom_sf(data = elephants.mcp, aes(color = id), fill = NA, alpha = 0.4, linewidth = 0.8) +
+  theme_minimal()
+p17
+
+```
+
+|           <span style="color:tomato">**QUESTION 19:**  Describe what you see in the map. How would this be helpful for conservation planning?</span>
+<br/><br/>
+
+
+### Save the HR results in a data frame.  
+
+Sometimes to report the result you need to export the data as a data frame. `sf` objects can be easily turn into a data frame as below:
+
+```{r same results in a data frame}
+
+elephants.mcp.df <- st_drop_geometry(elephants.mcp)
+
+```
+
+
+## use amt to calculate metrics 
+
+dat.df <- mt_as_event_attribute(bts, individual_local_identifier) %>%
+     dplyr::mutate(coords_x=sf::st_coordinates(.)[,1], coords_y=sf::st_coordinates(.)[,2]) %>%
+     sf::st_drop_geometry(.) %>%
+  select("individual_local_identifier", "timestamp", "coords_x", "coords_y") %>%
+  as.tibble()
+
+
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
