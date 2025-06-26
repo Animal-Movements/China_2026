@@ -65,7 +65,7 @@ One of the key strengths of `move2` is its native integration with Movebank (htt
 
 Movebank allows data owners to control access to their tracking data through customizable permissions. Users can choose to make their data fully public, viewable but not downloadable, or completely private—facilitating data sharing while respecting ownership and confidentiality.
 
-Let's try to use move2 to download and explore a public cougar dataset from Brazil:
+Let's try to use move2 to download and explore a public cougar dataset from Brazil (movebank study id 577226894):
 
 Cavalcanti, S.M.C., Morato, R.G., Niebuhr, B.B. et al. 2021. A Onca-Parda na Bacia do Rio Tietê: O uso de um predador de topo de cadeia como ferramenta de conservacão da biodiversidade no Estado de Sao Paulo. Instituto para a Conservação dos Carnívoros Neotropicais (Pró-Carnívoros). Atibaia, São Paulo, Marco de 2021.
 
@@ -73,7 +73,7 @@ Cavalcanti, S.M.C., Morato, R.G., Niebuhr, B.B. et al. 2021. A Onca-Parda na Bac
 
 First we need to set our movebank login (sign up here https://www.movebank.org/cms/movebank-registration). You only need to do it once and your computer will remember it for the next time. 
 ```{r movebank credentials, eval = FALSE}
-movebank_store_credentials("myUserName", "myPassword") # replace user naem and password with your own credentials
+movebank_store_credentials("myUserName", "myPassword") # replace user name and password with your own credentials
 ```
 
 
@@ -98,7 +98,7 @@ dat.lines %>%
   addLegend("bottomright", pal = pal, values = ~individual_local_identifier, title = "Track ID")
 ```
 
-We will now look at a series of very useful functions in move2 that allow us to calculate the movement metrics we talked about earlier. Please note that before calculate any movement metrics, make sure your data is *ordered within tracks*. Specifically, we will look into:
+`move` provides a series of useful functions to calculate the movement metrics we talked about earlier. Please note that before calculate any movement metrics, make sure your data is *ordered within tracks*. Specifically, we will look into:
 
 + `mt_time_lags()` # duration interval between consecutive locations 
 + `mt_distance()` # distance between consecutive locations
@@ -143,12 +143,12 @@ table(is.na(dat.mv$time_lags_h))
 ## step length and speed
 Other metrics can be calculated following basically the same steps. But for calculating distances, we usually want to operate in a projected coordinate system.
 
-```{r step sped 1, warning = FALSE} 
+```{r step speed 0, warning = FALSE} 
 dat.mv <- st_transform(dat.mv, 29172)
 ```
 
 Now we can calculate step length and speed: 
-```{r step sped 1, warning = FALSE} 
+```{r step speed 1, warning = FALSE} 
 dat.mv <- dat.mv %>%
   mutate(
     step_length_m = mt_distance(., units = "m"),
@@ -176,9 +176,9 @@ grid.arrange(p3, p4, ncol = 2)
 ```
 Very interesting twin-peak pattern of cougar activity! This indicates that cougar could have two different movement states. 
 
-## TASK 1: make a map of cougar movement, color the tracking location by speed. This would be a good way to explore the movement pattern further. Based on this map, is there any obvious pattern that could explain the distribution of step length and speed?
+### TASK 1: make a map of cougar movement, color the tracking location by speed. This would be a good way to explore the movement pattern further. Based on this map, is there any obvious pattern that could explain the distribution of step length and speed?
 
-```{r step/speed, echo = FALSE}
+```{r step/speed, eval = FALSE, echo = FALSE}
   
 pal <- colorNumeric(palette = "viridis", domain = log(as.numeric(dat.mv$speed_m_s) + 0.00001), na.color = "transparent") 
 dat.mv %>%
@@ -224,9 +224,10 @@ p6 <- dat.mv %>%
   
 grid.arrange(p5, p6, ncol = 2)
 ```
-We can see that turn angle distributions are different for Piloto at the two different movement sections. Hence, tun angle could be used as one of the metrics to characterize movement patterns. We will talk more about this later. 
 
-We can see that `move2` certain has its advantage due to its integration with movebank. The calculation of metrics are also intuitive. However, the metrics calculation might not be the most straightforward in terms of the different requirements in the coordinate reference systems. Next, we will introduce a different package with a cleaner workflow (but with its own limitation, which we will talk more about below).
+Turn angle distributions are different for Piloto at the two different movement sections. Hence, tun angle could be used as one of the metrics to characterize movement patterns. We will talk more about this later. 
+
+`move2` certain has its advantage due to its integration with movebank. The calculation of metrics are also intuitive. However, the metrics calculation might not be the most straightforward in terms of the different requirements in the coordinate reference systems. Next, we will introduce a different package with a cleaner workflow (but with its own limitation, which we will talk more about below).
 
 # Step-level metrics with `amt`
 The amt package (Animal Movement Tools) provides a comprehensive and flexible framework for analyzing animal movement data. One of its key strengths lies in its tidy, modular approach to constructing movement workflows—enabling users to easily calculate movement metrics, generate random steps, and fit step-selection functions. In contrast to packages that emphasize trajectory visualization or raw data handling, `amt` is designed to support hypothesis-driven analysis, especially in the context of habitat selection and movement ecology. Today we will focus on the metrics part of the workflow. 
@@ -239,9 +240,9 @@ load("./Data/wildebeest_data.rdata")
 ## step 1: data cleaning and track generation 
 
 Because of the hypothesis-driven workflow, `amt` has requirement for data quality, and the first step is data cleaning, including:
-  1. check whether the data set contains any missing location coordinates. If so, remove the incomplete relocation;
-  2. make sure a time stamp (date + time) column exist;
-  3. check for and remove any duplicated time stamps.
+1. check whether the data set contains any missing location coordinates. If so, remove the incomplete relocation;
+2. make sure a time stamp (date + time) column exist;
+3. check for and remove any duplicated time stamps.
 
 ```{r data clean}
 # check is all observations are complete 
@@ -262,7 +263,7 @@ WB %>% group_by(animal_id) %>% summarise(any(duplicated(timestamp)))
 
 We have no duplicated timestamp within each individual. Great! 
 
-## step 2: Track creation 
+## step 2: track creation 
 Like other packags, track is the base unit how `amt` handles movement data. Basically you tell `amt` which columns from the input data frame are locations, time, and individual ID (if exists), and any other associated information. 
 
 ```{r create track}
@@ -432,95 +433,61 @@ There are many ways to calculate home range. Here we focus on using *MCP (Minimu
 We will only demonstrate the first three today, which view the tracking locations as discrete events. However, AKDE differs from other methods as it considers the autocorrelation among tracking locations, and the akde function in `amt` is a wrapper of functions from `ctmm` - which we will learn more about in the `ctmm` day! 
 
 ## Calculating MCP, KDE, and locoh for one individual
-Note that argument `levels` defines the isopleth levels used for calculating home ranges.
+Note that argument `levels` defines the isopleth levels used for calculating home ranges. Theoretically it is good to exclude points that are outliers, i.e. not typical of the individual's movement pattern or one-time forays into different areas. But sometimes such "outlier" behaviors are important. 
 
-```{r mcp and kde and locoh for one wb}
+```{r mcp and kde and locoh for one wb - plot}
 # estimate mcp at the level of 95%
 one.wb.mcp <- hr_mcp(one.wb.trk.UTM, levels = c(0.5, 0.95))
-
 # locoh
-one.wb.locoh <- hr_locoh(one.wb.trk.UTM, type = "r", n=2, levels = c(0.95))
-
+one.wb.locoh <- hr_locoh(one.wb.trk.UTM, type = "k", n= 150, levels = c(0.5, 0.95))
 # Create a template raster for the KDE
 trast <- make_trast(one.wb.trk.UTM, res = 50)
-one.wb.kde <- hr_kde(one.wb.trk.UTM, trast = trast, levels = c(0.5, 0.9))
+one.wb.kde <- hr_kde(one.wb.trk.UTM, trast = trast, levels = c(0.5, 0.95))
 
 par(mfrow = c(1, 3))
-plot(one.wb.mcp, main = "mcp")
-plot(one.wb.locoh, main = "locoh")
+plot(one.wb.mcp, main = paste("mcp"))
+plot(one.wb.locoh, main = "k-locoh 150")
 plot(one.wb.kde, main = "kde")
 
 ```
 
-<<<< --------------- WENJING STARTS FROM HERE ------------- >>>>>>>>>>
+And we can look at different home range 
+```{r mcp and kde and locoh for one wb - area}
+hr_area_one_wb <- cbind(tibble(method = rep(c("mcp", "locoh", "kde"), each = 2)),
+                        rbind(hr_area(one.wb.mcp), hr_area(one.wb.locoh), hr_area(one.wb.kde))) %>%
+  select(-what)
 
-
-#### Figure 14: elephant 5 MCP relative to the entire park  
-
-```{r plot_with_park_boundary}
-
-# first double check that data are in the save CRS:
-st_crs(etosha.boundary) == st_crs(one.elephant.mcp$mcp)
-
-p14 <-  ggplot() +
-  geom_sf(data = etosha.boundary, fill = "white", linetype = "longdash", linewidth = 1) + 
-  geom_sf(data = one.elephant.mcp$mcp, color = "orange") +
-  geom_point(aes(x = one.elephant.mcp$data$x_, y = one.elephant.mcp$data$y_), color = "orange", alpha = 0.3) +
-  theme_minimal() +
-  labs (x = "longitude", y = "latitude")
-p14
-```
-
-We can see from the map that elephant 5 mostly used the center of the park.
-
-### Calculating MCP area for one individual
-
-The area of the resulted MCP can be easily calculated as below: 
-```{r mcp area}
-hr_area(one.elephant.mcp)
-```
-### MCP of multiple levels for one individual
-
-Sometimes we want to know where is the core area that animals used. In this case, we can adjust the `levels` arguments to a smaller number. 
-
-```{r multiple levels mcp}
-one.elephant.mcp.2 <- hr_mcp(one.elephant.trk, levels = c(1, 0.9, 0.5))
-
-one.elephant.mcp.2$mcp
-```
-
-#### Figure 15: elephant 5 mcp with three levels
-
-```{r plot hrs}
-p15 <-  ggplot() +
-  geom_sf(data = one.elephant.mcp.2$mcp, aes(color = factor(level)), fill = NA, alpha = 0.4, linewidth = 0.8) +
-  geom_point(aes(x = one.elephant.mcp.2$data$x_, y = one.elephant.mcp$data$y_), color = "orange", alpha = 0.1, size = 0.3) +
-  theme_minimal() +
-  labs (x = "longitude", y = "latitude")
-p15
+hr_area_one_wb %>% ggplot(aes(x = method, y = area/1000000, 
+                              group = factor(level), fill = factor(level))) +
+  geom_bar(stat = "identity", position = "dodge") +
+  theme_minimal() + 
+  ylab("area km^2")
 
 ```
 
-We can see that 100% MCP is the largest, but very close to the 90% MCP. In contrast, 50% MCP is much smaller. 
+Difference home range estimators may result in very different home range shapes and sizes. Locoh is the most conservation, while MCP might be too general. In addition, they often result in multi-part home ranges, while ecologically speaking, home range should not be fragmented (at least for terrestrial animals).
 
-Theoretically it is good to exclude points that are outliers, i.e. not typical of the individual's movement pattern or one-time forays into different areas. Yet as you can see from these plots, the MCP method is not so smart at reducing the home range to just the 'core' area. It essentially picked the points in the geographic center of the points. This has no ecological reasoning behind it, especially when the animal uses space heterogeneously. This is why there are other methods that try to add more information to make a more informed decision. 
+Ask yourself: does the method you choose serve your research goal? Are you look for a quick analysis to delineate a general area the animal could go to? Or you are looking for a conservation estimate to highlight the core areas that the animals heavily rely on?  
 
-|           <span style="color:tomato"> **TASK 3**: Using code provided above to calculate areas of 50%, 75%, and 95% MCP range size for elephant 8. </span>
-<br/><br/>
+Further readings:
 
-### MCP for multiple individual
+Walter, W. David, Dave P. Onorato, and Justin W. Fischer. "Is there a single best estimator? Selection of home range estimators using area-under-the-curve." Movement Ecology 3 (2015): 1-11.
 
-Calculting MCP for all individuals in `amt` follows the same logic as how we calculate movement metrics for multiple individuals, except for step 3 because we are dealing with list of `sf` objects and we cannot simply unnest sf objects into a data frame. 
+Noonan, Michael J., et al. "A comprehensive analysis of autocorrelation and bias in home range estimation." Ecological Monographs 89.2 (2019): e01344.
+
+### Home range estimate for multiple individual
+
+Calculting home range for all individuals in `amt` follows the same logic as how we calculate movement metrics for multiple individuals, except for step 3 because we are dealing with list of `sf` objects and we cannot simply unnest sf objects into a data frame. We will use MCP as an example here. 
 
 ```{r mcp_all_ind, warning=FALSE}
 
 # step 1: nest the track by id
 
-elephants.nested <- elephants.trk %>% nest(data = -"id")
+ wb.trk.nested  # previously we have created the nested tracks. 
 
 # step 2: calculate mcp 
 
-elephants.nested <- elephants.nested %>% mutate(mcp = map(data, function(x) {
+wb.trk.nested <- wb.trk.nested %>% mutate(mcp = map(data, function(x) {
     mcp = hr_mcp(x, levels = 0.95)
     return(mcp$mcp)
     }
@@ -528,22 +495,16 @@ elephants.nested <- elephants.nested %>% mutate(mcp = map(data, function(x) {
 
 # step 3: combine mcp of multiple individuals to one sf object
 
-elephants.mcp <- bind_rows(elephants.nested$mcp) %>% mutate (id = elephants.nested$id)
+wb.mcp <- bind_rows(wb.trk.nested$mcp) %>% mutate (id = wb.trk.nested$id)
 
-elephants.mcp
+wb.mcp
 
 ```
-|           <span style="color:tomato">**QUESTION 17:** which elephant has the largest 90% MCP?</span>
-<br/><br/>
+### TASK 2: make a bar plot to compare HR sizes across all individuals directly. What could be some reasons that the home range sizes vary so much across individuals? 
 
+```{r mcp area bar, echo = FALSE}
 
-
-We can also make a plot to compare HR sizes across all individuals more directly:
-
-#### Figure 16: MCP home range areas of elephants
-```{r mcp area bar}
-
-elephants.mcp %>% ggplot() +
+wb.mcp %>% ggplot() +
   # turn area from m^2 to km^2 for easier interpretation
   geom_bar(aes( x = id, y = as.numeric(area)/1000000), 
            stat = "identity") +
@@ -552,49 +513,21 @@ elephants.mcp %>% ggplot() +
 
 ```
 
-
-|           <span style="color:tomato">**QUESTION 18:** What do you think could cause differences in space use?</span>
-<br/><br/>
-
-
-### Home ranges in the park
-
 Now we can easily plot the MCP for all individuals relative to the park: 
 
-#### Figure 17: all elephant 95% mcp in the park
-
-```{r all elephant mcp}
-p17 <-  ggplot() +
-  geom_sf(data = etosha.boundary, fill = "white", linetype = "longdash", linewidth = 1) + 
-  geom_sf(data = elephants.mcp, aes(color = id), fill = NA, alpha = 0.4, linewidth = 0.8) +
+```{r all wb mcp}
+p_mcp <-  ggplot() +
+  geom_sf(data = wb.mcp, aes(color = id), fill = NA, alpha = 0.4, linewidth = 0.8) +
   theme_minimal()
-p17
+p_mcp
 
 ```
-
-|           <span style="color:tomato">**QUESTION 19:**  Describe what you see in the map. How would this be helpful for conservation planning?</span>
-<br/><br/>
-
 
 ### Save the HR results in a data frame.  
 
 Sometimes to report the result you need to export the data as a data frame. `sf` objects can be easily turn into a data frame as below:
 
 ```{r same results in a data frame}
-
-elephants.mcp.df <- st_drop_geometry(elephants.mcp)
-
+wb.mcp.df <- st_drop_geometry(wb.mcp)
 ```
 
-
-## use amt to calculate metrics 
-
-dat.df <- mt_as_event_attribute(bts, individual_local_identifier) %>%
-     dplyr::mutate(coords_x=sf::st_coordinates(.)[,1], coords_y=sf::st_coordinates(.)[,2]) %>%
-     sf::st_drop_geometry(.) %>%
-  select("individual_local_identifier", "timestamp", "coords_x", "coords_y") %>%
-  as.tibble()
-
-
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
