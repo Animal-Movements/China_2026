@@ -65,7 +65,7 @@ library(tmap)
 
 ## Set Time Zone & Coordinate System
 I prefer to keep items that require user input to appear at the top of my scripts.  For me, this is helpful when transitioning between different studies because most of the introductory code is essentially the same. 
-Data in this example were collected in Kenya.  We will create and object for UTC (Coordinated Universal Time) time, but import all data as East Africa Time (EAT).  See the [wiki](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) for your appropriate timezone identifier.
+Data in this example were collected in Kenya.  We will create an object for UTC (Coordinated Universal Time) time, but import all data as East Africa Time (EAT).  See the [wiki](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) for your appropriate timezone identifier.
 
 ```{r Clean Timezone, message=FALSE, warning=FALSE}
 # Set TimeZone
@@ -85,13 +85,13 @@ When you acquire or download geospatial data, make sure you know the projection 
 There are EPSG Codes that can be used to avoid manually setting all the parameters needed in a projection. For instance, the code EPSG:32637 references the UTM37N projection with WGS84 datum and ellipsoid. The code EPSG:32736 references UTM36S.  You can find the EPSG reference listed in [http://spatialreference.org/ref/epsg/]() and [https://epsg.io/]().
 
 <center>
-![[Source: ESRI](Figures/projections-esri-blog.png)]{width=75%}
+![[Source: ESRI](https://www.esri.com/arcgis-blog/products/arcgis-pro/mapping/gcs_vs_pcs)](Figures/projections-esri-blog.png){width=75%}
 </center>
 <br>
 
 It is important to understand that projections try to minimize distortion of a 3-dimensional object (the earth) on a 2-dimensional surface (paper map or computer screen). Choosing a projection that minimizes this distortion is especially important when doing calculations of area or speed. I recommend collecting all GPS data in geographic coordinates and projecting data into a coordinate system that minimizes distortion of your objects of interest.  
 
-The Universal Tranverse Mercator (UTM) projection is a common projection used for assigning coordinates to locations on the surface of the earth.  The UTM projection divides earth into 60 distinct zones, using the equator as the origin (0) and spanning 1,000,000 meters.  The center of the zone is defined as 500,000 meters.  As a result, you can identify any geographic point on earth to a specific UTM zone and meter coordinate.
+The Universal Tranverse Mercator (UTM) projection is a common projection used for assigning coordinates to locations on the surface of the earth.  The UTM projection divides earth into 60 distinct zones, using the equator as the origin (0) and spanning 1,000,000 meters.  The center of the zone is defined as 500,000 meters.  As a result, you can identify any geographic point on earth to a specific UTM zone and meter coordinate.  
 
 <center>
 ![[Source: Wikimedia](https://upload.wikimedia.org/wikipedia/commons/e/ed/Utm-zones.jpg)](Figures/Utm-zones.jpg){width=75%}
@@ -99,8 +99,6 @@ The Universal Tranverse Mercator (UTM) projection is a common projection used fo
 <br>
 
 ## Set Coordinate System
-I recommend importing your data with geographic (Lat/Long) coordinates, converting these values to your selected coordinate system.
-
 In this example, we will project all geographic data to the Universe Transverse Mercator (UTM) coordinate system, zone 37 south. The unit of measurement of this coordinate system is meters, advantageous for calculating relevant distances between sequential points in time. 
 
 Identifying the correct UTM zones is relatively simple, with multiple options:
@@ -129,12 +127,12 @@ UtmZone.proj <- "EPSG:32737"
 ```
 
 ## Load Collar Data
-All data for this exercise are freely available via [Movebank](https://www.movebank.org/). These data have already been downloaded and are available in your `/Data` folder as a `.csv`. Included is a reference file which was also downloaded from Movebank.  The reference file contains additional details (sex, age) about each animal and are common files that often need to be merged with the tracking data.  
+All data for this exercise are freely available via [Movebank](https://www.movebank.org/). These data have already been downloaded and are available in your `/Data` folder as a `.csv`. Included is a reference file which was also downloaded from [Movebank](https://www.movebank.org/).  The reference file contains additional details (sex, age) about each animal and are common files that often need to be merged with the tracking data.  
 
 Most important is that your movement dataset has the following variables:
 
 1) Unique Animal ID
-2) timestamp
+2) Timestamp
 3) Coordinates (X/Y)
 
 Since these data are available on [Movebank](https://www.movebank.org/) as open access, we don't need to provide any login details - we simply need to correctly specify the study id of interest.  Downloading directly from [Movebank](https://www.movebank.org/) is particularly useful when data continue to be collected (i.e., are actively streaming) on a study.  This ensures that you are always working with the most up-to-date dataset being collected.
@@ -252,7 +250,7 @@ Many of the dataframe columns included are unnecessary (and quite long).  We nee
 
 Here, we will clean the data, filter out unnecessary information, and update the timezone to the local timezone.  We will then subset (i.e., filter) the start/end dates for each animal to match what has been recorded in our reference dataset.  These dates represent the dates that the collar was deployed on the animal. To join the dataframes, we will match records based on a shared primary key (i.e., id). Lastly, we will check on the completeness of the dataset and remove any (grossly) erroneous data points.
 
-**NOTE**: date/time fields can often present issues and be difficult to import.  If problems exist, you may need to properly format the date/time fields first.  See the [lubridate](https://cran.r-project.org/web/packages/lubridate/index.html)) package for some instructions and/or the [strptime](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/strptime) package to format your date/time field. Note the format of **YOUR** own dataset (e.g., "%Y-%m-%d %H:%M:%S").  
+**NOTE**: date/time fields can often present issues and be difficult to import.  If problems exist, you may need to properly format the date/time fields first.  See the [lubridate](https://cran.r-project.org/web/packages/lubridate/index.html) package for some instructions and/or the [strptime](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/strptime) package to format your date/time field. Note the format of **YOUR** own dataset (e.g., "%Y-%m-%d %H:%M:%S").  
 
 Also note that some manufacturers put the date and time in separate columns.  If this occurs with your dataset, you'll need to put these columns together to create a timestamp.  For example, `timestamp = ymd_hms(paste(date,time),tz = 'Africa/Nairobi')`.
 
