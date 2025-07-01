@@ -52,7 +52,7 @@ Load the required libraries and remove everything held in [R's](https://cran.r-p
 rm(list=ls())
 
 # You may need to install these packages first
-#install.packages('tidyverse', 'move2', 'lubridate', 'tmap', 'sf', 'gt')
+#install.packages('tidyverse', 'move2', 'lubridate', 'gt', 'sf', 'tmap')
 
 # Load required libraries
 library(tidyverse)
@@ -64,9 +64,44 @@ library(tmap)
 ```
 
 ## Set Time Zone & Coordinate System
-I prefer to keep items that require user input to appear at the top of my scripts.  For me, this is helpful when transitioning between different studies because most of the introductory code is essentially the same.  I recommend importing your data in UTC time with geographic (Lat/Long) coordinates and then converting these values to your local time zone and coordinate system.
+I prefer to keep items that require user input to appear at the top of my scripts.  For me, this is helpful when transitioning between different studies because most of the introductory code is essentially the same. 
+Data in this example were collected in Kenya.  We will create and object for UTC (Coordinated Universal Time) time, but import all data as East Africa Time (EAT).  See the [wiki](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) for your appropriate timezone identifier.
 
-Here, we will set the timezone and local projection.  When we import the movement data, we will update the UTC (Coordinated Universal Time) time to East Africa Time (EAT) since our data were collected in Kenya.  See the [wiki](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) for your appropriate timezone identifier. We will also project all geographic data to the Universe Transverse Mercator (UTM) coordinate system, zone 37 south. The unit of measurement of this coordinate system is meters, advantageous for calculating relevant distances between sequential points in time. 
+```{r Clean Timezone, message=FALSE, warning=FALSE}
+# Set TimeZone
+# Other timezones can be found at: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+Timezone1 <- 'UTC'
+Timezone2 <- "Africa/Nairobi"
+```
+
+## Coordinate Systems and Projections
+
+Spatial data collected using GPS devices or downloaded online must have a projection system that links the coordinates to specific locations on the earth’s surface. Without a coordinate reference system, there is no way to locate places to their location on Earth.  
+
+Any geospatial data (e.g., a set of points) with an incorrect projection or with unknown projection system can be visualized on its own. However, you will not be able to plot that data with other spatial data, as the coordinate reference system is missing. Importantly, you will not be able to conduct any spatial analysis (e.g., calculate the distance of a given point to a road, or extract the value of the underlining raster value at the point locations), since the incorrectly projected (or unprojected) spatial data is pointing to a completely different location on earth than intended.
+
+When you acquire or download geospatial data, make sure you know the projection of the data.  This information is usually found in the metadata of a given dataset or should be provided by the person that is sharing the data with you.
+
+There are EPSG Codes that can be used to avoid manually setting all the parameters needed in a projection. For instance, the code EPSG:32637 references the UTM37N projection with WGS84 datum and ellipsoid. The code EPSG:32736 references UTM36S.  You can find the EPSG reference listed in [http://spatialreference.org/ref/epsg/]() and [https://epsg.io/]().
+
+<center>
+![Source: ESRI](Figures/projections-esri-blog.jpg){width=75%}
+</center>
+<br>
+
+It is important to understand that projections try to minimize distortion of a 3-dimensional object (the earth) on a 2-dimensional surface (paper map or computer screen). Choosing a projection that minimizes this distortion is especially important when doing calculations of area or speed. I recommend collecting all GPS data in geographic coordinates and projecting data into a coordinate system that minimizes distortion of your objects of interest.  
+
+The Universal Tranverse Mercator (UTM) projection is a common projection used for assigning coordinates to locations on the surface of the earth.  The UTM projection divides earth into 60 distinct zones, using the equator as the origin (0) and spanning 1,000,000 meters.  The center of the zone is defined as 500,000 meters.  As a result, you can identify any geographic point on earth to a specific UTM zone and meter coordinate.
+
+<center>
+![[Source: Wikimedia](https://upload.wikimedia.org/wikipedia/commons/e/ed/Utm-zones.jpg)](Figures/Utm-zones.jpg){width=75%}
+</center>
+<br>
+
+## Set Coordinate System
+I recommend importing your data with geographic (Lat/Long) coordinates, converting these values to your selected coordinate system.
+
+In this example, we will project all geographic data to the Universe Transverse Mercator (UTM) coordinate system, zone 37 south. The unit of measurement of this coordinate system is meters, advantageous for calculating relevant distances between sequential points in time. 
 
 Identifying the correct UTM zones is relatively simple, with multiple options:
 
@@ -86,12 +121,7 @@ Identifying the correct UTM zones is relatively simple, with multiple options:
   
 **NOTE**: The data we are using spans multiple UTM zones (UTM 36 south and UTM 37 south).  In this case, there is no problem because we will be subsetting our data, only using data that overlap with UTM 37 south.  Other coordinator systems, such as Lambert's or Alber's Equal-Area conic projections, could be used for datasets that span multiple UTM zones, minimizing distortion.  It's important to correctly input the parameters of your selected coordinate system.
 
-```{r Clean Timezone, message=FALSE, warning=FALSE}
-# Set TimeZone and UTM Zone
-# Other timezones can be found at: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-Timezone1 <- 'UTC'
-Timezone2 <- "Africa/Nairobi"
- 
+```{r Set UTM Zone, message=FALSE, warning=FALSE}
 # UTM Zone
 LatLong.proj <- "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"  # EPSG:4326
 #UtmZone.proj <- "+proj=utm +zone=37 +south +ellps=WGS84 +datum=WGS84 +units=m +no_defs" #This is EPSG:32737"
@@ -107,13 +137,14 @@ Most important is that your movement dataset has the following variables:
 2) timestamp
 3) Coordinates (X/Y)
 
-```{r Load, message=FALSE, warning=FALSE}
-# Since these data are available on Movebank as open access, we don't need to provide any login details - we simply need to correctly specify the study id of interest.  Downloading directly from Movebank is particularly useful when data continue to be collected (i.e., are actively streaming) on a study.  This ensures that you are always working with the most up-to-date dataset being collected.
+Since these data are available on [Movebank](https://www.movebank.org/) as open access, we don't need to provide any login details - we simply need to correctly specify the study id of interest.  Downloading directly from [Movebank](https://www.movebank.org/) is particularly useful when data continue to be collected (i.e., are actively streaming) on a study.  This ensures that you are always working with the most up-to-date dataset being collected.
 
+```{r Load, message=FALSE, warning=FALSE}
 # Pull Data from Movebank
 WB <- movebank_download_study(study_id = "White-bearded wildebeest (Connochaetes taurinus) movements - Kenya") 
 
 # You could use the output directly with functions in the move2 package.  Here, however, we will extract the X and Y coordinates and convert to a dataframe
+
 # Using piping operations
 WB <- WB %>% 
   as_tibble() %>% # A tibble is a dataframe of dataframes 
@@ -217,7 +248,7 @@ tz(WB$timestamp)
 ```
 
 ## Dataframe Organization & Cleaning
-Many of the columns included in the dataframes are unnecessary (and quite long).  We need to clean and filter the dataframes. To do so, we will use 'piping' (e.g., %>%) from the [tidyverse](https://cran.r-project.org/web/packages/tidyverse/index.html) package.  This allows us to combine multiple sequential commands together.
+Many of the dataframe columns included are unnecessary (and quite long).  We need to clean and filter the data. To do so, we will use 'piping' (e.g., %>%) from the [tidyverse](https://cran.r-project.org/web/packages/tidyverse/index.html) package.  This allows us to combine multiple sequential commands together.
 
 Here, we will clean the data, filter out unnecessary information, and update the timezone to the local timezone.  We will then subset (i.e., filter) the start/end dates for each animal to match what has been recorded in our reference dataset.  These dates represent the dates that the collar was deployed on the animal. To join the dataframes, we will match records based on a shared primary key (i.e., id). Lastly, we will check on the completeness of the dataset and remove any (grossly) erroneous data points.
 
@@ -227,10 +258,10 @@ Also note that some manufacturers put the date and time in separate columns.  If
 
 ```{r Clean Merge, message=FALSE, warning=FALSE, echo=TRUE}
 # Clean the reference file, selecting only the columns that you want to include
-WB <- # Note that this will overwrite the existing dataset
+WB <- # Note, this will overwrite your existing dataset
   WB %>% 
  
-  # Pull in the WB.ref dataset to join the study site column
+  # Pull in the WB.ref dataset, joining by a key field
   left_join(WB.ref, by = join_by("individual_local_identifier" == "individual_local_identifier")) %>%
 
   # Select columns of interest, rename if necessary
@@ -242,7 +273,9 @@ WB <- # Note that this will overwrite the existing dataset
          DOP = gps_dop,
          fixType = gps_fix_type_raw,
          temp = external_temperature,
-         # Create local timestamp (UTC to local) using 'with_tz' command
+         # Setting my timestaps to Timezone2 -> EAT
+         # Your timestamp might be in two different fields and is potentially collected in a different time stamp (i.e., UTC)
+         #timestamp = dmy_hms(paste(date, time), tz=Timezone1), # Convert to date/time
          timestamp = with_tz(timestamp, tz=Timezone2),
          deploy_on = with_tz(deploy_on_timestamp, tz=Timezone2),
          deploy_off = with_tz(deploy_off_timestamp, tz=Timezone2),
@@ -262,7 +295,7 @@ WB <- # Note that this will overwrite the existing dataset
          latitude != 0,
          longitude != 0,
 
-         # Grab only the Athi-Kaputiei Data
+         # Subset: Grab only the Athi-Kaputiei Data
          study_site == "Athi-Kaputiei Plains",
 
          # And use the deploy on and off dates to further subset
@@ -383,8 +416,35 @@ plot(WB$longitude, WB$latitude,
      asp = 1)
 ```
 
-## Convert to Spatial Object
+## Make it Spatial
+
+There are two main packages in R to handle geospatial vector data: the `sp` package and the `sf` package.
+
+The first package to provide classes and methods for spatial data types in R is called `sp`. Development of the `sp` package began in the early 2000s in an attempt to standardize how spatial data would be treated in R and to allow for better interoperability between different analysis packages that use spatial data. The package (first release on CRAN in 2005) provides classes and methods to create points, lines, polygons, and grids, with functions to work with them.  About 350 packages developed for spatial analysis use the data types implemented in `sp`, which means several spatial packages “depend” on the `sp` package in some way.
+
+The `sp` package depends on `rgeos` and `rgdal`. However at the end of 2023, these packages were retired, primarily because their maintainer, Roger Bivand, also retired. You can read more about it [here](https://r-spatial.org/r/2022/04/12/evolution.html).
+
+All geospatial work in R is being replaced by the more modern package `sf`. `sf` was first released on CRAN in late October 2016. It implements a formal standard called “Simple Features” that specifies a storage and access model of spatial geometries (i.e. points, lines, polygons).  `sf` provides fast I/O, particularly relevant for large files.
+
+## The `sf` Package
+
+The `sf` class is an extension of a dataframes. Essentially, `sf` objects can be treated as dataframes that also contain spatial data, as opposed to spatial data that may or may not also contain data frames. This enables `sf` objects to fit within the `tidyverse` workflow, making it possible to manipulate them with the `dplyr` commands we used previously.
+
+`sf` objects consist of rows of features, hence the name “simple features (`sf`)”, which have both non-spatial and spatial data formats.  The spatial data of an `sf` object is contained in a special geometry column that is of class ‘sfc - simple features class’. The geometry column contains the basic types of spatial data: the Coordinate Reference System (CRS), coordinates, and type of geometric object.
+
+The ‘sfc’ class has seven subclasses to denote the types of geometric objects within the geometry column, which are derived from the simple features standard. The possible geometric objects are point, linestring, polygon, multipoint, multilinestring, multipolygon, and geometrycollection, which is used for any combination of the other types.
+
+![Artwork by [Allison Horst](https://allisonhorst.com/allison-horst)](Figures/AllisonHorst_sf.png)
+<br>
+
+## Convert a Dataframe to a `sf` Object
+
 Convert the dataframe to a [sf](https://cran.r-project.org/web/packages/sf/index.html) simple features object and plot.  Note the structure of the object once it has been converted to a spatial object.
+
+We will then use the function `st_as_sf()` that requires a vector of coordinates to be input to the ‘coords’ argument, and an EPSG code or a PROJ definition for the crs. We can import the file just like any other data file and then make the data file a `sf` object. Note, we will use the function `st_transform()` to reproject the geographic data (Latitude/Longitude) to UTMs.
+
+**Important**: There is an important distinction between 'Setting a Project' and 'Re-projecting an object' to a new projection.  Only use `st_transform()` to project or transform your object from a known coordinate system or projection to another (e.g., Geographic coordinates to UTM projection). `sf::st_crs()` should only be used to retrieve or set your existing coordinate reference system.  Using `st::st_crs()` to erroneously re-project your data would be akin to setting a new home address without actually moving to this new location. 
+
 ```{r Visualize1, message=FALSE, warning=FALSE, echo=TRUE}
 # Convert
 WB.sf <- WB %>% 
@@ -402,7 +462,7 @@ class(WB.sf)
 ```
 
 ## Plot the Spatial Object
-Now, let's plot the spatial object, using [ggplot](https://cran.r-project.org/web/packages/ggplot2/index.html), which has some nice features for plotting.
+Now plot the spatial object using [ggplot](https://cran.r-project.org/web/packages/ggplot2/index.html), which has some nice features for plotting.
 ```{r Visualize2, message=FALSE, warning=FALSE, echo=TRUE}
 # Plot using basic R function
 # plot(WB.sf["animal_id"],
@@ -434,9 +494,17 @@ WB.sf %>%
 ```
 
 ## Tmap Plotting
-Perhaps more useful is plotting the data on top of available satellite or background basemaps.  This way, we can determine if the data are where they should be.  We will use [tmap](https://cran.r-project.org/web/packages/tmap/index.html).  Tmap includes a variety of basemaps (see a list [here](https://leaflet-extras.github.io/leaflet-providers/preview/)) and can be used in "view" (known as "interactive" mode) or "plot" mode.  Plot mode is better for making static maps.  
+Perhaps more useful is plotting the data on top of available satellite or background basemaps.  This way, we can determine if the data are where they should be.  We will use [tmap](https://cran.r-project.org/web/packages/tmap/index.html).  Tmap includes a variety of basemaps (see a list [here](https://leaflet-extras.github.io/leaflet-providers/preview/)) and can be used in "view" (known as "interactive" mode) or "plot" mode.  Plot mode is better for making static maps. 
 
-While in interactive mode, you can zoom in to investigate points from a particular animal. You can also toggle on and off the various basemap layers you have included using the tile icon in the top left corner. 
+The basic building block in `tmap` is `tm_shape()`, which creates a tmap-element that defines input data as vector or raster objects. We then add one or more layer elements, such as `tm_fill()`, `tm_borders()`, `tm_dots()`, `tm_raster()`, depending on the data type.  `Tmap` syntax involves separating between the input data and the aesthetics for data visualization. Each input dataset can be displayed in many different ways, largely dependent on whether the data object is a raster, point, line, or polygon layer.  We can link different commands in `tmap` by adding them (`+`) together.
+
+<div style="float:right">
+<img width="150" height="150" src="Figures/tmap.png">
+</div>
+
+While in interactive mode, you can zoom in to investigate points from a particular animal. You can also toggle on and off the various basemap layers you have included using the tile icon in the top left corner. Aesthetics of objects can be changed using either variable fields (data in your file) or constant values. The most commonly used aesthetics for fill and border layers include color, transparency, line width and line type, which are set with `col`, `alpha`, `lwd`, and `lty` arguments, respectively.  Most importantly, you can freely and easily access available basemaps to place as a background on the dat, using the function `tm_basemap()`.
+
+`Tmap` also has a number of helpful vignettes to get products up and running.  The vignettes can be found [here]( https://cran.r-project.org/web/packages/tmap/vignettes/tmap-getstarted.html).
 
 ```{r Visualize3, message=FALSE, warning=FALSE, echo=TRUE}
 tmap_mode("view")
@@ -478,3 +546,10 @@ Save the dataframe files so that we can use them in future exercises.  We can wr
 save(WB, WB.sf, file = "Data/wildebeest_data.rdata")
 ```
 
+# Exercise
+
+Now that you have uploaded and manipulated the wildebeest data in [R](https://cran.r-project.org/), please adapt the code with your own data.  If your data are not on [Movebank](https://www.movebank.org/), you will need to use functions (e.g., 'read_csv') to import your movement dataset.  Please do the following:
+
+1. Import your movement dataset into R
+2. Check the coordinate reference system and re-projectm if necessary
+3. Prepare a map of your study area
