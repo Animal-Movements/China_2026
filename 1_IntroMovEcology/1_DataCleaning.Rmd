@@ -418,7 +418,7 @@ plot(WB$longitude, WB$latitude,
 
 There are two main packages in R to handle geospatial vector data: the `sp` package and the `sf` package.
 
-The first package to provide classes and methods for spatial data types in R is called `sp`. Development of the `sp` package began in the early 2000s in an attempt to standardize how spatial data would be treated in R and to allow for better interoperability between different analysis packages that use spatial data. The package (first release on CRAN in 2005) provides classes and methods to create points, lines, polygons, and grids, with functions to work with them.  About 350 packages developed for spatial analysis use the data types implemented in `sp`, which means several spatial packages “depend” on the `sp` package in some way.
+The first package to provide classes and methods for spatial data types in R is called `sp`. Development began in the early 2000s, in an attempt to standardize how spatial data would be treated and to allow for better interoperability between different analysis packages that use spatial data. The package (first released on CRAN in 2005) provides classes and methods to create points, lines, polygons, and grids, with functions to work with them.  About 350 packages developed for spatial analysis use the data types implemented in `sp`, which means several spatial packages “depend” on the `sp` package in some way.
 
 The `sp` package depends on `rgeos` and `rgdal`. However at the end of 2023, these packages were retired, primarily because their maintainer, Roger Bivand, also retired. You can read more about it [here](https://r-spatial.org/r/2022/04/12/evolution.html).
 
@@ -426,20 +426,21 @@ All geospatial work in R is being replaced by the more modern package `sf`. `sf`
 
 ## The `sf` Package
 
-The `sf` class is an extension of a dataframes. Essentially, `sf` objects can be treated as dataframes that also contain spatial data, as opposed to spatial data that may or may not also contain data frames. This enables `sf` objects to fit within the `tidyverse` workflow, making it possible to manipulate them with the `dplyr` commands we used previously.
+The `sf` class is an extension of a dataframe. Essentially, `sf` objects can be treated as dataframes that also contain spatial data, as opposed to spatial data that may or may not also contain data frames. This enables `sf` objects to fit within the `tidyverse` workflow, making it possible to manipulate them with the `dplyr` commands we used previously.
 
 `sf` objects consist of rows of features, hence the name “simple features (`sf`)”, which have both non-spatial and spatial data formats.  The spatial data of an `sf` object is contained in a special geometry column that is of class ‘sfc - simple features class’. The geometry column contains the basic types of spatial data: the Coordinate Reference System (CRS), coordinates, and type of geometric object.
 
 The ‘sfc’ class has seven subclasses to denote the types of geometric objects within the geometry column, which are derived from the simple features standard. The possible geometric objects are point, linestring, polygon, multipoint, multilinestring, multipolygon, and geometrycollection, which is used for any combination of the other types.
 
 ![Artwork by [Allison Horst](https://allisonhorst.com/allison-horst)](Figures/AllisonHorst_sf.png)
+
 <br>
 
 ## Convert a Dataframe to a `sf` Object
 
 Convert the dataframe to a [sf](https://cran.r-project.org/web/packages/sf/index.html) simple features object and plot.  Note the structure of the object once it has been converted to a spatial object.
 
-We will then use the function `st_as_sf()` that requires a vector of coordinates to be input to the ‘coords’ argument, and an EPSG code or a PROJ definition for the crs. We can import the file just like any other data file and then make the data file a `sf` object. Note, we will use the function `st_transform()` to reproject the geographic data (Latitude/Longitude) to UTMs.
+We will then use the function `st_as_sf()` that requires a vector of coordinates to be input to the ‘coords’ argument and an EPSG code or a PROJ definition for the crs. We can import the file just like any other data file and then make the data file a `sf` object. Note, we will use the function `st_transform()` to reproject the geographic data (Latitude/Longitude) to UTMs.
 
 **Important**: There is an important distinction between 'Setting a Project' and 'Re-projecting an object' to a new projection.  Only use `st_transform()` to project or transform your object from a known coordinate system or projection to another (e.g., Geographic coordinates to UTM projection). `sf::st_crs()` should only be used to retrieve or set your existing coordinate reference system.  Using `st::st_crs()` to erroneously re-project your data would be akin to setting a new home address without actually moving to this new location. 
 
@@ -461,6 +462,7 @@ class(WB.sf)
 
 ## Plot the Spatial Object
 Now plot the spatial object using [ggplot](https://cran.r-project.org/web/packages/ggplot2/index.html), which has some nice features for plotting.
+
 ```{r Visualize2, message=FALSE, warning=FALSE, echo=TRUE}
 # Plot using basic R function
 # plot(WB.sf["animal_id"],
@@ -492,7 +494,9 @@ WB.sf %>%
 ```
 
 ## Tmap Plotting
-Perhaps more useful is plotting the data on top of available satellite or background basemaps.  This way, we can determine if the data are where they should be.  We will use [tmap](https://cran.r-project.org/web/packages/tmap/index.html).  Tmap includes a variety of basemaps (see a list [here](https://leaflet-extras.github.io/leaflet-providers/preview/)) and can be used in "view" (known as "interactive" mode) or "plot" mode.  Plot mode is better for making static maps. 
+Perhaps more useful is plotting the data on top of available satellite or background basemaps.  This way, we can determine if the data are where they should be.  We will use [tmap](https://cran.r-project.org/web/packages/tmap/index.html) to plot the wildebeest data and upload a shapefile boundary of Nairobi National Park to display with the point data. We'll also convert the wildebeest points to lines for graphing purposes. 
+
+Tmap includes a variety of basemaps (see a list [here](https://leaflet-extras.github.io/leaflet-providers/preview/)) and can be used in "view" (known as "interactive" mode) or "plot" mode.  Plot mode is better for making static maps. 
 
 The basic building block in `tmap` is `tm_shape()`, which creates a tmap-element that defines input data as vector or raster objects. We then add one or more layer elements, such as `tm_fill()`, `tm_borders()`, `tm_dots()`, `tm_raster()`, depending on the data type.  `Tmap` syntax involves separating between the input data and the aesthetics for data visualization. Each input dataset can be displayed in many different ways, largely dependent on whether the data object is a raster, point, line, or polygon layer.  We can link different commands in `tmap` by adding them (`+`) together.
 
@@ -502,9 +506,21 @@ The basic building block in `tmap` is `tm_shape()`, which creates a tmap-element
 
 While in interactive mode, you can zoom in to investigate points from a particular animal. You can also toggle on and off the various basemap layers you have included using the tile icon in the top left corner. Aesthetics of objects can be changed using either variable fields (data in your file) or constant values. The most commonly used aesthetics for fill and border layers include color, transparency, line width and line type, which are set with `col`, `alpha`, `lwd`, and `lty` arguments, respectively.  Most importantly, you can freely and easily access available basemaps to place as a background on the dat, using the function `tm_basemap()`.
 
-`Tmap` also has a number of helpful vignettes to get products up and running.  The vignettes can be found [here]( https://cran.r-project.org/web/packages/tmap/vignettes/tmap-getstarted.html).
+`Tmap` also has a number of helpful vignettes to get products up and running, which can be found [here]( https://cran.r-project.org/web/packages/tmap/vignettes/tmap-getstarted.html).
 
 ```{r Visualize3, message=FALSE, warning=FALSE, echo=TRUE}
+# Read in shapefile boundary of Nairobi National Park
+# Data are projected to DD WGS84 and must be reprojected to UTM 37S, WGS
+NNP <- st_read("Data/NNP_DDWGS84.shp") %>% 
+  st_transform(crs = UtmZone.proj)
+
+# Convert the wildebeest spatial points to spatial lines (more accurately, a “LINESTRING”). We’ll use a few functions that we have yet to see and will use the summarise function to create an individual line (do_union=FALSE) for each animal we monitored with a tracking device.
+WB.lines <- WB.sf %>% 
+  group_by(id) %>% 
+  dplyr::summarise(do_union=FALSE) %>% 
+  st_cast("LINESTRING")
+
+# Set tmap mode
 tmap_mode("view")
  
 # Select from a range of basemaps:.
@@ -513,17 +529,34 @@ tmap_mode("view")
 
 # We'll pull a world satellite map and a world street map.
 # Note that the format of tmap requires us to refer to variables in quotes
+# We'll also add the NNP boundary
 
 Athi.Map <-
   tm_basemap(c("Esri.WorldImagery",
              "OpenStreetMap")) +
+  
+  # Display WB - points
   tm_shape(WB.sf,
-           #name = "Wildebeest Locations (Athi-Kaputiei)") +
            name = paste("Wildebeest: Athi-Kaputiei Plains (n =", length(unique(WB.sf$animal_id)),")")) +
-  tm_dots(size = 0.025,
-          title = "Wildebeest ID",
-          col = "animal_id",
-          alpha = 0.5)
+    tm_dots(col = "id", # COlor based on the id
+            palette = viridis::viridis(length(unique(WB.sf$id))), # A color palette
+            size = 0.001, # Size of the points
+            legend.show = TRUE) +
+  
+  # Load the wildebeest data - Lines
+  tm_shape(WB.lines,
+           name = "Wildebeest Lines") +
+    tm_lines(lwd = 0.25, # Controls the width of the lines
+             col = 'id',
+             palette = viridis::viridis(length(unique(WB.lines$id))),
+             legend.col.show = FALSE) +
+
+  # Display NNP boundary
+  tm_shape(NNP,
+           name = 'NNP') +
+  tm_fill(col = 'green',
+          alpha = 0.5) +
+  tm_borders(col = 'green')
 
 # Create the map
 Athi.Map
@@ -549,5 +582,5 @@ save(WB, WB.sf, file = "Data/wildebeest_data.rdata")
 Now that you have uploaded and manipulated the wildebeest data in [R](https://cran.r-project.org/), please adapt the code with your own data.  If your data are not on [Movebank](https://www.movebank.org/), you will need to use functions (e.g., 'read_csv') to import your movement dataset.  Please do the following:
 
 1. Import your movement dataset into R
-2. Check the coordinate reference system and re-projectm if necessary
+2. Check the coordinate reference system and re-project if necessary
 3. Prepare a map of your study area
