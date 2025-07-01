@@ -28,27 +28,20 @@ This session introduces core movement metrics that allow us to transform raw tra
 We will use `move2`(https://cran.r-project.org/web/packages/move2/index.html) and `amt` (https://cran.r-project.org/web/packages/amt/index.html) as example to see how some of the most frequently used metrics can be calculated. 
 
 In this exercise, we will cover:
-  1. Data exploration and step-level metrics with `move2`
-      + data exploration 
-      + step length, speed, and turning angle
-  2. Step-level metrics with `amt`
-      + data cleaning 
-      + calculating step length, speed, and turning angle
-      + turn angle correlation (tac), straightness, intensity_use, net-squared displacement (NSD)
-      + manipulating multiple individuals 
-  3. Space-use metrics with `amt` (discrete methods)
-      + calculating MCP and KDE for one individual
-      + calculating MCP and KDE for multiple individuals 
 
+1. Data exploration and step-level metrics with `move2`
+    + data exploration 
+    + step length, speed, and turning angle
+2. Step-level metrics with `amt`
+    + data cleaning 
+    + calculating step length, speed, and turning angle
+    + turn angle correlation (tac), straightness, intensity_use, net-squared displacement (NSD)
+    + manipulating multiple individuals 
 
 ## Load Libraries
 Load the required libraries and remove everything held in [R's](https://cran.r-project.org/) memory.
 
 ```{r packages, warning=FALSE, message=FALSE, results='hide'}
-
-# if packaged not installed yet, run the line below with the the "#"
-# install.packages("tidyverse", "lubridate", "terra", "sf", "amt")
-
 library(tidyverse, quietly = TRUE) #the tidyverse is an collection of R packages designed for data science. All packages share an underlying design philosophy, grammar, and data structures. Relavant packages for us includ `dplyr` (for data manipulation), `lubridate` (for dealing with time), `ggplot2` (for data visualization). 
 library(sf, quietly = TRUE) #"simple features", lets us work with spatial vector data
 library(amt, quietly = TRUE) # amt = animal movement tool. It is used to manage and analyze animal movement data. It can be used to calculate home range, track statistics, and prep the data for further analysis such as resource selection function (which you will learn more on day 3)
@@ -59,7 +52,7 @@ library(gridExtra, quietly = TRUE)
 library(leaflet,quietly = TRUE) # to create interactive maps 
 ```
 
-# Data exploration and step-level metrics with `move2`
+# Step-level metrics with `move2`
 
 One of the key strengths of `move2` is its native integration with Movebank (https://www.movebank.org/cms/movebank-main), a global platform for storing, managing, and sharing animal tracking data. Movebank provides a standardized and secure environment for trajectory data management, ensuring data quality, metadata consistency, and long-term accessibility. By linking directly to Movebank, `move2` allows us to efficiently import, explore, and analyze tracking datasets in a reproducible workflow—bridging robust data management with flexible analytical tools in R.
 
@@ -176,7 +169,8 @@ grid.arrange(p3, p4, ncol = 2)
 ```
 Very interesting twin-peak pattern of cougar activity! This indicates that cougar could have two different movement states. 
 
-### TASK 1: make a map of cougar movement, color the tracking location by speed. This would be a good way to explore the movement pattern further. Based on this map, is there any obvious pattern that could explain the distribution of step length and speed?
+|           <span style="color:tomato">**TASK 1: ** make a map of cougar movement, color the tracking location by speed. This would be a good way to explore the movement pattern further. Based on this map, is there any obvious pattern that could explain the distribution of step length and speed? </span>
+<br/><br/>
 
 ```{r step/speed, eval = FALSE, echo = FALSE}
   
@@ -390,17 +384,14 @@ wb.step %>%
 ```
 
 # Track-level metrics with `amt`
-In addition to these basic step-level metrics (based on the two consecutive steps), `amt` also has functions to calculate other useful track-level metrics (based on steps cross the track) such as:
-  + straightness 
-  + net squared displacement (nsd)
-  + mean squared displacement (msd)
-  + total movement distance (tot_dist)
-  + intensity use, calculated by dividing the total movement distance (tot_dist) by the square of the area of movement (100% MCP)
-  + mean turn angle correlation (tac)
-  
-These metrics can provide different information depending on your research question and the temporal scale of your analysis. 
+In addition to these basic step-level metrics (based on the two consecutive steps), `amt` also has functions to calculate other useful track-level metrics (based on multiple steps, i.e. a "track"), such as:
 
-As an example: 
++ straightness: the ratio between the distance from the starting point to an end-point and the actual path length traveled between these two points (ranging between 0 and 1, a value of 1 means moving straight);
++ mean turn angle correlation (tac): another measure for how straight or tortuous a movement path is. High positive correlation indicates directional persistence whereas low or negative correlation (i.e., large or highly variable turning angles) suggests random movement, often associated with area-restricted search or foraging.
++ net squared displacement (nsd): Quantifies the net squared distance traveled over time compared to an point of reference (calculates distance from each location to a point of reference). Often used to identify and characterize animal migration patterns.
++ intensity use: calculated by dividing the total movement distance by the square of the area of movement (100% MCP)
+
+`amt` provides functions to directly calculate some of these common metrics. As an example: 
 ```{r amt track metrics}
 wb.trk.nested  <-  wb.trk.nested %>% mutate (
   tot_dist = map_dbl(data, function(x) {x %>% tot_dist()}),
@@ -410,7 +401,7 @@ wb.trk.nested
 ```
 Now you get a quick overview of the different movement patterns across different individuals. For example, some individuals moved more distances than others (but not that the tracking duration might be different), and others use space more intensely than others. 
 
-Another very useful metric is NSD. It has been often used to study migration patterns (whether and how animals return to the starting location). 
+You can also calculate NSD with `amt`: 
 ```{r amt track nsd}
 wb.trk.nsd <- wb.trk.nested %>% 
   mutate (data = map(data, function(x) {x %>% add_nsd()})) %>% 
@@ -423,111 +414,18 @@ p_nsd <- wb.trk.nsd %>% ggplot(aes(x = t_, y = nsd_, color = id)) +
 p_nsd
 ```
 
+|           <span style="color:tomato">**QUESTION 1: ** How would you interpret the movement pattern of these wildebeest? Consider the temporal scale and individual variation. </span>
+<br/><br/>
 
-# Home range estimation (discrete methods)
-
-Animal movement data can also tell us information about their space use. Depending on the temporal scale, the range estimate could correspond to daily range, seasonal range, or home range. Here we refer to these ranges generally as "home range" for simplicity. 
-
-There are many ways to calculate home range. Here we focus on using *MCP (Minimum Convex Polygon).* There are four mainly methods employed by `amt` - minimum convex polygon (mcp), kernel density estimate (kde), local convex hull (locoh), and autocorrelated kernel density estimate (akde). 
-
-We will only demonstrate the first three today, which view the tracking locations as discrete events. However, AKDE differs from other methods as it considers the autocorrelation among tracking locations, and the akde function in `amt` is a wrapper of functions from `ctmm` - which we will learn more about in the `ctmm` day! 
-
-## Calculating MCP, KDE, and locoh for one individual
-Note that argument `levels` defines the isopleth levels used for calculating home ranges. Theoretically it is good to exclude points that are outliers, i.e. not typical of the individual's movement pattern or one-time forays into different areas. But sometimes such "outlier" behaviors are important. 
-
-```{r mcp and kde and locoh for one wb - plot}
-# estimate mcp at the level of 95%
-one.wb.mcp <- hr_mcp(one.wb.trk.UTM, levels = c(0.5, 0.95))
-# locoh
-one.wb.locoh <- hr_locoh(one.wb.trk.UTM, type = "k", n= 150, levels = c(0.5, 0.95))
-# Create a template raster for the KDE
-trast <- make_trast(one.wb.trk.UTM, res = 50)
-one.wb.kde <- hr_kde(one.wb.trk.UTM, trast = trast, levels = c(0.5, 0.95))
-
-par(mfrow = c(1, 3))
-plot(one.wb.mcp, main = paste("mcp"))
-plot(one.wb.locoh, main = "k-locoh 150")
-plot(one.wb.kde, main = "kde")
-
-```
-
-And we can look at different home range 
-```{r mcp and kde and locoh for one wb - area}
-hr_area_one_wb <- cbind(tibble(method = rep(c("mcp", "locoh", "kde"), each = 2)),
-                        rbind(hr_area(one.wb.mcp), hr_area(one.wb.locoh), hr_area(one.wb.kde))) %>%
-  select(-what)
-
-hr_area_one_wb %>% ggplot(aes(x = method, y = area/1000000, 
-                              group = factor(level), fill = factor(level))) +
-  geom_bar(stat = "identity", position = "dodge") +
-  theme_minimal() + 
-  ylab("area km^2")
-
-```
-
-Difference home range estimators may result in very different home range shapes and sizes. Locoh is the most conservation, while MCP might be too general. In addition, they often result in multi-part home ranges, while ecologically speaking, home range should not be fragmented (at least for terrestrial animals).
-
-Ask yourself: does the method you choose serve your research goal? Are you look for a quick analysis to delineate a general area the animal could go to? Or you are looking for a conservation estimate to highlight the core areas that the animals heavily rely on?  
-
+---------------------
 Further readings:
 
-Walter, W. David, Dave P. Onorato, and Justin W. Fischer. "Is there a single best estimator? Selection of home range estimators using area-under-the-curve." Movement Ecology 3 (2015): 1-11.
++ Seidel, Dana Paige, Eric Dougherty, Colin Carlson, and Wayne M. Getz. 2018. “Ecological Metrics and Methods for GPS Movement Data.” International Journal of Geographical Information Science: IJGIS 32 (11): 2272–93.
 
-Noonan, Michael J., et al. "A comprehensive analysis of autocorrelation and bias in home range estimation." Ecological Monographs 89.2 (2019): e01344.
++ Abrahms, Briana, Dana P. Seidel, Eric Dougherty, Elliott L. Hazen, Steven J. Bograd, Alan M. Wilson, J. Weldon McNutt, et al. 2017. “Suite of Simple Metrics Reveals Common Movement Syndromes across Vertebrate Taxa.” Movement Ecology 5 (June): 12.
 
-### Home range estimate for multiple individual
++ Kays, Roland, Ben Hirsch, Damien Caillaud, Rafael Mares, Shauhin Alavi, Rasmus Worsøe Havmøller, and Margaret Crofoot. 2023. “Multi-Scale Movement Syndromes for Comparative Analyses of Animal Movement Patterns.” Movement Ecology 11 (1): 61.
 
-Calculting home range for all individuals in `amt` follows the same logic as how we calculate movement metrics for multiple individuals, except for step 3 because we are dealing with list of `sf` objects and we cannot simply unnest sf objects into a data frame. We will use MCP as an example here. 
 
-```{r mcp_all_ind, warning=FALSE}
 
-# step 1: nest the track by id
-
- wb.trk.nested  # previously we have created the nested tracks. 
-
-# step 2: calculate mcp 
-
-wb.trk.nested <- wb.trk.nested %>% mutate(mcp = map(data, function(x) {
-    mcp = hr_mcp(x, levels = 0.95)
-    return(mcp$mcp)
-    }
-  ))
-
-# step 3: combine mcp of multiple individuals to one sf object
-
-wb.mcp <- bind_rows(wb.trk.nested$mcp) %>% mutate (id = wb.trk.nested$id)
-
-wb.mcp
-
-```
-### TASK 2: make a bar plot to compare HR sizes across all individuals directly. What could be some reasons that the home range sizes vary so much across individuals? 
-
-```{r mcp area bar, echo = FALSE}
-
-wb.mcp %>% ggplot() +
-  # turn area from m^2 to km^2 for easier interpretation
-  geom_bar(aes( x = id, y = as.numeric(area)/1000000), 
-           stat = "identity") +
-  theme_minimal() +
-  labs (y = "Area (km^2)")
-
-```
-
-Now we can easily plot the MCP for all individuals relative to the park: 
-
-```{r all wb mcp}
-p_mcp <-  ggplot() +
-  geom_sf(data = wb.mcp, aes(color = id), fill = NA, alpha = 0.4, linewidth = 0.8) +
-  theme_minimal()
-p_mcp
-
-```
-
-### Save the HR results in a data frame.  
-
-Sometimes to report the result you need to export the data as a data frame. `sf` objects can be easily turn into a data frame as below:
-
-```{r same results in a data frame}
-wb.mcp.df <- st_drop_geometry(wb.mcp)
-```
-
+ <center> -----------------     (ﾉ◕ヮ◕)ﾉ*:･ﾟ✧  THE END :･ﾟ･ﾟ     ------------------ </center>
