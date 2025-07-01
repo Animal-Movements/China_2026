@@ -27,7 +27,7 @@ Now that we have imported the wildebeest dataset for analysis and done some init
 We will use the ([adehabitatLT](https://cran.r-project.org/web/packages/adehabitatLT/index.html)) package in [R](https://cran.r-project.org/) to convert our dataframe to an animal movement trajectory.  However, other packages also exist (e.g., [amt](https://cran.r-project.org/web/packages/amt/index.html), [move2](https://cran.r-project.org/web/packages/move2/index.html)).  These packages differ in the commands and workflow used, but will provide the same end product for further analyses.  Please see the vignettes included with each package for further instruction.
 
 <div style="float:right">
-<img width="270" height="176" src="Mvmt.png">
+<img width="270" height="176" src="Figures/Mvmt.png">
 </div>
 
 In this exercise, we will:
