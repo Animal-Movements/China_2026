@@ -85,7 +85,7 @@ When you acquire or download geospatial data, make sure you know the projection 
 There are EPSG Codes that can be used to avoid manually setting all the parameters needed in a projection. For instance, the code EPSG:32637 references the UTM37N projection with WGS84 datum and ellipsoid. The code EPSG:32736 references UTM36S.  You can find the EPSG reference listed in [http://spatialreference.org/ref/epsg/]() and [https://epsg.io/]().
 
 <center>
-![Source: ESRI](Figures/projections-esri-blog.jpg){width=75%}
+![[Source: ESRI](Figures/projections-esri-blog.png)]{width=75%}
 </center>
 <br>
 
