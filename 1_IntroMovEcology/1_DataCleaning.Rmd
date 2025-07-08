@@ -511,7 +511,7 @@ While in interactive mode, you can zoom in to investigate points from a particul
 ```{r Visualize3, message=FALSE, warning=FALSE, echo=TRUE}
 # Read in shapefile boundary of Nairobi National Park
 # Data are projected to DD WGS84 and must be reprojected to UTM 37S, WGS
-NNP <- st_read("Data/NNP_DDWGS84.shp") %>% 
+NNP <- st_read("Data/NNP_DDWGS84.shp", quiet = TRUE) %>% 
   st_transform(crs = UtmZone.proj)
 
 # Convert the wildebeest spatial points to spatial lines (more accurately, a “LINESTRING”). We’ll use a few functions that we have yet to see and will use the summarise function to create an individual line (do_union=FALSE) for each animal we monitored with a tracking device.
@@ -519,6 +519,9 @@ WB.lines <- WB.sf %>%
   group_by(id) %>% 
   dplyr::summarise(do_union=FALSE) %>% 
   st_cast("LINESTRING")
+
+# Create color palette to use in graphing across individuals
+col.pal <- viridis::viridis(length(unique(WB.sf$id)))
 
 # Set tmap mode
 tmap_mode("view")
@@ -538,18 +541,18 @@ Athi.Map <-
   # Display WB - points
   tm_shape(WB.sf,
            name = paste("Wildebeest: Athi-Kaputiei Plains (n =", length(unique(WB.sf$animal_id)),")")) +
-    tm_dots(col = "id", # COlor based on the id
-            palette = viridis::viridis(length(unique(WB.sf$id))), # A color palette
-            size = 0.001, # Size of the points
+    tm_dots(col = 'id', 
+            palette = col.pal, 
+            size = 0.001, # Size of the dots
             legend.show = TRUE) +
   
   # Load the wildebeest data - Lines
   tm_shape(WB.lines,
-           name = "Wildebeest Lines") +
-    tm_lines(lwd = 0.25, # Controls the width of the lines
-             col = 'id',
-             palette = viridis::viridis(length(unique(WB.lines$id))),
-             legend.col.show = FALSE) +
+           name = "Wildebeest Tracks") +
+  tm_lines(lwd = 0.25, 
+           col = 'id',
+           palette = col.pal,
+           legend.col.show = FALSE) +
 
   # Display NNP boundary
   tm_shape(NNP,
