@@ -26,7 +26,7 @@ Now that we have imported the wildebeest dataset for analysis and done some init
 
 There are a number of [R](https://cran.r-project.org/) packages that can be used to convert our dataframe to an animal movement trajectory.  We will use the [adehabitatLT](https://cran.r-project.org/web/packages/adehabitatLT/index.html) and [amt](https://cran.r-project.org/web/packages/amt/index.html) packages for all analyses described here.  The [move2](https://cran.r-project.org/web/packages/move2/index.html) package also has additional features that are worth exploring.  All packages differ in the commands and workflow used, but will provide the same end product for further analyses.  Please see the vignettes included with each package for further instruction.
 
-The [Amt](https://cran.r-project.org/web/packages/amt/index.html) has grown in its popularity over the last few years, but using tracks as it basic building block.  This can take some time to get used to, but lends itself well when moving to the next stages of analyses, importantly which include calculating integrated step selection functions (iSSFs). 
+The [Amt - Animal Movement Tools](https://cran.r-project.org/web/packages/amt/index.html) has grown in its popularity over the last few years, using tracks as it basic building block.  One of its key strengths lies in its tidy, modular approach to constructing movement workflows. The coding structure, however, can take some time to get used to, but lends itself well when moving to the next stages of analyses, importantly which include calculating movement metrics, generate random steps, and fitting integrated step selection functions (iSSFs). 
 
 <div style="float:right">
 <img width="270" height="176" src="Figures/Mvmt.png">
@@ -83,7 +83,7 @@ load("Data/wildebeest_data.rdata")
 # Check the projection.
 # st_crs(WB.sf)
 
-# AdeHabitatLT requires a dataframe for analyses, which means we need to remove the geographic information that was added to the dataframe by converting to a sf object.  We'll use the WB.sf dataset here because the data have been projected (i..e, we need projected coordinates for analyses.  Thus, let's convert to a flat' dataframe.
+# AdeHabitatLT requires a dataframe for analyses, which means we need to remove the geographic information that was added to the dataframe when converting to a sf object.  We'll use the WB.sf dataset here because the data have been projected (i..e, we need projected coordinates for analyses.  Thus, let's convert to a flat' dataframe.
 
 # Dataframe conversion
 WB.data <- WB.sf %>%
@@ -439,6 +439,20 @@ WB.moveStats
 # Create Animal Trajectory - Amt
 
 Now we will perform the same procedure, except using the functions from the [Amt](https://cran.r-project.org/web/packages/adehabitatLT/index.html) package.
+
+```{r AMT Track, message=FALSE, warning=FALSE, echo=FALSE, eval=FALSE}
+WB.trk <- make_track(WB.data, 
+                            # tell the function which column contains the coordinates
+                            .x = longitude, .y = latitude, 
+                            # tell the function which CRS the coordinates are based on. 
+                            crs = 4326, 
+                            .t = timestamp,
+                            # any additional information you want to attach to the track
+                            # such as animal ID and month
+                            id = animal_id, sex = sex, temp = temp) 
+
+class(WB.trk)
+```
 
 
 # Save Output
