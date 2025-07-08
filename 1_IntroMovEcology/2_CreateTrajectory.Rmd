@@ -19,12 +19,14 @@ pdf_document: default
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-<a href="https://github.com/Smithsonian/Wildebeest_HMM.git" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+<a href="https://github.com/Animal-Movements/China_2025.git" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
 
 # Introduction
-Now that we have imported the wildebeest dataset for analysis and done some initial cleaning, we can take the necessary next steps to create an animal movement trajectory and format the data for analyses investigating changes in animal behavior.  The [moveHMM](https://cran.r-project.org/web/packages/moveHMM/index.html) package expects the data to be regularly sampled with negligible positional error.  This dataset **must** also be organized in sequential order.  
+Now that we have imported the wildebeest dataset for analysis and done some initial cleaning, we can take the necessary next steps to create an animal movement trajectory.  Most discrete time analyses require the data to be regularly sampled with negligible positional error.  Data **must** also be organized in sequential order.  
 
-We will use the ([adehabitatLT](https://cran.r-project.org/web/packages/adehabitatLT/index.html)) package in [R](https://cran.r-project.org/) to convert our dataframe to an animal movement trajectory.  However, other packages also exist (e.g., [amt](https://cran.r-project.org/web/packages/amt/index.html), [move2](https://cran.r-project.org/web/packages/move2/index.html)).  These packages differ in the commands and workflow used, but will provide the same end product for further analyses.  Please see the vignettes included with each package for further instruction.
+There are a number of [R](https://cran.r-project.org/) packages that can be used to convert our dataframe to an animal movement trajectory.  We will use the [adehabitatLT](https://cran.r-project.org/web/packages/adehabitatLT/index.html) and [amt](https://cran.r-project.org/web/packages/amt/index.html) packages for all analyses described here.  The [move2](https://cran.r-project.org/web/packages/move2/index.html) package also has additional features that are worth exploring.  All packages differ in the commands and workflow used, but will provide the same end product for further analyses.  Please see the vignettes included with each package for further instruction.
+
+The [Amt](https://cran.r-project.org/web/packages/amt/index.html) has grown in its popularity over the last few years, but using tracks as it basic building block.  This can take some time to get used to, but lends itself well when moving to the next stages of analyses, importantly which include calculating integrated step selection functions (iSSFs). 
 
 <div style="float:right">
 <img width="270" height="176" src="Figures/Mvmt.png">
@@ -32,8 +34,8 @@ We will use the ([adehabitatLT](https://cran.r-project.org/web/packages/adehabit
 
 In this exercise, we will:
 
-  * Investigate the [adehabitatLT](https://cran.r-project.org/web/packages/adehabitatLT/index.html) package for analyzing animal movement data
-  * Clean the animal movement trajectory and make the track 'regular'
+  * Investigate the [adehabitatLT](https://cran.r-project.org/web/packages/adehabitatLT/index.html) and [amt](https://cran.r-project.org/web/packages/adehabitatLT/index.html) packages for analyzing animal movement data
+  * Clean the animal movement trajectories and make the track 'regular'
   * Visualize plots of animal movement
 
 ## Load Libraries
@@ -44,7 +46,7 @@ Load the required libraries and remove everything held in [R's](https://cran.r-p
 rm(list=ls())
 
 # You may need to install these packages first
-#install.packages('sf', 'adehabitatLT', 'gridExtra', 'tidyverse')
+#install.packages('adehabitatLT', 'amt', 'sf', 'tidyverse', 'unit', 'gridExtra')
 
 # Load libraries
 library(adehabitatLT)
@@ -56,7 +58,7 @@ library(gridExtra)
 ```
 
 ## Set Reference Time Zone & Coordinate System
-Values are specific to our dataset.
+**Note**, these values are specific to our dataset.
 
 ```{r Timezone, message=FALSE, warning=FALSE, echo=TRUE}
 # TimeZone
@@ -73,7 +75,7 @@ Load the data from the previous exercise. This includes two data files, `WB` and
 
 ```{r Data Import, message=FALSE, warning=FALSE, echo=TRUE}
 # Data load/import
-load("./Data/wildebeest_data.rdata")
+load("Data/wildebeest_data.rdata")
 
 # View your environment or print objects to screen using ls()
 # ls()
@@ -81,26 +83,25 @@ load("./Data/wildebeest_data.rdata")
 # Check the projection.
 # st_crs(WB.sf)
 
-# AdeHabitatLT requires a dataframe for analyses.
-# Let's use the WB.sf dataset because the data have been projected and we'll need the projected coordinates for analyses.  Convert to a 'flat' dataframe.
+# AdeHabitatLT requires a dataframe for analyses, which means we need to remove the geographic information that was added to the dataframe by converting to a sf object.  We'll use the WB.sf dataset here because the data have been projected (i..e, we need projected coordinates for analyses.  Thus, let's convert to a flat' dataframe.
 
 # Dataframe conversion
 WB.data <- WB.sf %>%
   as_tibble() %>%
-  mutate(X = st_coordinates(WB.sf)[ ,1],
-         Y = st_coordinates(WB.sf)[ ,2]) %>%
+  mutate(X = st_coordinates(WB.sf)[,1],
+         Y = st_coordinates(WB.sf)[,2]) %>%
   dplyr::select(-geometry) %>% 
   drop_units()
 
-
 # Look at the data
+# How does this file differ from the WB.sf object?
 head(WB.data)
 ```
 
 # Data Quality & Summary
 Nearly all telemetry datasets have some sort of data quality flag included with the recorded positions. Since every manufacturer has different ways to report error, you’ll have to familiarize yourself with your own dataset. For example, some manufacturers report SPS (Standard Positioning System) or DGPS (Differential GPS) positions, while others report a measure of the type of positions (e.g., 1D, 2D, 3D). Best is when manufacturers report a Dilution of Precision (DOP). 
 
-Lotek GPS collars (the manufacturer we are using here) are provided with a DOP measure. As noted by Chris, placing your GPS devices in an open constellation before fitting on your animals is recommended.  This then provides the validation data required to assess GPS error/scattering.  The error associated with positions is is often device specific.  Here, I’ll show a very basic way of filtering poor quality data points, although many other options exist (e.g., speed-based filtering).
+The GPS collar manufacturer we are using here (Lotek Wireless) provides data with a DOP measure. A good recommendation is to always place your GPS device in an open constellation and in a stationary location before fitting the device on an animal.  This will provide the validation data required to assess GPS error/scattering.  The error associated with positions is often device or even batch specific.  Here, I’ll show a very basic way of filtering poor quality data points, although many other options exist (e.g., speed-based filtering).  Always be careful when filtering out data from further analysis.
 
 ```{r DOP, message=FALSE, warning=FALSE, echo=TRUE}
 # Plot the DOP values for confirmation.  
@@ -159,10 +160,10 @@ round((val1-val2)/val1, digits = 4)
 # Only 333 records (<1% of data) were removed based on the criteria we used.
 ```
 
-# Create Animal Trajectory
+# Create Animal Trajectory - Adehabitat
 An animal track in the [adehabitatLT](https://cran.r-project.org/web/packages/adehabitatLT/index.html) package is referred to as a trajectory. Type II trajectories are those for which each location is associated with a recorded time. The data input needs to be a dataframe with xy coordinates. 
 
-We use the `as.ltraj` function to create individual animal trajectories and use the `infolocs` command to include attributes of the data that we want to maintain/use later. The `slsp` argument indicates how to deal with turning angles when successive locations are in the same place. See the `help` menu for additional details.
+We will use the `as.ltraj` function to create individual animal trajectories and use the `infolocs` command to include attributes of the data that we want to maintain/use later. The `slsp` argument indicates how to deal with turning angles when successive locations are in the same place. See the `help` menu for additional details.
 
 ```{r Trajectory, message=FALSE, warning=FALSE, echo=TRUE}
 # Extract the X and Y coordinates to input into as.ltraj
@@ -175,7 +176,7 @@ WB.traj <-as.ltraj(xy = XY,
                        date = WB.data$timestamp,
                        id = WB.data$animal_id,
                        typeII = TRUE, 
-                       infolocs = WB.data[ ,3:6],
+                       infolocs = WB.data[ ,3:8],
                        slsp = "missing")
 
 # Look at the summary of the created object
@@ -185,9 +186,9 @@ WB.traj
 ## Resampling the Trajectory
 The summary of the trajectory above highlights that no NAs exist in our entire dataframe.  This is because the function `as.ltraj` does not recognize the movement interval and therefore, does not recognize that there may have been times in which data were missed/not collected.  In [adehabitatLT](https://cran.r-project.org/web/packages/adehabitatLT/index.html), the fix interval is a parameter we must manually set.  
 
-In our dataset, data were collected irregularly (i.e., every hour between 0600 and 1800 and every three hours from 1800 to 0600 (local time)).  Because we need a regular trajectory for the [moveHMM](https://cran.r-project.org/web/packages/moveHMM/index.html) package, we will resample all the data to a 3 hour interval.  This means we will lose some data in the process.  To resample the data, we must use a two step process:
+Also note that the dataset summary indicates that our data were collected irregularly, with a variable time lag between two location (i.e., every hour between 0600 and 1800 and every three hours from 1800 to 0600 (local time)).  Many discrete time analyses require a regular trajectory.  As a result, we will resample all the data to a 3 hour interval.  This means we will lose some data in the process.  To resample the data, we must use a two step process:
 
-  1. Resample the data to a 3 hour interval and set all no data records to NA using the `setNA()` function.  
+  1. Resample the data to a 3-hour interval and set all no data records to NA using the `setNA()` function.  
   2. Round all the times to the exact time interval (i.e., make the trajectory regular) using the `sett0()` function.
 
 ```{r Resample, message=FALSE, warning=FALSE, echo=TRUE}
@@ -246,7 +247,7 @@ Summary.traj
 ```
 
 ## Generic Plotting
-[AdehabitatLT]() has a number of plotting options for visualizing the animal movement trajectory.  These plots can be very useful to identify potential problems in the data and inform potential research questions.
+[AdehabitatLT](https://cran.r-project.org/web/packages/adehabitatLT/index.html) has a number of plotting options for visualizing the animal movement trajectory.  These plots can be very useful to identify potential problems in the data and inform potential research questions.
 
 ```{r Plotting, message=FALSE, warning=FALSE, echo=TRUE}
 # Plot all animals together, helpful since all animals are plotted on the same scale.
@@ -257,7 +258,7 @@ plot(WB.traj.reg[5])
 
 # We can also specify the name of the animals we want to plot.  Here, I've included 4 unique animals to plot.
 # unique(WB.data$animal_id)
-# plot(WB.traj,
+# plot(WB.traj, 
 #      id = c("Kikaya", "Karbolo", "Peria", "Sotua"))
 
 # View the columns included in the data object
@@ -278,7 +279,7 @@ plot(WB.traj.reg[5])
 #plotltr(WB.traj.reg[5], which = "DOP") # DOP.  As expected, all values are < 10 DOP.
 ```
 
-## Custom Plotting
+## Custom Plotting - Single Individual
 I usually prefer to create my own plots, as you have greater flexibility in exploring specific items.  Here, I provide a simple example of a movement trajectory that I commonly create.  This code could be edited slightly to loop over each individual and plot results that are specific to each animal.  I highly recommend plotting your data and spending time looking at each animal's movement trajectory.  
 
 [AdehabitatLT](https://cran.r-project.org/web/packages/adehabitatLT/index.html) has a nice function (i.e., `ld()`) that converts the trajectory into a dataframe.  We'll need to do that here so that we can easily summarize and plot the data.  This function simply converts the `as.ltraj` object to a dataframe.
@@ -298,7 +299,7 @@ i <- 5
 # Account for the NAs in the dataset a subset the data to a single individual
 WB.sub <- subset(WB.move[!is.na(WB.move$x),], id == Id.val[i]) 
 
-# Setup plot layout with three panels
+# Setup a 2x2 plot layout with three panels
 layout(matrix(c(1,1,2,3), 2, 2, byrow = FALSE), widths=1, heights=c(1,1))
 
 # Calculate the total days tracked
@@ -325,8 +326,23 @@ plot(WB.sub$date, sqrt(WB.sub$R2n)/1000, type='l', ylab="Distance (km)", xlab="D
     mtext(paste(abs(time.diff)," days"),cex=0.75)
 ```
 
+## Custom Plotting - All individuals
+
+We can also plot the trajectory of each individual, creating a simple loop to output a plot to a directory of our choosing.  This requires a small change to the code created above.  See the 'Output/Plots' folder to view the graph created for each individual.
+
 ```{r Plotting Loop, message=FALSE, warning=FALSE, echo=FALSE}
-# Loop over each individual (by id) and save result
+# Set Output Directory
+dir.out <- paste0(getwd(),"/Output/Plots")
+
+# Create the directory if it doesn't exist
+if (!dir.exists(dir.out)){
+  dir.create(dir.out)
+  print ("Creating Directory!")
+} else {
+  print("Directory exists!  Check the Output/Plots folder for results.")
+}
+
+# Now loop over each individual (by id) and save result
 # Create ID.val
 Id.val <- unique(WB.move$id)
  
@@ -336,7 +352,7 @@ for (i in 1:length(Id.val)){
 WB.sub <- subset(WB.move[!is.na(WB.move$x),], id == Id.val[i]) 
 
 # Create the output name of the plot
-png(filename = paste0("Output/Plots/",WB.sub$id[i],"_MvmtPlot.png"))
+png(filename = paste0(dir.out,WB.sub$id[i],"_MvmtPlot.png"))
     
 # Setup plot layout with three panels
 layout(matrix(c(1,1,2,3), 2, 2, byrow = FALSE), widths=1, heights=c(1,1))
@@ -368,10 +384,10 @@ dev.off()
 }
 ```
 
+```{r Metrics, message=FALSE, warning=FALSE, eval=FALSE, echo=FALSE}
 # Calculate Movement Metrics
-Now that we have a movement trajectory, we can create simple summary metrics.  However, we must acknowledge that our sampling interval will impact these results.  Please remember that all data in this example has been resampled to a 3 hour temporal interval. 
+#Now that we have a movement trajectory, we can create simple summary metrics.  However, we must acknowledge that our sampling interval will impact these results.  Please remember that all data in this example has been resampled to a 3 hour temporal interval. 
 
-```{r Metrics, message=FALSE, warning=FALSE, echo=TRUE}
 # First, let's calculate speed, since distance traveled is provided with change in time (dt).  We should also make id and sex factorsr
 WB.move <- WB.move %>% 
   mutate(speed = dist/dt) %>%
@@ -419,6 +435,11 @@ WB.moveStats <- WB.move %>%
 
 WB.moveStats
 ```
+
+# Create Animal Trajectory - Amt
+
+Now we will perform the same procedure, except using the functions from the [Amt](https://cran.r-project.org/web/packages/adehabitatLT/index.html) package.
+
 
 # Save Output
 Save our cleaned dataframe for further analyses investigating animal behavior.  This file is the cleaned trajectory (a regular trajectory) that we created in this exercise.
