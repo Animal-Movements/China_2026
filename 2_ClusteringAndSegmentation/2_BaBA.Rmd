@@ -1,0 +1,72 @@
+---
+title: "Introduction to Movement Metrics"
+author: "Wenjing Xu 徐雯靓 (wenjing.xu@senckenberg.de)"
+date: '`r format(Sys.time(), "%d %B %Y")`'
+output:
+  html_document:
+    toc: true
+    toc_depth: 4
+    toc_float: 
+      collapsed: true
+      smooth_scroll: true
+    number_sections: false
+    #theme: united
+    #highlight: tango
+pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE) # display both code and results 
+knitr::opts_chunk$set(fig.pos = 'H')
+```
+
+--------------------------------------------------------
+
+# Introduction
+xxxx
+
+xxx
+
+In this exercise, we will cover:
+
+1. xx
+    + xx
+
+## Load Libraries and data
+Load the required libraries and remove everything held in [R's](https://cran.r-project.org/) memory.
+
+```{r packages, warning=FALSE, message=FALSE, results='hide'}
+library(tidyverse, quietly = TRUE) 
+library(amt, quietly = TRUE) 
+library(leaflet,quietly = TRUE)
+library(RColorBrewer)  # for color palettes
+library(sf)
+
+
+# load data and filter out the unreliable locations
+load("./Data/wildebeest_data.rdata")
+
+WB <- WB %>%
+  as_tibble() %>%
+  filter(
+    fixType == "3D" & as.numeric(DOP) < 10 | fixType == "2D" & as.numeric(DOP)  < 5)
+
+```
+
+# xxx
+
+
+
+
+
+|           <span style="color:tomato">**QUESTION x: ** xxxxx. </span>
+<br/><br/>
+
+---------------------
+Further readings:
+
++
+
+
+
+ <center> -----------------     (ﾉ◕ヮ◕)ﾉ*:･ﾟ✧  THE END :･ﾟ･ﾟ     ------------------ </center>
