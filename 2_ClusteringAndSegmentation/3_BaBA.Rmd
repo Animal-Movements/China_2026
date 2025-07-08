@@ -23,9 +23,9 @@ knitr::opts_chunk$set(fig.pos = 'H')
 --------------------------------------------------------
 
 # Introduction
-xxxx
+Linear infrastructure ... 
 
-xxx
+
 
 In this exercise, we will cover:
 
@@ -35,9 +35,19 @@ In this exercise, we will cover:
 ## Load Libraries and data
 Load the required libraries and remove everything held in [R's](https://cran.r-project.org/) memory.
 
+
+`BaBA` is not hosted on CRAN and needs to be installed directly from GitHub: 
+```{r install and load BaBA}
+require("devtools")
+devtools::install_github("wx-ecology/BaBA") ## <<--- may need to install locally
+```
+
+
 ```{r packages, warning=FALSE, message=FALSE, results='hide'}
+# Remove from memory
+rm(list=ls())
+
 library(tidyverse, quietly = TRUE) 
-library(amt, quietly = TRUE) 
 library(leaflet,quietly = TRUE)
 library(RColorBrewer)  # for color palettes
 library(sf)
@@ -51,11 +61,40 @@ WB <- WB %>%
   filter(
     fixType == "3D" & as.numeric(DOP) < 10 | fixType == "2D" & as.numeric(DOP)  < 5)
 
+
+fence = st_read("./Data/Fences2010_UTM37S.shp")
+
 ```
 
-# xxx
+# Types of Barrier Behaviors 
+
+<div style="float:right">
+![Barrier behaviour categories classified by Barrier Behaviour Analysis.](./Figures/BABA.jpg)
+# data prep
+
+```{r data prep}
+
+WB.sf <- WB %>% 
+  rename(Animal.ID = id, date = timestamp) %>%
+  st_as_sf(., coords = c("longitude", "latitude"), crs = st_crs(4326))
+
+```
 
 
+```{r data transform}
+
+WB.sf <- WB.sf %>% 
+  st_transform( st_crs = st_crs(fence))
+
+# turn to lines
+
+```
+
+# visualize movement and fences
+
+
+
+</div>
 
 
 
