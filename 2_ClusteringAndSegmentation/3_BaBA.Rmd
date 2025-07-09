@@ -204,7 +204,6 @@ results_WB3 <- BaBA(animal = WB.sf.1ind,
                       export_images = T, 
                       img_path = "./Output/BaBA_viz_wb/b3_d150/", img_suffix = "wb_b3_d150")
 
-write_rds(results_WB3, "./2_ClusteringAndSegmentation/Output/BaBA_results_WB3.rds")
 # directly read results here
 # results_WB3 <- read_rds("./2_ClusteringAndSegmentation/Output/BaBA_results_WB3.rds")
 ```
@@ -276,7 +275,7 @@ p_all_type2_line
 
 
 </div>
-|           <span style="color:tomato">**QUESTION x: ** xxxxx. </span>
+|           <span style="color:tomato">**QUESTION 1: ** What can be some ecologically meaning ways to determine buffer distances? </span>
 <br/><br/>
 
 ---------------------
