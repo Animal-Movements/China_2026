@@ -51,18 +51,8 @@ library(tidyverse, quietly = TRUE)
 library(leaflet,quietly = TRUE)
 library(RColorBrewer)  # for color palettes
 library(sf)
-
-
-# load data and filter out the unreliable locations
-load("./Data/wildebeest_data.rdata")
-
-WB <- WB %>%
-  as_tibble() %>%
-  filter(
-    fixType == "3D" & as.numeric(DOP) < 10 | fixType == "2D" & as.numeric(DOP)  < 5)
-
-
-fence = st_read("./Data/Fences2010_UTM37S.shp")
+library(mapview) # for quick spatial data viz
+library(gridExtra, quietly = TRUE)
 
 ```
 
@@ -70,41 +60,231 @@ fence = st_read("./Data/Fences2010_UTM37S.shp")
 
 <div style="float:right">
 ![Barrier behaviour categories classified by Barrier Behaviour Analysis.](./Figures/BABA.jpg)
-# data prep
 
-```{r data prep}
+[[[[EXPLAIN DIFFERENT PARAMETERS]]]]
 
-WB.sf <- WB %>% 
-  rename(Animal.ID = id, date = timestamp) %>%
-  st_as_sf(., coords = c("longitude", "latitude"), crs = st_crs(4326))
+
+# pronghorn example 
+```{r read pronghorn and fence data}
+data("pronghorn")
+data("fences")
+```
+
+
+```{r data check}
+st_crs(pronghorn) == st_crs(fences)
+```
+
+For simplicity, we visualize two individual tracks overlapping with fence to make sure the two data overlap. This time we use `mapview` package, which is great for quick spatial data visualization for its simple syntax. 
+```{r data visualization 1 }
+  mapView(pronghorn, zcol = "Animal.ID", layer.name = "Pronghorn pts", cex = 1) +
+  mapView(fences, color = "grey", layer.name = "Fencelines") 
+```
+
+```{r data visualization 1 }
+
+pronghorn.lines <- pronghorn %>% 
+  mt_as_move2(., time_column = "date", track_id_column = "Animal.ID") %>%
+  mt_track_lines() 
+
+
+  mapView(pronghorn.lines, zcol = "Animal.ID",layer.name = "Pronghorn lines", cex = 1) +
+    mapView(fences, color = "grey", layer.name = "Fencelines") 
+```
+
+```{r run baba 1, eval = FALSE }
+
+# when choosing exporting images, it will take a while to run 
+results_prong <- BaBA(animal = pronghorn, 
+                      barrier = fences, 
+                      b_time = 4, p_time = 36, d = 110, max_cross = 4,
+                      export_images = T, 
+                      img_path = "./Output/BaBA_viz_pronghorn/", img_suffix = "pronghorn")
+
+# you can read results here:
+# results_prong <- read_rds("./2_ClusteringAndSegmentation/Output/BaBA_results_prong.rds")
+```
+```{r view baba result 1 }
+# View BaBA results
+
+# one output is classification table that summarizes .... 
+head(results_prong$classification)
+
+# plot encounter event locations
+
+  mapView(results_prong$encounters, zcol = "eventTYPE",
+          col.regions = brewer.pal(n = 5, name = "Set1"), layer.name = "Pronghorn BaBA", cex = 4) +
+    mapView(fences, color = "grey", layer.name = "Fencelines") 
+
+```
+
+[[[[ walk thought results ]]]]
+
+
+
+# Wildebeest example 
+
+```{r read WB data}
+# load data and filter out the unreliable locations
+WB <- read_rds("./Data/wildebeest_3hr_adehabitat.rds") %>%
+  as_tibble() %>% 
+  rename(Animal.ID = animal_id) %>%
+  mutate(Animal.ID = factor(Animal.ID)) %>%
+  drop_na(x, y) %>%
+  st_as_sf(., coords = c("x", "y"), crs = st_crs(32737))
+
+# read fence polylins
+fence.kenya <-  st_read("./Data/Fencelines2010_UTM37S.gpkg") 
 
 ```
 
 
+
+BaBA requires data in projected coordinate system, same for linear infrastructure and animal data.
 ```{r data transform}
-
-WB.sf <- WB.sf %>% 
-  st_transform( st_crs = st_crs(fence))
-
-# turn to lines
+st_crs(WB) == st_crs(fence.kenya)
 
 ```
 
 # visualize movement and fences
 
 
+```{r data viz}
+
+WB.lines <- WB %>% 
+  mt_as_move2(., time_column = "date", track_id_column = "Animal.ID") %>%
+  mt_track_lines() 
+
+mapView(WB.lines, zcol = "Animal.ID",
+          layer.name = "Wildebeest", cex = 1) +
+    mapView(fence.kenya, color = "grey", layer.name = "Fencelines") 
+```
+We can see the fences are very different from the wyoming fences. so the parameters need to be different to fit context. 
+
+Run one individual with data output first. 
+First define b_time and p_time parameters based on data resolution and ecological contexts. Then, testing a series of buffer distance to find the optimal one.
+
+
+```{r filter to one ind}
+
+WB.sf.1ind = WB %>% 
+  filter(Animal.ID == unique(Animal.ID)[1])
+```
+
+
+```{r run baba 3, eval = FALSE}
+results_WB1 <- BaBA(animal = WB.sf.1ind, 
+                      barrier = fence.kenya, 
+                      d = 100,
+                      interval = 3, units = "hours",
+                      b_time = 3, p_time = 36,  max_cross = 0,
+                      export_images = T, 
+                      img_path = "./Output/BaBA_viz_wb/b3_d100/", img_suffix = "wb_b3_d100")
+
+# directly read results here
+# results_WB1 <- read_rds("./2_ClusteringAndSegmentation/Output/BaBA_results_WB1.rds")
+
+results_WB2 <- BaBA(animal = WB.sf.1ind, 
+                      barrier = fence.kenya, 
+                      d = 50,
+                      interval = 3, units = "hours",
+                      b_time = 3, p_time = 36,  max_cross = 0,
+                      export_images = T, 
+                      img_path = "./Output/BaBA_viz_wb/b3_d50/", img_suffix = "wb_b3_d50")
+
+
+# directly read results here
+# results_WB2 <- read_rds("./2_ClusteringAndSegmentation/Output/BaBA_results_WB2.rds")
+
+results_WB3 <- BaBA(animal = WB.sf.1ind, 
+                      barrier = fence.kenya, 
+                      d = 150,
+                      interval = 3, units = "hours",
+                      b_time = 3, p_time = 36,  max_cross = 0,
+                      export_images = T, 
+                      img_path = "./Output/BaBA_viz_wb/b3_d150/", img_suffix = "wb_b3_d150")
+
+write_rds(results_WB3, "./2_ClusteringAndSegmentation/Output/BaBA_results_WB3.rds")
+# directly read results here
+# results_WB3 <- read_rds("./2_ClusteringAndSegmentation/Output/BaBA_results_WB3.rds")
+```
+most quick cross are likely due to gps or fence location error. they are all really just bounce. 
+
+
+
+now testing different buffer distance. 
+
+```{r run baba 5, eval = FALSE}
+event = tibble()
+for (dist in seq(10,200, by = 10)) {
+results_WB_dist <- BaBA(animal = WB.sf.1ind, 
+                      barrier = fence.kenya, 
+                      d = dist,
+                      interval = 3, units = "hours",
+                      b_time = 3, p_time = 36,  max_cross = 0,
+                      export_images = F)
+event.dist <- tibble(results_WB_dist$classification) %>% mutate(buffer_dist = dist)
+event <- rbind(event, event.dist)
+}
+
+# directly read results here
+# event <- read_rds("./2_ClusteringAndSegmentation/Output/BaBA_results_WB_dist.rds")
+
+```
+
+```{r compare dist results}
+
+event_summary <- event %>%
+  group_by(buffer_dist, eventTYPE) %>%
+  summarise(count = n(), .groups = "drop") %>%
+  group_by(buffer_dist) %>%
+  mutate(proportion = count / sum(count)) 
+
+
+p_all_type <- event_summary %>%
+  ggplot(aes(x = factor(buffer_dist), y = proportion, fill= eventTYPE)) +
+  geom_bar(stat = "identity") +
+  scale_y_continuous(labels = scales::percent_format()) +
+  labs(x = "Buffer Distance", y = "Event Count", fill = "Event Type") +
+  theme_minimal()
+
+p_all_type_line <- event_summary %>%
+  ggplot(aes(x = factor(buffer_dist), y = proportion, group= eventTYPE, color = eventTYPE)) +
+  geom_line() +
+  scale_y_continuous(labels = scales::percent_format()) +
+  labs(x = "Buffer Distance", y = "Event Count", fill = "Event Type") +
+  theme_minimal()
+grid.arrange(p_all_type, p_all_type_line)
+```
+
+Looks like Bounce is the only one that levels off - which makes sense. look at bounce: 
+```{r compare dist results2}
+p_all_type2_line <- event_summary %>%
+  filter(eventTYPE %in% c("Bounce", "Quick_Cross")) %>%
+  mutate(eventTYPE2 = "short_event" ) %>% 
+  group_by(buffer_dist) %>%
+  summarise(proportion = sum(proportion)) %>%
+  ggplot(aes(x = buffer_dist, y = proportion)) +
+  geom_line() +
+  scale_y_continuous(labels = scales::percent_format()) +
+  labs(x = "Buffer Distance", y = "Event Count", fill = "Event Type") +
+  theme_minimal()
+p_all_type2_line 
+
+```
+
+
 
 </div>
-
-
-
 |           <span style="color:tomato">**QUESTION x: ** xxxxx. </span>
 <br/><br/>
 
 ---------------------
 Further readings:
 
-+
++ Xu W, Dejid N, Herrmann V, Sawyer H, Middleton AD. (2021). Barrier Behaviour Analysis (BaBA) reveals extensive effects of fencing on wide-ranging ungulates. Journal of Applied Ecology. 58(4), 690-698. https://doi.org/10.1111/1365-2664.13806
+
++ Aikens, E. O., Merkle, J. A., Xu, W., & Sawyer, H. (2025). Pronghorn movements and mortality during extreme weather highlight the critical importance of connectivity. Current Biology.https://doi.org/10.1016/j.cub.2025.03.010 
 
 
 
