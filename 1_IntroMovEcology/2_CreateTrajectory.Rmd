@@ -24,9 +24,9 @@ knitr::opts_chunk$set(echo = TRUE)
 # Introduction
 Now that we have imported the wildebeest dataset for analysis and done some initial cleaning, we can take the necessary next steps to create an animal movement trajectory.  Most discrete time analyses require the data to be regularly sampled with negligible positional error.  Data **must** also be organized in sequential order.  
 
-There are a number of [R](https://cran.r-project.org/) packages that can be used to convert our dataframe to an animal movement trajectory.  We will use the [adehabitatLT](https://cran.r-project.org/web/packages/adehabitatLT/index.html) and [amt](https://cran.r-project.org/web/packages/amt/index.html) packages for all analyses described here.  The [move2](https://cran.r-project.org/web/packages/move2/index.html) package also has additional features that are worth exploring.  All packages differ in the commands and workflow used, but will provide the same end product for further analyses.  Please see the vignettes included with each package for further instruction.
+There are a number of [R](https://cran.r-project.org/) packages that can be used to convert our dataframe to an animal movement trajectory.  We will use the [adehabitatLT](https://cran.r-project.org/web/packages/adehabitatLT/index.html) and [amt - animal movement tools](https://cran.r-project.org/web/packages/amt/index.html) packages for all analyses described here.  The [move2](https://cran.r-project.org/web/packages/move2/index.html) package also has additional features that are worth exploring.  All packages differ in the commands and workflow used, but will provide the same end product for further analyses.  Please see the vignettes included with each package for further instruction.
 
-The [Amt - Animal Movement Tools](https://cran.r-project.org/web/packages/amt/index.html) has grown in its popularity over the last few years, using tracks as it basic building block.  One of its key strengths lies in its tidy, modular approach to constructing movement workflows. The coding structure, however, can take some time to get used to, but lends itself well when moving to the next stages of analyses, importantly which include calculating movement metrics, generate random steps, and fitting integrated step selection functions (iSSFs). 
+The [Amt](https://cran.r-project.org/web/packages/amt/index.html) has grown in its popularity over the last few years, using tracks as it basic building block.  One of its key strengths lies in its tidy, modular approach to construct movement workflows. The coding structure, however, can take some time to get used to, but lends itself well when moving to the next stages of analyses, which importantly includes calculating movement metrics, generate random steps, and fitting integrated step selection functions (iSSFs). 
 
 <div style="float:right">
 <img width="270" height="176" src="Figures/Mvmt.png">
@@ -57,44 +57,27 @@ library(units)
 library(gridExtra)
 ```
 
-## Set Reference Time Zone & Coordinate System
-**Note**, these values are specific to our dataset.
-
-```{r Timezone, message=FALSE, warning=FALSE, echo=TRUE}
-# TimeZone
-Timezone1 <- 'UTC'
-Timezone2 <- "Africa/Nairobi"
- 
-# Spatial Reference
-LatLong.proj <- "EPSG:4326"
-UtmZone.proj <- "EPSG:32737"
-```
-
 ## Data Import
-Load the data from the previous exercise. This includes two data files, `WB` and `WB.sf`.  Remember that the `WB.sf` file is essentially the same as the `WB` object, except that the data are projected (i.e., the dataset includes geographic coordinates). 
+Load the data from the previous exercise. Recall that the `.Rdata` file includes two files, `WB` and `WB.sf`.  The `WB.sf` file is essentially the same as the `WB` object, except that the data are projected (i.e., the data have spatial coordinates).  Let's use this file since we are ultimately interested in understanding how animals (i.e., calculating metrics of movement between points). 
 
 ```{r Data Import, message=FALSE, warning=FALSE, echo=TRUE}
 # Data load/import
 load("Data/wildebeest_data.rdata")
 
-# View your environment or print objects to screen using ls()
-# ls()
-
 # Check the projection.
 # st_crs(WB.sf)
 
-# AdeHabitatLT requires a dataframe for analyses, which means we need to remove the geographic information that was added to the dataframe when converting to a sf object.  We'll use the WB.sf dataset here because the data have been projected (i..e, we need projected coordinates for analyses.  Thus, let's convert to a flat' dataframe.
+# AdeHabitatLT requires a dataframe for analyses.  This means we need to remove the geographic information from the header of the file.  We'll use the WB.sf dataset, converting the file to a flat' dataframe with coordinate information contained in columns.
 
 # Dataframe conversion
 WB.data <- WB.sf %>%
   as_tibble() %>%
-  mutate(X = st_coordinates(WB.sf)[,1],
-         Y = st_coordinates(WB.sf)[,2]) %>%
+  mutate(Easting = st_coordinates(WB.sf)[,1],
+         Northing = st_coordinates(WB.sf)[,2]) %>%
   dplyr::select(-geometry) %>% 
   drop_units()
 
-# Look at the data
-# How does this file differ from the WB.sf object?
+# Look at the data. How does this file differ from the WB.sf object?
 head(WB.data)
 ```
 
@@ -105,13 +88,12 @@ The GPS collar manufacturer we are using here (Lotek Wireless) provides data wit
 
 ```{r DOP, message=FALSE, warning=FALSE, echo=TRUE}
 # Plot the DOP values for confirmation.  
-# For this dataset, we will separate 2D and 3D positions and then use a qualitative filter to remove data above a threshold.
-# Here I am being more restrictive on 2D positions (dop < 5.0) than 3D positions (dop < 10.0).
+# For this dataset, we will separate 2D and 3D positions and then use a qualitative filter to remove data above a threshold.  We will be more restrictive on 2D positions (dop < 5.0) than 3D positions (dop < 10.0).
 
 # Let's first get a summary of how many records are in the dataset before removing records.  This way we can track how much this filtering impacts the size of the dataset.
 (val1 <- nrow(WB.data))
 
-# Plot 2D positions
+# Plot 2D  and then 3D positions
 P1.FT2 <- 
   ggplot(WB.data[WB.data$fixType == "2D",], aes(x = DOP)) +
   geom_histogram(color = "black", fill = "white", bins = 25) +
@@ -127,11 +109,11 @@ P1.FT3 <-
   geom_vline(xintercept = 10, color = "red", linetype = "dotted", linewidth = 1) +
   theme_classic()
 
-# Filter/subset
+# Create filter to only accept positions with a 3D fixtype and DOP less than 10 or a 2D fixtype and DOP less than 5
 WB.data <- 
   WB.data %>% 
   filter(
-    fixType == "3D" & DOP < 10 | fixType == "2D" & DOP < 5) # Only accept position with a 3D fixtype and DOP less than 10 or a 2D fixtype and DOP less than 5
+    fixType == "3D" & DOP < 10 | fixType == "2D" & DOP < 5) 
 
 # How many records now after filtering?
 (val2 <- nrow(WB.data))
@@ -156,8 +138,6 @@ grid.arrange(P1.FT2, P2.FT2, P1.FT3, P2.FT3, ncol = 2)
 
 # What's the percent of data that have been removed?
 round((val1-val2)/val1, digits = 4)
-
-# Only 333 records (<1% of data) were removed based on the criteria we used.
 ```
 
 # Create Animal Trajectory - Adehabitat
@@ -330,7 +310,7 @@ plot(WB.sub$date, sqrt(WB.sub$R2n)/1000, type='l', ylab="Distance (km)", xlab="D
 
 We can also plot the trajectory of each individual, creating a simple loop to output a plot to a directory of our choosing.  This requires a small change to the code created above.  See the 'Output/Plots' folder to view the graph created for each individual.
 
-```{r Plotting Loop, message=FALSE, warning=FALSE, echo=FALSE}
+```{r Plotting Loop, message=FALSE, warning=FALSE, echo=TRUE}
 # Set Output Directory
 dir.out <- paste0(getwd(),"/Output/Plots")
 

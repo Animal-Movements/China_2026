@@ -24,7 +24,7 @@ knitr::opts_chunk$set(echo = TRUE)
 # Introduction
   >Example: White-bearded wildebeest (2010-2013)
   
-Throughout introductory exercises focused on discrete-time analyses, we will use a dataset collected during my PhD field research.  The dataset consists of 36 adult white-bearded wildebeest (*Connochaetes taurinus*) fitted with Lotek WildCell^TM^ GPS tracking devices that were monitored across three ecosystems (Amboseli Basin, Athi-Kaputiei Plains, and the Greater Maasai Mara) in southern Kenya from 2010-2013.  These data are freely available on [Movebank](https://www.movebank.org/), accessible without creating a Movebank account.  Known to be particularly important to ecosystem function and diversity, many resident populations of wildebeest have become threatened with extinction over the past few decades.  Study goals were to understand how natural and anthropogenic change impact the movements of wildebeest fitted with tracking devices.
+Throughout introductory exercises focused on discrete-time analyses, we will use a dataset collected during my graduate work.  The dataset consists of 36 adult white-bearded wildebeest (*Connochaetes taurinus*) fitted with Lotek WildCell^TM^ GPS tracking devices that were monitored across three ecosystems (Amboseli Basin, Athi-Kaputiei Plains, and the Greater Maasai Mara) in southern Kenya from 2010-2013.  These data are freely available on [Movebank](https://www.movebank.org/), a global platform for storing, managing, and sharing animal tracking data.  Known to be particularly important to ecosystem function and diversity, many resident populations of wildebeest have become threatened with extinction over the past few decades.  Study goals were to understand how natural and anthropogenic change impact the wildebeest movements.
 
 <div style="float:right">
 <img width="270" height="176" src="Figures/DSC_0287.jpg">
@@ -36,16 +36,16 @@ Stabach JA, Hughey LF, Crego RD, Fleming CH, Hopcraft JGC, Leimgruber P, Morriso
 
 Stabach JA, Hughey LF, Reid RS, Worden JS, Leimgruber P, Boone RB. 2020. Data from: Comparison of movement strategies of three populations of white-bearded wildebeest. Movebank Data Repository. [doi:10.5441/001/1.h0t27719](https://www.datarepository.movebank.org/handle/10255/move.1095)
 
-In this exercise, you will:
+In this exercise, we will:
 
-  * Import and clean the animal movement trajectory for future analyses
+  * Import and clean the wildebeest movement dataset for future analyses
   * Summarize and visualize movement path(s)
 
 # Data Preparation
-Here, we will prepare data for discrete time analyses.  As a first step, we must first clean the data received before taking any additional steps. This includes filtering the dataset for completeness, identifying duplicate records, removing invalid start or stop dates, identifying positions of poor data quality, and ordering the dataset sequentially.  Nearly all manufacturers report some type of positional quality, often reported as the type of position (e.g., 1D, 2D, or 3D) or Dilution of Position (DOP - horizontal or vertical).  Large DOPs indicate poor positional quality that can be filtered from the dataset.
+As a first step, we must first clean the dataset before taking any additional analytical steps. This includes filtering the dataset for completeness, identifying duplicate records, removing invalid start or stop dates, identifying positions of poor data quality, and ordering the dataset sequentially.  Nearly all manufacturers report some type of positional quality, often reported as the type of position (e.g., 1D, 2D, or 3D) or Dilution of Position (DOP - horizontal or vertical).  Large DOPs indicate poor positional quality that can be filtered from the dataset.
 
 ## Load Libraries
-Load the required libraries and remove everything held in [R's](https://cran.r-project.org/) memory.
+Remove everything held in [R's](https://cran.r-project.org/) memory and load the required libraries for analysis.
 
 ```{r Clean Libraries, message=FALSE, warning=FALSE}
 # Remove from memory
@@ -75,12 +75,11 @@ Timezone2 <- "Africa/Nairobi"
 ```
 
 ## Coordinate Systems and Projections
+Data collected via a GPS device must be encoded with an appropriate projection system to link the coordinates to specific locations on the earth’s surface. 
 
-Spatial data collected using GPS devices or downloaded online must have a projection system that links the coordinates to specific locations on the earth’s surface. Without a coordinate reference system, there is no way to locate places to their location on Earth.  
+Any geospatial data (e.g., a set of points) with an incorrect projection or with an unknown projection system can be visualized on its own. However, you will be unable to plot the data with other spatially referenced data, since the coordinate reference system is missing. Importantly, you will not be able to conduct any spatial analysis (e.g., calculate the distance of a given point to a road, or extract the value of the underlining raster value at the point locations), since the incorrectly projected (or unprojected) spatial data is pointing to a completely different location on earth than intended.
 
-Any geospatial data (e.g., a set of points) with an incorrect projection or with unknown projection system can be visualized on its own. However, you will not be able to plot that data with other spatial data, as the coordinate reference system is missing. Importantly, you will not be able to conduct any spatial analysis (e.g., calculate the distance of a given point to a road, or extract the value of the underlining raster value at the point locations), since the incorrectly projected (or unprojected) spatial data is pointing to a completely different location on earth than intended.
-
-When you acquire or download geospatial data, make sure you know the projection of the data.  This information is usually found in the metadata of a given dataset or should be provided by the person that is sharing the data with you.
+When you acquire or download geospatial data, make sure you know the projection of the data.  This information is usually found in the metadata of a given dataset or should be provided by the person that is sharing the data with you.  A qualified GIS analyst should not be providing you with data without specifying the projection and datum in which the data were collected.
 
 There are EPSG Codes that can be used to avoid manually setting all the parameters needed in a projection. For instance, the code EPSG:32637 references the UTM37N projection with WGS84 datum and ellipsoid. The code EPSG:32736 references UTM36S.  You can find the EPSG reference listed in [http://spatialreference.org/ref/epsg/]() and [https://epsg.io/]().
 
@@ -127,7 +126,9 @@ UtmZone.proj <- "EPSG:32737"
 ```
 
 ## Load Collar Data
-All data for this exercise are freely available via [Movebank](https://www.movebank.org/). These data have already been downloaded and are available in your `/Data` folder as a `.csv`. Included is a reference file which was also downloaded from [Movebank](https://www.movebank.org/).  The reference file contains additional details (sex, age) about each animal and are common files that often need to be merged with the tracking data.  
+All data for this exercise are freely available via [Movebank](https://www.movebank.org/). [Movebank](https://www.movebank.org/) provides a standardized and secure environment for storing animal movement data, ensuring data quality, and data consistency across animal movement projects. Movebank allows data owners to control access to their tracking data through customizable permissions. Users can choose to make their data fully public, viewable but not downloadable, or completely private—facilitating data sharing while respecting ownership and confidentiality.  
+
+The data used in this exercise have already been downloaded and are available in your `/Data` folder as a `.csv`. Included is a reference file which was also downloaded from [Movebank](https://www.movebank.org/).  The reference file contains additional details (sex, age) about each animal and are common files that often need to be merged with the tracking data.  
 
 Most important is that your movement dataset has the following variables:
 
@@ -135,7 +136,7 @@ Most important is that your movement dataset has the following variables:
 2) Timestamp
 3) Coordinates (X/Y)
 
-Since these data are available on [Movebank](https://www.movebank.org/) as open access, we don't need to provide any login details - we simply need to correctly specify the study id of interest.  Downloading directly from [Movebank](https://www.movebank.org/) is particularly useful when data continue to be collected (i.e., are actively streaming) on a study.  This ensures that you are always working with the most up-to-date dataset being collected.
+Since these data are available on [Movebank](https://www.movebank.org/) as open access, we don't need to provide any login details - we simply need to correctly specify the study id of interest.  Downloading directly from [Movebank](https://www.movebank.org/) is particularly useful when data continue to be collected (i.e., are actively streaming) on a study.  This ensures that you are always working with the most up-to-date dataset for analyses.
 
 ```{r Load, message=FALSE, warning=FALSE}
 # Pull Data from Movebank
@@ -156,18 +157,11 @@ WB.ref <- data.frame(movebank_download_deployment(study_id = "White-bearded wild
 
 #**NOTE**: If data are protected and you need to provide your login details, you could do the following:
 
-# Use the svDialogs library to add a pop-up to your code so that you can add your Username and Password as you run your script
-#library(svDialogs)
+# Set your movebank login (sign up here https://www.movebank.org/cms/movebank-registration). You will only need to set  your login details once.  Afterwards, your computer will remember your credentials.
+#movebank_store_credentials(username="myUserName", password="myPassword")
 
-# Set Movebank Login Details
-#UN <- dlgInput("Enter Movebank UserName: ", Sys.info()[""])$res
-#PW <- dlgInput("Enter Movebank Password: ", Sys.info()[""])$res
-
-# Details
-#login <- movebank_store_credentials(username=UN, password=PW)
-
-# Then do the same as before, but add your login details
-#WB <- as.data.frame(movebank_download_study(study_id = "White-bearded wildebeest (Connochaetes taurinus) movements - Kenya", login = login))
+# Then do the same as before
+#WB <- as.data.frame(movebank_download_study(study_id = "White-bearded wildebeest (Connochaetes taurinus) movements - Kenya"))
 
 # Reference Dataset
 #WB.ref <- as.data.frame(movebank_download_deployment(study_id = "White-bearded wildebeest (Connochaetes taurinus) movements - Kenya", login = login))
@@ -179,8 +173,6 @@ WB.ref <- data.frame(movebank_download_deployment(study_id = "White-bearded wild
 
 #WB <- data.frame(read_csv("Data/WB_FullDataset.csv"))
 #WB.ref <- data.frame(read_csv("Data/WB_FullDataset_ref.csv"))
-
-#**NOTE**: If you open the file provided in Excel, do NOT save the file before loading it in R. Excel will change the timestamp column and set it to the time on your computer - obviously not what you want for most studies.
 
 # You could also list the files so you don't need to type so much
 # Create list
@@ -223,7 +215,7 @@ head(WB, 10)
 WB[1:10,]
 
 # What is the structure of the dataset?
-# What is the data type of the time stamp column?
+# What is the data type of the timestamp column?
 str(WB)
 str(WB$timestamp)
 str(WB.ref)
@@ -248,11 +240,11 @@ tz(WB$timestamp)
 ## Dataframe Organization & Cleaning
 Many of the dataframe columns included are unnecessary (and quite long).  We need to clean and filter the data. To do so, we will use 'piping' (e.g., %>%) from the [tidyverse](https://cran.r-project.org/web/packages/tidyverse/index.html) package.  This allows us to combine multiple sequential commands together.
 
-Here, we will clean the data, filter out unnecessary information, and update the timezone to the local timezone.  We will then subset (i.e., filter) the start/end dates for each animal to match what has been recorded in our reference dataset.  These dates represent the dates that the collar was deployed on the animal. To join the dataframes, we will match records based on a shared primary key (i.e., id). Lastly, we will check on the completeness of the dataset and remove any (grossly) erroneous data points.
+Here, we will clean the data, filter out unnecessary information, and update the timezone to the local timezone.  We will then filter the data to the start/end dates for each animal to match what has been recorded in our reference dataset.  These dates represent the dates that the collar was deployed on the animal. To join the dataframes, we will match records based on a shared primary key (i.e., id). Lastly, we will check on the completeness of the dataset and remove any (grossly) erroneous data points.
 
-**NOTE**: date/time fields can often present issues and be difficult to import.  If problems exist, you may need to properly format the date/time fields first.  See the [lubridate](https://cran.r-project.org/web/packages/lubridate/index.html) package for some instructions and/or the [strptime](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/strptime) package to format your date/time field. Note the format of **YOUR** own dataset (e.g., "%Y-%m-%d %H:%M:%S").  
+**NOTE**: date/time fields are problematic and be difficult to import.  If problems exist, you may need to properly format the date/time fields first.  See the [lubridate](https://cran.r-project.org/web/packages/lubridate/index.html) package for some instructions and/or the [strptime](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/strptime) package to format your date/time field. Note the format of **YOUR** own dataset (e.g., "%Y-%m-%d %H:%M:%S").  
 
-Also note that some manufacturers put the date and time in separate columns.  If this occurs with your dataset, you'll need to put these columns together to create a timestamp.  For example, `timestamp = ymd_hms(paste(date,time),tz = 'Africa/Nairobi')`.
+Also note that some manufacturers put the date and time in separate columns.  If this occurs with your dataset, you'll need to put these columns together to create a timestamp.  For example, `timestamp = ymd_hms(paste(date,time),tz = Timezone1)`.  By using the `tz` argument, you can specify the timezone of the data.
 
 ```{r Clean Merge, message=FALSE, warning=FALSE, echo=TRUE}
 # Clean the reference file, selecting only the columns that you want to include
@@ -271,10 +263,9 @@ WB <- # Note, this will overwrite your existing dataset
          DOP = gps_dop,
          fixType = gps_fix_type_raw,
          temp = external_temperature,
-         # Setting my timestaps to Timezone2 -> EAT
-         # Your timestamp might be in two different fields and is potentially collected in a different time stamp (i.e., UTC)
-         #timestamp = dmy_hms(paste(date, time), tz=Timezone1), # Convert to date/time
+         # Convert timestamps from Timezone1 (UTC) to Timezone2 -> EAT
          timestamp = with_tz(timestamp, tz=Timezone2),
+         # Set the timezones for the deploy on and deploy off fields
          deploy_on = with_tz(deploy_on_timestamp, tz=Timezone2),
          deploy_off = with_tz(deploy_off_timestamp, tz=Timezone2),
          study_site,
@@ -303,7 +294,6 @@ WB <- # Note, this will overwrite your existing dataset
   dplyr::select(-c(deploy_on, deploy_off)) %>%
   
   # Remove extra levels (important since subsetting to a single study area)
-  # The droplevels function re-assess what levels are in the data and drops the rest
   droplevels() %>%
 
   # Arrange the dataset by id and timestamp
@@ -415,32 +405,30 @@ plot(WB$longitude, WB$latitude,
 ```
 
 ## Make it Spatial
+There are two main packages in [R](https://cran.r-project.org/) to handle geospatial vector data: [sp](https://cran.csiro.au/web/packages/sp/index.html) and [sf](https://search.r-project.org/CRAN/refmans/sf/html/sf-package.html).
 
-There are two main packages in R to handle geospatial vector data: the `sp` package and the `sf` package.
+The first package to provide classes and methods for spatial data types in [R](https://cran.r-project.org/) is called [sp](https://cran.csiro.au/web/packages/sp/index.html). Development began in the early 2000s, in an attempt to standardize how spatial data would be treated and to allow for better interoperability between different analysis packages that use spatial data. The package (first released on CRAN in 2005) provides classes and methods to create points, lines, polygons, and grids, with functions to work with them.  About 350 packages developed for spatial analysis use the data types implemented in [sp](https://cran.csiro.au/web/packages/sp/index.html), which means several spatial packages “depend” on the [sp](https://cran.csiro.au/web/packages/sp/index.html) package in some way.
 
-The first package to provide classes and methods for spatial data types in R is called `sp`. Development began in the early 2000s, in an attempt to standardize how spatial data would be treated and to allow for better interoperability between different analysis packages that use spatial data. The package (first released on CRAN in 2005) provides classes and methods to create points, lines, polygons, and grids, with functions to work with them.  About 350 packages developed for spatial analysis use the data types implemented in `sp`, which means several spatial packages “depend” on the `sp` package in some way.
+The [sp](https://cran.csiro.au/web/packages/sp/index.html) package depends on `rgeos` and `rgdal`. However, at the end of 2023, these packages were retired, primarily because their maintainer, Roger Bivand, also retired. You can read more about it [here](https://r-spatial.org/r/2022/04/12/evolution.html).
 
-The `sp` package depends on `rgeos` and `rgdal`. However at the end of 2023, these packages were retired, primarily because their maintainer, Roger Bivand, also retired. You can read more about it [here](https://r-spatial.org/r/2022/04/12/evolution.html).
+All geospatial work in [R](https://cran.r-project.org/) is being replaced by the more modern package [sf](https://search.r-project.org/CRAN/refmans/sf/html/sf-package.html). [sf](https://search.r-project.org/CRAN/refmans/sf/html/sf-package.html) was first released on CRAN in late October 2016. It implements a formal standard called “Simple Features” that specifies a storage and access model of spatial geometries (i.e. points, lines, polygons).  [sf](https://search.r-project.org/CRAN/refmans/sf/html/sf-package.html) provides fast I/O, particularly relevant for large files.
 
-All geospatial work in R is being replaced by the more modern package `sf`. `sf` was first released on CRAN in late October 2016. It implements a formal standard called “Simple Features” that specifies a storage and access model of spatial geometries (i.e. points, lines, polygons).  `sf` provides fast I/O, particularly relevant for large files.
+## The [sf](https://search.r-project.org/CRAN/refmans/sf/html/sf-package.html) Package
 
-## The `sf` Package
+The [sf](https://search.r-project.org/CRAN/refmans/sf/html/sf-package.html) class is an extension of a dataframe. Essentially, [sf](https://search.r-project.org/CRAN/refmans/sf/html/sf-package.html) objects can be treated as dataframes that also contain spatial data, as opposed to spatial data that may or may not also contain data frames. This enables [sf](https://search.r-project.org/CRAN/refmans/sf/html/sf-package.html) objects to fit within the [tidyverse](https://cran.r-project.org/web/packages/tidyverse/index.html) workflow, making it possible to manipulate them with the [dplyr](https://cran.r-project.org/web/packages/tidyverse/index.html) commands we used previously.
 
-The `sf` class is an extension of a dataframe. Essentially, `sf` objects can be treated as dataframes that also contain spatial data, as opposed to spatial data that may or may not also contain data frames. This enables `sf` objects to fit within the `tidyverse` workflow, making it possible to manipulate them with the `dplyr` commands we used previously.
+[sf](https://search.r-project.org/CRAN/refmans/sf/html/sf-package.html) objects consist of rows of features, hence the name “simple features ([sf](https://search.r-project.org/CRAN/refmans/sf/html/sf-package.html))”, which have both non-spatial and spatial data formats.  The spatial data of an [sf](https://search.r-project.org/CRAN/refmans/sf/html/sf-package.html) object is contained in a special geometry column that is of class ‘sfc - simple features class’. The geometry column contains the basic types of spatial data: the Coordinate Reference System (CRS), coordinates, and type of geometric object.
 
-`sf` objects consist of rows of features, hence the name “simple features (`sf`)”, which have both non-spatial and spatial data formats.  The spatial data of an `sf` object is contained in a special geometry column that is of class ‘sfc - simple features class’. The geometry column contains the basic types of spatial data: the Coordinate Reference System (CRS), coordinates, and type of geometric object.
-
-The ‘sfc’ class has seven subclasses to denote the types of geometric objects within the geometry column, which are derived from the simple features standard. The possible geometric objects are point, linestring, polygon, multipoint, multilinestring, multipolygon, and geometrycollection, which is used for any combination of the other types.
+The ‘sfc’ class has seven subclasses to denote the types of geometric objects within the geometry column, which are derived from the simple features standard. The possible geometric objects are point, linestring, polygon, multipoint, multilinestring, multipolygon, and geometry collection, which is used for any combination of the other types.
 
 ![Artwork by [Allison Horst](https://allisonhorst.com/allison-horst)](Figures/AllisonHorst_sf.png)
 
 <br>
 
-## Convert a Dataframe to a `sf` Object
-
+## Convert a Dataframe to a [sf](https://cran.r-project.org/web/packages/sf/index.html) Object
 Convert the dataframe to a [sf](https://cran.r-project.org/web/packages/sf/index.html) simple features object and plot.  Note the structure of the object once it has been converted to a spatial object.
 
-We will then use the function `st_as_sf()` that requires a vector of coordinates to be input to the ‘coords’ argument and an EPSG code or a PROJ definition for the crs. We can import the file just like any other data file and then make the data file a `sf` object. Note, we will use the function `st_transform()` to reproject the geographic data (Latitude/Longitude) to UTMs.
+We will then use the function `st_as_sf()` that requires a vector of coordinates to be input to the ‘coords’ argument and an EPSG code or a PROJ definition for the crs. We can import the file just like any other data file and then make the data file a [sf](https://cran.r-project.org/web/packages/sf/index.html) object. Note, we will use the function `st_transform()` to reproject the geographic data (Latitude/Longitude) to UTMs.
 
 **Important**: There is an important distinction between 'Setting a Project' and 'Re-projecting an object' to a new projection.  Only use `st_transform()` to project or transform your object from a known coordinate system or projection to another (e.g., Geographic coordinates to UTM projection). `sf::st_crs()` should only be used to retrieve or set your existing coordinate reference system.  Using `st::st_crs()` to erroneously re-project your data would be akin to setting a new home address without actually moving to this new location. 
 
@@ -481,7 +469,7 @@ WB.sf %>%
   theme_minimal()
 
 # or use the facet_wrap command to separate each individual into its own plot
-# This is perhaps a bit more useful to look for potential errant points for each individual.
+# This is perhaps a bit more useful to look for potential data errors.
 # WB.sf %>%
 #   ggplot() +
 #   geom_sf(aes(fill = animal_id),
@@ -528,12 +516,10 @@ tmap_mode("view")
  
 # Select from a range of basemaps:.
 # https://leaflet-extras.github.io/leaflet-providers/preview/
-# You can also type "providers$" in the console to see all the options, but this won't allow you to easily preview them.
+# You can also type "providers" in the console to see all the options.
 
 # We'll pull a world satellite map and a world street map.
-# Note that the format of tmap requires us to refer to variables in quotes
-# We'll also add the NNP boundary
-
+# We'll also plot the National Park boundary.
 Athi.Map <-
   tm_basemap(c("Esri.WorldImagery",
              "OpenStreetMap")) +
@@ -584,6 +570,6 @@ save(WB, WB.sf, file = "Data/wildebeest_data.rdata")
 
 Now that you have uploaded and manipulated the wildebeest data in [R](https://cran.r-project.org/), please adapt the code with your own data.  If your data are not on [Movebank](https://www.movebank.org/), you will need to use functions (e.g., 'read_csv') to import your movement dataset.  Please do the following:
 
-1. Import your movement dataset into R
+1. Import your movement dataset
 2. Check the coordinate reference system and re-project if necessary
 3. Prepare a map of your study area

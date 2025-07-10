@@ -1943,7 +1943,57 @@ plot(WB.sub$date, sqrt(WB.sub$R2n)/1000, type=&#39;l&#39;, ylab=&quot;Distance (
 loop to output a plot to a directory of our choosing. This requires a
 small change to the code created above. See the ‘Output/Plots’ folder to
 view the graph created for each individual.</p>
+<pre class="r"><code># Set Output Directory
+dir.out &lt;- paste0(getwd(),&quot;/Output/Plots&quot;)
+
+# Create the directory if it doesn&#39;t exist
+if (!dir.exists(dir.out)){
+  dir.create(dir.out)
+  print (&quot;Creating Directory!&quot;)
+} else {
+  print(&quot;Directory exists!  Check the Output/Plots folder for results.&quot;)
+}</code></pre>
 <pre><code>## [1] &quot;Directory exists!  Check the Output/Plots folder for results.&quot;</code></pre>
+<pre class="r"><code># Now loop over each individual (by id) and save result
+# Create ID.val
+Id.val &lt;- unique(WB.move$id)
+ 
+for (i in 1:length(Id.val)){
+  
+# Account for the NAs in the dataset a subset the data to a single individual
+WB.sub &lt;- subset(WB.move[!is.na(WB.move$x),], id == Id.val[i]) 
+
+# Create the output name of the plot
+png(filename = paste0(dir.out,WB.sub$id[i],&quot;_MvmtPlot.png&quot;))
+    
+# Setup plot layout with three panels
+layout(matrix(c(1,1,2,3), 2, 2, byrow = FALSE), widths=1, heights=c(1,1))
+
+# Calculate the total days tracked
+time.diff &lt;- trunc(difftime(WB.sub$date[nrow(WB.sub)],WB.sub$date[1]),units=&quot;days&quot;)
+
+# Plot the trajectory
+plot(WB.sub$x,WB.sub$y,typ=&quot;l&quot;,xlab=&quot;Easting&quot;,ylab=&quot;Northing&quot;,
+     main=paste(WB.sub$id[1],&quot; Movement&quot;),frame=FALSE,axes=FALSE,asp=1)
+     mtext(paste(format(WB.sub$date[1],&quot;%Y-%m-%d&quot;),&quot; to &quot;,format(WB.sub$date[nrow(WB.sub)],&quot;%Y-%m-%d&quot;)),cex=0.75) # Just specifying how I want the dates to be reported
+     axis(1, labels=TRUE)
+     axis(2, labels=TRUE)
+     # Color the points
+     points(WB.sub$x,WB.sub$y,pch=16,cex=0.5,col=&quot;blue&quot;)  # All points Blue
+     points(WB.sub$x[1],WB.sub$y[1],pch=17,cex=1,col=&quot;green&quot;) # Starting point Green
+     points(WB.sub$x[nrow(WB.sub)],WB.sub$y[nrow(WB.sub)],pch=15,cex=1,col=&quot;red&quot;) # End point Red
+
+# Plot the movements over time (Velocity)
+plot(WB.sub$date, WB.sub$dist/1000, type=&#39;l&#39;, ylab=&quot;Distance moved (km)&quot;, xlab=&quot;Time&quot;, main=&quot;Steplengths&quot;, frame=FALSE)
+    # Calculate the time from release date
+    mtext(paste(abs(time.diff),&quot; days&quot;),cex=0.75)
+
+# Plot the net displacement per step
+plot(WB.sub$date, sqrt(WB.sub$R2n)/1000, type=&#39;l&#39;, ylab=&quot;Distance (km)&quot;, xlab=&quot;Days Since Release&quot;, main=&quot;Net Displacement&quot;,frame=FALSE)
+    mtext(paste(abs(time.diff),&quot; days&quot;),cex=0.75)
+
+dev.off()
+}</code></pre>
 </div>
 </div>
 <div id="create-animal-trajectory---amt" class="section level1">
