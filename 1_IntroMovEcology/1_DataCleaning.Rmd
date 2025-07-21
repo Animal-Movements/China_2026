@@ -566,7 +566,7 @@ Save the dataframe files so that we can use them in future exercises.  We can wr
 save(WB, WB.sf, file = "Data/wildebeest_data.rdata")
 ```
 
-# Exercise
+# Exercise:
 
 Now that you have uploaded and manipulated the wildebeest data in [R](https://cran.r-project.org/), please adapt the code with your own data.  If your data are not on [Movebank](https://www.movebank.org/), you will need to use functions (e.g., 'read_csv') to import your movement dataset.  Please do the following:
 

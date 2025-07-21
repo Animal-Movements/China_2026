@@ -34,7 +34,7 @@ I am most familiar with the [adehabitatLT](https://cran.r-project.org/web/packag
 
 In this exercise, we will:
 
-  * Investigate the [adehabitatLT](https://cran.r-project.org/web/packages/adehabitatLT/index.html) and [amt](https://cran.r-project.org/web/packages/adehabitatLT/index.html) packages for analyzing animal movement data
+  * Investigate the [adehabitatLT](https://cran.r-project.org/web/packages/adehabitatLT/index.html) and [amt](https://cran.r-project.org/web/packages/amt/index.html) packages for analyzing animal movement data
   * Clean the animal movement trajectories and make the tracks 'regular'
   * Visualize plots & create a simple animation of animal movement
 
@@ -445,7 +445,7 @@ dev.off()
 ```
 
 # Create Animal Trajectory - Amt
-Now we will perform the same procedure using the 'unfiltered' dataset (`WB.data`) that we used in the previous exercise, except using functions from the [amt](https://cran.r-project.org/web/packages/adehabitatLT/index.html) package.  Because of the nested data structure of [amt](https://cran.r-project.org/web/packages/adehabitatLT/index.html), there are some additional steps that are necessary to take.
+Now we will perform the same procedure using the 'unfiltered' dataset (`WB.data`) that we used in the previous exercise, except using functions from the [amt](https://cran.r-project.org/web/packages/amt/index.html) package.  Because of the nested data structure of [amt](https://cran.r-project.org/web/packages/amt/index.html), there are some additional steps that are necessary to take.
 
 To calculate movement metrics across datasets with multiple individuals, we need to:
 
@@ -517,7 +517,7 @@ WB.move.amt <- WB.steps %>%
 ```
 
 # Animating a Trajectory
-We can now use either the [adehabitatLT](https://cran.r-project.org/web/packages/adehabitatLT/index.html) or [amt](https://cran.r-project.org/web/packages/adehabitatLT/index.html) trajectory to create an animation of the movements of an animal on a daily time step.  To do so, we will create a graph for every day that the animal was tracked.  The outputs will then be aggregated in an animated gif.  If creating the outputs using [ggplot2](https://cran.r-project.org/web/packages/ggplot2/index.html), you could also use `gganimate()`.  See `help(gganimate)` for more information. 
+We can now use either the [adehabitatLT](https://cran.r-project.org/web/packages/adehabitatLT/index.html) or [amt](https://cran.r-project.org/web/packages/amt/index.html) trajectory to create an animation of the movements of an animal on a daily time step.  To do so, we will create a graph for every day that the animal was tracked.  The outputs will then be aggregated in an animated gif.  If creating the outputs using [ggplot2](https://cran.r-project.org/web/packages/ggplot2/index.html), you could also use `gganimate()`.  See `help(gganimate)` for more information. 
 
 [MoveVis](https://movevis.org) could also be explored, but is currently non-functional.
 
@@ -618,14 +618,14 @@ Save our cleaned dataframe for further analyses investigating animal behavior.  
 save(WB.move, WB.move.amt, file = "Data/wildebeest_3hr_adehabitat.rdata")
 ```
 
-# Exercise
+# Exercise:
 
-The animal movement animation created above could be greatly improved by importing other spatial data layers or overlaying movements on top of availabile satellite imagery.  Sometimes just as interesting is viewing the steplength and net displacement graphs with the animated trajectory.  Experiment with the generic plotting functions or with `ggplot()` to create a 3-panel figure like the image below.  Animate the movements on a daily timestamp, plotting the animal's trajectory, daily steplengths, and net squared displacement in separate windows.  Output the .gif to your output folder and delete all preliminary data files.  
+The animal movement animation created above could be greatly improved by making the data spatial (see 1_DataCleaning.html), importing other spatial data layers, or overlaying movements on top of available satellite imagery.  Sometimes just as interesting is viewing the steplength and net displacement graphs with the animated trajectory.  Using the wildebeest dataset or your own data, experiment with the generic plotting functions or with `ggplot()` to create a 3-panel figure like the image below.  Animate the movements on a daily time step, plotting the animal's trajectory, daily steplengths, and net squared displacement in separate windows.  Generate movement statistics with either [adehabitatLT](https://cran.r-project.org/web/packages/adehabitatLT/index.html) or [amt](https://cran.r-project.org/web/packages/amt/index.html).  Output the .gif to your output folder and delete all preliminary data files.  
 
-The end result should look similar to the following:
+The end result should look similar to the image below, although feel free to add other items of interest.
 
 <div style="float:center">
-<img width="500" height="400" src="Figures/Wild_3panel.png">
+<img width="800" height="640" src="Figures/Wild_3panel.png">
 </div>
 
 ```{r Animate Exercise, message=FALSE, warning=FALSE, eval=FALSE, echo=FALSE}
