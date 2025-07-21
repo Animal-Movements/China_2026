@@ -193,58 +193,100 @@ We will use one individual as an example to search for the best parameters combo
 
 First run on one starting set of parameter to visualize it. The initial parameters are based on expert knowledge - how many hours of fence interaction would you call that it is normal v.s. altered behavior? What is a reasonable distance to identify these encounters? 
 
+Because the data resolution is 3 hours, and the fences are very dense, it is only reasonable to set b_time to the minimum possible (3h) to consider an encounter event as "short". In addition, because the fences are dense, many "crossings" (identified via intersecting movement track with fence lines) may not reflect a real-world crossing. We may need to do some secondary reclassification afterwards. Hence, the key parameter to be determined here would be the buffer distance (d) - at that distance do we recognize the movement as a barrier interaction? Let's test on two extremes: 
+
 Since the code will take a while to run when `export_images = T`, we ran the code ahead of time and you can directly read the result: 
 
-```{r filter to one ind}
-WB.sf.1ind = WB %>% 
-  filter(id == unique(id)[1])
+```{r run baba on 2 ind}
 
-# results_WB1 <- BaBA(animal = WB.sf.1ind,
+# pick two individuals with relatively large range in the study area 
+# Nitishya and Sotua also have seperated range so the two of them should be a good representation 
+# for the population 
+WB.sf.2ind = WB %>% 
+  filter(id %in% c("Ntishya", "Sotua")) %>%
+  arrange(id, date)
+
+# results_WB1 <- BaBA(animal = WB.sf.2ind,
 #                       barrier = fence.kenya,
 #                       d = 100,
 #                       interval = 3, units = "hours",
-#                       b_time = 3, p_time = 36, 
+#                       b_time = 3, p_time = 36,
+#                       max_cross = 10, # setting it to a relatively big number to account for most intersections are not real fence crossing due to the moderate data resolution and high fence density
 #                       export_images = T,
 #                       img_path = "./Output/BaBA_viz_wb/b3_d100/", img_suffix = "wb_b3_d100")
 
 # directly read results here
-results_WB1 <- read_rds("./Output/BaBA_results_WB1.rds")
+ results_WB1 <- read_rds("./Output/BaBA_2ind_WB1.rds")
+
+# results_WB2 <- BaBA(animal = WB.sf.2ind,
+#                       barrier = fence.kenya,
+#                       d = 1000,
+#                       interval = 3, units = "hours",
+#                       b_time = 3, p_time = 36,
+#                       max_cross = 10,
+#                       export_images = T,
+#                       img_path = "./Output/BaBA_viz_wb/b3_d1000/", img_suffix = "wb_b3_d1000")
+
+# directly read results here
+ results_WB2 <- read_rds("./Output/BaBA_2ind_WB2.rds")
 ```
 
-Now we can check the output images - the classified images look reasonable. However, because the fences are dense while the temporal resolution is 3 h, most of the "quick cross" is actually more like a "bounce" - it is unlikely that they actually "crossed" the fence, but more likely they moved around the fenced plots. This suggests that we may need a secondary re-classification after the automatic classification process. 
+Now we can check the output images. 
+
+At d = 100, the shorter interactions are better identified (Bounce and Quick Cross). However, However, because the fences are dense while the temporal resolution is 3 h, most of the "quick cross" is actually more like a "bounce" - it is unlikely that they actually "crossed" the fence, but more likely they moved around the fenced plots. This suggests that we may need a secondary re-classification after the automatic classification process. 
 
 <div style="text-align: center;">
 
 <div style="display: inline-block; width: 48%;">
-<img src="./Output/BaBA_viz_wb/b3_d100/Quick_Cross_1_6147_wb_b3_d100.png" style="width:100%;">
+<img src="./Output/BaBA_viz_wb/b3_d100/Quick_Cross_7_492_wb_b3_d100.png" style="width:100%;">
 <p style="text-align:center;"><em>Exanple quick cross1</em></p>
 </div>
 
 <div style="display: inline-block; width: 48%;">
-<img src="./Output/BaBA_viz_wb/b3_d100/Quick_Cross_1_7404_wb_b3_d100.png" style="width:100%;">
+<img src="./Output/BaBA_viz_wb/b3_d100/Quick_Cross_7_5214_wb_b3_d100.png" style="width:100%;">
 <p style="text-align:center;"><em>Example quick cross2</em></p>
 </div>
 
 </div>
 
-Now we can to test a series of buffer distances to see whether different barrier distances can lead to different ecological insights, and whether we can find an optimal distance that can best capture the barrier interactions.
+At d = 1000, most captured events are longer events (e.g. Average movement, Trapped). There are also many `unknown` events that seems to be one encounter split into multiple bursts (see below). This issue can be fixed by adding a `tolerance` parameter - for two connected events, if the number of points between them are within tolerance, they are merged into one encounter event. 
+
+
+<div style="text-align: center;">
+
+<div style="display: inline-block; width: 48%;">
+<img src="./Output/BaBA_viz_wb/b3_d1000/unknown_12_507_wb_b3_d1000.png" style="width:100%;">
+<p style="text-align:center;"><em>Exanple quick cross1</em></p>
+</div>
+
+<div style="display: inline-block; width: 48%;">
+<img src="./Output/BaBA_viz_wb/b3_d1000/unknown_12_510_wb_b3_d1000.png" style="width:100%;">
+<p style="text-align:center;"><em>Example quick cross2</em></p>
+</div>
+
+</div>
+
+
+Now that we have a general understanding of the parameter performance, we can to test a series of buffer distances to see whether different barrier distances can lead to different ecological insights, and whether we can find an optimal distance that can best capture the barrier interactions.
 
 ```{r run baba 5}
 # event = tibble()
 # for (dist in seq(100,1000, by = 100)) {
-# results_WB_dist <- BaBA(animal = WB.sf.1ind, 
-#                       barrier = fence.kenya, 
+# results_WB_2ind_dist <- BaBA(animal = WB.sf.2ind,
+#                       barrier = fence.kenya,
 #                       d = dist,
 #                       interval = 3, units = "hours",
-#                       b_time = 3, p_time = 36,  
+#                       b_time = 3, p_time = 36,
+#                       max_cross = 10,
+#                       tolerance = 1, # add the tolerance parameter
 #                       export_images = F)
-# event.dist <- tibble(results_WB_dist$classification) %>% mutate(buffer_dist = dist)
+# 
+# event.dist <- tibble(results_WB_2ind_dist$classification) %>% mutate(buffer_dist = dist)
 # event <- rbind(event, event.dist)
 # }
 
-
 # directly read results here
-event <- read_rds("./Output/BaBA_results_WB_dist.rds")
+event <- read_rds("./Output/BaBA_2ind_WB_dist.rds")
 
 ```
 
@@ -260,7 +302,7 @@ event_summary <- event %>%
 
 # stack bar plots to visualize total event counts and counts of different behaviors
 p_all_type <- event_summary %>%
-  ggplot(aes(x = factor(buffer_dist), y = sum, fill= eventTYPE)) +
+  ggplot(aes(x = factor(buffer_dist), y = count, fill= eventTYPE)) +
   geom_bar(stat = "identity") +
   labs(x = "Buffer Distance (m)", y = "Event Count", fill = "Event Type") +
   theme_minimal()
@@ -275,7 +317,7 @@ p_all_type_line <- event_summary %>%
 grid.arrange(p_all_type, p_all_type_line)
 ```
 
-As buffer distance increase, more tracking locations would be included inside of the buffer. Hence, the number of "events", or consecutive tracking locations within the buffer, would eventually decrease. We can see that at 300 meters, the total barrier behavior detection peaked. If your goal is to capture most amount of barrier behaviors, around 300 would be a good distance to use as the buffer. 
+As buffer distance increase, more tracking locations would be included inside of the buffer. Hence, the number of "events", or consecutive tracking locations within the buffer, would eventually decrease. We can see that at 300 meters, the total barrier behavior detection peaked. Also at 300m we still see a good distinction between the short behaviors (e.g. bounce and quick cross) and long behaviors. If your goal is to capture most amount and variations of different barrier behaviors, around 300 would be a good distance to use as the buffer. 
 
 Let's apply the parameters to the full dataset. 
 
