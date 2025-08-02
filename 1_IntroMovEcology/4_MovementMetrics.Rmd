@@ -416,7 +416,7 @@ p_nsd <- wb.trk.nsd %>% ggplot(aes(x = t_, y = nsd_, color = id)) +
 p_nsd
 ```
 
-|           <span style="color:tomato">**QUESTION 1: ** How would you interpret the movement pattern of these wildebeest? Consider the temporal scale and individual variation. </span>
+|           <span style="color:tomato">**QUESTION: ** How would you interpret the movement pattern of these wildebeest? Consider the temporal scale and individual variation. </span>
 <br/><br/>
 
 ---------------------
