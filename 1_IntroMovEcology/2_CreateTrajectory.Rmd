@@ -26,7 +26,7 @@ Now that we have imported the wildebeest dataset for analysis and done some init
 
 There are a number of [R](https://cran.r-project.org/) packages that can be used to convert our dataframe to an animal movement trajectory.  We will use the [adehabitatLT](https://cran.r-project.org/web/packages/adehabitatLT/index.html) and [amt - animal movement tools](https://cran.r-project.org/web/packages/amt/index.html) packages for all analyses described here.  The [move2](https://cran.r-project.org/web/packages/move2/index.html) package also has features that are worth exploring.  All packages differ in the commands and workflow used, but will provide the same end product for further analyses.  Please see the vignettes included with each package for further instruction.
 
-I am most familiar with the [adehabitatLT](https://cran.r-project.org/web/packages/adehabitatLT/index.html) package and tend to default to using it for animal movement analyses.  [Amt](https://cran.r-project.org/web/packages/amt/index.html), however, has grown in its popularity over the last few years, using tracks as it basic building block.  One of its key strengths lies in its tidy, modular approach to construct movement workflows. The coding structure lends itself well when moving on to more complicated analyses. 
+I am most familiar with the [adehabitatLT](https://cran.r-project.org/web/packages/adehabitatLT/index.html) package and tend to default to using it for animal movement analyses.  [Amt](https://cran.r-project.org/web/packages/amt/index.html), however, has grown in its popularity over the last few years, using tracks as its basic building block.  One of the packages key strengths lies in its tidy, modular approach to construct movement workflows, with the coding structure lending itself well when transitioning to more complicated analyses (e.g., integrated Step Selection Functions (iSSFs)). 
 
 <div style="float:right">
 <img width="270" height="176" src="Figures/Mvmt.png">
@@ -87,7 +87,7 @@ head(WB.data)
 # Data Quality & Summary
 Nearly all telemetry datasets have some sort of data quality flag included with the recorded positions. Since every manufacturer has different ways to report error, you’ll have to familiarize yourself with your own dataset. Some manufacturers, for example, report SPS (Standard Positioning System) or DGPS (Differential GPS) positions, while others report a measure of the type of positions (e.g., 1D, 2D, 3D). Best is when manufacturers report a Dilution of Precision (DOP). 
 
-The GPS collar manufacturer we are using here (Lotek Wireless) provides data with a DOP measure. A good recommendation is to place your GPS device in a stationary location with an open constellation before fitting the device on an animal.  This will provide validation data required to assess GPS error (i.e., How much GPS scattering exists?).  The error associated with positions is often device or even batch specific.  Here, I’ll show a very basic way of filtering poor quality data points, although many other options exist (e.g., speed-based filtering).  Always be careful when filtering out data from further analysis.
+The GPS collar manufacturer in this study (Lotek Wireless) provide data with a DOP measure. A good recommendation is to place your GPS device in a stationary location with an open constellation before fitting the device on an animal.  Save these data to provide the calibration information to assess GPS error (i.e., How much GPS scattering exists?).  The error associated with positions is often device or even batch specific.  Here, I’ll show a very basic way of filtering poor quality data points, although many other options exist (e.g., speed-based filtering).  Always be careful when filtering out data from further analysis.
 
 ```{r DOP, message=FALSE, warning=FALSE, echo=TRUE}
 # Plot the DOP values for confirmation.  
@@ -160,7 +160,7 @@ WB.data %>%
 # If duplicates exists, you need to remove them before moving forward
 #WB.data <- WB.data[!duplicated(WB.data),c('id','timestamp')]
 
-# Extract the X and Y coordinates to input into as.ltraj
+# Create a separate dataframe object with the X and Y coordinates to use with the as.ltraj function
 XY <- WB.data %>% 
   dplyr::select(X:Y) %>% 
   as.data.frame()
@@ -298,7 +298,7 @@ plot(WB.traj.reg[5])
 #      id = c("Kikaya", "Karbolo", "Peria", "Sotua"))
 
 # View the columns included in the data object 
-#**Note**, you must you double brackets [[]] because the output is a list
+#**Note**, you must use double brackets [[]] because the output is a list
 #names(WB.traj.reg[[1]])
 #head(WB.traj.reg[[1]])
 
@@ -317,7 +317,7 @@ plot(WB.traj.reg[5])
 ```
 
 ## Custom Plotting - Single Individual
-We can also create our own custom plots, summarizing the movement trajectory or the summary information on how animals moved, using commands demonstrated in the previous exercise. This gives us greater flexibility to explore specific items.  Here, I provide a simple example of a movement trajectory that I commonly create, which includes graphing the animal points, the distance moved, and how far the animal moved from an initial location (NSD - Net Squared Displacement).  We will learn more about NSD in the next lecture.  I highly recommend plotting your data and spending time looking at each animal's movement trajectory.  
+We can also create our own custom plots. This gives us greater flexibility to explore specific items.  Here, I provide a simple example of a movement trajectory that I commonly create, which includes graphing the animal points, the distance moved, and how far the animal moved from an initial location (NSD - Net Squared Displacement).  We will learn more about NSD in the next lecture.  I highly recommend plotting your data and spending time looking at each animal's movement trajectory.  
 
 [AdehabitatLT](https://cran.r-project.org/web/packages/adehabitatLT/index.html) has a nice function (i.e., `ld()`) that converts the trajectory into a dataframe.  We'll need to do that here so that we can easily summarize and plot the data.  This function converts the `as.ltraj` object to a dataframe.
 
@@ -328,7 +328,7 @@ We can also create our own custom plots, summarizing the movement trajectory or 
 # Convert trajectory to a flat dataframe (all data appended into a single file)
 WB.move <- ld(WB.traj.reg)
 
-# Create a reference id so can change easily between individuals
+# Create a reference id so can switch easily between individuals
 Id.val <- unique(WB.move$id)
  
 # Determine which animal you want to plot.  Here, I will plot the 5th animal in the object we created above
@@ -343,8 +343,7 @@ WB.sub <- WB.move %>%
 time.diff <- WB.sub %>% 
   summarize(start = min(date),
             end = max(date),
-            #diff = end - start)
-            diff = trunc(difftime(end, start, units="days"))) %>%  # difftime allows me to specify the units; trunc will truncate the output to an integer 
+            diff = trunc(difftime(end, start, units="days"))) %>%  
   pull(diff) # This will make the time.diff variable = diff
 
 # Setup a 2x2 plot layout with three panels
@@ -382,7 +381,7 @@ plot(WB.sub$date, sqrt(WB.sub$R2n)/1000, type='l', ylab="Distance (km)", xlab="D
 
 ## Custom Plotting - All individuals
 
-We can adopt this code easily to "loop" across each individual, outputting results to a directory of our choosing.  See the 'Output/Plots' folder to view the graph created for each individual.  Much of the code is exactly the same as the code used above, with the small change of using a 'for' loop.  Note, that the `map` function could be used to accomplish the same result.  See `help(map)` for more information.
+We can adopt this code easily to "loop" across each individual, outputting results to a directory of our choosing.  See the 'Output/Plots' folder to view the graph created for each individual.  Much of the code is exactly the same as the code used above, with the small change of using a 'for' loop.  Note, that the `map` function could also be used to accomplish the same result.  See `help(map)` for more information.
 
 ```{r Plotting Loop, message=FALSE, warning=FALSE, echo=TRUE, eval=TRUE}
 # Set Output Directory
@@ -398,10 +397,12 @@ if (!dir.exists(dir.out)){
 
 # Now loop over each individual (by id) and save result
 Id.val <- unique(WB.move$id)
- 
+
+# ------------------------------ 
 for (i in 1:length(Id.val)){
-  
+
 # Subset the data to our animal of interest and remove NAs from the dataset
+# ------------------------------
 WB.sub <- WB.move %>% 
   filter(id == Id.val[i],
          !is.na(x))
@@ -414,6 +415,7 @@ time.diff <- WB.sub %>%
   pull(diff)
 
 # Create the output name of the plot...everything else in the code is the same
+# ------------------------------
 png(filename = paste0(dir.out,WB.sub$id[i],"_MvmtPlot.png"))
     
 # Setup plot layout with three panels
@@ -440,17 +442,18 @@ plot(WB.sub$date, sqrt(WB.sub$R2n)/1000, type='l', ylab="Distance (km)", xlab="D
     mtext(paste(time.diff,"days"),cex=0.75)
 
 # Close the plot
+# ------------------------------
 dev.off()
 }
 ```
 
 # Create Animal Trajectory - Amt
-Now we will perform the same procedure using the 'unfiltered' dataset (`WB.data`) that we used in the previous exercise, except using functions from the [amt](https://cran.r-project.org/web/packages/amt/index.html) package.  Because of the nested data structure of [amt](https://cran.r-project.org/web/packages/amt/index.html), there are some additional steps that are necessary to take.
+Now we will perform the same procedure using the dataset we created above (`WB.data`), except using functions from the [amt](https://cran.r-project.org/web/packages/amt/index.html) package.  Because of the nested data structure of [amt](https://cran.r-project.org/web/packages/amt/index.html), there are some additional steps that are necessary to take.
 
 To calculate movement metrics across datasets with multiple individuals, we need to:
 
   1. Nest the resulting track by the animal id, allowing us then group results together as a list.
-  2. Perform operations on the group data column, using the `mutate()` and `map()` (or `lapply()`) functions.
+  2. Perform operations on the group data column, using the `mutate()` and `map()` or `lapply()` functions.
   3. Select the relevant columns and unnest for further analysis.  
   
 ```{r AMT Track, message=FALSE, warning=FALSE, echo=TRUE, eval=TRUE}
@@ -468,12 +471,12 @@ WB.trk <- make_track(WB.data,
 # Note, you could also import the geographic data and then transform the coordinate system
 #WB.trk.New -> transform_coords(WB.trk, crs_to = SET, crs_from = SET)
 
-# Look at the data and note that the result is one huge dataframe
+# Look at the data and note the result
 head(WB.trk)
 #class(WB.trk)
 
-# Step 2: Perform operations of interest using mutate() and map()
-# Here, we'll do two We'll start with resampling the dataset to a 3 hour interval
+# Step 2: Resample and add net squared displacement
+# Note the use of the map() function.  Resample to a 3 hour interval
 WB.steps <- WB.trk %>% 
   mutate(
     steps = map(data, function(x)
@@ -517,7 +520,7 @@ WB.move.amt <- WB.steps %>%
 ```
 
 # Animating a Trajectory
-We can now use either the [adehabitatLT](https://cran.r-project.org/web/packages/adehabitatLT/index.html) or [amt](https://cran.r-project.org/web/packages/amt/index.html) trajectory to create an animation of the movements of an animal on a daily time step.  To do so, we will create a graph for every day that the animal was tracked.  The outputs will then be aggregated in an animated gif.  If creating the outputs using [ggplot2](https://cran.r-project.org/web/packages/ggplot2/index.html), you could also use `gganimate()`.  See `help(gganimate)` for more information. 
+We can now use either the [adehabitatLT](https://cran.r-project.org/web/packages/adehabitatLT/index.html) or [amt](https://cran.r-project.org/web/packages/amt/index.html) trajectory to create an animation of the movements of an animal on a daily time step.  To do so, we will create a graph for every day that the animal was tracked.  The outputs will then be aggregated in a gif.  If creating the outputs using [ggplot2](https://cran.r-project.org/web/packages/ggplot2/index.html), you could also use `gganimate()`.  See `help(gganimate)` for more information. 
 
 [MoveVis](https://movevis.org) could also be explored, but is currently non-functional.
 
@@ -574,7 +577,7 @@ for (i in 1:length(Days.unique)){
 	if(i==1)
 		{Day.new <- Day.sub
 		} else {
-		  Day.new <- WB.sub %>% 
+		  Day.new <- Day.sub %>% 
 		    filter(julian == Days.unique[i]) # Note the subtle difference from above
 		}
 	
@@ -589,7 +592,7 @@ for (i in 1:length(Days.unique)){
     pull(diff)
          
   # Create plot
-	plot(WB.sub$x,WB.sub$y,type="n",lwd=1.5,xlim=c(min.X,max.X),ylim=c(min.Y,max.Y),xlab="",ylab="",asp=1,bty="n",axes=FALSE,frame.plot=TRUE,main=Title1)
+	plot(WB.sub$x,WB.sub$y,type="n",lwd=1.5,xlim=c(min.X,max.X),ylim=c(min.Y,max.Y),xlab="",ylab="",asp=1,bty="n",axes=FALSE,frame.plot=TRUE,main=Title1, cex.main = 1.5)
 	mtext(paste(format(WB.sub$date[1],"%Y-%m-%d")," to ",format(WB.sub$date[nrow(WB.sub)],"%Y-%m-%d")),cex=0.75)
 	Axis(side=1, labels=TRUE)
 	Axis(side=2, labels=TRUE)
@@ -598,7 +601,7 @@ for (i in 1:length(Days.unique)){
 	mtext(side = 2,line=3, "Northing",cex=1.5,col="black")
 	mtext(side = 1,line=3, "Easting",cex=1.5,col="black")
 	# Plot the date
-	text(min.X+15000,max.Y-10000, paste("Date: ",format(Date.txt, "%d/%m/%Y")),pos=4,cex=1.5)
+	text(min.X+10000,max.Y-10000, paste("Date: ",format(Date.txt, "%d/%m/%Y")),pos=4,cex=1.5)
 	
 dev.off()
 }
@@ -612,15 +615,16 @@ file.remove(All.files)
 ```
 
 # Save Output
-Save our cleaned dataframe for further analyses investigating animal behavior.  This file is the cleaned trajectory (a regular trajectory) that we created in this exercise.
+Save our cleaned dataframe for further analyses.  These are the files that we created in this exercise.
 
 ```{r Save, message=FALSE, warning=FALSE, echo=TRUE}
 save(WB.move, WB.move.amt, file = "Data/wildebeest_3hr_adehabitat.rdata")
 ```
 
 # Exercise:
+The animal movement animation created above could be greatly improved by making the data spatial (see 1_DataCleaning.html), importing other spatial data layers, or overlaying movements on top of available satellite imagery.  Sometimes just as interesting is viewing the steplength and net displacement graphs with the animated trajectory.  
 
-The animal movement animation created above could be greatly improved by making the data spatial (see 1_DataCleaning.html), importing other spatial data layers, or overlaying movements on top of available satellite imagery.  Sometimes just as interesting is viewing the steplength and net displacement graphs with the animated trajectory.  Using the wildebeest dataset or your own data, experiment with the generic plotting functions or with `ggplot()` to create a 3-panel figure like the image below.  Animate the movements on a daily time step, plotting the animal's trajectory, daily steplengths, and net squared displacement in separate windows.  Generate movement statistics with either [adehabitatLT](https://cran.r-project.org/web/packages/adehabitatLT/index.html) or [amt](https://cran.r-project.org/web/packages/amt/index.html).  Output the .gif to your output folder and delete all preliminary data files.  
+Using the wildebeest dataset or your own data, experiment with the generic plotting functions or with `ggplot()` to create a 3-panel figure like the image below.  Animate the movements on a daily time step, plotting the animal's trajectory, daily steplengths, and net squared displacement in separate windows.  Use the dataset in this exercise, with the ultimate goal of creating a similar graph with your own data.  Output the .gif to your output folder and delete all preliminary data files.  
 
 The end result should look similar to the image below, although feel free to add other items of interest.
 
@@ -693,7 +697,7 @@ for (i in 1:length(Days.unique)){
 	if(i==1)
 		{Day.new <- Day.sub
 		} else {
-		  Day.new <- WB.sub %>% 
+		  Day.new <- Day.sub %>% 
 		    filter(julian == Days.unique[i]) # Note the subtle difference from above
 		}
 	
@@ -708,7 +712,7 @@ for (i in 1:length(Days.unique)){
     pull(diff)
          
   # Create plots
-	plot(WB.sub$x,WB.sub$y,type="n",lwd=1.5,xlim=c(min.X,max.X),ylim=c(min.Y,max.Y),xlab="",ylab="",asp=1,bty="n",axes=FALSE,frame.plot=TRUE,main=Title1)
+	plot(WB.sub$x,WB.sub$y,type="n",lwd=1.5,xlim=c(min.X,max.X),ylim=c(min.Y,max.Y),xlab="",ylab="",asp=1,bty="n",axes=FALSE,frame.plot=TRUE,main=Title1, cex.main = 2.5)
 	mtext(paste(format(WB.sub$date[1],"%Y-%m-%d")," to ",format(WB.sub$date[nrow(WB.sub)],"%Y-%m-%d")),cex=0.75)
 	Axis(side=1, labels=TRUE)
 	Axis(side=2, labels=TRUE)
@@ -717,17 +721,17 @@ for (i in 1:length(Days.unique)){
 	mtext(side = 2,line=3, "Northing",cex=1.5,col="black")
 	mtext(side = 1,line=3, "Easting",cex=1.5,col="black")
 	# Plot the date
-	text(min.X+15000,max.Y-10000, paste("Date: ",format(Date.txt, "%d/%m/%Y")),pos=4,cex=1.5)
+	text(min.X+10000,max.Y-10000, paste("Date: ",format(Date.txt, "%d/%m/%Y")),pos=4,cex=1.5)
 	
 	# Plot the movements over time (Velocity)
-  plot(WB.sub$date,WB.sub$dist/1000,type="n",lwd=1.5,xlim=c(min.Time,max.Time),ylim=c(min.dist,max.dist),bty="n",xlab="",ylab="",axes=TRUE,frame.plot=TRUE,main=Title2, cex=2) 
+  plot(WB.sub$date,WB.sub$dist/1000,type="n",lwd=1.5,xlim=c(min.Time,max.Time),ylim=c(min.dist,max.dist),bty="n",xlab="",ylab="",axes=TRUE,frame.plot=TRUE,main=Title2, cex.main = 2.5) 
 	lines(Day.sub$date, Day.sub$dist/1000, type='l', col="gray")
 	lines(Day.new$date, Day.new$dist/1000, type='l', col="blue")
 	mtext(side = 2,line=3, "Velocity (km/hr)",cex=1.5,col="blue") # Remember that this is a 3 hour dataset
 	mtext(side = 1,line=3, "Tracking Day",cex=1.5,col="black")
 
 	# Plot the net displacement per step
-	plot(WB.sub$date,sqrt(WB.sub$R2n)/1000,type="n",lwd=1.5,xlim=c(min.Time,max.Time),ylim=c(min.NSD,max.NSD),xlab="",ylab="",bty="n",axes=TRUE,frame.plot=TRUE,main=Title3) 
+	plot(WB.sub$date,sqrt(WB.sub$R2n)/1000,type="n",lwd=1.5,xlim=c(min.Time,max.Time),ylim=c(min.NSD,max.NSD),xlab="",ylab="",bty="n",axes=TRUE,frame.plot=TRUE,main=Title3, cex.main = 2.5) 
 	lines(Day.sub$date, sqrt(Day.sub$R2n)/1000, type='l', col="gray", cex=2)
 	lines(Day.new$date, sqrt(Day.new$R2n)/1000, type='l', col="blue", cex=2)
 	mtext(side = 2,line=3, "Net Displacement (Km)",cex=1.5,col="blue")

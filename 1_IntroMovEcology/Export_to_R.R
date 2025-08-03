@@ -1,4 +1,4 @@
 # extract R code
 library(knitr)
-file.exists("1_DataCleaning.Rmd")
-purl("1_DataCleaning.Rmd")
+file.exists("3_RemoteSensingExtraction.Rmd")
+purl("3_RemoteSensingExtraction.Rmd")
