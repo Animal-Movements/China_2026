@@ -24,7 +24,9 @@ knitr::opts_chunk$set(echo = TRUE)
 # Introduction
   >Example: White-bearded wildebeest (2010-2013)
   
-Throughout introductory exercises focused on discrete-time analyses, we will use a dataset collected during my graduate work.  The dataset consists of 36 adult white-bearded wildebeest (*Connochaetes taurinus*) fitted with Lotek WildCell^TM^ GPS tracking devices that were monitored across three ecosystems (Amboseli Basin, Athi-Kaputiei Plains, and the Greater Maasai Mara) in southern Kenya from 2010-2013.  These data are freely available on [Movebank](https://www.movebank.org/), a global platform for storing, managing, and sharing animal tracking data.  Known to be particularly important to ecosystem function and diversity, many resident populations of wildebeest have become threatened with extinction over the past few decades.  Study goals were to understand how natural and anthropogenic change impact the wildebeest movements.
+Throughout introductory exercises focused on discrete-time analyses, we will use a dataset collected during my graduate work.  The dataset consists of 36 adult white-bearded wildebeest (*Connochaetes taurinus*) fitted with Lotek WildCell^TM^ GPS tracking devices and monitored across three ecosystems (Amboseli Basin, Athi-Kaputiei Plains, and the Greater Maasai Mara) in southern Kenya from 2010-2013.  These data are freely available on [Movebank](https://www.movebank.org/), a global platform for storing, managing, and sharing animal tracking data.  
+
+Known to be particularly important to ecosystem function and diversity, many resident populations of wildebeest have become threatened with extinction over the past few decades.  Study goals were to understand how natural and anthropogenic change impact wildebeest movements.
 
 <div style="float:right">
 <img width="270" height="176" src="Figures/DSC_0287.jpg">
@@ -65,7 +67,7 @@ library(tmap)
 
 ## Set Time Zone & Coordinate System
 I prefer to keep items that require user input to appear at the top of my scripts.  For me, this is helpful when transitioning between different studies because most of the introductory code is essentially the same. 
-Data in this example were collected in Kenya.  We will create an object for UTC (Coordinated Universal Time) time, but import all data as East Africa Time (EAT).  See the [wiki](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) for your appropriate timezone identifier.
+Data in this example were collected in Kenya.  We will import our data in UTC (Coordinated Universal Time) time, but convert to local time (East Africa Time - EAT).  See the [wiki](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) for your appropriate timezone identifier.
 
 ```{r Clean Timezone, message=FALSE, warning=FALSE}
 # Set TimeZone
@@ -81,7 +83,7 @@ Any geospatial data (e.g., a set of points) with an incorrect projection or with
 
 When you acquire or download geospatial data, make sure you know the projection of the data.  This information is usually found in the metadata of a given dataset or should be provided by the person that is sharing the data with you.  A qualified GIS analyst should not be providing you with data without specifying the projection and datum in which the data were collected.
 
-There are EPSG Codes that can be used to avoid manually setting all the parameters needed in a projection. For instance, the code EPSG:32637 references the UTM37N projection with WGS84 datum and ellipsoid. The code EPSG:32736 references UTM36S.  You can find the EPSG reference listed in [http://spatialreference.org/ref/epsg/]() and [https://epsg.io/]().
+There are EPSG Codes that can be used to avoid manually setting all the parameters needed in a projection. For instance, the code EPSG:32637 references the UTM37N projection with WGS84 datum and ellipsoid. The code EPSG:32736 references UTM36S.  You can find the EPSG reference listed in [http://spatialreference.org/ref/epsg/](http://spatialreference.org/ref/epsg/) and [https://epsg.io/](https://epsg.io/).
 
 <center>
 ![[Source: ESRI](https://www.esri.com/arcgis-blog/products/arcgis-pro/mapping/gcs_vs_pcs)](Figures/projections-esri-blog.png){width=75%}
@@ -242,7 +244,7 @@ Many of the dataframe columns included are unnecessary (and quite long).  We nee
 
 Here, we will clean the data, filter out unnecessary information, and update the timezone to the local timezone.  We will then filter the data to the start/end dates for each animal to match what has been recorded in our reference dataset.  These dates represent the dates that the collar was deployed on the animal. To join the dataframes, we will match records based on a shared primary key (i.e., id). Lastly, we will check on the completeness of the dataset and remove any (grossly) erroneous data points.
 
-**NOTE**: date/time fields are problematic and be difficult to import.  If problems exist, you may need to properly format the date/time fields first.  See the [lubridate](https://cran.r-project.org/web/packages/lubridate/index.html) package for some instructions and/or the [strptime](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/strptime) package to format your date/time field. Note the format of **YOUR** own dataset (e.g., "%Y-%m-%d %H:%M:%S").  
+**NOTE**: date/time fields are problematic and can be difficult to import.  If problems exist, you may need to properly format the date/time fields first.  See the [lubridate](https://cran.r-project.org/web/packages/lubridate/index.html) package for some instructions and/or the [strptime](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/strptime) package to format your date/time field. Note the format of **YOUR** own dataset (e.g., "%Y-%m-%d %H:%M:%S").  
 
 Also note that some manufacturers put the date and time in separate columns.  If this occurs with your dataset, you'll need to put these columns together to create a timestamp.  For example, `timestamp = ymd_hms(paste(date,time),tz = Timezone1)`.  By using the `tz` argument, you can specify the timezone of the data.
 
@@ -541,11 +543,9 @@ Athi.Map <-
            legend.col.show = FALSE) +
 
   # Display NNP boundary
-  tm_shape(NNP,
-           name = 'NNP') +
-  tm_fill(col = 'green',
-          alpha = 0.5) +
-  tm_borders(col = 'green')
+  tm_shape(NNP, name = 'NNP') +
+    tm_fill(col = 'green', alpha = 0.5) +
+    tm_borders(col = 'green')
 
 # Create the map
 Athi.Map
