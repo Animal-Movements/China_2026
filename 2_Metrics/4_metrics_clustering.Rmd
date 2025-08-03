@@ -1,5 +1,5 @@
 ---
-title: "applying clustering on movement metrics"
+title: "Applying clustering algorithms on movement metrics"
 author: "Wenjing Xu 徐雯靓 (wenjing.xu@senckenberg.de)"
 date: '`r format(Sys.time(), "%d %B %Y")`'
 output:
@@ -30,33 +30,43 @@ library(ggplot2)
 ## 1. Introduction
 
 The goal of this analysis is to identify distinct movement strategies among wildebeest individuals based on movement-derived summary metrics. We apply both hierarchical and k-means clustering to explore individual-level patterns in:
-- displacement
-- path straightness
-- intensity of space use
-- minimum convex polygon (MCP) area
+
++ displacement
++ path straightness
++ intensity of space use
++ minimum convex polygon (MCP) area
 
 
 The two main clustering methods used in this workshop are:
-- **Hierarchical clustering**, which builds a tree-like structure of nested groups without pre-specifying the number of clusters.
-- **K-means clustering**, which partitions the data into a pre-defined number of clusters by minimizing within-cluster variance.
+
++ **Hierarchical clustering**, which builds a tree-like structure of nested groups without pre-specifying the number of clusters.
++ **K-means clustering**, which partitions the data into a pre-defined number of clusters by minimizing within-cluster variance.
 
 
 Why clustering?
-- Clustering provides an unsupervised, data-driven way to group individuals
+
++ Clustering provides an unsupervised, data-driven way to group individuals
   based on multivariate movement patterns.
-- It is simpler and more interpretable than behavioral segmentation methods (e.g. state‑space models), especially at the individual level.
-- Clustering enables exploration of general movement syndromes before applying more complex behavioral modeling.
++ It is simpler and more interpretable than behavioral segmentation methods (e.g. state‑space models), especially at the individual level.
++ Clustering enables exploration of general movement syndromes before applying more complex behavioral modeling.
 
 ## 2. Load and Prepare Data
 
 ```{r load-data}
 load("./Data/wildebeest_data.rdata")
 
+# filter to more accurate data points
 WB <- WB %>%
   as_tibble() %>%
   filter((fixType == "3D" & as.numeric(DOP) < 10) |
          (fixType == "2D" & as.numeric(DOP) < 5))
 
+# some individuals have less than one year amount of data
+# to make sure the movement metrics are comparable, we subset the dataset 
+# to contain only individuals with at least one year amount of data 
+# and subset the data to contain only data between Nov 1st 2010 and Oct 31 2011. 
+
+# first create a summary table for the dataset 
 WB_summary <- WB %>%
   arrange(animal_id, timestamp) %>%
   group_by(animal_id) %>%
@@ -69,20 +79,17 @@ WB_summary <- WB %>%
     .groups = "drop"
   )
 
-# some individuals have less than one year amount of data
-# to make sure the movement metrics are comparable, we subset the dataset 
-# to contain only individuals with at least one year amount of data 
-# and subset the data to contain only data between Nov 1st 2010 and Oct 31 2011. 
-
+# find individuals that were tracked for more tha one year
 long_term_ids <- WB_summary %>%
   filter(total_duration_days >= 365) %>%
   pull(animal_id)
 
+# filter to only these individuals and the same time period
 WB.one.year <- WB %>%
   filter(animal_id %in% long_term_ids) %>%
   filter(timestamp >= ymd("2010-11-01") & timestamp <= ymd("2011-10-31"))
 
-# then calculate metrics for all individuals in the one year dataset
+# turn the subset to tracks 
 wb.trk <- make_track(WB.one.year, 
                      # tell the function which column contains the coordinates
                      .x = longitude, .y = latitude, 
@@ -93,6 +100,7 @@ wb.trk <- make_track(WB.one.year,
                      # such as animal ID and month
                      id = animal_id, sex = sex, temp = temp) 
 
+# nest the tracks to prep for metrics calculation 
 wb.trk.nested <- wb.trk %>%
   transform_coords(., 32737) %>% 
   nest(data = -"id")
@@ -101,10 +109,14 @@ wb.trk.nested <- wb.trk %>%
 
 ## 3. Define and Compute Movement Metrics
 
+Because we will calculate the same metrics across all individuals at different temporal intervals (day, week, or year), we can define the functions first then apply to the tracks using `map`. 
 ```{r metrics-functions}
+# calculating displacement at the given temporal scale 
 calc_disp <- function(track_df, time_unit = c("day", "week")) {
+  
   time_unit <- match.arg(time_unit)
   
+  # for each temporal group, calculate distance between the first and the last locations (i.e. displacement)
   track_df %>%
     mutate(period = floor_date(t_, unit = time_unit)) %>%
     arrange(t_) %>%
@@ -124,17 +136,18 @@ calc_disp <- function(track_df, time_unit = c("day", "week")) {
 # calc maximum displacement monthly and annually 
 calc_max_disp <- function(track_df, time_unit = c("month", "year")) {
   
+  # if temporal period is year, calculate maximum displacement for the entire track
   if (time_unit == "year") {
     coords <- track_df %>% select(x_, y_) %>% as.matrix()
     # Get all pairwise distances efficiently
     dists <- dist(coords)
     max_dist <- max(dists, na.rm = TRUE)
-    
     tibble(
       max_disp = max_dist
-    )
-  } else {
+      )
     
+  } else {
+    # otherwise, group the dataset and calculate maximum displacement for each group
     df <- track_df %>%
       mutate(period = floor_date(t_, unit = time_unit)) %>%
       group_by(period) %>%
@@ -157,7 +170,7 @@ calc_max_disp <- function(track_df, time_unit = c("month", "year")) {
   }
 }
 
-# calculate monthly or yearly straightness
+# calculate monthly or yearly track straightness
 calc_straightness <- function(track_df, time_unit = c("month", "year")) {
   time_unit <- match.arg(time_unit)
   
@@ -165,6 +178,7 @@ calc_straightness <- function(track_df, time_unit = c("month", "year")) {
     # Calculate straightness once over all points
     straight <- straightness(track_df)
     return(tibble(period = "all_year", straightness = straight))
+    
   } else {
     track_df <- track_df %>%
       mutate(period = floor_date(t_, unit = time_unit)) %>%
@@ -183,7 +197,7 @@ calc_straightness <- function(track_df, time_unit = c("month", "year")) {
   
 }
 
-# calculate monthly or yearly intensity of use 
+# calculate monthly or yearly intensity of use, calculated by dividing the total movement distance (tot_dist) by the square of the area of movement (= minimum convex polygon 100).
 calc_intensity_use <- function(track_df, time_unit = c("month", "year")) {
   time_unit <- match.arg(time_unit)
   
@@ -209,7 +223,7 @@ calc_intensity_use <- function(track_df, time_unit = c("month", "year")) {
 }
 
 
-# calculate monthly intensity of use 
+# calculate monthly and yearly MCP 
 calc_mcp <- function(track_df, time_unit = c("month", "year")) {
   time_unit <- match.arg(time_unit)
   
@@ -239,7 +253,7 @@ calc_mcp <- function(track_df, time_unit = c("month", "year")) {
 }
 ```
 
-With the functions defied, we can now compute all the metrics. 
+With the functions defied, we can now compute all the metrics by applying the functions to each track of the nested track through `map`. 
 ```{r compute-metrics}
 wb_daily_disp <- wb.trk.nested %>%
   mutate(daily_disp = map(data, ~ calc_disp(.x, time_unit = "day"))) %>%
@@ -274,6 +288,7 @@ wb_monthly_straightness <- wb.trk.nested %>%
   summarise(ave_monthly_str = mean(straightness, na.rm = T),
             sd_monthly_str = sd(straightness, na.rm = T))
 
+# yearly straightness 
 wb_yearly_straightness <- wb.trk.nested %>%
   mutate(yearly_straightness = map(data, ~ calc_straightness(.x, time_unit = "year"))) %>%
   select(id, yearly_straightness) %>%
@@ -290,6 +305,7 @@ wb_monthly_intensity <- wb.trk.nested %>%
   summarise(ave_monthly_intensity = mean(intensity_use, na.rm = T),
             sd_monthly_intensity = sd(intensity_use, na.rm = T))
 
+# yearly intensity use
 wb_yearly_intensity <- wb.trk.nested %>%
   mutate(annual_intensity = map(data, ~ calc_intensity_use(.x, time_unit = "year"))) %>%
   select(id, annual_intensity) %>%
@@ -297,7 +313,7 @@ wb_yearly_intensity <- wb.trk.nested %>%
   select(-period) %>%
   rename(yearly_intensity = intensity_use)
 
-# monthly MCP of use per animal
+# monthly 95% MCP of use per animal
 wb_monthly_mcp <- wb.trk.nested %>%
   mutate(monthly_mcp = map(data, ~ calc_mcp(.x, time_unit = "month"))) %>%
   select(id, monthly_mcp) %>%
@@ -306,6 +322,7 @@ wb_monthly_mcp <- wb.trk.nested %>%
   summarise(ave_monthly_mcp = mean(mcp95, na.rm = T),
             sd_monthly_mcp = sd(mcp95, na.rm = T))
 
+# yearly 95% MCP 
 wb_yearly_mcp <- wb.trk.nested %>%
   mutate(annual_mcp = map(data, ~ calc_mcp(.x, time_unit = "year"))) %>%
   select(id, annual_mcp) %>%
@@ -314,7 +331,7 @@ wb_yearly_mcp <- wb.trk.nested %>%
   rename(yearly_mcp = mcp95)
 ```
 
-Combine all metrics into a single data frame 
+Combine all metrics into a single data frame, prepping for clustering later.
 ```{r data combo}
 metrics.list <- list(wb_daily_disp,
                      wb_monthly_max_disp,
@@ -336,18 +353,21 @@ metrics.mat <- scale(as.matrix(metrics.df %>% select(-id)))
 rownames(metrics.mat) <- metrics.df$id
 ```
 
+Heirachical clusting with `ward.D2` distance.
 ```{r HIERARCHICAL CLUSTERING}
 # Compute distance matrix and apply clustering method
 dist_mat <- dist(metrics.mat)
-hc <- hclust(dist_mat, method = "ward.D2") # ward.D2 creates compact, spherical clusters (often fits behavioral mode clustering).
+hc <- hclust(dist_mat, method = "ward.D2") 
+# ward.D2 creates compact, spherical clusters (often fits behavioral mode clustering).
 # Visualization
 plot(hc, main = "Hierarchical Clustering Dendrogram")
 ```
 
+K-means clustering, which aims to partition the points into k groups such that the sum of squares from points to the assigned cluster centres is minimized.
 ```{r k-means}
 set.seed(123)# reproducibility
-kmeans_result <- kmeans(metrics.mat, centers = 3, nstart = 25)
-metrics.df$cluster <- as.factor(kmeans_result$cluster)
+kmeans_result <- kmeans(metrics.mat, centers = 3, nstart = 25) # when centers is a number (the number of clusters), a random set of (distinct) rows in x is chosen as the initial centres. nstart defines this initial set of rows. 
+metrics.df$cluster <- as.factor(kmeans_result$cluster) # turn cluster ID into factor
 
 # Visualize using PCA projection onto first two principal components
 pca <- prcomp(metrics.mat)
@@ -360,7 +380,7 @@ ggplot(pca_df, aes(PC1, PC2, color = cluster, label = id)) +
   labs(title = "K-means Clustering (PCA Projection)", color = "Cluster")
 ```
 
-|           <span style="color:tomato">**QUESTION: ** From the track maps we created before, can you try to interpret the clustering results? </span>
+|           <span style="color:tomato">**QUESTION: ** From the track maps we created before, can you try to interpret the clustering results? Is 3 a seasonable number of clusters? Try different clustering numbers and see whether results are different.  </span>
 <br/><br/>
 
 
