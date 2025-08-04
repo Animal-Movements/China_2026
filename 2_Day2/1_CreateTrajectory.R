@@ -7,7 +7,7 @@ knitr::opts_chunk$set(echo = TRUE)
 rm(list=ls())
 
 # You may need to install these packages first
-#install.packages('adehabitatLT', 'amt', 'sf', 'tidyverse', 'unit', 'gridExtra', 'lubridate', 'date', 'gifski')
+#install.packages('adehabitatLT', 'amt', 'sf', 'tidyverse', 'units', 'gridExtra', 'lubridate', 'date')
 
 # Load libraries
 library(adehabitatLT)
@@ -18,7 +18,6 @@ library(units)
 library(gridExtra)
 library(lubridate)
 library(date)
-library(gifski)
 
 
 ## ----Data Import, message=FALSE, warning=FALSE, echo=TRUE---------------------------------------
@@ -125,49 +124,6 @@ WB.traj <-as.ltraj(xy = XY,
 WB.traj
 
 
-## ----Wenjing Subset, eval=FALSE, echo=FALSE-----------------------------------------------------
-## # Creating an hourly subset for Wenjing
-## WB.sub <- WB.data %>%
-##   mutate(
-##     hour = hour(timestamp),
-##     .keep = "all"
-##   ) %>%
-##   filter(
-##     hour >= 8 & hour <= 18
-##   )
-## 
-## # Extract the X and Y coordinates to input into as.ltraj
-## XY <- WB.sub %>%
-##   dplyr::select(X:Y) %>%
-##   as.data.frame()
-## 
-## # Create trajectory
-## WB.traj.sub <-as.ltraj(xy = XY,
-##                        date = WB.sub$timestamp,
-##                        id = WB.sub$animal_id,
-##                        typeII = TRUE,
-##                        infolocs = WB.sub[ ,3:8],
-##                        slsp = "missing")
-## 
-## # Set reference date/time
-## refda <- WB.traj.sub[[1]]$date[1]
-## 
-## # Set all null values to NA.  Based on 3 hour interval.
-## WB.traj.na.sub <- setNA(WB.traj.sub,
-##                     date.ref = refda,
-##                     dt = 1,
-##                     units = "hour")
-## 
-## # Create a regular trajectory by rounding the time to the exact time intervals.
-## WB.traj.reg.sub <- sett0(WB.traj.na.sub,
-##                       date.ref = refda,
-##                       dt = 1,
-##                       units = "hour")
-## 
-## # Export
-## write_rds(WB.traj.reg.sub, file = "Data/wildebeest_WB_Hourly.rds")
-
-
 ## ----Resample, message=FALSE, warning=FALSE, echo=TRUE------------------------------------------
 # Here, we will use the first location in the dataset as the reference date/time.  
 # Set reference date/time
@@ -226,10 +182,6 @@ plot(WB.traj.reg)
 
 # View each animal separately using vector notation
 plot(WB.traj.reg[5])
-
-# We can also specify the name of the animals we want to plot.  For example:
-# plot(WB.traj, 
-#      id = c("Kikaya", "Karbolo", "Peria", "Sotua"))
 
 # View the columns included in the data object 
 #**Note**, you must use double brackets [[]] because the output is a list
@@ -384,12 +336,8 @@ WB.trk <- make_track(WB.data,
   # Nest the data by id
   nest(data = -'id')
 
-# Note, you could also import the geographic data and then transform the coordinate system
-#WB.trk.New -> transform_coords(WB.trk, crs_to = SET, crs_from = SET)
-
 # Look at the data and note the result
 head(WB.trk)
-#class(WB.trk)
 
 # Step 2: Resample and add net squared displacement
 # Note the use of the map() function.  Resample to a 3 hour interval
@@ -409,12 +357,8 @@ WB.steps <- WB.trk %>%
 # Look at the file now
 head(WB.steps)
 
-# Or, look at one of the animals
-# You'll see the steplength (sl_), turning angle (ta_), change in time (dt_), and net squared displacement (nsd_)
-#WB.steps$steps[1]
-
 # Step 3: Select columns of interest and unnest
-# We'll grab the animal id and then the calculated movements.  This means we will ignore the original data
+# We'll grab the animal id and then the calculated movements.
 WB.move.amt <- WB.steps %>% 
   # Select columns of interest
   select(id, steps) %>% 
@@ -435,264 +379,6 @@ WB.move.amt <- WB.steps %>%
 #   ylab("Distance (km)")
 
 
-## ----Animate, message=FALSE, warning=FALSE, eval=FALSE, echo=TRUE, results='hide'---------------
-## # Set Output Directory
-## dir.out <- paste0(getwd(),"/Output/Animation/")
-## 
-## # Create the directory if it doesn't exist
-## if (!dir.exists(dir.out)){
-##   dir.create(dir.out)
-##   print ("Creating Directory!")
-## } else {
-##   print("Directory exists!  Check the Output/Plots folder for results.")
-## }
-## 
-## # Select the animal to animate and remove any NA values
-## WB.sub <- WB.move %>%
-##   filter(id == "Ntishya",
-##          !is.na(x))
-## 
-## # Create a vector of Julian dates to use as our numeric value to animate
-## # This just makes it easier to iterate through the days
-## WB.sub$julian <- mdy.date(month(WB.sub$date), day(WB.sub$date), year(WB.sub$date))
-## 
-## # Create unique variable (day) to loop over for animation
-## Days.unique <- unique(WB.sub$julian)
-## 	
-## # Create Null dataset to hold current day for display 	
-## Day.new <- NULL	
-## 
-## # Setup plot parameters - we need these to set the limits of each graph
-## # ----------------------------------------------------------------------
-## min.X <- min(WB.sub$x,na.rm=TRUE)
-## max.X <- max(WB.sub$x,na.rm=TRUE)
-## min.Y <- min(WB.sub$y,na.rm=TRUE)
-## max.Y <- max(WB.sub$y,na.rm=TRUE)
-## 
-## # Setup Title
-## Title1 = paste0(unique(WB.sub$id),": Observed Movement")
-## # ----------------------------------------------------------------------
-## 
-## # Loop through all days
-## # **************************************************
-## for (i in 1:length(Days.unique)){
-##   # Output each file to directory
-##   outfile = paste0(dir.out,"/Animation_",unique(WB.sub$id),"_",Days.unique[i],".png")
-##   png(file = outfile,width=1000, height=800)
-## 
-##   # Create subset of data to graph, stepping through each day, but includes all previous data
-## 	Day.sub <- WB.sub %>%
-## 	  filter(julian <= Days.unique[i])
-## 
-## 	# This part graphs the most current data in a different color...allows to be clearly seen in animation
-## 	if(i==1)
-## 		{Day.new <- Day.sub
-## 		} else {
-## 		  Day.new <- Day.sub %>%
-## 		    filter(julian == Days.unique[i]) # Note the subtle difference from above
-## 		}
-## 	
-## 	# Grab the date to plot
-## 	Date.txt <- Day.new[1,3]
-## 	
-## 	# Calculate the total days tracked
-##   time.diff <- Day.new %>%
-##     summarize(start = min(WB.sub$date), # Get the data from the full dataset
-##               end = max(date),
-##               diff = trunc(difftime(end, start, units="days"))) %>%
-##     pull(diff)
-## 
-##   # Create plot
-## 	plot(WB.sub$x,WB.sub$y,type="n",lwd=1.5,xlim=c(min.X,max.X),ylim=c(min.Y,max.Y),xlab="",ylab="",asp=1,bty="n",axes=FALSE,frame.plot=TRUE,main=Title1, cex.main = 1.5)
-## 	mtext(paste(format(WB.sub$date[1],"%Y-%m-%d")," to ",format(WB.sub$date[nrow(WB.sub)],"%Y-%m-%d")),cex=0.75)
-## 	Axis(side=1, labels=TRUE)
-## 	Axis(side=2, labels=TRUE)
-## 	lines(Day.sub$x,Day.sub$y,lwd=1,col="gray") # Graph all data in gray
-## 	lines(Day.new$x,Day.new$y,lwd=2,col="blue") # Graph new data in blue
-## 	mtext(side = 2,line=3, "Northing",cex=1.5,col="black")
-## 	mtext(side = 1,line=3, "Easting",cex=1.5,col="black")
-## 	# Plot the date
-## 	text(min.X+10000,max.Y-10000, paste("Date: ",format(Date.txt, "%d/%m/%Y")),pos=4,cex=1.5)
-## 	
-## dev.off()
-## }
-## 
-## # Then use Gifski to convert the .pngs to a .gif
-## All.files <- list.files(dir.out, pattern = "*.png", full.names = TRUE)
-## gifski(All.files, gif_file = paste(dir.out,"Wild.gif"), width = 1000, height = 800, delay = 0.1)
-## 
-## # Remove intermediary (.png) files
-## file.remove(All.files)
-
-
 ## ----Save, message=FALSE, warning=FALSE, echo=TRUE----------------------------------------------
-save(WB.move, WB.move.amt, file = "Data/wildebeest_3hr_adehabitat.rdata")
-
-
-## ----Animate Exercise, message=FALSE, warning=FALSE, eval=FALSE, echo=FALSE---------------------
-## # Set Output Directory
-## dir.out <- paste0(getwd(),"/Output/Animation/")
-## 
-## # Create the directory if it doesn't exist
-## if (!dir.exists(dir.out)){
-##   dir.create(dir.out)
-##   print ("Creating Directory!")
-## } else {
-##   print("Directory exists!  Check the Output/Plots folder for results.")
-## }
-## 
-## # Select the animal to animate
-## WB.sub <- WB.move %>%
-##   filter(id == "Ntishya",
-##          !is.na(x))
-## 
-## # Create a vector of Julian dates to use as our numeric value to animate
-## WB.sub$julian <- mdy.date(month(WB.sub$date), day(WB.sub$date), year(WB.sub$date))
-## 
-## # Create unique variable (day) to loop over for animation
-## Days.unique <- unique(WB.sub$julian)
-## 	
-## # Create Null dataset to hold current day for display 	
-## Day.new <- NULL	
-## 
-## # Setup plot parameters - we need these to set the limits of each graph
-## # ----------------------------------------------------------------------
-## min.X <- min(WB.sub$x,na.rm=TRUE)
-## max.X <- max(WB.sub$x,na.rm=TRUE)
-## min.Y <- min(WB.sub$y,na.rm=TRUE)
-## max.Y <- max(WB.sub$y,na.rm=TRUE)
-## 
-## min.Time <- min(WB.sub$date,na.rm=TRUE)
-## max.Time <- max(WB.sub$date,na.rm=TRUE)
-## 
-## min.dist <-min(WB.sub$dist/1000,na.rm=TRUE) # km
-## max.dist <-max(WB.sub$dist/1000,na.rm=TRUE)
-## 
-## min.NSD <- min(sqrt(WB.sub$R2n)/1000,na.rm=TRUE) # km
-## max.NSD <- max(sqrt(WB.sub$R2n)/1000,na.rm=TRUE)
-## 
-## # Setup Titles
-## Title1 = paste0(unique(WB.sub$id),": Observed Movement")
-## Title2 = paste("Movement")
-## Title3 = paste("Net Displacement")
-## # ----------------------------------------------------------------------
-## 
-## # Loop through all days
-## # **************************************************
-## for (i in 1:length(Days.unique)){
-##   # Output each file to directory
-##   outfile = paste0(dir.out,"/Animation_",unique(WB.sub$id),"_",Days.unique[i],".png")
-##   png(file = outfile,width=1000, height=800)
-##   layout(matrix(c(1,1,2,3), 2, 2, byrow = FALSE), widths=1, heights=c(1,1))
-##          par(mar=c(5.1,4.1,4.1,5.1))
-## 
-##   # Create subset of data to graph, stepping through each day, but includes all previous data
-## 	Day.sub <- WB.sub %>%
-## 	  filter(julian <= Days.unique[i])
-## 
-## 	# This part graphs the most current data in a different color...allows to be clearly seen in animation
-## 	if(i==1)
-## 		{Day.new <- Day.sub
-## 		} else {
-## 		  Day.new <- Day.sub %>%
-## 		    filter(julian == Days.unique[i]) # Note the subtle difference from above
-## 		}
-## 	
-## 	# Grab the date to plot
-## 	Date.txt <- Day.new[1,3]
-## 	
-## 	# Calculate the total days tracked
-##   time.diff <- Day.new %>%
-##     summarize(start = min(WB.sub$date), # Get the data from the full dataset
-##               end = max(date),
-##               diff = trunc(difftime(end, start, units="days"))) %>%
-##     pull(diff)
-## 
-##   # Create plots
-## 	plot(WB.sub$x,WB.sub$y,type="n",lwd=1.5,xlim=c(min.X,max.X),ylim=c(min.Y,max.Y),xlab="",ylab="",asp=1,bty="n",axes=FALSE,frame.plot=TRUE,main=Title1, cex.main = 2.5)
-## 	mtext(paste(format(WB.sub$date[1],"%Y-%m-%d")," to ",format(WB.sub$date[nrow(WB.sub)],"%Y-%m-%d")),cex=0.75)
-## 	Axis(side=1, labels=TRUE)
-## 	Axis(side=2, labels=TRUE)
-## 	lines(Day.sub$x,Day.sub$y,lwd=1,col="gray") # Graph all data in gray
-## 	lines(Day.new$x,Day.new$y,lwd=2,col="blue") # Graph new data in blue
-## 	mtext(side = 2,line=3, "Northing",cex=1.5,col="black")
-## 	mtext(side = 1,line=3, "Easting",cex=1.5,col="black")
-## 	# Plot the date
-## 	text(min.X+10000,max.Y-10000, paste("Date: ",format(Date.txt, "%d/%m/%Y")),pos=4,cex=1.5)
-## 	
-## 	# Plot the movements over time (Velocity)
-##   plot(WB.sub$date,WB.sub$dist/1000,type="n",lwd=1.5,xlim=c(min.Time,max.Time),ylim=c(min.dist,max.dist),bty="n",xlab="",ylab="",axes=TRUE,frame.plot=TRUE,main=Title2, cex.main = 2.5)
-## 	lines(Day.sub$date, Day.sub$dist/1000, type='l', col="gray")
-## 	lines(Day.new$date, Day.new$dist/1000, type='l', col="blue")
-## 	mtext(side = 2,line=3, "Velocity (km/hr)",cex=1.5,col="blue") # Remember that this is a 3 hour dataset
-## 	mtext(side = 1,line=3, "Tracking Day",cex=1.5,col="black")
-## 
-## 	# Plot the net displacement per step
-## 	plot(WB.sub$date,sqrt(WB.sub$R2n)/1000,type="n",lwd=1.5,xlim=c(min.Time,max.Time),ylim=c(min.NSD,max.NSD),xlab="",ylab="",bty="n",axes=TRUE,frame.plot=TRUE,main=Title3, cex.main = 2.5)
-## 	lines(Day.sub$date, sqrt(Day.sub$R2n)/1000, type='l', col="gray", cex=2)
-## 	lines(Day.new$date, sqrt(Day.new$R2n)/1000, type='l', col="blue", cex=2)
-## 	mtext(side = 2,line=3, "Net Displacement (Km)",cex=1.5,col="blue")
-## 	mtext(side = 1,line=3, "Tracking Day",cex=1.5,col="black")
-## 
-## dev.off()
-## }
-## 
-## # Then use Gifski to convert the .pngs to a .gif
-## All.files <- list.files(dir.out, pattern = "*.png", full.names = TRUE)
-## gifski(All.files, gif_file = paste(dir.out,"Wild_3panel.gif"), width = 1000, height = 800, delay = 0.1)
-## 
-## # Remove intermediary (.png) files
-## file.remove(All.files)
-
-
-## ----Metrics, message=FALSE, warning=FALSE, eval=FALSE, echo=FALSE------------------------------
-## # Calculate Movement Metrics
-## #Now that we have a movement trajectory, we can create simple summary metrics.  However, we must acknowledge that our sampling interval will impact these results.  Please remember that all data in this example has been resampled to a 3 hour temporal interval.
-## 
-## # First, let's calculate speed, since distance traveled is provided with change in time (dt).  We should also make id and sex factorsr
-## WB.move <- WB.move %>%
-##   mutate(speed = dist/dt) %>%
-##   mutate(across(c(id,sex), as.factor))
-## 
-## # Create a boxplot of the speeds traveled for each individual
-## # Note that I'm filtering the data so that only data that is not NA is included.
-## # Note also that the units are meters per second
-## WB.move %>%
-##   filter(!is.na(speed)) %>%
-##   ggplot(aes(x = id,
-##              y = speed)) +
-##   geom_boxplot()
-## 
-## # Create a graph of distance traveled
-## WB.move %>%
-##   filter(!is.na(dist)) %>%
-##   ggplot(aes(x = dist/1000)) +
-##   geom_histogram(color="black", fill="white", bins = 50) +
-##   labs(x = "Distance (km)") +
-##   theme_classic()
-## 
-## # Or we might want the same information, but showing the individual animals
-## WB.move %>%
-##   filter(!is.na(dist)) %>%
-##   ggplot(aes(x = dist/1000, fill = id)) +
-##   geom_density(alpha = 0.3) + # alpha determines transparency
-##   labs(x = "Distance (km)") +
-##   theme_classic()
-## 
-## # What is the maximum speed traveled
-## max(WB.move$speed, na.rm = TRUE)
-## 
-## # What about distance
-## max(WB.move$dist/1000, na.rm = TRUE) # So a distance of 13.4 km in a 3 hour period.
-## 
-## # Calculate statistics for each animal
-## WB.moveStats <- WB.move %>%
-##   #group_by(id) %>% # Grouping here would give you the same result
-##   summarize(AvgMove = round(mean(dist/1000, na.rm = TRUE), digits = 2),
-##             SumMove = round(sum(dist/1000, na.rm = TRUE), digits = 2),
-##             MaxSpeed = round(max(speed, na.rm = TRUE), digits = 2),
-##             MaxDisp = round(max(sqrt(R2n)/1000, na.rm = TRUE), digits = 2),
-##             .by = id)
-## 
-## WB.moveStats
+save(WB.move, WB.move.amt, file = "Data/wildebeest_3hr_data.rdata")
 
