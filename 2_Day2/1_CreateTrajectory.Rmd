@@ -22,7 +22,7 @@ knitr::opts_chunk$set(echo = TRUE)
 # Introduction
 Now that we have imported the wildebeest dataset for analysis and done some initial cleaning, we can take the necessary next steps to create an animal movement trajectory.  Most discrete time analyses require the data to be regularly sampled with negligible positional error.  Data **must** also be organized in sequential order.  
 
-There are a number of [R](https://cran.r-project.org/) packages that can be used to convert our dataframe to an animal movement trajectory.  We will use the [adehabitatLT](https://cran.r-project.org/web/packages/adehabitatLT/index.html) and [amt - animal movement tools](https://cran.r-project.org/web/packages/amt/index.html) packages for all analyses described here.  The [move2](https://cran.r-project.org/web/packages/move2/index.html) package also has features that are worth exploring.  All packages differ in the commands and workflow used, but will provide the same end product for further analyses.  Please see the vignettes included with each package for further instruction.
+There are a number of [R](https://cran.r-project.org/) packages that can be used to convert our dataframe to an animal movement trajectory.  We will use the [adehabitatLT](https://cran.r-project.org/web/packages/adehabitatLT/index.html) and [amt - animal movement tools](https://cran.r-project.org/web/packages/amt/index.html) packages for all analyses described here.  Packages differ in the commands and workflow used, but should provide the same end product for further analyses.  Please see the vignettes included with each package for further instruction.
 
 I am most familiar with the [adehabitatLT](https://cran.r-project.org/web/packages/adehabitatLT/index.html) package and tend to default to using it for animal movement analyses.  [Amt](https://cran.r-project.org/web/packages/amt/index.html), however, has grown in its popularity over the last few years, using tracks as its basic building block.  One of the packages key strengths lies in its tidy, modular approach to construct movement workflows, with the coding structure lending itself well when transitioning to more complicated analyses (e.g., integrated Step Selection Functions (iSSFs)). 
 
@@ -44,7 +44,7 @@ Load the required libraries and remove everything held in [R's](https://cran.r-p
 rm(list=ls())
 
 # You may need to install these packages first
-#install.packages('adehabitatLT', 'amt', 'sf', 'tidyverse', 'unit', 'gridExtra', 'lubridate', 'date', 'gifski')
+#install.packages('adehabitatLT', 'amt', 'sf', 'tidyverse', 'units', 'gridExtra', 'lubridate', 'date')
 
 # Load libraries
 library(adehabitatLT)
@@ -55,7 +55,6 @@ library(units)
 library(gridExtra)
 library(lubridate)
 library(date)
-library(gifski)
 ```
 
 ## Data Import
@@ -182,49 +181,6 @@ Also note that the dataset summary indicates that our data were collected irregu
 
   1. Resample the data to a 3-hour interval and set all no data records to NA using the `setNA()` function.  
   2. Round all the times to the exact time interval (i.e., make the trajectory regular) using the `sett0()` function.
-  
-```{r Wenjing Subset, eval=FALSE, echo=FALSE}
-# Creating an hourly subset for Wenjing
-WB.sub <- WB.data %>% 
-  mutate(
-    hour = hour(timestamp),
-    .keep = "all"
-  ) %>% 
-  filter(
-    hour >= 8 & hour <= 18
-  )
-
-# Extract the X and Y coordinates to input into as.ltraj
-XY <- WB.sub %>% 
-  dplyr::select(X:Y) %>% 
-  as.data.frame()
-
-# Create trajectory
-WB.traj.sub <-as.ltraj(xy = XY,
-                       date = WB.sub$timestamp,
-                       id = WB.sub$animal_id,
-                       typeII = TRUE, 
-                       infolocs = WB.sub[ ,3:8],
-                       slsp = "missing")
-
-# Set reference date/time
-refda <- WB.traj.sub[[1]]$date[1]
-
-# Set all null values to NA.  Based on 3 hour interval.
-WB.traj.na.sub <- setNA(WB.traj.sub, 
-                    date.ref = refda, 
-                    dt = 1, 
-                    units = "hour") 
-
-# Create a regular trajectory by rounding the time to the exact time intervals.
-WB.traj.reg.sub <- sett0(WB.traj.na.sub, 
-                      date.ref = refda, 
-                      dt = 1, 
-                      units = "hour")
-
-# Export
-write_rds(WB.traj.reg.sub, file = "Data/wildebeest_WB_Hourly.rds")
-```
 
 ```{r Resample, message=FALSE, warning=FALSE, echo=TRUE}
 # Here, we will use the first location in the dataset as the reference date/time.  
@@ -290,10 +246,6 @@ plot(WB.traj.reg)
 
 # View each animal separately using vector notation
 plot(WB.traj.reg[5])
-
-# We can also specify the name of the animals we want to plot.  For example:
-# plot(WB.traj, 
-#      id = c("Kikaya", "Karbolo", "Peria", "Sotua"))
 
 # View the columns included in the data object 
 #**Note**, you must use double brackets [[]] because the output is a list
