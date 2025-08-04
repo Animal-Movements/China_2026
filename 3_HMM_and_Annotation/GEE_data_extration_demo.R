@@ -12,10 +12,10 @@ library(mapview)
 ee_Initialize()
 
 # --------- read data ------------------
-sample_sites <- read_csv("./Data/Sampling_site.csv") %>% 
+sample_sites <- read_csv("./3_HMM_and_Annotation/Data/Sampling_site.csv") %>% 
   st_as_sf(., coords = c("x", "y"), crs = st_crs(32736))
 
-study_site_box <- read_sf("./Data/Study_area_bbox_3kmbuffer.gpkg")
+study_site_box <- read_sf("./3_HMM_and_Annotation/Data/Study_area_bbox_3kmbuffer.gpkg")
 
 # always check CRS
 st_crs(sample_sites)
@@ -29,7 +29,7 @@ mapView(study_site_box, color = "grey", layer.name = "Fencelines") +
 terraclimate <- ee$ImageCollection("IDAHO_EPSCOR/TERRACLIMATE") %>%  # identify the dataset from earth engine data catalog 
   ee$ImageCollection$filterDate("2018-01-01", "2021-01-01") %>% # filter to target sates
   ee$ImageCollection$map(function(x) x$select("pr")) %>% # Select only precipitation bands 
-  ee$ImageCollection$toBands() %>% # from imagecollection to image
+  ee$ImageCollection$first() %>% # from imagecollection to image
   ee$Image$rename(sprintf("PP_%02d",1:36)) # rename the bands of an image for identification
 
 ee_mara_rain <- ee_extract(x = terraclimate, y = study_site_box["Id"], fun = ee$Reducer$mean(), sf = FALSE) %>% #extract to the whole area and take the mean value
@@ -44,7 +44,7 @@ ee_mara_rain <- ee_extract(x = terraclimate, y = study_site_box["Id"], fun = ee$
 terraclimate_20yr <- ee$ImageCollection("IDAHO_EPSCOR/TERRACLIMATE") %>%
   ee$ImageCollection$filterDate("2001-01-01", "2021-01-01") %>%
   ee$ImageCollection$map(function(x) x$select("pr")) %>% # Select only precipitation bands
-  ee$ImageCollection$toBands() %>% # from imagecollection to image
+  ee$ImageCollection$first() %>% # from imagecollection to image
   ee$Image$rename(sprintf("PP_%02d",1:240)) # rename the bands of an image
 
 ee_mara_rain_20yr <- ee_extract(x = terraclimate_20yr, y = study_site_box["Id"], fun = ee$Reducer$mean(), sf = FALSE) %>%
