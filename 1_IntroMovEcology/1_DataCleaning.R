@@ -34,8 +34,8 @@ UtmZone.proj <- "EPSG:32737"
 
 ## ----Load, message=FALSE, warning=FALSE----------------------------------
 # Pull Data from Movebank
-WB <- movebank_download_study(study_id = "White-bearded wildebeest (Connochaetes taurinus) movements - Kenya") 
-
+WB <- movebank_download_study(study_id = "White-bearded wildebeest (Connochaetes taurinus) movements - Kenya", 'license-md5'='19ebcecefff9ecf716a0bf95ef0ef18b') 
+#WB <- read_csv("./1_IntroMovEcology/Data/WB_FullDataset.csv") %>% st_as_sf
 # You could use the output directly with functions in the move2 package.  Here, however, we will extract the X and Y coordinates and convert to a dataframe
 
 # Using piping operations
