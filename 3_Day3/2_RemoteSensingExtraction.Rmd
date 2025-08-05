@@ -89,11 +89,14 @@ raster_list[[1]]
 ```
 
 # Create Raster Mosaic
-Because our rasters are saved as a list, we will use the `do.call()` function to `mosaic()` the grids together and use `mean` for potential overlapping areas, which isn't necessary here.  As a result, we could use the `merge()` function instead.
+Because our rasters are saved as a list, we will use the `do.call()` function to `merge())` the grids together.  If there were overlap between the rasters we were merging, we would need to use the `mosaic()` function.  See `help(mosaic)` for more information.
 
 ```{r Mosaic, message=FALSE, warning=FALSE, echo=TRUE, eval = TRUE}
 # Mosaic the rasters together.
-raster_srtm <- do.call(mosaic, c(raster_list, fun = mean))
+raster_srtm <- do.call(merge, raster_list)
+# Or if overlap between the rasters exists
+#raster_srtm <- do.call(mosaic, c(raster_list, fun = mean))
+
 
 # Check to determine if the raster image and data points overlap
 image(raster_srtm)
@@ -113,7 +116,7 @@ WB.sf.dd$srtm <- Vals[,-1]
 ```
 
 # Exercise:
-Raster data layers can become quite large and difficult to handle in memory.  In these cases, it's often better to process each raster in a stepwise fashion, rather than mosaicking or merging them together.  
+Raster data layers can become quite large and difficult to handle in memory.  In these cases, it's often better to process each raster in a stepwise fashion, rather than merging or mosaicking them together.  
 
 How would you cycle through each raster, extracting the values from each, before moving on to the next raster in sequence?  Note, the difficult part with this exercise is determining how to append the extracted data in a single column to your dataframe. 
 

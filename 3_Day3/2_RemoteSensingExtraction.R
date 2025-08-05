@@ -1,8 +1,8 @@
-## ----setup, include=FALSE-----------------------------------------------------------------------
+## ----setup, include=FALSE----------------------------------------------------------
 knitr::opts_chunk$set(echo = TRUE)
 
 
-## ----Clean Libraries, message=FALSE, warning=FALSE----------------------------------------------
+## ----Clean Libraries, message=FALSE, warning=FALSE---------------------------------
 # Remove from memory
 rm(list=ls())
 
@@ -15,7 +15,7 @@ library(sf)
 library(mapview)
 
 
-## ----Data Import, message=FALSE, warning=FALSE, echo=TRUE---------------------------------------
+## ----Data Import, message=FALSE, warning=FALSE, echo=TRUE--------------------------
 # Data load/import
 load("Data/wildebeest_data.rdata")
 
@@ -37,7 +37,7 @@ WB.sf.dd
 mapview(WB.sf.dd)
 
 
-## ----List Files, message=FALSE, warning=FALSE---------------------------------------------------
+## ----List Files, message=FALSE, warning=FALSE--------------------------------------
 # List the files with the pattern hgt in the srtm folder
 dir.srtm <- paste0(getwd(),"/Data/srtm/")
 AllFiles <- list.files(path = dir.srtm, pattern = ".hgt", full.names = TRUE)
@@ -52,16 +52,19 @@ image(raster_list[[1]])
 raster_list[[1]]
 
 
-## ----Mosaic, message=FALSE, warning=FALSE, echo=TRUE, eval = TRUE-------------------------------
+## ----Mosaic, message=FALSE, warning=FALSE, echo=TRUE, eval = TRUE------------------
 # Mosaic the rasters together.
-raster_srtm <- do.call(mosaic, c(raster_list, fun = mean))
+raster_srtm <- do.call(merge, raster_list)
+# Or if overlap between the rasters exists
+#raster_srtm <- do.call(mosaic, c(raster_list, fun = mean))
+
 
 # Check to determine if the raster image and data points overlap
 image(raster_srtm)
 points(WB.sf.dd)
 
 
-## ----Extract, message=FALSE, warning=FALSE, echo=TRUE, eval = TRUE------------------------------
+## ----Extract, message=FALSE, warning=FALSE, echo=TRUE, eval = TRUE-----------------
 # Extract raster value at points
 Vals <- extract(raster_srtm, WB.sf.dd)
 
@@ -70,7 +73,7 @@ WB.sf.dd$srtm <- Vals[,-1]
 # Done!  Easy!
 
 
-## ----Reproj Verify, message=FALSE, warning=FALSE, results='hide', echo=FALSE, eval = FALSE------
+## ----Reproj Verify, message=FALSE, warning=FALSE, results='hide', echo=FALSE, eval = FALSE----
 ## # Create a temporary matrix to hold the results
 ## Temp.vals <- matrix(NA, nrow = nrow(WB.sf.dd), ncol = length(raster_list))
 ## 

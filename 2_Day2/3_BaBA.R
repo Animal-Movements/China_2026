@@ -77,7 +77,10 @@ head(results_prong$classification)
 fence.kenya <-  st_read("./Data/Fencelines2010_UTM37S.gpkg") 
 
 # load data and filter out the unreliable locations
-WB <- read_rds("./Data/wildebeest_3hr_adehabitat.rds") %>%
+load("./Data/wildebeest_3hr_data.rdata")
+
+
+WB <- WB.move %>%
   as_tibble() %>% 
   rename(Animal.ID = animal_id) %>%
   mutate(Animal.ID = factor(Animal.ID)) %>% # BaBA requires the ID column to be named "Animal.ID" and timestamp column to be namaed "date"
