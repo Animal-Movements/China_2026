@@ -1,8 +1,8 @@
-## ----setup, include=FALSE------------------------------------------------
+## ----setup, include=FALSE-----------------------------------------------------------------------------
 knitr::opts_chunk$set(echo = TRUE)
 
 
-## ----Clean Libraries, message=FALSE, warning=FALSE-----------------------
+## ----Clean Libraries, message=FALSE, warning=FALSE----------------------------------------------------
 # Remove from memory
 rm(list=ls())
 
@@ -18,67 +18,47 @@ library(sf)
 library(tmap)
 
 
-## ----Clean Timezone, message=FALSE, warning=FALSE------------------------
+## ----Clean Timezone, message=FALSE, warning=FALSE-----------------------------------------------------
 # Set TimeZone
 # Other timezones can be found at: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 Timezone1 <- 'UTC'
 Timezone2 <- "Africa/Nairobi"
 
 
-## ----Set UTM Zone, message=FALSE, warning=FALSE--------------------------
+## ----Set UTM Zone, message=FALSE, warning=FALSE-------------------------------------------------------
 # UTM Zone
 LatLong.proj <- "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"  # EPSG:4326
 #UtmZone.proj <- "+proj=utm +zone=37 +south +ellps=WGS84 +datum=WGS84 +units=m +no_defs" #This is EPSG:32737"
 UtmZone.proj <- "EPSG:32737"
 
 
-## ----Load, message=FALSE, warning=FALSE----------------------------------
-# Pull Data from Movebank
+## ----Load, message=FALSE, warning=FALSE---------------------------------------------------------------
+# Load the movement file as a CSV
+WB <- data.frame(read_csv("Data/WB_FullDataset.csv"))
 
-#movebank_store_credentials(username="myUserName", password="myPassword")
+# Load the reference dataset as a CSV
+WB.ref <- data.frame(read_csv("Data/WB_FullDataset_ref.csv"))
 
 
-WB <- movebank_download_study(study_id = "White-bearded wildebeest (Connochaetes taurinus) movements - Kenya",'license-md5' = "") 
+# Alternatively, you could directly pull from Movebank after creating an account and accepting the user agreement.
+# To pull data from Movebank directly
 
-# You could use the output directly with functions in the move2 package.  Here, however, we will extract the X and Y coordinates and convert to a dataframe
+# Store credentials
+#movebank_store_credentials("myUserName", "myPassword")
 
-# Using piping operations
-WB <- WB %>% 
-  as_tibble() %>% # A tibble is a dataframe of dataframes 
-  mutate(longitude = st_coordinates(WB)[,1], # Pull out the X coordinates
-         latitude = st_coordinates(WB)[,2]) %>% # Pull out the y coordinates
-  select(-geometry) %>% # Remove the geometry
-  data.frame() # Make it a dataframe
+# Specify the study id of interest
+#WB <- movebank_download_study(study_id = "White-bearded wildebeest (Connochaetes taurinus) movements - Kenya") 
+
+# Note the format from pulling directly from Movebank is a bit different and requires some wrangling (it's a move2 object)
+# WB <- WB %>% 
+#   as_tibble() %>% # A tibble is a dataframe of dataframes 
+#   mutate(longitude = st_coordinates(WB)[,1], # Pull out the X coordinates
+#          latitude = st_coordinates(WB)[,2]) %>% # Pull out the y coordinates
+#   select(-geometry) %>% 
+#   data.frame() 
 
 # Reference Dataset, import and convert to dataframe
-WB.ref <- data.frame(movebank_download_deployment(study_id = "White-bearded wildebeest (Connochaetes taurinus) movements - Kenya"))
-
-#**NOTE**: If data are protected and you need to provide your login details, you could do the following:
-
-# Set your movebank login (sign up here https://www.movebank.org/cms/movebank-registration). You will only need to set  your login details once.  Afterwards, your computer will remember your credentials.
-#movebank_store_credentials(username="myUserName", password="myPassword")
-
-# Then do the same as before
-#WB <- as.data.frame(movebank_download_study(study_id = "White-bearded wildebeest (Connochaetes taurinus) movements - Kenya"))
-
-# Reference Dataset
-#WB.ref <- as.data.frame(movebank_download_deployment(study_id = "White-bearded wildebeest (Connochaetes taurinus) movements - Kenya", login = login))
-
-# **********************
-# **********************
-
-# Alternatively, we can upload each file directly and convert to a dataframe using the 'read_csv()' function 
-
-#WB <- data.frame(read_csv("Data/WB_FullDataset.csv"))
-#WB.ref <- data.frame(read_csv("Data/WB_FullDataset_ref.csv"))
-
-# You could also list the files so you don't need to type so much
-# Create list
-#lf <- list.files(path="Data/", pattern = '.csv', all.files=FALSE, full.names=TRUE)
-#lf
-
-#WB <- as.data.frame(read_csv(lf[2]))
-#WB.ref <- as.data.frame(read_csv(lf[1]))
+# WB.ref <- data.frame(movebank_download_deployment(study_id = "White-bearded wildebeest (Connochaetes taurinus) movements - Kenya"))
 
 # **********************
 # **********************
@@ -88,7 +68,7 @@ head(WB)
 head(WB.ref)
 
 
-## ----Verify, message=FALSE, warning=FALSE, results='hide', echo=FALSE----
+## ----Verify, message=FALSE, warning=FALSE, results='hide', echo=FALSE---------------------------------
 # View the dataset
 head(WB)
 tail(WB)
@@ -118,7 +98,7 @@ unique(WB.ref$study_site)
 tz(WB$timestamp)
 
 
-## ----Clean Merge, message=FALSE, warning=FALSE, echo=TRUE----------------
+## ----Clean Merge, message=FALSE, warning=FALSE, echo=TRUE---------------------------------------------
 # Clean the reference file, selecting only the columns that you want to include
 WB <- # Note, this will overwrite your existing dataset
   WB %>% 
@@ -175,7 +155,7 @@ WB <- # Note, this will overwrite your existing dataset
 head(WB)
 
 
-## ----Clean Verify, message=FALSE, warning=FALSE, results='hide', echo=FALSE----
+## ----Clean Verify, message=FALSE, warning=FALSE, results='hide', echo=FALSE---------------------------
 # How many records
 dim(WB)
 nrow(WB)
@@ -191,7 +171,7 @@ length(unique(WB$animal_id))
 tz(WB$timestamp) 
 
 
-## ----Summarize, message=FALSE, warning=FALSE, echo=TRUE------------------
+## ----Summarize, message=FALSE, warning=FALSE, echo=TRUE-----------------------------------------------
 # Create summary object
 wb.Summary <- WB %>% 
   
@@ -246,7 +226,7 @@ gt_gnu
 gtsave(gt_gnu, filename = "Output/summary_gnu.html")
 
 
-## ----Visualize, message=FALSE, warning=FALSE, echo=TRUE------------------
+## ----Visualize, message=FALSE, warning=FALSE, echo=TRUE-----------------------------------------------
 # Create very simple plot (non-spatial)
 plot(WB$longitude, WB$latitude,
      col = WB$id,
@@ -257,7 +237,7 @@ plot(WB$longitude, WB$latitude,
      asp = 1)
 
 
-## ----Visualize1, message=FALSE, warning=FALSE, echo=TRUE-----------------
+## ----Visualize1, message=FALSE, warning=FALSE, echo=TRUE----------------------------------------------
 # Convert
 WB.sf <- WB %>% 
   st_as_sf(coords = c('longitude', 'latitude'), 
@@ -273,7 +253,7 @@ WB.sf <- WB %>%
 class(WB.sf)
 
 
-## ----Visualize2, message=FALSE, warning=FALSE, echo=TRUE-----------------
+## ----Visualize2, message=FALSE, warning=FALSE, echo=TRUE----------------------------------------------
 # Plot using basic R function
 # plot(WB.sf["animal_id"],
 #      main = paste("Wildebeest: Athi-Kaputiei Plains ( n = ", length(unique(WB.sf$animal_id)),")"))
@@ -303,7 +283,7 @@ WB.sf %>%
 #   facet_wrap(~ animal_id)
 
 
-## ----Visualize3, message=FALSE, warning=FALSE, echo=TRUE-----------------
+## ----Visualize3, message=FALSE, warning=FALSE, echo=TRUE----------------------------------------------
 # Read in shapefile boundary of Nairobi National Park
 # Data are projected to DD WGS84 and must be reprojected to UTM 37S, WGS
 NNP <- st_read("Data/NNP_DDWGS84.shp", quiet = TRUE) %>% 
@@ -359,11 +339,7 @@ Athi.Map
 tmap_save(Athi.Map, filename = "Output/Athi_GnuMap.html")
 
 
-## ----Save, message=FALSE, warning=FALSE, echo=TRUE-----------------------
-# Save individual file
-#write_rds(WB, file = "Data/wildebeest_WBonly.rds")
-# or use saveRDS(object, file = "my_data.rds")
-
+## ----Save, message=FALSE, warning=FALSE, echo=TRUE----------------------------------------------------
 # Save both files together
 save(WB, WB.sf, file = "Data/wildebeest_data.rdata")
 

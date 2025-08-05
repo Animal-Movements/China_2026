@@ -1,0 +1,433 @@
+---
+title: "Introduction to Movement Metrics"
+author: "Wenjing Xu 徐雯靓 (wenjing.xu@senckenberg.de)"
+date: '`r format(Sys.time(), "%d %B %Y")`'
+output:
+  html_document:
+    toc: true
+    toc_depth: 4
+    toc_float: 
+      collapsed: true
+      smooth_scroll: true
+    number_sections: false
+    #theme: united
+    #highlight: tango
+pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE) # display both code and results 
+knitr::opts_chunk$set(fig.pos = 'H')
+```
+
+<a href="https://github.com/Animal-Movements/China_2025.git" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+--------------------------------------------------------
+
+# Introduction
+This session introduces core movement metrics that allow us to transform raw tracking data into biologically meaningful insights. By calculating and interpreting metrics such as speed, turning angle, and displacement, we begin to characterize movement strategies and behavioral patterns. These metrics also form the foundation for more advanced analyses, from modeling behavioral states to inferring habitat preferences and assessing landscape connectivity.
+
+We will use `move2`(https://cran.r-project.org/web/packages/move2/index.html) and `amt` (https://cran.r-project.org/web/packages/amt/index.html) as example to see how some of the most frequently used metrics can be calculated. 
+
+In this exercise, we will cover:
+
+1. Data exploration and step-level metrics with `move2`
+    + data exploration 
+    + step length, speed, and turning angle
+2. Step-level metrics with `amt`
+    + data cleaning 
+    + calculating step length, speed, and turning angle
+    + turn angle correlation (tac), straightness, intensity_use, net-squared displacement (NSD)
+    + manipulating multiple individuals 
+
+## Load Libraries
+Load the required libraries and remove everything held in [R's](https://cran.r-project.org/) memory.
+
+```{r packages, warning=FALSE, message=FALSE, results='hide'}
+library(tidyverse, quietly = TRUE) #the tidyverse is an collection of R packages designed for data science. All packages share an underlying design philosophy, grammar, and data structures. Relavant packages for us includ `dplyr` (for data manipulation), `lubridate` (for dealing with time), `ggplot2` (for data visualization). 
+library(sf, quietly = TRUE) #"simple features", lets us work with spatial vector data
+library(amt, quietly = TRUE) # amt = animal movement tool. It is used to manage and analyze animal movement data. It can be used to calculate home range, track statistics, and prep the data for further analysis such as resource selection function (which you will learn more on day 3)
+library(move2, quietly = TRUE) #handle, manipulate, and explore trajectory data with direct connection with MOVEBANK and sf 
+library(units, quietly = TRUE) #support for measurement units 
+library(rnaturalearth, quietly = TRUE)
+library(gridExtra, quietly = TRUE)
+library(leaflet,quietly = TRUE) # to create interactive maps 
+```
+
+# Step-level metrics with `move2`
+
+One of the key strengths of `move2` is its native integration with Movebank (https://www.movebank.org/cms/movebank-main), a global platform for storing, managing, and sharing animal tracking data. Movebank provides a standardized and secure environment for trajectory data management, ensuring data quality, metadata consistency, and long-term accessibility. By linking directly to Movebank, `move2` allows us to efficiently import, explore, and analyze tracking datasets in a reproducible workflow—bridging robust data management with flexible analytical tools in R.
+
+Movebank allows data owners to control access to their tracking data through customizable permissions. Users can choose to make their data fully public, viewable but not downloadable, or completely private—facilitating data sharing while respecting ownership and confidentiality.
+
+Let's try to use move2 to download and explore a public cougar dataset from Brazil (movebank study id 577226894):
+
+Cavalcanti, S.M.C., Morato, R.G., Niebuhr, B.B. et al. 2021. A Onca-Parda na Bacia do Rio Tietê: O uso de um predador de topo de cadeia como ferramenta de conservacão da biodiversidade no Estado de Sao Paulo. Instituto para a Conservação dos Carnívoros Neotropicais (Pró-Carnívoros). Atibaia, São Paulo, Marco de 2021.
+
+## read data 
+
+First we need to set our movebank login (sign up here https://www.movebank.org/cms/movebank-registration). You only need to do it once and your computer will remember it for the next time. 
+```{r movebank credentials, eval = FALSE}
+movebank_store_credentials("myUserName", "myPassword") # replace user name and password with your own credentials
+```
+
+
+Then you can access a specific study with its ID number: 
+```{r read data}
+dat.mv <- movebank_download_study(study_id = 577226894,  
+                        remove_movebank_outliers = T)
+dat.mv
+```
+
+Data downloaded from movebank is a spatial object. It includes both track information (aka the metadata of each track) and an event table (with locations and timestamp). We can see that there are 13 tracks. Let's visualize it:
+```{r m2 viz, message=FALSE, warning=FALSE}
+dat.lines <- dat.mv %>%
+  mt_track_lines() 
+
+pal <- colorFactor(palette = "Set1", domain = dat.lines$individual_local_identifier)
+
+dat.lines %>%
+  leaflet() %>%
+  addTiles() %>%
+  addPolylines(color = ~pal(individual_local_identifier), label = ~individual_local_identifier, weight = 2, opacity = 1) %>%
+  addLegend("bottomright", pal = pal, values = ~individual_local_identifier, title = "Track ID")
+```
+
+`move` provides a series of useful functions to calculate the movement metrics we talked about earlier. Please note that before calculate any movement metrics, make sure your data is *ordered within tracks*. Specifically, we will look into:
+
++ `mt_time_lags()` # duration interval between consecutive locations 
++ `mt_distance()` # distance between consecutive locations
++ `mt_speed()` # speed between consecutive locations
++ `mt_azimuth()` # heading/azimuth/direction of movement of each segment between consecutive locations of a track.
++ `mt_turnangle()` # the relative angle between consecutive segments.
+
+## time lag (temporal intervals)
+```{r time lag} 
+# make sure the data is ordered
+dat.mv <- dat.mv %>%
+  group_by(individual_local_identifier) %>%
+  arrange(timestamp, .by_group = TRUE) %>%
+  ungroup()
+
+timeLags <- mt_time_lags(dat.mv)
+head(timeLags)
+```
+
+By default it uses the most convenient unit but we can change it or set it from the beginning.
+```{r time lag2} 
+timeLags <- units::set_units(timeLags, hours)
+
+dat.mv <- dat.mv %>% 
+  mutate(time_lags_h = mt_time_lags(., units = "hour")) 
+
+lag.summary <- dat.mv %>%
+  group_by(individual_local_identifier) %>%
+  summarise(median_interval = median(time_lags_h, na.rm=T),
+            sd_interval = round(sd(time_lags_h, na.rm=T),2))
+
+lag.summary
+```
+We can see that most data were collected at 1h interval, but some individuals, such as Pepira, experienced more variations (probably due to data transmission failure). 
+
+Note that timelag, distance, speed, and direction are properties of the segment (2 locations, not one). Therefore, the number of valid values will be `nrow() - 1` for each track, here we have 13 tracks and therefore 13 NAs. Hence we need to use `na.rm = T` when calculating summary statistics. 
+
+```{r time lag3} 
+table(is.na(dat.mv$time_lags_h))
+```
+
+## step length and speed
+Other metrics can be calculated following basically the same steps. But for calculating distances, we usually want to operate in a projected coordinate system.
+
+```{r step speed 0, warning = FALSE} 
+dat.mv <- st_transform(dat.mv, 29172)
+```
+
+Now we can calculate step length and speed: 
+```{r step speed 1, warning = FALSE} 
+dat.mv <- dat.mv %>%
+  mutate(
+    step_length_m = mt_distance(., units = "m"),
+    speed_m_s = mt_speed(., units = "m/s")
+  )
+
+p1 <- dat.mv %>% ggplot(aes(x = step_length_m)) +
+  geom_histogram(bins = 50) +
+  theme_minimal() 
+p2 <- dat.mv %>% ggplot(aes(x = speed_m_s)) +
+  geom_histogram(bins = 50) +
+  theme_minimal() 
+grid.arrange(p1, p2, ncol = 2)
+```
+
+For speed and step length, it is often helpful to look at the log scale.
+```{r step speed2, warning = FALSE}
+p3 <- dat.mv %>% ggplot(aes(x = log(step_length_m))) +
+  geom_histogram(bins = 50) +
+  theme_minimal() 
+p4 <- dat.mv %>% ggplot(aes(x = log(speed_m_s))) +
+  geom_histogram(bins = 50) +
+  theme_minimal() 
+grid.arrange(p3, p4, ncol = 2)
+```
+Very interesting twin-peak pattern of cougar activity! This indicates that cougar could have two different movement states. 
+
+|           <span style="color:tomato">**TASK 1: ** make a map of cougar movement, color the tracking location by speed. This would be a good way to explore the movement pattern further. Based on this map, is there any obvious pattern that could explain the distribution of step length and speed? </span>
+<br/><br/>
+
+```{r step/speed, eval = FALSE, echo = FALSE}
+  
+pal <- colorNumeric(palette = "viridis", domain = log(as.numeric(dat.mv$speed_m_s) + 0.00001), na.color = "transparent") 
+dat.mv %>%
+  st_transform(., 4326) %>% #leaflet maps require long-lat projection
+  mutate(speed_m_s = log(as.numeric(dat.mv$speed_m_s) + 0.00001)) %>%
+  leaflet() %>%
+  addTiles() %>%
+  addCircleMarkers(
+    radius = 3,
+    color = ~pal(speed_m_s),
+    stroke = FALSE,
+    fillOpacity = 0.8,
+    label = ~paste0("ID: ", individual_local_identifier, " Speed: ", round(speed_m_s, 2), " m/s"),
+    labelOptions = labelOptions(direction = "auto")
+  ) %>%
+  addLegend("bottomright", pal = pal, values = ~speed_m_s, title = "Speed (m/s)")
+
+```
+
+## heading and turning angles
+Turning angles are a property of 2 segments (3 locations), and angles are calculated in radians relative to the previous step, with 2 NAs per track (first and last value of each track). 
+
+```{r turning angles, warning = FALSE}
+dat.mv <- dat.mv %>% 
+  st_transform(., 4326) %>% # then the angle calculation require geographic coordinate system again 
+  mutate(turnAngles = mt_turnangle(.),
+         heading = mt_azimuth(.))
+
+p5 <- dat.mv %>% 
+  filter(individual_local_identifier %in% c("Piloto"),
+         timestamp > ymd("2019-03-24")) %>% 
+  mutate(state = ifelse(timestamp < ymd("2019-04-08"), "A", "B") ) %>%
+  ggplot(aes(x = turnAngles, fill = state)) +
+  geom_density(alpha = 0.8) +
+  theme_minimal()
+
+p6 <- dat.mv %>% 
+  filter(individual_local_identifier %in% c("Piloto"),
+         timestamp > ymd("2019-03-24")) %>% 
+  mutate(state = ifelse(timestamp < ymd("2019-04-08"), "A", "B") ) %>%
+  ggplot(aes(color = state)) + geom_sf() +
+  theme_minimal()
+  
+grid.arrange(p5, p6, ncol = 2)
+```
+
+Turn angle distributions are different for Piloto at the two different movement sections. Hence, tun angle could be used as one of the metrics to characterize movement patterns. We will talk more about this later. 
+
+`move2` certain has its advantage due to its integration with movebank. The calculation of metrics are also intuitive. However, the metrics calculation might not be the most straightforward in terms of the different requirements in the coordinate reference systems. Next, we will introduce a different package with a cleaner workflow (but with its own limitation, which we will talk more about below).
+
+# Step-level metrics with `amt`
+The amt package (Animal Movement Tools) provides a comprehensive and flexible framework for analyzing animal movement data. One of its key strengths lies in its tidy, modular approach to constructing movement workflows—enabling users to easily calculate movement metrics, generate random steps, and fit step-selection functions. In contrast to packages that emphasize trajectory visualization or raw data handling, `amt` is designed to support hypothesis-driven analysis, especially in the context of habitat selection and movement ecology. Today we will focus on the metrics part of the workflow. 
+
+For this part, let's use the wildebeest data. 
+```{r Data Import, message=FALSE, warning=FALSE}
+load("./Data/wildebeest_data.rdata")
+```
+
+## step 1: data cleaning and track generation 
+
+Because of the hypothesis-driven workflow, `amt` has requirement for data quality, and the first step is data cleaning, including:
+1. check whether the data set contains any missing location coordinates. If so, remove the incomplete relocation;
+2. make sure a time stamp (date + time) column exist;
+3. check for and remove any duplicated time stamps.
+
+```{r data clean}
+# check is all observations are complete 
+WB <- WB %>%
+  as_tibble() %>%
+  filter(
+    fixType == "3D" & as.numeric(DOP) < 10 | fixType == "2D" & as.numeric(DOP)  < 5)
+
+all(complete.cases(WB)) 
+``` 
+
+Cool. All cases are complete.
+
+Now check whether any time stamps are duplicated for each individual:
+```{r check duplication}
+WB %>% group_by(animal_id) %>% summarise(any(duplicated(timestamp)))
+```
+
+We have no duplicated timestamp within each individual. Great! 
+
+## step 2: track creation 
+Like other packags, track is the base unit how `amt` handles movement data. Basically you tell `amt` which columns from the input data frame are locations, time, and individual ID (if exists), and any other associated information. 
+
+```{r create track}
+wb.trk <- make_track(WB, 
+                            # tell the function which column contains the coordinates
+                            .x = longitude, .y = latitude, 
+                            # tell the function which CRS the coordinates are based on. 
+                            crs = 4326, 
+                            .t = timestamp,
+                            # any additional information you want to attach to the track
+                            # such as animal ID and month
+                            id = animal_id, sex = sex, temp = temp) 
+
+class(wb.trk)
+```
+
+Now we have a movement track. But at the same time it is still a tibble. Hence, the pipe operations from `dyplr` still work for tracks created by `amt`.
+
+We can use function `summarize_sampling_rate` to look at the sampling rate.
+```{r samling rate}
+summarize_sampling_rate(wb.trk)
+```
+
+
+## step 3: calculating step-level metrics
+
+Like `move2`, `amt` can calculate basic movement metrics. Uniquely, `amt` provides us a quick and elegant way to calculate common step statistics all at once. 
+
+Because we want to calculate steps lengths, transform it to projected coordinate system first so the calculate unite would be in meters. 
+```{r amt step0}
+wb.trk.UTM <- transform_coords(wb.trk, 32737)
+```
+
+Let's start with one individual. 
+```{r amt step}
+# first we filter the data to the individual of interest
+one.wb.trk.UTM <- wb.trk.UTM %>% filter(id == "Sotua")
+
+one.wb.steps <- steps(one.wb.trk.UTM)
+
+head(one.wb.steps)
+```
+
+As demonstrated, using `steps()`, we can quickly calculate all the common step statistics for a track, in which `x1_` and `y1_` are the coordinates of the first location, and `x2_` and `y2_` are the coordinate of the second location. In the new tibble, we see the step length `sl_`, turning angle `ta_`, and step duration `dt_`. 
+
+## Working with several individuals concurrently 
+
+We often want movement characteristics calculated for several animals/tracks together. `amt` does not provide a infrastructure for dealing with several animal. However, list-columns from the `tidyverse` can be used to manage many animals. 
+
+Because a track is just a tibble all tidyverse verbs can be used. The general strategy consists of three steps:
+
+**1.** Nest a track by one or more columns (such as by ID). A nested data frame is a data frame where one (or more) columns is a list of data frames (hence basically tibble nested in a tibble).
+
+```{r nest}
+
+wb.trk.nested <- wb.trk.UTM %>% nest(data = -"id")
+
+wb.trk.nested
+  
+```
+
+Individual tracks are now stored is now stored in a new column called "data". 
+
+**2.** Now we can perform operations on the grouped data by using `mutate` and `map`. *`map` applies a function to each elephant of a vector/list.* 
+
+```{r turn to step}
+
+wb.step.nested <- wb.trk.nested %>% mutate (steps = map(data, function(x) {x %>% steps()} )) 
+
+wb.step.nested
+
+# let's look at one element in the column "steps"
+wb.step.nested$steps[1]
+```
+
+
+**3.** `select()` the relevant columns and `unnest()` to turn the data frame back to a data frame. 
+
+Because we are interested in making a steps data frame containing all individuals, we select column "id" and "steps" and unnest them into a new data frame. 
+
+```{r unnest}
+
+wb.step <- wb.step.nested %>% 
+  select (id, steps) %>% #select the two columns of interest
+  unnest(cols = steps) #unnest the steps column
+
+head(wb.step)
+```
+Now steps across all individuals with basic movement metrics calculated are in one big data frame. 
+
+We can now more easily compare movement metrics of different individuals. As an example, we can plot the step-length distributions of all individuals concurrently now: 
+
+```{r all individual sl distribution}
+
+wb.step %>% 
+  ggplot (aes(x = log(sl_+0.00001), fill = factor(id))) +  #sometimes animals have 0 step length. To avoid issue when doing "log", we can add a very small number to all steps
+  geom_density(alpha = 0.3) + #alpha determines transparency 
+  theme_minimal() +
+  labs ( x = "log step length", fill = "ID", title = "The Distribution of Wildebeest Step Length")
+
+```
+
+```{r all individual angle distribution, warning=F}
+
+wb.step %>% ggplot (aes(x = ta_, fill = factor(id))) +
+  geom_density(alpha = 0.3) + #alpha determines transparency
+  theme_minimal() +
+  labs (x = "turning angles (rad)", fill = "ID")
+
+```
+
+We can also plot the turn angle density distribution. This time let's try to plot them in a circular form and turn the radian to degree for easier interpretation.
+
+```{r circlur plotting}
+wb.step %>% 
+  mutate(ta_degree = ta_ * 180/pi) %>%
+  filter(!is.na(ta_degree)) %>%
+  ggplot(aes(x = ta_degree, fill = id)) +
+  geom_density(alpha = 0.4) +
+  coord_polar() +
+  theme_minimal() +
+  labs (x = "turning angles (degree)")
+
+```
+
+# Track-level metrics with `amt`
+In addition to these basic step-level metrics (based on the two consecutive steps), `amt` also has functions to calculate other useful track-level metrics (based on multiple steps, i.e. a "track"), such as:
+
++ straightness: the ratio between the distance from the starting point to an end-point and the actual path length traveled between these two points (ranging between 0 and 1, a value of 1 means moving straight);
++ mean turn angle correlation (tac): another measure for how straight or tortuous a movement path is. High positive correlation indicates directional persistence whereas low or negative correlation (i.e., large or highly variable turning angles) suggests random movement, often associated with area-restricted search or foraging.
++ net squared displacement (nsd): Quantifies the net squared distance traveled over time compared to an point of reference (calculates distance from each location to a point of reference). Often used to identify and characterize animal migration patterns.
++ intensity use: calculated by dividing the total movement distance by the square of the area of movement (100% MCP)
+
+`amt` provides functions to directly calculate some of these common metrics. As an example: 
+```{r amt track metrics}
+wb.trk.nested  <-  wb.trk.nested %>% mutate (
+  tot_dist = map_dbl(data, function(x) {x %>% tot_dist()}),
+  straightness = map_dbl(data, function(x) {x %>% straightness()}), 
+  intensity_use = map_dbl(data, function(x) {x %>% intensity_use()})) 
+wb.trk.nested 
+```
+Now you get a quick overview of the different movement patterns across different individuals. For example, some individuals moved more distances than others (but not that the tracking duration might be different), and others use space more intensely than others. 
+
+You can also calculate NSD with `amt`: 
+```{r amt track nsd}
+wb.trk.nsd <- wb.trk.nested %>% 
+  mutate (data = map(data, function(x) {x %>% add_nsd()})) %>% 
+  select (id, data) %>% #select the two columns of interest
+  unnest(cols = data)
+
+p_nsd <- wb.trk.nsd %>% ggplot(aes(x = t_, y = nsd_, color = id)) +
+  geom_line() +
+  theme_minimal() 
+p_nsd
+```
+
+|           <span style="color:tomato">**QUESTION: ** How would you interpret the movement pattern of these wildebeest? Consider the temporal scale and individual variation. </span>
+<br/><br/>
+
+---------------------
+Further readings:
+
++ Seidel, Dana Paige, Eric Dougherty, Colin Carlson, and Wayne M. Getz. 2018. “Ecological Metrics and Methods for GPS Movement Data.” International Journal of Geographical Information Science: IJGIS 32 (11): 2272–93.
+
++ Abrahms, Briana, Dana P. Seidel, Eric Dougherty, Elliott L. Hazen, Steven J. Bograd, Alan M. Wilson, J. Weldon McNutt, et al. 2017. “Suite of Simple Metrics Reveals Common Movement Syndromes across Vertebrate Taxa.” Movement Ecology 5 (June): 12.
+
++ Kays, Roland, Ben Hirsch, Damien Caillaud, Rafael Mares, Shauhin Alavi, Rasmus Worsøe Havmøller, and Margaret Crofoot. 2023. “Multi-Scale Movement Syndromes for Comparative Analyses of Animal Movement Patterns.” Movement Ecology 11 (1): 61.
+
+
+
+ <center> -----------------     (ﾉ◕ヮ◕)ﾉ*:･ﾟ✧  THE END :･ﾟ･ﾟ     ------------------ </center>

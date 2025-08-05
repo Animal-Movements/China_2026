@@ -136,51 +136,33 @@ Most important is that your movement dataset has the following variables:
 2) Timestamp
 3) Coordinates (X/Y)
 
-Since these data are available on [Movebank](https://www.movebank.org/) as open access, we don't need to provide any login details - we simply need to correctly specify the study id of interest.  Downloading directly from [Movebank](https://www.movebank.org/) is particularly useful when data continue to be collected (i.e., are actively streaming) on a study.  This ensures that you are always working with the most up-to-date dataset for analyses.
-
 ```{r Load, message=FALSE, warning=FALSE}
-# Pull Data from Movebank
-WB <- movebank_download_study(study_id = "White-bearded wildebeest (Connochaetes taurinus) movements - Kenya") 
+# Load the movement file as a CSV
+WB <- data.frame(read_csv("Data/WB_FullDataset.csv"))
 
-# You could use the output directly with functions in the move2 package.  Here, however, we will extract the X and Y coordinates and convert to a dataframe
+# Load the reference dataset as a CSV
+WB.ref <- data.frame(read_csv("Data/WB_FullDataset_ref.csv"))
 
-# Using piping operations
-WB <- WB %>% 
-  as_tibble() %>% # A tibble is a dataframe of dataframes 
-  mutate(longitude = st_coordinates(WB)[,1], # Pull out the X coordinates
-         latitude = st_coordinates(WB)[,2]) %>% # Pull out the y coordinates
-  select(-geometry) %>% # Remove the geometry
-  data.frame() # Make it a dataframe
+
+# Alternatively, you could directly pull from Movebank after creating an account and accepting the user agreement.
+# To pull data from Movebank directly
+
+# Store credentials
+#movebank_store_credentials("myUserName", "myPassword")
+
+# Specify the study id of interest
+#WB <- movebank_download_study(study_id = "White-bearded wildebeest (Connochaetes taurinus) movements - Kenya") 
+
+# Note the format from pulling directly from Movebank is a bit different and requires some wrangling (it's a move2 object)
+# WB <- WB %>% 
+#   as_tibble() %>% # A tibble is a dataframe of dataframes 
+#   mutate(longitude = st_coordinates(WB)[,1], # Pull out the X coordinates
+#          latitude = st_coordinates(WB)[,2]) %>% # Pull out the y coordinates
+#   select(-geometry) %>% 
+#   data.frame() 
 
 # Reference Dataset, import and convert to dataframe
-WB.ref <- data.frame(movebank_download_deployment(study_id = "White-bearded wildebeest (Connochaetes taurinus) movements - Kenya"))
-
-#**NOTE**: If data are protected and you need to provide your login details, you could do the following:
-
-# Set your movebank login (sign up here https://www.movebank.org/cms/movebank-registration). You will only need to set  your login details once.  Afterwards, your computer will remember your credentials.
-#movebank_store_credentials(username="myUserName", password="myPassword")
-
-# Then do the same as before
-#WB <- as.data.frame(movebank_download_study(study_id = "White-bearded wildebeest (Connochaetes taurinus) movements - Kenya"))
-
-# Reference Dataset
-#WB.ref <- as.data.frame(movebank_download_deployment(study_id = "White-bearded wildebeest (Connochaetes taurinus) movements - Kenya", login = login))
-
-# **********************
-# **********************
-
-# Alternatively, we can upload each file directly and convert to a dataframe using the 'read_csv()' function 
-
-#WB <- data.frame(read_csv("Data/WB_FullDataset.csv"))
-#WB.ref <- data.frame(read_csv("Data/WB_FullDataset_ref.csv"))
-
-# You could also list the files so you don't need to type so much
-# Create list
-#lf <- list.files(path="Data/", pattern = '.csv', all.files=FALSE, full.names=TRUE)
-#lf
-
-#WB <- as.data.frame(read_csv(lf[2]))
-#WB.ref <- as.data.frame(read_csv(lf[1]))
+# WB.ref <- data.frame(movebank_download_deployment(study_id = "White-bearded wildebeest (Connochaetes taurinus) movements - Kenya"))
 
 # **********************
 # **********************
@@ -198,7 +180,7 @@ It's always good practice to look at your data and make sure the dataset has bee
 * `dim()` to print the dimensions of the data object (i.e., rows and columns)
 * `str()` to provide the structure of the data object
 
-**Questions :**
+**Questions:**
 
 * How would you view the first or last few lines of the dataset?  What would you do to view the first 10 rows?
 * What is the structure of the dataset?  What is the data type of the timestamp column?
@@ -409,8 +391,6 @@ There are two main packages in [R](https://cran.r-project.org/) to handle geospa
 
 The first package to provide classes and methods for spatial data types in [R](https://cran.r-project.org/) is called [sp](https://cran.csiro.au/web/packages/sp/index.html). Development began in the early 2000s, in an attempt to standardize how spatial data would be treated and to allow for better interoperability between different analysis packages that use spatial data. The package (first released on CRAN in 2005) provides classes and methods to create points, lines, polygons, and grids, with functions to work with them.  About 350 packages developed for spatial analysis use the data types implemented in [sp](https://cran.csiro.au/web/packages/sp/index.html), which means several spatial packages “depend” on the [sp](https://cran.csiro.au/web/packages/sp/index.html) package in some way.
 
-The [sp](https://cran.csiro.au/web/packages/sp/index.html) package depends on `rgeos` and `rgdal`. However, at the end of 2023, these packages were retired, primarily because their maintainer, Roger Bivand, also retired. You can read more about it [here](https://r-spatial.org/r/2022/04/12/evolution.html).
-
 All geospatial work in [R](https://cran.r-project.org/) is being replaced by the more modern package [sf](https://search.r-project.org/CRAN/refmans/sf/html/sf-package.html). [sf](https://search.r-project.org/CRAN/refmans/sf/html/sf-package.html) was first released on CRAN in late October 2016. It implements a formal standard called “Simple Features” that specifies a storage and access model of spatial geometries (i.e. points, lines, polygons).  [sf](https://search.r-project.org/CRAN/refmans/sf/html/sf-package.html) provides fast I/O, particularly relevant for large files.
 
 ## The [sf](https://search.r-project.org/CRAN/refmans/sf/html/sf-package.html) Package
@@ -556,17 +536,12 @@ tmap_save(Athi.Map, filename = "Output/Athi_GnuMap.html")
 Save the dataframe files so that we can use them in future exercises.  We can write each file as a `.rds` file or save the files together, writing the data to a `.rdata` file.
 
 ```{r Save, message=FALSE, warning=FALSE, echo=TRUE}
-# Save individual file
-#write_rds(WB, file = "Data/wildebeest_WBonly.rds")
-# or use saveRDS(object, file = "my_data.rds")
-
 # Save both files together
 save(WB, WB.sf, file = "Data/wildebeest_data.rdata")
 ```
 
 # Exercise:
-
-Now that you have uploaded and manipulated the wildebeest data in [R](https://cran.r-project.org/), please adapt the code with your own data.  If your data are not on [Movebank](https://www.movebank.org/), you will need to use functions (e.g., 'read_csv') to import your movement dataset.  Please do the following:
+Now that you have uploaded and manipulated the wildebeest data in [R](https://cran.r-project.org/), please adapt the code with your own data.  Use [Movebank](https://www.movebank.org/) to download an available data or upload your data directly using read_csv (or other).  Please do the following:
 
 1. Import your movement dataset
 2. Check the coordinate reference system and re-project if necessary
