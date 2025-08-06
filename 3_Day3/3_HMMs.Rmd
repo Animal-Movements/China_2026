@@ -437,6 +437,6 @@ ggsave(plot = two_plots,
 ```
 
 # Exercise: 
-In order to understand HMMs work, it can be helpful to track yourself with an app downloaded on your phone (e.g., Geo Tracker).  This way, you have a clear understanding of what you were doing (i.e., walking, eating, sleeping, running).  
+In order to understand how HMMs work, it can be helpful to track yourself with an app downloaded on your phone (e.g., Geo Tracker).  This way, you have a clear understanding of what you were doing (i.e., walking, eating, sleeping, running).  
 
-As an independent exercise, collect some data on yourself and record what you were doing.  Download the data and create a workflow using [R](https://cran.r-project.org/).  Import the data and fit a HMM to determine how well the model can recover the behaviors of your choosing.  Try to keep this simple, with a few behaviors of interest to identify in your track (i.e., no more the 3 or 4).
+As an independent exercise, collect some data on yourself and record what you were doing.  Download the data and create a workflow using [R](https://cran.r-project.org/).  Import the data and fit a HMM to determine how well the model recovers the behaviors of your choosing.  Are there any covariates that you might want to include to explain your behavioral changes?  Try to keep this simple, with a few behaviors of interest to identify in your track (i.e., no more the 3 or 4).
