@@ -34,7 +34,7 @@ In this exercise, we will:
   * Practice investigation of impact of continuous covariates on state transition probabilities 
   * Learn how to interpret the output from HMMs
   * Practice methods for visualizing HMM output both spatially and graphically
-  * Use model output to subset tracking datasets [MAYBE]
+  * Use model output to subset tracking datasets
   
 ## Load Libraries
 Load the required libraries and remove everything held in [R's](https://cran.r-project.org/) memory.
@@ -369,7 +369,7 @@ paste("Best model based on AIC: ", best_model_aic, "model")
 # Further Applications
 Similar to activities demonstrated above, we could encode the behavioral states identified to our original dataframe to our best fitting model.  By doing so, we would be able to calculate how much time animals remain in particular behavioral states, compare differences in animal behavior between study areas, or identify areas that are associated with certain behavioral states.  This could be particularly helpful if your goal was to separate the data to create seasonal home range where animals are mostly resident.  
 
-As an example, let's filter the data by state behaviors and plot each behavior separately.  We'll follow the same procedure that we demonstrated above.  The output shows some clear areas where one of the wildebeest (Sawani) spent large periods in a encamped state, but there are quite a few points where these areas overlap (not clearly distinct).  This is the kind of approach, however, that might work better for other species.
+As an example, we'll filter the data by state behaviors and plot each behavior separately.  We'll follow the same procedure that we demonstrated above.  The output shows some clear areas where one of the wildebeest (Sawani) spent large periods in a encamped state, but there are quite a few points where these areas overlap (not clearly distinct).  This is the kind of approach, however, that might work better for other species.
 
 ```{r Applications, message=FALSE, warning=FALSE, echo=TRUE}
 # Encode the behaviors using the Viterbi algorithm
@@ -435,3 +435,8 @@ ggsave(plot = two_plots,
        width = 6.5,
        height = 4)
 ```
+
+# Exercise: 
+In order to understand how HMMs work, it can be helpful to track yourself with an app downloaded on your phone (e.g., Geo Tracker).  This way, you have a clear understanding of what you were doing (i.e., walking, eating, sleeping, running).  
+
+As an independent exercise, collect some data on yourself and record what you were doing.  Download the data and create a workflow using [R](https://cran.r-project.org/).  Import the data and fit a HMM to determine how well the model recovers the behaviors of your choosing.  Are there any covariates that you might want to include to explain your behavioral changes?  Try to keep this simple, with a few behaviors of interest to identify in your track (i.e., no more the 3 or 4).
