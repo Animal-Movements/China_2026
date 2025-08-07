@@ -3,6 +3,7 @@
 .RData
 .Ruserdata
 1_Day1_DataCleaning/*.Rmd
+2_Day2_TrajetoryMetricsBaBA/*.Rmd
 3_Day3_CovariateExtraction/*.Rmd
 Export_to_R.R
 .Rmd
