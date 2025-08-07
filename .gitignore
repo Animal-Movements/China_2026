@@ -2,5 +2,6 @@
 .Rhistory
 .RData
 .Ruserdata
-*.pptx
+.pptx
+.Rmd
 Export_to_R.R
