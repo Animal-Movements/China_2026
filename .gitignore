@@ -4,3 +4,4 @@
 .Ruserdata
 3_Day3_CovariateExtraction/*.Rmd
 Export_to_R.R
+.Rmd
