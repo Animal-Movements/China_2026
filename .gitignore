@@ -2,6 +2,6 @@
 .Rhistory
 .RData
 .Ruserdata
-.pptx
+3_Day3_CovariateExtraction/*.pptx
 3_Day3_CovariateExtraction/*.Rmd
 Export_to_R.R
