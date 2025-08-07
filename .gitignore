@@ -3,5 +3,5 @@
 .RData
 .Ruserdata
 .pptx
-.Rmd
+*.Rmd
 Export_to_R.R
