@@ -7,5 +7,5 @@
 3_Day3_CovariateExtraction/*.Rmd
 4_Day4_HMMs/*.Rmd
 3_Day3_CovariateExtraction/Presentations/*.pptx
-4_Day4_HMMs/Presentations/*.pptx
+4_Day4_HMMs/Presentation/*.pptx
 Export_to_R.R
