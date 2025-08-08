@@ -2,10 +2,6 @@
 .Rhistory
 .RData
 .Ruserdata
-1_Day1_DataCleaning/*.Rmd
-2_Day2_TrajectoryMetricsBaBA/*.Rmd
-3_Day3_CovariateExtraction/*.Rmd
-4_Day4_HMMs/*.Rmd
 3_Day3_CovariateExtraction/Presentation/*.pptx
 4_Day4_HMMs/Presentation/*.pptx
 Export_to_R.R
