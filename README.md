@@ -19,6 +19,6 @@ Materials and lectures from an introductory course on analyzing animal movement 
 
 ## Repository Structure
 
-Each lecture contiains a '.html' file and corresponding '.Rmd' and '.R' files. A '.Rproj'
+Each lecture contiains a $.html$ file and corresponding '.Rmd' and '.R' files. A '.Rproj'
 
 ## Citation
