@@ -6,6 +6,9 @@ Materials and lectures from an Introduction to Animal Movements course taught by
 
 ## Instructors
 **Jared Stabach**, Research Ecologist & Head - Conservation Technology & Innovation, *Smithsonian's National Zoo & Conservation Biology Institute*
+
 **Wenjing Xu**, Assistant Professor, Department of Environmental Conservation, *University of Massachusetts Amherst*
+
 **Christen Fleming**, Assistant Professor & Head - EcoInformatics Lab, College of Science, *University of Central Florida*
+
 **Erika Lin**, Graduate Student, College of Science, *University of Central Florida*
