@@ -1,4 +1,4 @@
-# Introduction to Animal Movements - Course 2025 🐋🐅🐝🐆🐦
+# Introduction to Animal Movements - Course 2026 🐋🐅🐝🐆🐦
 This repository contains scripts and instructions for a course taught at Fudan University in August 2026, with a focus on discrete-time and continuous-time analyses.
 
 ![R](https://img.shields.io/badge/Language-R-blue)
