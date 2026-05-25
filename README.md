@@ -4,6 +4,10 @@ Materials and lectures from an introductory course on analyzing animal movement 
 ![R](https://img.shields.io/badge/Language-R-blue)
 ![Context](https://img.shields.io/badge/Focus-Movement%20Ecology-orange)
 
+## Overview
+
+## Key Topics
+
 ## Instructors
 **Jared Stabach**, Research Ecologist & Head - Conservation Technology & Innovation, *Smithsonian's National Zoo & Conservation Biology Institute*
 
@@ -12,3 +16,9 @@ Materials and lectures from an introductory course on analyzing animal movement 
 **Christen Fleming**, Assistant Professor & Head - EcoInformatics Lab, College of Science, *University of Central Florida*
 
 **Erika Lin**, Graduate Student, College of Science, *University of Central Florida*
+
+## Repository Structure
+
+Each lecture contiains a '.html' file and corresponding '.Rmd' and '.R' files.  
+
+## Citation
