@@ -22,3 +22,8 @@ Materials and lectures from an introductory course on analyzing animal movement 
 Each lecture contiains a `.html` file and corresponding `.Rmd` and `.R` files. A `.Rproj` is also provided in each directory to allow for easy mapping to each of the files. Various subdirectories are included in each lecture, with Data necessary to execute the lesson provided within a `\Data` folder. 
 
 ## Citation
+
+GPS tracking data used in this workshop is subset from a 3-year study on the movements of white-bearded wildebeest (*Connochaetes taurinus*) in southern Kenya. The citation for these data is:
+
+* Stabach JA, et al. (2022). Increasing anthropogenic disturbance restricts wildebeest movement across East African grazing systems. Frontiers in Ecology and Evolution. [](10.3389/fevo.2022.846171)
+* Stabach JA, et al. (2020). Data from: Comparison of movement strategies of three populations of white-bearded wildebeest. Movebank Data Repository. [](doi:10.5441/001/1.h0t27719)
