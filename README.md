@@ -19,7 +19,7 @@ Materials and lectures from an introductory course on analyzing animal movement 
 
 ## Repository Structure
 
-Each lecture contiains a `.html` file and corresponding `.Rmd` and `.R` files. A `.Rproj` is also provided in each directory to allow for easy mapping to each of the files. Various subdirectories are included in each lecture, with Data necessary to execute the lesson provided within a `\Data` folder. 
+Each lecture contiains a `.html` file and corresponding `.Rmd` and `.R` files. A `.Rproj` is also provided in each directory to allow for easy mapping to each of the files. Various subdirectories are included in each lecture, with data necessary to execute the lesson provided within a `\Data` folder. 
 
 ## Citation
 
