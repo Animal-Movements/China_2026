@@ -1,4 +1,31 @@
+# R project files
 .Rproj.user
 .Rhistory
 .RData
 .Ruserdata
+
+# Generated outputs (knit from Rmd — distribute via Google Drive/WeChat, not git)
+*.html
+
+# Data files (large — distribute separately)
+Data/
+**/Data/
+*.rdata
+*.rds
+*.csv
+*.shp
+*.dbf
+*.prj
+*.shx
+*.sbn
+*.sbx
+
+# Figures and output folders
+Figures/
+**/Figures/
+Output/
+**/Output/
+
+# OS files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,379 @@
+---
+title: "M1: Data Import & Movebank"
+subtitle: "Day 2 — Introduction to Movement Data"
+author: "Animal Movement Analyses for Ecologists | SYSU Shenzhen, July 2026"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    theme: flatly
+    highlight: tango
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+---
+
+## Learning Objectives
+
+By the end of this module you will be able to:
+
+1. Download animal tracking data directly from Movebank into R using the `move2` package
+2. Understand the structure of a `move2` object — how GPS locations and individual metadata are organized
+3. Import data from a local CSV file as an alternative workflow
+4. Perform initial exploration to understand your dataset: who, where, and for how long
+
+**Packages used:** `move2`, `tidyverse`, `lubridate`, `sf`, `mapview`
+
+---
+
+## Ecological context
+
+The white-bearded wildebeest (*Connochaetes taurinus*) of the Athi-Kaputiei Plains in southern Kenya represent one of the few remaining migratory wildebeest populations outside the Serengeti ecosystem. Unlike their more famous Serengeti counterparts, these animals navigate a landscape increasingly fragmented by fencing, roads, and peri-urban development around Nairobi. Understanding where they go, when, and why is essential for guiding conservation interventions — but that understanding starts with the data.
+
+Throughout this workshop, we will work with GPS collar data from this population. Today, we focus on getting that data into R in a clean, reproducible way.
+
+---
+
+## 1. Setup
+
+### 1.1 Load packages
+
+```{r packages}
+# install.packages(c("move2", "tidyverse", "lubridate", "sf", "mapview"))
+
+library(move2)       # Movebank interface and the move2 spatial data class
+library(tidyverse)   # Data wrangling and visualization (dplyr, ggplot2, etc.)
+library(lubridate)   # Working with timestamps and timezones
+library(sf)          # Spatial vector data (move2 is built on sf)
+library(mapview)     # Quick interactive maps
+```
+
+### 1.2 Define coordinate reference systems
+
+We set our CRS upfront and refer to them by name throughout. GPS data always arrives in geographic coordinates (lat/long). Any analysis involving distances or areas requires projection to a metric system.
+
+```{r crs}
+latlong_crs <- "EPSG:4326"   # WGS84 geographic — standard for GPS and Movebank
+utm_crs     <- "EPSG:32737"  # UTM Zone 37S — metric, appropriate for Athi-Kaputiei, Kenya
+```
+
+> **Why does CRS matter?** In EPSG:4326, one "degree" of distance is not a consistent unit — it is ~111 km at the equator but shrinks toward the poles. Calculations like step length (km), home range area (km²), or buffer distances require projected coordinates where units are meters.
+
+### 1.3 Set timezone
+
+Movebank stores all timestamps in UTC. We define the local timezone for the study area to convert when needed.
+
+```{r timezone}
+tz_utc   <- "UTC"
+tz_local <- "Africa/Nairobi"  # East Africa Time (EAT = UTC+3)
+# Full list of timezone names: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+```
+
+---
+
+## 2. Download data from Movebank
+
+[Movebank](https://www.movebank.org) is the world's largest repository of animal tracking data, hosting data for thousands of studies across taxa. The `move2` package provides a direct interface, so you can download data into R without ever leaving your script.
+
+### 2.1 Store your credentials (once per computer)
+
+```{r credentials, eval=FALSE}
+# Run this once — credentials are stored securely in your system keychain
+movebank_store_credentials("your_username", "your_password")
+```
+
+> **Security note:** Never hardcode your password in a script that you share or commit to GitHub. `movebank_store_credentials()` stores it once in your OS keychain; after that, all `move2` Movebank functions use it automatically.
+
+### 2.2 Explore available studies (optional)
+
+```{r search_studies, eval=FALSE}
+# Search for open-data studies that you can download data from
+movebank_download_study_info(
+  license_type = "CC_0",
+  i_have_download_access = TRUE,
+  attributes = c("name", "id")
+)
+```
+
+### 2.3 Download the study
+For this exercise, we will use the wildebeest data. Data based on below study: 
+Stabach JA, et al. (2022). Increasing anthropogenic disturbance restricts wildebeest movement across East African grazing systems. Frontiers in Ecology and Evolution. 10.3389/fevo.2022.846171
+Stabach JA, et al. (2020). Data from: Comparison of movement strategies of three populations of white-bearded wildebeest. Movebank Data Repository. doi:10.5441/001/1.h0t27719
+
+```{r download_movebank, eval=FALSE}
+WB.mv2 <- movebank_download_study(
+  study_id      =  208413731
+)
+```
+
+Often you will be prompted to accept the data license. You will see messages like: "In R is done by adding the following to a download request:
+'license-md5'='xxxxxx'. Copy the license number and run again:
+
+```{r download_movebank2, eval=FALSE}
+WB.mv2 <- movebank_download_study(
+  study_id      =  208413731,
+  'license-md5'='xxxxxx' # <- copy license number here
+)
+```
+
+```{r load_provided, echo=FALSE}
+# For the workshop, we load a pre-downloaded version to avoid Movebank API delays.
+# The object WB.mv2 is identical to what movebank_download_study() would return.
+load("./Data/wildebeest_data.rdata")
+```
+
+---
+
+## 3. Understand the move2 object
+
+`move2` is a relatively new package (2022) designed to make working with tracking data more intuitive. A `move2` object is fundamentally an `sf` (simple features) object — meaning every row already carries a spatial point geometry — with extra structure to handle multiple individuals and timestamps.
+
+### 3.1 Object class and basic summary
+
+```{r class}
+class(WB.mv2)   # move2, sf, tbl_df, tbl, data.frame
+```
+
+```{r print}
+# Printing a move2 object gives a structured summary
+WB.mv2
+```
+
+Notice the summary tells you: number of tracks, time range, CRS, and a preview of the data.
+
+### 3.2 Key move2 helper functions
+
+```{r mt_functions}
+# Number of unique animals
+n_distinct(mt_track_id(WB.mv2))
+
+# Number of tracks
+mt_n_tracks(WB.mv2)
+
+# Name of timestamp column
+mt_time_column(WB.mv2)
+
+# Name of track ID column
+mt_track_id_column(WB.mv2)
+
+# Overall time range
+range(mt_time(WB.mv2), na.rm = TRUE)
+```
+
+### 3.3 Event data vs. track metadata
+
+A `move2` object holds two distinct types of information:
+
+| Type | What it is | How to access |
+|---|---|---|
+| **Event data** | One row per GPS fix — location, timestamp, sensor readings | Print the object directly, or `as_tibble(WB.mv2)` |
+| **Track metadata** | One row per individual — sex, deployment dates, study site | `mt_track_data(WB.mv2)` |
+
+```{r track_data}
+# Individual-level metadata (deployment information from Movebank)
+track_info <- mt_track_data(WB.mv2)
+glimpse(track_info)
+```
+
+```{r column_names}
+# Column names in the event data
+names(WB.mv2)
+```
+
+> When you download from Movebank with `move2`, the deployment metadata (individual info, study site, sex, deploy on/off dates) is automatically embedded in the track data. In Module 2, we will use this information to subset to the study area and filter by deployment period.
+
+---
+
+## 4. CSV import (alternative workflow)
+
+If you cannot connect to Movebank — or if your data lives elsewhere — you can import from a CSV and convert to a `move2` object using `mt_as_move2()`.
+
+```{r csv_import, eval=FALSE}
+# Step 1: Read the event data CSV
+WB_csv <- read_csv("Data/WB_FullDataset.csv") %>%
+  mutate(timestamp = ymd_hms(timestamp, tz = tz_utc))  # parse timestamp with timezone
+
+# Step 3: Convert to move2
+WB.mv2 <- mt_as_move2(
+  WB_csv,
+  coords           = c("longitude", "latitude"),  # column names for x, y
+  crs              = latlong_crs,
+  time_column      = "timestamp",
+  track_id_column  = "individual_local_identifier"
+)
+```
+
+> **Note:** `mt_as_move2()` works with any data frame that has coordinates and timestamps. Once converted, the object behaves identically to a Movebank download — all the same `mt_*` functions apply.
+
+---
+
+## 5. Initial data exploration
+
+### 5.1 Dimensions and structure
+
+```{r dimensions}
+nrow(WB.mv2)   # Total GPS fixes
+ncol(WB.mv2)   # Columns
+
+glimpse(WB.mv2)
+```
+
+### 5.2 Per-individual summary
+
+How many fixes does each animal have, and what is their tracking period?
+
+```{r individual_summary}
+individual_summary <- WB.mv2 %>%
+  as_tibble() %>%
+  group_by(individual_local_identifier) %>%
+  summarise(
+    n_fixes     = n(),
+    first_fix   = min(timestamp, na.rm = TRUE),
+    last_fix    = max(timestamp, na.rm = TRUE),
+    duration_d  = round(as.numeric(difftime(max(timestamp, na.rm = TRUE),
+                                            min(timestamp, na.rm = TRUE),
+                                            units = "days")), 1)
+  ) %>%
+  arrange(individual_local_identifier)
+
+individual_summary
+```
+
+> **Discussion:** Notice the variation in tracking duration and number of fixes across individuals. This kind of imbalance is common in real tracking datasets and has implications for comparative analyses. What might cause an individual to have fewer fixes than others?
+
+### 5.3 Sampling interval
+
+Most movement analyses assume a regular sampling interval. It is important to understand your data's fix rate before proceeding.
+
+```{r sampling_interval}
+# Calculate time between consecutive fixes for each individual
+# mt_time_lags() returns the time difference to the NEXT location for each row
+time_lags <- WB.mv2 %>%
+  filter(!is.na(mt_time(.)))  %>% # JARED CHECK WHY SO MANY NAs.. maybe the timezone was wrongly set
+  mutate(dt_hours = as.numeric(mt_time_lags(.)), unit = "hours") %>%
+  as_tibble() %>%
+  filter(!is.na(dt_hours))
+
+# Summary of sampling intervals per individual
+time_lags %>%
+  group_by(individual_local_identifier) %>%
+  summarise(
+    median_interval_h = round(median(dt_hours), 2),
+    min_interval_h    = round(min(dt_hours), 2),
+    max_interval_h    = round(max(dt_hours), 2),
+    pct_irregular     = round(mean(abs(dt_hours - 3) > 0.1) * 100, 1)  # % not at 3h
+  )
+```
+
+```{r interval_histogram}
+# Distribution of intervals for one individual
+time_lags %>%
+  filter(individual_local_identifier == first(individual_local_identifier),
+         dt_hours < 12) %>%
+  ggplot(aes(x = dt_hours)) +
+  geom_histogram(binwidth = 0.25, fill = "steelblue", color = "white") +
+  geom_vline(xintercept = 3, color = "firebrick", linetype = "dashed") +
+  labs(title = "Distribution of fix intervals",
+       subtitle = "Red line = 3-hour target interval",
+       x = "Time between fixes (hours)", y = "Count") +
+  theme_minimal()
+```
+
+### 5.4 Temporal coverage
+
+```{r temporal_plot}
+WB.mv2 %>%
+  as_tibble() %>%
+  mutate(date = as_date(timestamp)) %>%
+  count(individual_local_identifier, date) %>%
+  ggplot(aes(x = date, y = individual_local_identifier, fill = n)) +
+  geom_tile() +
+  scale_fill_viridis_c(name = "Fixes/day", option = "plasma") +
+  labs(title = "Temporal coverage — Wildebeest GPS data",
+       x = NULL, y = NULL) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+> This plot gives an immediate visual of data gaps, deployment start/end dates, and variation across individuals. Any gaps mid-deployment are worth investigating — they may reflect collar issues, animal behavior, or habitat (e.g., dense canopy can reduce fix success).
+
+---
+
+## 6. Quick map
+
+Before doing any cleaning or analysis, always map your raw data. This is the fastest way to spot obvious errors — locations in the ocean, impossible coordinates, or fixes far outside the study area.
+
+```{r quick_map}
+# mapview creates a quick interactive leaflet map
+# We plot a random sample to keep it fast
+
+# but first we need to convert the object to sf
+WB.sf <- sf::st_as_sf(as.data.frame(WB.mv2))
+
+WB.sf %>%
+  slice_sample(n = 2000) %>%    # random subset for speed
+  mapview(zcol = "individual_local_identifier",
+          layer.name = "Individual",
+          cex = 2,
+          alpha = 0.7)
+```
+
+> **What to look for:** Do all points fall within the expected study area? Are there any obvious outliers far from the main cluster? Do individual home ranges seem reasonable for wildebeest? We will do more rigorous quality filtering in Module 2.
+
+---
+
+## 7. Save output for Module 2
+
+We save the raw `move2` object. Module 2 will pick this up and apply data cleaning and quality filtering.
+
+```{r save}
+save(WB.mv2, file = "Data/WB_raw.rdata")
+cat("Saved WB.mv2 —", n_distinct(mt_track_id(WB.mv2)), "animals,", nrow(WB.mv2), "fixes\n")
+```
+
+---
+
+## Practice: Apply to your own data
+
+Now try the same workflow with your own dataset.
+
+1. **If your data is on Movebank:** use `movebank_download_study()` to download it. Run `n_distinct(mt_track_id())`, `mt_track_data()`, and the individual summary table.
+
+2. **If you have a CSV:** use `mt_as_move2()` to convert. Make sure your timestamp column is parsed correctly — check with `class(your_data$timestamp)` and confirm it returns `POSIXct`.
+
+3. **For everyone:** run the temporal coverage heatmap and quick map on your own data. What patterns do you notice? Any gaps or suspicious points?
+
+**Useful questions to answer for your own dataset:**
+- How many individuals? How long were they tracked?
+- What is the nominal sampling interval? How regular is it in practice?
+- Are there any obvious spatial outliers?
+
+---
+
+## Key functions reference
+
+| Function | Package | Purpose |
+|---|---|---|
+| `movebank_store_credentials()` | `move2` | Store Movebank login (once per machine) |
+| `movebank_download_study_info()` | `move2` | Browse available Movebank studies |
+| `movebank_download_study()` | `move2` | Download study from Movebank → move2 object |
+| `mt_as_move2()` | `move2` | Convert data frame / sf to move2 |
+| `mt_track_id()` | `move2` | Extract track ID vector (use with `n_distinct()` to count animals) |
+| `mt_n_tracks()` | `move2` | Count tracks |
+| `mt_time_column()` | `move2` | Name of the timestamp column |
+| `mt_track_id_column()` | `move2` | Name of the track ID column |
+| `mt_time()` | `move2` | Extract timestamp vector |
+| `mt_track_data()` | `move2` | Access individual-level metadata |
+| `mt_time_lags()` | `move2` | Time differences between consecutive fixes |
+| `st_as_sf()` | `sf` | Convert move2/data frame to sf object (needed for some downstream functions) |
+| `mapview()` | `mapview` | Quick interactive map |
+
+---
+
+*Next: **Module 2 — Data Cleaning & Quality Control** — we subset to the study area, filter by deployment dates, remove low-quality fixes, and handle duplicates.*
