@@ -1,6 +1,6 @@
 ---
 title: "M1: Data Import & Movebank"
-subtitle: "Day 2 — Introduction to Movement Data"
+subtitle: "Day 1 — Introduction to Movement Data"
 author: "Animal Movement Analyses for Ecologists | SYSU Shenzhen, July 2026"
 date: "`r Sys.Date()`"
 output:
@@ -16,6 +16,9 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 ```
+
+
+<a href="https://github.com/Animal-Movements/China_2026.git" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
 
 ---
 
@@ -52,6 +55,7 @@ library(tidyverse)   # Data wrangling and visualization (dplyr, ggplot2, etc.)
 library(lubridate)   # Working with timestamps and timezones
 library(sf)          # Spatial vector data (move2 is built on sf)
 library(mapview)     # Quick interactive maps
+library(units)  
 ```
 
 ### 1.2 Define coordinate reference systems
@@ -196,8 +200,18 @@ If you cannot connect to Movebank — or if your data lives elsewhere — you ca
 
 ```{r csv_import, eval=FALSE}
 # Step 1: Read the event data CSV
-WB_csv <- read_csv("Data/WB_FullDataset.csv") %>%
+# Force `timestamp` to be read in as raw text (col_character), rather than letting
+# read_csv() auto-detect and parse it as a datetime itself. If readr auto-parses
+# timestamp to POSIXct and you THEN re-parse it with ymd_hms(), you are parsing an
+# already-parsed datetime object instead of the original text -- this round-trip
+# can silently turn a subset of rows into NA with no warning. Parsing the raw text
+# exactly once, explicitly, avoids that.
+WB_csv <- read_csv("Data/WB_FullDataset.csv",
+                    col_types = cols(timestamp = col_character())) %>%
   mutate(timestamp = ymd_hms(timestamp, tz = tz_utc))  # parse timestamp with timezone
+
+# Always verify before moving on -- this should be 0:
+# sum(is.na(WB_csv$timestamp))
 
 # Step 3: Convert to move2
 WB.mv2 <- mt_as_move2(
@@ -249,16 +263,32 @@ individual_summary
 
 ### 5.3 Sampling interval
 
-Most movement analyses assume a regular sampling interval. It is important to understand your data's fix rate before proceeding.
+Many movement analyses assume a regular sampling interval (or at least close to regular). It is important to understand your data's fix rate distribution before proceeding.
 
 ```{r sampling_interval}
 # Calculate time between consecutive fixes for each individual
 # mt_time_lags() returns the time difference to the NEXT location for each row
+# (track-aware: NA marks the last fix of each track, never bridging across
+# individuals). Order by individual + time first so the lag is computed
+# against the correct neighboring fix.
 time_lags <- WB.mv2 %>%
-  filter(!is.na(mt_time(.)))  %>% # JARED CHECK WHY SO MANY NAs.. maybe the timezone was wrongly set
-  mutate(dt_hours = as.numeric(mt_time_lags(.)), unit = "hours") %>%
-  as_tibble() %>%
+  arrange(individual_local_identifier, timestamp) %>%
+  mutate(dt_hours = mt_time_lags(.) %>% #default to minutes
+           set_units("hours") %>%  # convert to hours
+           as.numeric()) %>%
+  as_tibble()
+
+# the last time lag of each individual track will always be NA
+# so the total NA shuould be equal to the number of individuals
+sum(is.na(time_lags$dt_hours)) 
+
+time_lags <- time_lags %>%
   filter(!is.na(dt_hours))
+
+# Find the nominal sampling interval empirically rather than assuming one --
+# different tags/studies/species can have very different fix schedules.
+target_interval_h <- round(median(time_lags$dt_hours), 1)
+cat("Empirical (median) sampling interval across all individuals:", target_interval_h, "hours\n")
 
 # Summary of sampling intervals per individual
 time_lags %>%
@@ -267,7 +297,7 @@ time_lags %>%
     median_interval_h = round(median(dt_hours), 2),
     min_interval_h    = round(min(dt_hours), 2),
     max_interval_h    = round(max(dt_hours), 2),
-    pct_irregular     = round(mean(abs(dt_hours - 3) > 0.1) * 100, 1)  # % not at 3h
+    pct_irregular     = round(mean(abs(dt_hours - target_interval_h) > 0.1) * 100, 1)
   )
 ```
 
@@ -278,30 +308,95 @@ time_lags %>%
          dt_hours < 12) %>%
   ggplot(aes(x = dt_hours)) +
   geom_histogram(binwidth = 0.25, fill = "steelblue", color = "white") +
-  geom_vline(xintercept = 3, color = "firebrick", linetype = "dashed") +
+  geom_vline(xintercept = target_interval_h, color = "firebrick", linetype = "dashed") +
   labs(title = "Distribution of fix intervals",
-       subtitle = "Red line = 3-hour target interval",
+       subtitle = paste0("Red line = ", target_interval_h, "-hour target interval (empirical median)"),
        x = "Time between fixes (hours)", y = "Count") +
   theme_minimal()
 ```
 
+> **A single `max_interval_h` will almost always look alarming.** Over a multi-year deployment, nearly every individual will have some unusually long gap somewhere in its track — that alone isn't evidence of a problem. The more useful question is *whether long gaps are isolated to one tag, or shared across many individuals at the same time*. An isolated gap on one animal, on a random date, points to a tag- or animal-specific cause (battery, poor satellite geometry, dense cover). The same gap appearing on many animals at once, all resolving within the same few days, points to a system-wide cause instead — a ground-station/uplink outage, or a network-wide duty-cycle change.
+
+```{r gap_diagnostics}
+# Flag long gaps (> 1 day) and ask: are they spread randomly across
+# individuals and dates, or do many individuals lose/regain signal together?
+gap_threshold_h <- 24
+
+long_gaps <- time_lags %>%
+  filter(dt_hours > gap_threshold_h) %>%
+  mutate(gap_start = timestamp,                       # last fix before signal was lost
+         gap_end   = timestamp + dhours(dt_hours)) %>% # first fix after signal returned
+  select(individual_local_identifier, gap_start, gap_end, dt_hours)
+
+cat(nrow(long_gaps), "gaps longer than", gap_threshold_h, "hours, across",
+    n_distinct(long_gaps$individual_local_identifier), "of",
+    n_distinct(time_lags$individual_local_identifier), "individuals\n")
+
+# Bin gap *resolutions* (gap_end) by week: a spike in the number of distinct
+# individuals resolving a long gap in the same week is the signature of a
+# synchronized, fleet-wide event rather than independent tag failures.
+synchronized_gaps <- long_gaps %>%
+  mutate(resume_week = floor_date(gap_end, "week")) %>%
+  group_by(resume_week) %>%
+  summarise(n_individuals_affected = n_distinct(individual_local_identifier),
+            n_gaps = n(), .groups = "drop") %>%
+  arrange(desc(n_individuals_affected))
+
+synchronized_gaps %>% slice_head(n = 5)
+```
+
+```{r outage_window}
+# Treat the week with the most individuals affected as a candidate
+# system-wide outage (require >= 5 individuals so isolated coincidences don't
+# get flagged), and recover its full span -- earliest signal loss to latest
+# signal recovery -- so we can highlight it on the temporal coverage plot below.
+outage_start <- as.POSIXct(NA); outage_end <- as.POSIXct(NA)
+
+if (nrow(synchronized_gaps) > 0 && synchronized_gaps$n_individuals_affected[1] >= 5) {
+  outage_week <- synchronized_gaps$resume_week[1]
+  outage_gaps <- long_gaps %>% filter(floor_date(gap_end, "week") == outage_week)
+
+  outage_start <- min(outage_gaps$gap_start)
+  outage_end   <- max(outage_gaps$gap_end)
+
+  cat("Candidate synchronized outage:", as.character(outage_start), "to",
+      as.character(outage_end), "--", n_distinct(outage_gaps$individual_local_identifier),
+      "individuals affected\n")
+}
+```
+
+> **What this reveals:** a cluster of individuals all lose and regain signal within the same few-day window — far too many, and too synchronized, to be independent animal behavior or coincidental tag failures. That pattern is the signature of a real telemetry event (e.g., an uplink or ground-station outage), not a data error — it's genuine missing data, not a duplicate or invalid fix. It does need to be respected downstream: when we compute step lengths and movement metrics later in the workshop, a multi-day gap should never be treated as a single "step," which is exactly why `amt`'s burst/resampling tools exist.
+
 ### 5.4 Temporal coverage
 
 ```{r temporal_plot}
-WB.mv2 %>%
+p <- WB.mv2 %>%
   as_tibble() %>%
   mutate(date = as_date(timestamp)) %>%
   count(individual_local_identifier, date) %>%
-  ggplot(aes(x = date, y = individual_local_identifier, fill = n)) +
+  ggplot(aes(x = date, y = individual_local_identifier, fill = n))
+
+# Highlight the candidate synchronized outage window from Section 5.3 (if any
+# was found), so it's visible across every individual's row at once.
+if (!is.na(outage_start)) {
+  p <- p +
+    annotate("rect",
+             xmin = as_date(outage_start), xmax = as_date(outage_end),
+             ymin = -Inf, ymax = Inf,
+             fill = "red", alpha = 0.15)
+}
+
+p +
   geom_tile() +
   scale_fill_viridis_c(name = "Fixes/day", option = "plasma") +
   labs(title = "Temporal coverage — Wildebeest GPS data",
+       subtitle = if (!is.na(outage_start)) "Shaded band = candidate synchronized outage (see Section 5.3)" else NULL,
        x = NULL, y = NULL) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-> This plot gives an immediate visual of data gaps, deployment start/end dates, and variation across individuals. Any gaps mid-deployment are worth investigating — they may reflect collar issues, animal behavior, or habitat (e.g., dense canopy can reduce fix success).
+> This plot gives an immediate visual of data gaps, deployment start/end dates, and variation across individuals. The shaded red band (if present) marks the candidate system-wide outage detected in Section 5.3 — notice it cuts vertically across *many* individuals' rows at once. That's the visual signature of a shared, external cause, as opposed to a gap confined to a single row, which points to a tag- or animal-specific issue instead.
 
 ---
 
@@ -371,6 +466,8 @@ Now try the same workflow with your own dataset.
 | `mt_time()` | `move2` | Extract timestamp vector |
 | `mt_track_data()` | `move2` | Access individual-level metadata |
 | `mt_time_lags()` | `move2` | Time differences between consecutive fixes |
+| `floor_date()` | `lubridate` | Round a datetime down to a unit (e.g., `"week"`) — used to bin gap-resolution times for clustering |
+| `dhours()` | `lubridate` | Exact duration of *n* hours (handles fractional hours, unlike calendar-based `hours()`) |
 | `st_as_sf()` | `sf` | Convert move2/data frame to sf object (needed for some downstream functions) |
 | `mapview()` | `mapview` | Quick interactive map |
 
