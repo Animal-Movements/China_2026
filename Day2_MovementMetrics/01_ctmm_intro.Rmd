@@ -1,0 +1,212 @@
+---
+title: "M3: Introduction to CTMM"
+subtitle: "Day 2 — Movement Metrics"
+author: "Animal Movement Analyses for Ecologists | SYSU Shenzhen, July 2026"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    toc_collapse: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+*Created: 2026-06-25* 
+*Last updated: `r Sys.Date()`*
+
+---
+
+## Continuous-Time Movement Modeling
+
+[Insert introduction to the conceptualization of `ctmm`]
+
+https://github.com/ctmm-initiative
+
+### Helpful Resources
+
+```{r help, eval = FALSE}
+
+# Help files (documentation)
+help(package = "ctmm")
+
+# Vignettes (walkthrough tutorials)
+browseVignettes(package = "ctmm")
+
+# Frequently asked questions (FAQ)
+help("ctmm-FAQ", package = "ctmm")
+
+# ctmm user group for any questions or help
+browseURL("https://groups.google.com/g/ctmm-user")
+
+# Issue reporting
+browseURL("https://github.com/ctmm-initiative/ctmm/issues")
+
+# ctmm learning material - where the code script from this document can be found
+browseURL("https://github.com/ctmm-initiative/ctmmlearn")
+
+# ctmm manuscripts
+browseURL("https://www.dropbox.com/sh/55ylq4rbm9pl4d9/AAC2WlRCfgQDYrVRpu5pgrfFa?dl=0")
+
+# Development branch of ctmm (more recent than the CRAN version)
+remotes::install_github("ctmm-initiative/ctmm")
+
+# What's new in ctmm
+news(package = "ctmm")
+
+# ctmmweb: point-and-click app - if you know anyone that doesn't use R
+remotes::install_github("ctmm-initiative/ctmmweb")
+ctmmweb::app()
+
+# ctmm MoveApps
+browseURL("https://www.moveapps.org/apps/browser?q=ctmm")
+
+```
+
+## Importing & Visualizing Data
+
+```{r load_packages}
+
+# Install the latest version of ctmm from GitHub
+# remotes::install_github("ctmm-initiative/ctmm")
+
+# Load the ctmm package
+library(ctmm)
+
+```
+
+This package works primarily (and best) with data available on MoveBank. You can upload your data to MoveBank, ensuring that your telemetry data follows standard formatting, which would make it compatible with a wide variety of tools associated with MoveBank (e.g., MoveApps, `ctmm`, etc.). The `as.telemetry` function works with most tabulated tracking data formats and is periodically updated to include new column names to accommodate how GPS location data is collected for different studies. Some manual column renaming may be needed if you are unable to upload your data to MoveBank.
+
+Here, we will demonstrate the first step of importing data with `ctmm` using data on 6 GPS-collared African Buffalo in Kruger National Park, South Africa.
+
+```{r import_data}
+
+# STEP 1: Get data through MoveBank
+# STEP 2: Import data with as.telemetry()
+help("as.telemetry")
+
+# Load data from Movebank CSV (which can be compressed)
+# Buffalo <- as.telemetry('data/Kruger African Buffalo, GPS tracking, South Africa.zip')
+## You can also import from a move object, data.frame, etc.
+## GPS location error can be an issue if greater than the sampling timesteps
+
+# Load buffalo dataset from ctmm
+data(buffalo)  # this data is available within the package
+# help("buffalo")  # information on this data can be found at its help page
+
+# This is a list of buffalo telemetry objects (all objects are telemetry objects)
+class(buffalo)
+
+# Number of buffalo datasets
+length(buffalo)  # There are 6 individuals
+
+class(buffalo[[1]])  # ctmm telemetry object
+head(buffalo[[1]])
+
+# Names of buffalo
+names(buffalo) 
+
+# Summary of buffalo data
+summary(buffalo)
+## Note: 1 hour sampling for all individuals except Pepper's collar malfunctioned (2 hours)
+
+```
+
+We can visualize this the location points using the `plot.telemetry` function, which works automatically when running `plot()` on a `telemetry` object. We can also use the `zoom` function to zoom into (enlarge) and inspect specific parts of the plot, using a gear icon that appears in the top left corner of the "Plots" panel in RStudio. Note: Sometimes RStudio can be buggy, so you may need to rerun this function more than once for the gear icon to appear.
+
+Here are the arguments that can be adjusted for the plotting functions. Additional plotting parameters are passed on to Base R `plot`.
+
+```{r plot_help, eval = FALSE}
+
+## S3 method for class 'telemetry'
+plot(x, CTMM=NULL, UD=NULL, col.bg="white", cex=NULL, col="red", lwd=1, pch=1, type='p',
+     error=TRUE, transparency.error=0.25, velocity=FALSE, DF="CDF", col.UD="blue",
+     col.grid="white", labels=NULL, level=0.95, level.UD=0.95, convex=FALSE, col.level="black",
+     lwd.level=1, SP=NULL, border.SP=TRUE, col.SP=NA, R=NULL, col.R="green", legend=FALSE,
+     fraction=1, xlim=NULL, ylim=NULL, ext=NULL, units=TRUE, add=FALSE, ...)
+
+## S4 method for signature 'telemetry'
+zoom(x, fraction=1, ...)
+
+```
+
+```{r plot.telemetry}
+
+# Plot all buffalo
+plot(buffalo, main = "6 African buffalo")  # telemetry tracking data for all 6 indivs
+## but they are all the same color (hard to tell apart individuals)
+
+# Plot buffalo with list-sorted rainbow of colors
+COL <- rainbow(length(buffalo))
+plot(buffalo, col = COL, main = "Rainbow colors") ## rainbow by default
+## includes `color` function, which can color by individuals 
+## (individuals closer together in space are more distinct in color)
+
+# Plot buffalo with spatially-separated rainbow of colors
+COL <- color(buffalo, by = 'individual')
+plot(buffalo, col = COL, main = "Spatial color separation")
+
+# There are different built-in coloring options for telemetry objects
+# help("color")
+## You can color by sunlight, moonlight, season, time, ...
+
+```
+
+### Projections
+
+[Insert intro to projections]
+
+```{r projection}
+
+# What projection are the buffalo in
+projection(buffalo)
+## want a projection ideally w/out distortion (tangent to where map is on globe)
+## the further out in projection, the more distorted (better at the focal point)
+## only local projections are good, unless working w/ remote sensing data (project it to that data)
+# 2 point as equidistant object is the safest
+
+# You want a projection that is locally flat over your data (to minimize distortion).
+# By default, as.telemetry() will choose a two-point equidistant projection, which is
+## safer for migratory species, but does not preserve North=up.
+
+# The algorithm can be found in:
+ctmm:::median_longlat
+## and automates the estimation of k=2 geometric median (robust) clusters
+
+median(buffalo)
+# Object of class "telemetry"
+# longitude  latitude x y
+# 1  31.82024 -24.73712 0 0
+
+# Show north on plot (puts North facing to the side due to foci on horizontal)
+# compass()
+
+# Center the projection on the geometric median of the data
+projection(buffalo) <- median(buffalo)
+
+projection(buffalo)
+
+# Changes the method so that North is now up
+plot(buffalo, col = COL, main = "Azimuthal-equidistant projection") + 
+  compass()
+
+```
+
+## The Standard CTMM Framework
+
+## Checking for Autocorrelation
+
+### Variograms
+
+## Model Selection
+
+### Range resident models
+
+### Non-resident models
+
+## With this information, what can we do with our data?
+
+
