@@ -315,7 +315,29 @@ time_lags %>%
   theme_minimal()
 ```
 
-> **A single `max_interval_h` will almost always look alarming.** Over a multi-year deployment, nearly every individual will have some unusually long gap somewhere in its track — that alone isn't evidence of a problem. The more useful question is *whether long gaps are isolated to one tag, or shared across many individuals at the same time*. An isolated gap on one animal, on a random date, points to a tag- or animal-specific cause (battery, poor satellite geometry, dense cover). The same gap appearing on many animals at once, all resolving within the same few days, points to a system-wide cause instead — a ground-station/uplink outage, or a network-wide duty-cycle change.
+> **You can see here that the sampling intervals peak at 1 and 3 hours.** This is in fact by design: wildebeest are more active during the day, so these collars are programmed to fix hourly through daylight and drop to every 3 hours at night — a duty cycle that still resolves the period of greatest movement while saving battery overnight. We can check that this two-peak pattern really does line up with time of day, rather than just being an artifact of the histogram's binning:
+
+```{r interval_by_hour}
+# Tag each interval by the local hour of day of the fix that starts it, and
+# check whether short (~1h) vs. long (~3h) intervals separate by time of day.
+time_lags <- time_lags %>%
+  mutate(hour_local = hour(with_tz(timestamp, tz_local)))
+
+time_lags %>%
+  filter(dt_hours < 6) %>%
+  ggplot(aes(x = hour_local, y = dt_hours)) +
+  geom_jitter(alpha = 0.1, width = 0.3, height = 0, color = "steelblue") +
+  geom_hline(yintercept = c(1, 3), color = "firebrick", linetype = "dashed") +
+  scale_x_continuous(breaks = seq(0, 23, 3)) +
+  labs(title = "Fix interval vs. local hour of day",
+       subtitle = "Red lines mark the 1-hour and 3-hour nominal intervals",
+       x = "Hour of day (Africa/Nairobi)", y = "Time to next fix (hours)") +
+  theme_minimal()
+```
+
+> **What this confirms:** the ~1-hour intervals cluster during daylight hours and the ~3-hour intervals cluster overnight — exactly the duty cycle described above, not random noise. Hold onto this: later in the workshop (Day 2), when we compute step metrics from this same data, this day/night split shows up again, and it should be treated as a known sampling design to work with, not "irregularity" to correct.
+
+> **Not every irregularity in tracking data is designed, though.** A single `max_interval_h` will almost always look alarming — but for a different reason than the 1-/3-hour pattern above. Over a multi-year deployment, nearly every individual will have some unusually long gap somewhere in its track — that alone isn't evidence of a problem. The more useful question is *whether long gaps are isolated to one tag, or shared across many individuals at the same time*. An isolated gap on one animal, on a random date, points to a tag- or animal-specific cause (battery, poor satellite geometry, dense cover). The same gap appearing on many animals at once, all resolving within the same few days, points to a system-wide cause instead — a ground-station/uplink outage, or a network-wide duty-cycle change.
 
 ```{r gap_diagnostics}
 # Flag long gaps (> 1 day) and ask: are they spread randomly across
@@ -468,6 +490,8 @@ Now try the same workflow with your own dataset.
 | `mt_time_lags()` | `move2` | Time differences between consecutive fixes |
 | `floor_date()` | `lubridate` | Round a datetime down to a unit (e.g., `"week"`) — used to bin gap-resolution times for clustering |
 | `dhours()` | `lubridate` | Exact duration of *n* hours (handles fractional hours, unlike calendar-based `hours()`) |
+| `with_tz()` | `lubridate` | Convert a timestamp to a given timezone for display/grouping, without changing the instant in time |
+| `hour()` | `lubridate` | Extract the hour-of-day component from a timestamp |
 | `st_as_sf()` | `sf` | Convert move2/data frame to sf object (needed for some downstream functions) |
 | `mapview()` | `mapview` | Quick interactive map |
 

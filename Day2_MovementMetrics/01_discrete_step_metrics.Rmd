@@ -1,0 +1,303 @@
+---
+title: "M1: Discrete Step Metrics"
+subtitle: "Day 2 — Movement Metrics"
+author: "Animal Movement Analyses for Ecologists | SYSU Shenzhen, July 2026"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    theme: flatly
+    highlight: tango
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+<a href="https://github.com/Animal-Movements/China_2026.git" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+---
+
+## Learning Objectives
+
+By the end of this module you will be able to:
+
+1. Check each individual's empirical GPS sampling rate with `summarize_sampling_rate()`, and use `track_resample()` to select which consecutive fixes count as a comparable step for a given analysis — recognizing that uneven sampling is the normal condition of tracking data, not a defect to fix
+2. Derive step length (`sl_`), turning angle (`ta_`), and time step (`dt_`) for every individual with `amt::steps_by_burst()`, scaling from one individual to all with the `nest()`/`map()`/`unnest()` pattern, and calculate speed from the resulting step table
+3. Compute the same three quantities directly from a `move2` object with `mt_distance()`, `mt_speed()`, and `mt_turnangle()`/`mt_azimuth()`, and recognize when that more direct route is enough versus when `amt`'s track/step infrastructure is worth the extra setup
+
+**Packages used:** `amt`, `move2`, `sf`, `tidyverse`, `lubridate`, `units`
+
+---
+
+## Ecological context
+
+Step length, turning angle, and speed are the smallest unit of movement we can measure from GPS data — the displacement and direction change between one fix and the next. They look like a modest starting point, but almost everything downstream of them is built on top: speed distributions flag resting versus traveling bouts, turning-angle patterns distinguish directed transit from area-restricted foraging, and both feed directly into the behavioral-state models (HMMs) we'll build on Day 5. Sometimes, this first level of movement information already carries ecological signal. For example, a sustained run of long, straight steps can mean a directed move along a fence line or a road, where the herd's options are constrained by the landscape rather than by foraging choice, or it signals movements during migration, while short, high-turning-angle steps cluster where animals are settled into an area, foraging or resting, or it signals movements during the "ranging" movements outside of the migration period.
+
+Getting some of the clean step metrics, though, depends on comparing steps that span the *same* time interval. A step length computed across a 20-minute gap and one computed across a 6-hour gap aren't measuring the same thing, and mixing the two without thinking about it will distort everything calculated from them — including the speed and turning-angle distributions above. Section 2 below works through how to pick a consistent interval for the discrete, step-based metrics this module covers.
+
+That said, not every movement analysis needs a regular sampling interval at all. Continuous-time movement models — covered later today in Modules 3–4 — are built specifically to use irregular fix intervals directly, treating the gaps between fixes as information rather than something to standardize away. The discrete step-metric approach here is one useful lens, not the only one.
+
+---
+
+## 1. Setup
+
+### 1.1 Load packages
+
+```{r packages}
+# install.packages(c("amt", "move2", "sf", "tidyverse", "lubridate", "units"))
+
+library(amt)         # Tracks, resampling, step metrics
+library(move2)       # move2 helpers (mt_distance, mt_speed, mt_turnangle, ...)
+library(sf)          # Spatial vector data
+library(tidyverse)   # Data wrangling and visualization
+library(lubridate)   # Timestamps and durations
+library(units)       # Explicit unit conversions
+```
+
+### 1.2 Pick `trk_all` back up
+
+Yesterday, in Day 1 Module 3, we built a multi-individual `amt` track from the cleaned `move2` data and reprojected it to a metric CRS — then set it aside for today. `trk_all` itself wasn't saved to disk (only the cleaned `move2` object was), so as a reminder, here's the exact code that built it:
+
+```{r load}
+load("../Day1_IntroMovementData/Data/WB_clean.rdata")   # loads WB.mv2, saved at the end of Day 1 Module 2
+
+latlong_crs <- "EPSG:4326"   # WGS84 geographic — what move2/Movebank gives us
+utm_crs     <- "EPSG:32737"  # UTM Zone 37S — metric, appropriate for Athi-Kaputiei, Kenya
+```
+
+```{r rebuild_trk_all}
+WB_df <- WB.mv2 %>%
+  mutate(x = sf::st_coordinates(.)[, 1],
+         y = sf::st_coordinates(.)[, 2]) %>%
+  as_tibble() %>%
+  transmute(id = individual_local_identifier,
+            x, y,
+            t = timestamp) %>%
+  arrange(id, t)
+
+trk_all <- make_track(WB_df, x, y, t, id = id, crs = latlong_crs)
+trk_all <- transform_coords(trk_all, utm_crs)
+
+class(trk_all)        # track_xyt, track_xy, tbl_df, tbl, data.frame
+n_distinct(trk_all$id) # number of individuals
+```
+
+> **Note:** `trk_all` holds every individual in one tibble, with `id` as an ordinary column. The `amt` functions in Section 2 and 3 each operate on a single individual's track at a time, so we'll repeat the `nest(data = -id)` / `map()` / `unnest()` pattern previewed yesterday throughout this module — Section 2.1 below walks through what each piece actually does.
+
+---
+
+## 2. Sampling design and choosing comparable steps
+
+### 2.1 Check the sampling rate per individual
+
+Before we run any `amt` function across all eight wildebeest, we need a way to apply a function that's written for *one* track to every individual in `trk_all` at once. That's what the `nest()` / `map()` / `unnest()` pattern (previewed yesterday) is for, and since we'll lean on it for the rest of this module, it's worth pausing on what each piece actually does:
+
+- **`nest(data = -id)`** collapses `trk_all` from "one row per fix" into "one row per individual." Every column except `id` gets folded into a single list-column called `data` — so each row holds, in effect, one individual's entire track as its own self-contained tibble. Run the chunk below and click on a `data` entry in the viewer to see this directly.
+- **`map(data, FUN)`** then applies a function (`FUN`) to each of those per-individual tibbles in turn, one at a time, and collects the results back into a new list-column. This is the part that does the actual "scale from one individual to all" work — `FUN` itself (e.g., `summarize_sampling_rate()` below) only ever has to know how to handle a single track.
+- **`unnest()`** reverses the first step: it flattens a list-column of results back out into an ordinary tibble, with `id` carried along on every resulting row so you always know which individual each value came from.
+
+```{r nest}
+trk_nested <- trk_all %>% nest(data = -id)
+trk_nested
+```
+
+```{r sampling_rate}
+sampling_rates <- trk_nested %>%
+  mutate(rate = map(data, summarize_sampling_rate)) %>%
+  select(id, rate) %>%
+  unnest(rate)
+
+sampling_rates
+```
+
+> **What this shows for this dataset:** `summarize_sampling_rate()` returns the distribution (min, median, mean, max, etc.) of the time gap between consecutive fixes for one individual. For these collars, that distribution isn't a single number — as established in Day 1 Module 1, they're programmed with two different fix rates by design: roughly hourly during the day and every three hours at night, to save battery without sacrificing resolution during the period of greatest activity. The mix of ~1-hour and ~3-hour gaps you see above isn't a sign of anything broken; it's the deliberate sampling schedule showing up in the data.
+>
+> More broadly, this kind of unevenness is the normal condition of GPS tracking data, not the exception. Duty-cycled collars, missed fixes, and satellite-visibility gaps all produce a mix of intervals in almost any real deployment. The question Section 2.2 below works through isn't "how do we fix this," but "given this sampling design, which consecutive fixes should count as one comparable step."
+
+### 2.2 Picking comparable steps with `track_resample()`
+
+Step length, turning angle, and speed are only comparable across steps if every step spans roughly the same time interval — a step computed over 1 hour and one computed over 3 hours describe different things, even though both are perfectly valid fixes from the same deliberate duty cycle. `track_resample()` doesn't repair anything; it lets us state explicitly which consecutive fixes should count as a step for the analysis at hand.
+
+Here, we target the daytime's nominal 1-hour rate, with a 15-minute tolerance to absorb ordinary GPS jitter without stitching genuinely separate fixes together into a false step:
+
+```{r resample}
+trk_resampled <- trk_nested %>%
+  mutate(resampled = map(data, ~ track_resample(.x, rate = hours(1), tolerance = minutes(15)))) %>%
+  select(id, resampled) %>%
+  unnest(resampled)
+
+head(trk_resampled)
+```
+
+> **Note:** `track_resample()` adds a `burst_` column — a run of consecutive fixes that all fall within `tolerance` of the target `rate`. With `rate = hours(1)`, the daytime's roughly-hourly fixes form long, usable bursts, while the night's ~3-hour gaps mostly exceed the 15-minute tolerance and start a new burst — which tells the next step (`steps_by_burst()`) not to compute a step across that gap. That's a deliberate choice for this `rate`, not an error: Section 3 below ends up describing daytime movement specifically. Section 2.3 shows the alternative — targeting the night's coarser 3-hour rate instead, so day and night become directly comparable to each other.
+
+### 2.3 An alternative: one shared 3-hour interval
+
+If the goal is a single, consistent step length across the *whole* diel cycle rather than daytime resolution, target the night's native rate instead. This keeps roughly one fix every 3 hours and drops the extra daytime fixes in between, so every resulting step — day or night — spans the same nominal interval:
+
+```{r resample_3h}
+trk_resampled_3h <- trk_nested %>%
+  mutate(resampled = map(data, ~ track_resample(.x, rate = hours(3), tolerance = minutes(30)))) %>%
+  select(id, resampled) %>%
+  unnest(resampled)
+
+head(trk_resampled_3h)
+```
+
+> **Note:** Same function, coarser target `rate` — `track_resample()` looks for the fix nearest each 3-hour mark within `tolerance` and keeps that one. There's no universally "correct" choice between this and the hourly version in 2.2; it depends on the question. The hourly version resolves fine-scale daytime behavior at the cost of treating night steps as a separate, shorter regime; this 3-hour version gives one apples-to-apples step length across the full cycle at the cost of discarding most daytime fixes. The rest of this module continues with the hourly (`trk_resampled`) version, since Section 3's goal is to demonstrate the step-metric workflow at the finer of the two resolutions — substitute `trk_resampled_3h` in Section 3 if whole-cycle comparability matters more for your question.
+
+---
+
+## 3. Step metrics with `amt::steps_by_burst()`
+
+### 3.1 One individual, step by step
+
+```{r one_individual}
+one_trk <- trk_resampled %>% filter(id == "Sotua")
+
+one_steps <- steps_by_burst(one_trk)
+head(one_steps)
+```
+
+`sl_` is step length (meters, since `trk_all` is in a metric CRS), `ta_` is turning angle (radians), and `dt_` is the time step between the two fixes that make up the step.
+
+### 3.2 Deriving speed
+
+`steps_by_burst()` doesn't return speed directly — we calculate it as step length divided by time step:
+
+```{r speed_one}
+one_steps <- one_steps %>%
+  mutate(dt_s = as.numeric(dt_, units = "secs"),
+         speed_m_s = sl_ / dt_s)
+
+head(one_steps)
+```
+
+> **Note:** `dt_` here is a base R `difftime`, so `as.numeric(dt_, units = "secs")` converts it correctly. This is *not* the same situation as `move2::mt_time_lags()`, which returns a `units`-class object (from the `units` package) — for that one, the same `as.numeric(x, units = ...)` idiom is silently ignored and leaves the value in its default unit. Worth keeping straight if you've used both packages on the same project.
+
+### 3.3 Scaling to all individuals
+
+```{r all_steps}
+trk_resampled_nested <- trk_resampled %>% nest(data = -id)
+
+wb_steps <- trk_resampled_nested %>%
+  mutate(steps = map(data, steps_by_burst)) %>%
+  select(id, steps) %>%
+  unnest(steps) %>%
+  mutate(dt_s = as.numeric(dt_, units = "secs"),
+         speed_m_s = sl_ / dt_s)
+
+head(wb_steps)
+```
+
+### 3.4 Visualizing the distributions
+
+```{r plot_sl}
+wb_steps %>%
+  ggplot(aes(x = log(sl_ + 0.00001), fill = factor(id))) +
+  geom_density(alpha = 0.3) +
+  theme_minimal() +
+  labs(x = "log step length (m)", fill = "ID", title = "Step length distribution")
+```
+
+```{r plot_ta}
+wb_steps %>%
+  ggplot(aes(x = ta_, fill = factor(id))) +
+  geom_density(alpha = 0.3) +
+  theme_minimal() +
+  labs(x = "turning angle (rad)", fill = "ID", title = "Turning angle distribution")
+```
+
+```{r plot_ta_circular}
+wb_steps %>%
+  mutate(ta_deg = ta_ * 180 / pi) %>%
+  filter(!is.na(ta_deg)) %>%
+  ggplot(aes(x = ta_deg, fill = factor(id))) +
+  geom_density(alpha = 0.4) +
+  coord_polar() +
+  theme_minimal() +
+  labs(x = "turning angle (degrees)", fill = "ID")
+```
+
+```{r plot_speed}
+wb_steps %>%
+  ggplot(aes(x = speed_m_s, fill = factor(id))) +
+  geom_density(alpha = 0.3) +
+  theme_minimal() +
+  labs(x = "speed (m/s)", fill = "ID", title = "Speed distribution")
+```
+
+> **Discussion:** A long right tail in step length or speed often reflects a handful of directed, fast-moving steps rather than typical movement — exactly the kind of step a fence line or a road verge can produce. Compare individuals: do some show a tighter, more concentrated turning-angle distribution (more directed movement) than others, and does that line up with anything you'd expect from their sex, age, or where they range?
+
+---
+
+## 4. Quick look: the same basics directly from `move2`
+
+`amt`'s track/step machinery is the most flexible route to these metrics — it's what supports the resampling control above and the windowed home-range/trait calculations in Module 2. But for a fast look at step length, speed, and turning angle, `move2` computes them directly on the cleaned `move2` object, no track conversion required:
+
+```{r move2_speed}
+WB_metric <- WB.mv2 %>%
+  st_transform(utm_crs) %>%
+  mutate(step_length_m = mt_distance(., units = "m"),
+         speed_m_s     = mt_speed(., units = "m/s"))
+
+WB_metric %>%
+  st_drop_geometry() %>%
+  select(individual_local_identifier, timestamp, step_length_m, speed_m_s) %>%
+  head()
+```
+
+```{r move2_angle}
+WB_angles <- WB.mv2 %>%
+  st_transform(latlong_crs) %>%   # mt_turnangle()/mt_azimuth() are only implemented for geographic coordinates
+  mutate(turn_angle = mt_turnangle(.),
+         heading     = mt_azimuth(.))
+
+WB_angles %>%
+  st_drop_geometry() %>%
+  select(individual_local_identifier, timestamp, turn_angle, heading) %>%
+  head()
+```
+
+> **Note:** `move2`'s angle functions currently only work on geographic (lon/lat) coordinates — reproject to `EPSG:4326` before calling them, and back to a metric CRS for anything distance-based (move2 package documentation, `mt_azimuth()` reference).
+
+> **Why two routes to the same numbers?** `move2`'s `mt_*()` functions are vectorized across the whole multi-individual object directly — no `nest()`/`map()` needed, because they're track-ID-aware internally. That's simpler when all you want is step length, speed, or turning angle. `amt`'s track/step framework takes more setup, but that setup is what buys you controlled resampling (Section 2), and the burst- and window-aware metrics — displacement, intensity of use, home ranges — that Module 2 and Day 3 build on. Use whichever matches what you actually need.
+
+---
+
+## Practice: Apply to your own data
+
+1. **Check the sampling rate** for 2–3 individuals in your own dataset with `summarize_sampling_rate()`. Is it one consistent rate, or does it mix multiple regimes the way the wildebeest day/night schedule does?
+2. **Pick a target rate for `track_resample()`** that matches the question you're asking — the finer rate if you want within-regime resolution, or the coarser shared rate (as in Section 2.3) if you want one consistent interval across regimes — with a tolerance that reflects how much jitter your collars typically show.
+3. **Compute step length, turning angle, and speed** with `steps_by_burst()`, scaling to all your individuals with the `nest()`/`map()`/`unnest()` pattern.
+4. **Plot the distributions** and connect what you see back to your species' ecology. Do long, directed steps line up with anything in the landscape (roads, fences, water points)? Do individuals differ in ways that match known differences (sex, age, season)?
+
+**Useful questions to answer for your own dataset:**
+
+- Does your species/dataset have a known duty cycle (e.g., different day vs. night fix rates, or a schedule change partway through deployment)? If so, treat it as a sampling design choice to work with, not noise to remove.
+- Are there individuals with unusually short bursts after resampling — a sign of poor satellite visibility or frequent missed fixes, as opposed to a designed schedule?
+- Do your step-length or speed distributions have a long right tail, and if so, what's producing it?
+- Does your research question actually require a regular interval at all, or would an irregularity-aware approach (e.g., continuous-time movement models, Modules 3–4) fit better?
+
+---
+
+## Key functions reference
+
+| Function | Package | Purpose |
+|---|---|---|
+| `summarize_sampling_rate()` | `amt` | Summarize the time-gap distribution between consecutive fixes for one track |
+| `track_resample()` | `amt` | Select fixes onto a chosen nominal time interval within a tolerance, tagging `burst_` membership |
+| `steps_by_burst()` | `amt` | Compute step length (`sl_`), turning angle (`ta_`), and time step (`dt_`) within each burst |
+| `nest()` / `map()` / `unnest()` | `tidyr` / `purrr` | Apply a single-track `amt` function across all individuals |
+| `mt_distance()` | `move2` | Step (point-to-point) distance directly on a `move2` object |
+| `mt_speed()` | `move2` | Step speed directly on a `move2` object |
+| `mt_turnangle()` | `move2` | Relative turning angle between consecutive segments (geographic CRS only) |
+| `mt_azimuth()` | `move2` | Heading/azimuth of each segment (geographic CRS only) |
+
+---
+
+*Next: **Module 2 — Summary Movement Traits** — having quantified step-by-step movement, we zoom out to individual-level summary traits over longer windows: displacement, maximum displacement, intensity of use, and diurnality — the same set of metrics used by the MoveTraits database to compare movement behavior across species.*
