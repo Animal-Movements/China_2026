@@ -1,0 +1,396 @@
+---
+title: "M1: Discrete Home Range Estimation"
+subtitle: "Day 3 — Home Range Estimation"
+author: "Animal Movement Analyses for Ecologists | SYSU Shenzhen"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    theme: flatly
+    highlight: tango
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+<a href="https://github.com/Animal-Movements/China_2026.git" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(10deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+---
+
+## Learning Objectives
+
+By the end of this module you will be able to:
+
+1. Explain the difference between discrete (independence-assuming) and continuous-time (autocorrelation-aware) home range estimators, and why the choice matters for biased GPS data
+2. Estimate and compare home ranges for one individual using three discrete methods — MCP, LoCoH, and KDE (`amt`) — and articulate what each method assumes and what it gets wrong
+3. Scale a single-individual workflow to estimate and compare home range area across an entire population
+4. Calculate two additional MoveTraits movement traits that depend on home-range estimation — **range size** and **intensity of use** — across multiple time windows, completing the five-trait set introduced in Day 2 Module 2
+
+**Packages used:** `amt`, `sf`, `leaflet`, `RColorBrewer`, `tidyverse`, `lubridate`
+
+---
+
+## Ecological context: why estimate home ranges, and why more than one method?
+
+A home range is the area an individual uses for its routine activities — foraging, resting, breeding — over a defined period (Burt 1943). Estimating it well matters for almost everything downstream in this workshop: it sets the spatial scale at which habitat selection (Day 6) is meaningful, it's the denominator against which space-use intensity is judged (Section 5, below), and for a partially-migratory, fence-bound population like the Athi-Kaputiei wildebeest, changes in range size and shape are one of the most direct signals that connectivity has been lost.
+
+**Discrete** methods — MCP, LoCoH, KDE — treat each GPS fix as an independent, identically distributed draw from the animal's space-use distribution. That assumption is convenient (these estimators are fast, simple, and easy to compare across studies) but it is also usually wrong: modern GPS data are autocorrelated, and ignoring that autocorrelation systematically biases area estimates — usually downward, since correlated fixes are functionally fewer "independent" samples than they appear (Noonan et al. 2019, *Ecological Monographs* 89(2):e01344). Walter, Onorato & Fischer (2015, *Movement Ecology* 3) is a good practical reference for the broader question this raises: there is no single best estimator, and the right choice depends on what the home range estimate will be used for. **Continuous-time** methods — autocorrelated KDE (AKDE) via `ctmm`, covered later this week — model that autocorrelation explicitly instead of assuming it away. We start with the discrete methods here because they remain the fastest route to a first look at space use, and because understanding what they assume is what makes the autocorrelation-aware alternative legible later.
+
+This module also closes a loop from Day 2 Module 2. That module covered three of the five MoveTraits traits — displacement, maximum displacement, and diurnality (Beumer et al. 2026, *Ecology Letters* 29:e70297) — and deliberately held back the other two, **range size** and **intensity of use**, because both are built directly on top of a home-range estimate. Sections 4 and 5 below pick those up now that `hr_mcp()` is a tool you have rather than an unexplained black box.
+
+---
+
+## 1. Setup
+
+### 1.1 Load packages
+
+```{r packages}
+# install.packages(c("amt", "sf", "leaflet", "RColorBrewer", "tidyverse", "lubridate"))
+
+library(amt)         # Tracks, home-range estimation
+library(sf)          # Spatial vector data
+library(leaflet)     # Interactive maps
+library(RColorBrewer) # Color palettes
+library(tidyverse)   # Data wrangling and visualization
+library(lubridate)   # Timestamps, floor_date()
+```
+
+### 1.2 Rebuild `trk_all`
+
+As in Day 2, we rebuild the multi-individual track from the cleaned `move2` data rather than relying on anything saved from a previous module.
+
+```{r load}
+load("../Day1_IntroMovementData/Data/WB_clean.rdata")   # loads WB.mv2
+
+latlong_crs <- "EPSG:4326"   # WGS84 geographic — what move2/Movebank gives us
+utm_crs     <- "EPSG:32737"  # UTM Zone 37S — metric, needed for area in m^2/km^2
+
+WB_df <- WB.mv2 %>%
+  mutate(x = sf::st_coordinates(.)[, 1],
+         y = sf::st_coordinates(.)[, 2]) %>%
+  as_tibble() %>%
+  transmute(id = individual_local_identifier, x, y, t = timestamp) %>%
+  arrange(id, t)
+
+trk_all <- make_track(WB_df, x, y, t, id = id, crs = latlong_crs)
+trk_all <- transform_coords(trk_all, utm_crs)
+
+trk_nested <- trk_all %>% nest(data = -id)
+trk_nested
+```
+
+---
+
+## 2. Home range for one individual: MCP, LoCoH, KDE
+
+```{r one_individual}
+one_trk <- trk_all %>% filter(id == "Sotua")
+```
+
+### 2.1 MCP (Minimum Convex Polygon)
+
+MCP draws the smallest convex polygon containing a chosen percentage of fixes.
+
+```{r mcp}
+one_mcp <- hr_mcp(one_trk, levels = c(0.5, 0.95))
+plot(one_mcp, main = "MCP")
+```
+
+MCP is simple and assumes independence between fixes. It also makes no use of fix density — every point inside the polygon counts equally, so it routinely includes large areas the animal rarely or never actually used, and it says nothing about *where* within the range use was concentrated.
+
+### 2.2 LoCoH (Local Convex Hull)
+
+LoCoH builds a local MCP around each fix using its *k* nearest neighbors (or, in other variants, an *r* radius or *a* sum of distances), then unions those local hulls.
+
+```{r locoh}
+one_locoh_20  <- hr_locoh(one_trk, type = "k", n = 20,  levels = c(0.5, 0.95))
+one_locoh_50  <- hr_locoh(one_trk, type = "k", n = 50,  levels = c(0.5, 0.95))
+one_locoh_100 <- hr_locoh(one_trk, type = "k", n = 100, levels = c(0.5, 0.95))
+
+par(mfrow = c(1, 3))
+plot(one_locoh_20,  main = "k-LoCoH, k = 20")
+plot(one_locoh_50,  main = "k-LoCoH, k = 50")
+plot(one_locoh_100, main = "k-LoCoH, k = 100")
+```
+
+LoCoH accounts for the fact that nearby points are related and excludes areas with no real support in the data — visibly tighter and more irregular than the MCP above. But choosing *k* (or *r*, or *a*) is non-trivial, as the three panels above make clear, and LoCoH still assumes independence between fixes and reasonably regular sampling.
+
+### 2.3 KDE (Kernel Density Estimation)
+
+KDE estimates a smooth utilization distribution — the relative probability of finding the animal at each location — rather than a single hard boundary.
+
+```{r kde}
+trast   <- make_trast(one_trk, res = 50)   # 50 m resolution raster template, in UTM units
+one_kde <- hr_kde(one_trk, trast = trast, levels = c(0.5, 0.95))
+plot(one_kde, main = "KDE")
+```
+
+KDE still assumes independence and regular sampling, and autocorrelation in real GPS data tends to make it *underestimate* area — exactly the bias Noonan et al. (2019) quantify. That said, these assumptions mattered less when location data were scarce and expensive to collect; KDE's continuing popularity is partly historical.
+
+> **Note on `levels`:** in all three methods, `levels` sets the isopleth — 95% gives the broad range, 50% the "core" area. Excluding the outer few percent is a deliberate choice to drop one-off outlier forays, but sometimes those rare excursions (a long-distance dispersal attempt, a single crossing of a fence gap) are exactly the behavior you care about. Don't default to 95%/50% without asking whether your question needs the tails.
+
+### 2.4 Comparing the three estimators
+
+```{r hr_area_one}
+hr_area_one <- cbind(
+  tibble(method = rep(c("mcp", "k-locoh 100", "kde"), each = 2)),
+  rbind(hr_area(one_mcp), hr_area(one_locoh_100), hr_area(one_kde))
+) %>%
+  select(-what)
+
+hr_area_one %>%
+  ggplot(aes(x = method, y = area / 1e6, group = factor(level), fill = factor(level))) +
+  geom_bar(stat = "identity", position = "dodge") +
+  theme_minimal() +
+  labs(title = "Home range area by estimator, Sotua",
+       x = NULL, y = expression("Area ("*km^2*")"), fill = "Isopleth level")
+```
+
+Different estimators can give substantially different areas and shapes for the *same* underlying fixes. LoCoH tends to be most conservative, MCP the most permissive, and both MCP and LoCoH can produce multi-part (disjunct) ranges — ecologically odd for a terrestrial herbivore, where "home range" usually implies a single contiguous area.
+
+> **Discussion:** Before choosing an estimator for your own work, ask what the home range estimate is *for*. A quick, conservative delineation of where an animal could plausibly go is a different goal from a defensible estimate of the core area it relies on most — and those two goals can call for different methods entirely.
+
+---
+
+## 3. Home range for multiple individuals
+
+Scaling to every individual follows the same nest → map → combine logic used for movement traits in Day 2, with one wrinkle: `hr_mcp()` returns an `sf` object, not a plain numeric column, so we can't `unnest()` it directly — we bind the list of `sf` objects together with `bind_rows()` instead.
+
+```{r mcp_all_ind}
+wb_mcp_nested <- trk_nested %>%
+  mutate(mcp = map(data, function(x) {
+    mcp <- hr_mcp(x, levels = 0.95)
+    return(mcp$mcp)
+  }))
+
+wb_mcp <- bind_rows(wb_mcp_nested$mcp) %>%
+  mutate(id = wb_mcp_nested$id)
+
+wb_mcp
+```
+
+> **Try it yourself:** before looking at the chart below, sketch what you'd expect — do you think 95% MCP area will vary a little or a lot across individuals? What's one fair way to compare them, given that individuals were tracked for different lengths of time?
+
+```{r mcp_area_bar}
+wb_mcp %>%
+  ggplot(aes(x = id, y = as.numeric(area) / 1e6)) +
+  geom_col(fill = "steelblue") +
+  theme_minimal() +
+  labs(title = "95% MCP home range area by individual",
+       x = NULL, y = expression("Area ("*km^2*")")) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+> **Discussion:** Home range area computed over an individual's *entire* track is confounded by tracking duration — an individual tracked for 18 months has simply had more opportunities to visit new places than one tracked for 6, independent of any real difference in ranging behavior. A fairer comparison would standardize by duration (e.g., truncate every track to the same number of days before computing MCP), or compare the **windowed** range-size trait in Section 4 instead, which sidesteps the problem by computing area within fixed-length windows rather than over the whole track.
+
+### 3.1 Mapping all individuals' home ranges
+
+```{r all_wb_mcp}
+ggplot() +
+  geom_sf(data = wb_mcp, aes(color = id), fill = NA, alpha = 0.4, linewidth = 0.8) +
+  theme_minimal() +
+  labs(title = "95% MCP home ranges, all individuals", color = "Individual")
+```
+
+```{r leaflet}
+# leaflet only takes lon/lat, so transform back from UTM
+wb_mcp_geo <- wb_mcp %>% st_transform(crs = st_crs(4326))
+
+pal <- colorFactor(
+  palette = brewer.pal(length(unique(wb_mcp_geo$id)), "Set3"),
+  domain  = wb_mcp_geo$id
+)
+
+leaflet(wb_mcp_geo) %>%
+  addProviderTiles("CartoDB.Positron") %>%
+  addPolygons(fillColor = ~pal(id), color = "black", weight = 1,
+              opacity = 1, fillOpacity = 0.6,
+              popup = ~paste("Animal ID:", id)) %>%
+  addLegend("bottomright", pal = pal, values = ~id, title = "Animal ID")
+```
+
+### 3.2 Exporting results
+
+`sf` objects drop straight to a plain data frame once you no longer need the geometry — useful for reporting or for joining home-range area onto other per-individual tables:
+
+```{r mcp_df}
+wb_mcp_df <- st_drop_geometry(wb_mcp)
+wb_mcp_df
+```
+
+---
+
+## 4. Range size: home range area as a repeated trait
+
+Section 3 computed one MCP area per individual, over its entire track. **Range size**, as MoveTraits defines it, is different: it's the same 95% MCP area computed repeatedly within fixed time windows (MoveTraits uses 24-hour, 7-day, 30-day, and 12-month windows), which turns a single snapshot into a repeated measurement you can summarize and compare the way Day 2 Module 2 summarized displacement and diurnality. We compute it here at monthly and yearly windows — the same two scales Day 2 Module 2 used for maximum displacement, for direct comparability.
+
+```{r calc_range_size_fn}
+calc_range_size <- function(track_df, time_unit = c("month", "year")) {
+  time_unit <- match.arg(time_unit)
+
+  if (time_unit == "year") {
+    if (nrow(track_df) < 5) return(tibble(area_m2 = NA_real_))
+    mcp_all <- hr_mcp(track_df, levels = 0.95)
+    return(tibble(area_m2 = as.numeric(hr_area(mcp_all)$area)))
+  }
+
+  track_df %>%
+    mutate(period = floor_date(t_, unit = time_unit)) %>%
+    group_by(period) %>%
+    group_split() %>%
+    map_dfr(function(df_period) {
+      # MCP needs at least 3 non-collinear points; require a few more for a
+      # sensible estimate rather than a degenerate sliver of a polygon
+      if (nrow(df_period) < 5) {
+        return(tibble(period = df_period$period[1], area_m2 = NA_real_))
+      }
+      mcp_period <- hr_mcp(df_period, levels = 0.95)
+      tibble(period = df_period$period[1], area_m2 = as.numeric(hr_area(mcp_period)$area))
+    })
+}
+```
+
+```{r monthly_yearly_range_size}
+wb_monthly_range_raw <- trk_nested %>%
+  mutate(monthly = map(data, ~ calc_range_size(.x, time_unit = "month"))) %>%
+  select(id, monthly) %>%
+  unnest(monthly)
+
+wb_yearly_range <- trk_nested %>%
+  mutate(yearly = map(data, ~ calc_range_size(.x, time_unit = "year"))) %>%
+  select(id, yearly) %>%
+  unnest(yearly) %>%
+  rename(yearly_range_size = area_m2)
+```
+
+MoveTraits summarizes each windowed trait per individual using five statistics — mean, median, coefficient of variation, and the 5th/95th percentiles — rather than just a mean, because both the central tendency and the spread of a repeated trait carry information (an individual with a high mean but also high CV is using a variable-sized area from month to month, not consistently ranging over a large one):
+
+```{r monthly_range_summary}
+wb_monthly_range <- wb_monthly_range_raw %>%
+  group_by(id) %>%
+  summarise(mean_range_size   = mean(area_m2, na.rm = TRUE),
+            median_range_size = median(area_m2, na.rm = TRUE),
+            cv_range_size     = sd(area_m2, na.rm = TRUE) / mean(area_m2, na.rm = TRUE),
+            p95_range_size    = quantile(area_m2, 0.95, na.rm = TRUE),
+            p05_range_size    = quantile(area_m2, 0.05, na.rm = TRUE),
+            .groups = "drop")
+
+wb_monthly_range
+wb_yearly_range
+```
+
+```{r plot_range_size}
+wb_monthly_range_raw %>%
+  mutate(area_km2 = area_m2 / 1e6) %>%
+  ggplot(aes(x = period, y = area_km2, color = id)) +
+  geom_line() +
+  geom_point(size = 1.5) +
+  scale_x_datetime(date_labels = "%b %Y") +
+  theme_minimal() +
+  labs(title = "Monthly range size (95% MCP) by individual",
+       x = "Month", y = expression("Monthly range size ("*km^2*")"), color = "Individual") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+> **Discussion:** For a partially migratory population in a seasonal rangeland system, monthly range size is one of the more direct signals of a behavioral shift — a sustained jump in range size points to a wider-ranging or migratory month, while a sustained drop points toward settling into a dry-season refuge or a resource patch. Months with missing points had fewer than 5 fixes that month for that individual, where a 95% MCP isn't a sensible estimate.
+
+---
+
+## 5. Intensity of use: how intensively is that area used?
+
+Range size answers "how big an area." **Intensity of use** answers a different question: within that area, how much ground did the individual actually cover? MoveTraits defines it as the cumulative step distance traveled within a window, divided by the square root of that same window's home-range area — `path_length / sqrt(area)`. The square root of area gives a characteristic linear scale of the range (think of it as roughly "how wide the range is"), so intensity of use is, loosely, *distance traveled relative to the range's own width*.
+
+This makes the two traits complementary rather than redundant: an individual could have a *large* range size but *low* intensity of use if it occupies a wide area but moves efficiently within it, or a *small* range size but *high* intensity of use if it covers a lot of relative ground within a compact area — pacing back and forth across a small patch rather than settling into one corner of it.
+
+```{r calc_path_length_fn}
+calc_path_length <- function(track_df, time_unit = "month") {
+  track_df %>%
+    arrange(t_) %>%
+    mutate(period = floor_date(t_, unit = time_unit),
+           step = sqrt((x_ - lag(x_))^2 + (y_ - lag(y_))^2)) %>%
+    group_by(period) %>%
+    summarise(path_length = sum(step, na.rm = TRUE), n_fix = n(), .groups = "drop")
+}
+```
+
+We reuse the monthly MCP areas already computed in Section 4 (`wb_monthly_range_raw`) rather than recomputing them — the same window, the same area, just paired with cumulative path length instead of summarized on its own:
+
+```{r monthly_iou}
+wb_monthly_path_raw <- trk_nested %>%
+  mutate(monthly = map(data, ~ calc_path_length(.x, time_unit = "month"))) %>%
+  select(id, monthly) %>%
+  unnest(monthly)
+
+wb_monthly_iou_raw <- wb_monthly_path_raw %>%
+  left_join(wb_monthly_range_raw %>% select(id, period, area_m2), by = c("id", "period")) %>%
+  mutate(iou = path_length / sqrt(area_m2))
+
+wb_monthly_iou <- wb_monthly_iou_raw %>%
+  group_by(id) %>%
+  summarise(mean_iou   = mean(iou, na.rm = TRUE),
+            median_iou = median(iou, na.rm = TRUE),
+            cv_iou     = sd(iou, na.rm = TRUE) / mean(iou, na.rm = TRUE),
+            p95_iou    = quantile(iou, 0.95, na.rm = TRUE),
+            p05_iou    = quantile(iou, 0.05, na.rm = TRUE),
+            .groups = "drop")
+
+wb_monthly_iou
+```
+
+```{r plot_iou}
+wb_monthly_iou_raw %>%
+  ggplot(aes(x = period, y = iou, color = id)) +
+  geom_line() +
+  geom_point(size = 1.5) +
+  scale_x_datetime(date_labels = "%b %Y") +
+  theme_minimal() +
+  labs(title = "Monthly intensity of use by individual",
+       x = "Month", y = "Intensity of use (path length / √area)", color = "Individual")
+```
+
+> **Discussion:** A month with both a range-size spike (Section 4) *and* an intensity-of-use spike is consistent with a directed long-distance move — covering new ground rather than recycling familiar ground. A range-size spike with *flat or falling* intensity of use instead suggests the area simply got reclassified as larger (e.g., one outlying excursion stretched the MCP) without a corresponding increase in how thoroughly that larger area was actually traveled. For ungulates in fenced or fragmenting rangelands specifically, a sustained rise in intensity of use without a matching rise in range size can also flag restricted movement — covering more relative ground simply because the available area has shrunk, not because the animal is ranging more widely.
+
+Range size and intensity of use, together with displacement, maximum displacement, and diurnality from Day 2 Module 2, complete the five-trait set from Beumer et al. (2026). If you'd like to see whether adding these two changes how individuals cluster into movement profiles, revisit Day 2 Module 2 Section 5 and rerun the clustering with all five traits joined into one matrix — see Practice item 4 below.
+
+---
+
+## Practice: Apply to your own data
+
+1. **Estimate MCP, LoCoH, and KDE** for one individual in your own dataset with `hr_mcp()`, `hr_locoh()`, `hr_kde()`. Do the three methods agree on area and shape, or diverge the way they did here? If they diverge a lot, what does that tell you about how clustered vs. spread out your animal's fixes are?
+2. **Scale to all individuals** using the nest → map → `bind_rows()` pattern in Section 3. Compare home range area across individuals — and consider whether tracking duration differences are confounding that comparison, the way Section 3's discussion flags.
+3. **Calculate range size and intensity of use** for your own individuals with `calc_range_size()` and `calc_path_length()`. Do individuals separate cleanly by one trait but not the other, the way the discussion in Section 5 anticipates they might?
+4. **(Optional, integrative)** Combine range size and intensity of use with displacement, maximum displacement, and diurnality from Day 2 Module 2 into one trait matrix, and rerun the clustering workflow from Day 2 Module 2 Section 5. Does adding these two traits change which individuals group together?
+
+**Useful questions to answer for your own dataset:**
+
+- Does your research question call for a quick, permissive delineation of where the animal could go (MCP), a conservative estimate of core-use area (LoCoH/KDE at 50%), or both?
+- Is your tracking duration similar across individuals? If not, how will you account for that before comparing home range area?
+- Do range size and intensity of use move together over time for your individuals, or do they decouple — and if they decouple, what's a plausible ecological explanation (habitat loss, a barrier, a seasonal resource pulse)?
+
+---
+
+## Key functions reference
+
+| Function | Package | Purpose |
+|---|---|---|
+| `make_track()` / `transform_coords()` | `amt` | Build a track and reproject it to a metric CRS |
+| `hr_mcp()` | `amt` | Minimum convex polygon home range |
+| `hr_locoh()` | `amt` | Local convex hull home range |
+| `make_trast()` | `amt` | Build a raster template for KDE |
+| `hr_kde()` | `amt` | Kernel density estimation home range |
+| `hr_area()` | `amt` | Extract area (and isopleth level) from any `amt` home-range object |
+| `nest()` / `unnest()` | `tidyr` | Collapse/expand a list-column for per-individual or per-window computation |
+| `map()` / `map_dfr()` | `purrr` | Apply a function across a nested list-column, row-binding results |
+| `bind_rows()` | `dplyr` | Combine a list of `sf` objects (can't be `unnest()`-ed directly) |
+| `floor_date()` | `lubridate` | Bin timestamps into month/year windows |
+| `group_split()` | `dplyr` | Split a grouped data frame into a list of subsets |
+| `quantile()` | `stats` | 5th/95th percentile for trait summarization |
+| `st_drop_geometry()` | `sf` | Convert an `sf` object to a plain data frame |
+| `leaflet()` / `addPolygons()` / `addProviderTiles()` | `leaflet` | Interactive home-range map |
+
+---
+
+*Next: **Module 2 — Population-level comparison** — having estimated and summarized home ranges individual by individual, we turn to comparing space use across the population as a whole.*
