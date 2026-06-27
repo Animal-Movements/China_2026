@@ -1,8 +1,7 @@
 ---
 title: "M1: Discrete Step Metrics"
 subtitle: "Day 2 — Movement Metrics"
-author: "Animal Movement Analyses for Ecologists | SYSU Shenzhen, July 2026"
-date: "`r Sys.Date()`"
+author: "Animal Movement Analyses for Ecologists | SYSU Shenzhen"
 output:
   html_document:
     toc: true
