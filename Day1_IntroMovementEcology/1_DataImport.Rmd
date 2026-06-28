@@ -175,7 +175,7 @@ load("./Data/wildebeest_data.rdata")
 ## Understanding the move2 object
 `move2` is a relatively new package (2022) designed to make working with tracking data more intuitive. A `move2` object is fundamentally an `sf` (simple features) object — meaning every row already carries a spatial point geometry — with extra structure to handle multiple individuals and timestamps.
 
-### Object class and basic summary
+### Data Summary
 
 ```{r class}
 # Printing the class of the move 2 object
@@ -227,9 +227,7 @@ names(WB.mv2)
 
 > When you download from Movebank with `move2`, the deployment metadata (individual info, study site, sex, deploy on/off dates) is automatically embedded in the track data. In Module 2, we will use this information to subset to the study area and filter by deployment period.
 
----
-
-## 4. CSV import (alternative workflow)
+## CSV import (alternative workflow)
 
 If you cannot connect to Movebank — or if your data lives elsewhere — you can import from a CSV and convert to a `move2` object using `mt_as_move2()`.
 
@@ -242,7 +240,7 @@ If you cannot connect to Movebank — or if your data lives elsewhere — you ca
 # can silently turn a subset of rows into NA with no warning. Parsing the raw text
 # exactly once, explicitly, avoids that.
 WB_csv <- read_csv("Data/WB_FullDataset.csv",
-                    col_types = cols(timestamp = col_character())) %>%
+                   col_types = cols(timestamp = col_character())) %>%
   mutate(timestamp = ymd_hms(timestamp, tz = tz_utc))  # parse timestamp with timezone
 
 # Always verify before moving on -- this should be 0:
@@ -260,9 +258,7 @@ WB.mv2 <- mt_as_move2(
 
 > **Note:** `mt_as_move2()` works with any data frame that has coordinates and timestamps. Once converted, the object behaves identically to a Movebank download — all the same `mt_*` functions apply.
 
----
-
-## 5. Initial data exploration
+## Initial data exploration
 
 ### 5.1 Dimensions and structure
 
@@ -455,9 +451,7 @@ p +
 
 > This plot gives an immediate visual of data gaps, deployment start/end dates, and variation across individuals. The shaded red band (if present) marks the candidate system-wide outage detected in Section 5.3 — notice it cuts vertically across *many* individuals' rows at once. That's the visual signature of a shared, external cause, as opposed to a gap confined to a single row, which points to a tag- or animal-specific issue instead.
 
----
-
-## 6. Quick map
+## Quick map
 
 Before doing any cleaning or analysis, always map your raw data. This is the fastest way to spot obvious errors — locations in the ocean, impossible coordinates, or fixes far outside the study area.
 
@@ -478,58 +472,23 @@ WB.sf %>%
 
 > **What to look for:** Do all points fall within the expected study area? Are there any obvious outliers far from the main cluster? Do individual home ranges seem reasonable for wildebeest? We will do more rigorous quality filtering in Module 2.
 
----
+# Save
+Save the raw `move2` object so that we can use it in future exercises.  
 
-## 7. Save output for Module 2
-
-We save the raw `move2` object. Module 2 will pick this up and apply data cleaning and quality filtering.
-
-```{r save}
-save(WB.mv2, file = "Data/WB_raw.rdata")
-cat("Saved WB.mv2 —", n_distinct(mt_track_id(WB.mv2)), "animals,", nrow(WB.mv2), "fixes\n")
+```{r Save}
+save(WB.mb, file = "Output/WB_raw.rdata")
+cat("Saved WB.mb —", n_distinct(mt_track_id(WB.mb)), "animals,", nrow(WB.mb), "fixes\n")
 ```
 
----
+# Exercise: 
+Now that you have uploaded and manipulated the wildebeest dataset in [R](https://cran.r-project.org/), adapt the code with your own data.  Use [Movebank](https://www.movebank.org/) to download an available dataset or upload your data directly using `read_csv()`.  Please do the following:
 
-## Practice: Apply to your own data
-
-Now try the same workflow with your own dataset.
-
-1. **If your data is on Movebank:** use `movebank_download_study()` to download it. Run `n_distinct(mt_track_id())`, `mt_track_data()`, and the individual summary table.
-
-2. **If you have a CSV:** use `mt_as_move2()` to convert. Make sure your timestamp column is parsed correctly — check with `class(your_data$timestamp)` and confirm it returns `POSIXct`.
-
-3. **For everyone:** run the temporal coverage heatmap and quick map on your own data. What patterns do you notice? Any gaps or suspicious points?
+1. If you are pulling data from [Movebank](https://www.movebank.org/), use `movebank_download_study()` to download it. Run `n_distinct(mt_track_id())`, `mt_track_data()`, and create an individual summary table.
+2. If you are importing data from a .csv,  use `mt_as_move2()`. Make sure your timestamp column is parsed correctly — check the `class()` of your object and confirm that the timestamp column is formatted as `POSIXct()`.
+3. Run the temporal coverage heatmap and quickly map your own data. 
 
 **Useful questions to answer for your own dataset:**
-- How many individuals? How long were they tracked?
-- What is the nominal sampling interval? How regular is it in practice?
-- Are there any obvious spatial outliers?
-
----
-
-## Key functions reference
-
-| Function | Package | Purpose |
-|---|---|---|
-| `movebank_store_credentials()` | `move2` | Store Movebank login (once per machine) |
-| `movebank_download_study_info()` | `move2` | Browse available Movebank studies |
-| `movebank_download_study()` | `move2` | Download study from Movebank → move2 object |
-| `mt_as_move2()` | `move2` | Convert data frame / sf to move2 |
-| `mt_track_id()` | `move2` | Extract track ID vector (use with `n_distinct()` to count animals) |
-| `mt_n_tracks()` | `move2` | Count tracks |
-| `mt_time_column()` | `move2` | Name of the timestamp column |
-| `mt_track_id_column()` | `move2` | Name of the track ID column |
-| `mt_time()` | `move2` | Extract timestamp vector |
-| `mt_track_data()` | `move2` | Access individual-level metadata |
-| `mt_time_lags()` | `move2` | Time differences between consecutive fixes |
-| `floor_date()` | `lubridate` | Round a datetime down to a unit (e.g., `"week"`) — used to bin gap-resolution times for clustering |
-| `dhours()` | `lubridate` | Exact duration of *n* hours (handles fractional hours, unlike calendar-based `hours()`) |
-| `with_tz()` | `lubridate` | Convert a timestamp to a given timezone for display/grouping, without changing the instant in time |
-| `hour()` | `lubridate` | Extract the hour-of-day component from a timestamp |
-| `st_as_sf()` | `sf` | Convert move2/data frame to sf object (needed for some downstream functions) |
-| `mapview()` | `mapview` | Quick interactive map |
-
----
-
-*Next: **Module 2 — Data Cleaning & Quality Control** — we subset to the study area, filter by deployment dates, remove low-quality fixes, and handle duplicates.*
+* How many individuals were imported? How long was each individual tracked?
+* What is the sampling interval of your data? Is it regularly sampled?
+* Are there any obvious spatial outliers?  Do you notice any gaps or suspicious points?
+* What patterns do you notice?
