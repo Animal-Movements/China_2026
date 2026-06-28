@@ -22,7 +22,7 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 # Introduction
   >Example: White-bearded wildebeest (2010-2013)
 
-Throughout this introductory exercise, we will use a dataset on white-bearded wildebeest (*Connochaetes taurinus*) collected from 2010-2013 across the Athi-Kaputiei Plains in southern Kenya. Unlike their more famous Serengeti counterparts, wildebeest in Kenya navigate a landscape increasingly fragmented by fencing, roads, and peri-urban development. Study goals were to understand how natural and anthropogenic change impact wildebeest movements.
+Throughout this introductory exercise, we will use a dataset on white-bearded wildebeest (*Connochaetes taurinus*) collected from 2010-2013 across the Athi-Kaputiei Plains in southern Kenya. Unlike their more famous cousins in the Serengeti, wildebeest in Kenya navigate a landscape increasingly fragmented by fencing, roads, and peri-urban development. The study goals were to understand how natural and anthropogenic change impact wildebeest movements.
 
 Today, we focus on getting these data into [R](https://cran.r-project.org/) in a clean and reproducible way.
 
@@ -46,13 +46,13 @@ In this exercise, we will:
 **Packages used:** `move2`, `tidyverse`, `lubridate`, `sf`, `mapview`
 
 # Setup
-As a first step, we will import the necessary packages to conduct our analysis and setup our time zone and coordinate system.
+As a first step, we will import the necessary packages to conduct our analysis.
 
 ## Load packages
 Remove everything held in [R's](https://cran.r-project.org/) memory and load the required libraries for analysis.
 
 ```{r Load Libraries}
-# Remove from memory
+# Clear the memory
 rm(list=ls())
 
 # You may need to install these packages first
@@ -66,7 +66,7 @@ library(mapview)     # Quick interactive maps
 ```
 
 ## Set Time Zone
-Data in this example were collected in Kenya.  We will import our data in UTC (Coordinated Universal Time) time, but convert to local time (East Africa Time - EAT).  See the [wiki](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) for your appropriate timezone identifier.  
+Data in this example were collected in Kenya.  Data will be imported in UTC (Coordinated Universal Time) time, but converted to local time (East Africa Time - EAT).  See the [wiki](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) for additional information on choosing the appropriate timezone identifier.  
 
 ```{r Clean Timezone}
 # Set TimeZone
@@ -81,6 +81,8 @@ Any geospatial data (e.g., a set of points) with an incorrect projection or with
 
 When you acquire or download geospatial data, make sure you know the projection of the data.  This information is usually found in the metadata of a given dataset or should be provided by the person that is sharing the data with you.  A qualified GIS analyst should not provide data to you without specifying the projection and datum in which the data were collected.
 
+The Universal Tranverse Mercator (UTM) projection is a common projection used for assigning coordinates to locations on the surface of the earth.  The UTM projection divides earth into 60 distinct zones, using the equator as the origin (0) and spanning 1,000,000 meters.  The center of the zone is defined as 500,000 meters.  As a result, you can identify any geographic point on earth to a specific UTM zone and meter coordinate.
+
 There are EPSG Codes that can be used to avoid manually setting all the parameters needed in a projection. For instance, the code EPSG:32637 references the UTM37N projection with WGS84 datum and ellipsoid. The code EPSG:32736 references UTM36S.  You can find the EPSG reference listed in [http://spatialreference.org/ref/epsg/](http://spatialreference.org/ref/epsg/) and [https://epsg.io/](https://epsg.io/).
 
 <center>
@@ -88,34 +90,8 @@ There are EPSG Codes that can be used to avoid manually setting all the paramete
 </center>
 <br>
 
-It is important to understand that projections try to minimize distortion of a 3-dimensional object (the earth) on a 2-dimensional surface (paper map or computer screen). Choosing a projection that minimizes this distortion is especially important when doing calculations of area or speed. I recommend collecting all GPS data in geographic coordinates and projecting data into a coordinate system that minimizes distortion of your objects of interest.
+It is important to understand that projections try to minimize distortion of a 3-dimensional object (the earth) on a 2-dimensional surface (paper map or computer screen). Choosing a projection that minimizes this distortion is especially important when doing calculations of area or speed. It is recommended to collect all GPS data in geographic coordinates and project into a coordinate system that minimizes distortion of your objects of interest.
 
-The Universal Tranverse Mercator (UTM) projection is a common projection used for assigning coordinates to locations on the surface of the earth.  The UTM projection divides earth into 60 distinct zones, using the equator as the origin (0) and spanning 1,000,000 meters.  The center of the zone is defined as 500,000 meters.  As a result, you can identify any geographic point on earth to a specific UTM zone and meter coordinate.
-
-<center>
-![[Source: Wikimedia](https://upload.wikimedia.org/wikipedia/commons/e/ed/Utm-zones.jpg)](Figures/Utm-zones.jpg){width=75%}
-</center>
-<br>
-
-## Set Coordinate System
-In this example, we will project all geographic data to the Universe Transverse Mercator (UTM) coordinate system, zone 37 south. The unit of measurement of this coordinate system is meters, advantageous for calculating relevant distances between sequential points in time. 
-
-Identifying the correct UTM zones is relatively simple, with multiple options:
-
-  1. Mathematical Approach
-      + Take a longitudinal coordinate (or calculate the mean value) from your dataset and add 180.  Then divide by 6 and round up to the nearest whole number.
-      + Example: -39 + 180 = 141 / 6 = 23.5 == 24
-      + 39$^\circ$W is UTM zone 24.  Then simply determine if the point is above (N) or below (S) the equator.
-  
-  2. Check the PRJ File
-      + Check a .prj file from a shapefile associated with your study area.   
-
-  3. Download the World UTM Grid
-      + ArcGIS (or similar GIS software) include downloadable [UTM Zones](https://hub.arcgis.com/datasets/esri::world-utm-grid/explore) data layers.  Loading this file with your point dataset will show you where your data overlap.
-
-  4. Check the Zone Number in Google Earth (might be difficult in China)
-      + Convert your dataset to a KMZ/KML file and load into Google Earth.  Be sure your units are set to UTMs in Google Earth.  The zone number will appear at the bottom center of your screen when you zoom into your file.
-  
 > **NOTE**: The data we are using spans multiple UTM zones (UTM 36 south and UTM 37 south).  In this case, there is no problem because we will be subsetting our data, only using data that overlap with UTM 37 south.  Other coordinator systems, such as Lambert's or Alber's Equal-Area conic projections, could be used for datasets that span multiple UTM zones, minimizing distortion.  It's important to correctly input the parameters of your selected coordinate system.
 
 ```{r Set UTM Zone}
