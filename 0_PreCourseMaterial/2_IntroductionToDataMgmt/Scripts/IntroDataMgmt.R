@@ -1,13 +1,13 @@
-## ----setup, include=FALSE-------------------------------------------------------------
+## ----setup, include=FALSE---------------------------------------------------------------------------------------
 knitr::opts_chunk$set(echo = TRUE)
 
 
-## ----eval=F---------------------------------------------------------------------------
+## ----eval=F-----------------------------------------------------------------------------------------------------
 ## # ******************************************************************
 ## # ******************************************************************
 ## 
 ## # Project: Introduction to Data Analysis in R
-## # Description: A script which details some basic commands on how to manipulate data
+## # Description: A script which details basic commands on how to manipulate data
 ## # Author: <Your Name>
 ## # Date Initialized: <dd month yyyy>
 ## 
@@ -15,20 +15,20 @@ knitr::opts_chunk$set(echo = TRUE)
 ## # ******************************************************************
 
 
-## ----eval=F---------------------------------------------------------------------------
+## ----eval=F-----------------------------------------------------------------------------------------------------
 ## # Clean your workspace/remove all objects
 ## rm(list=ls())
 ## 
 ## # You can also remove a specific dataset using the following command
-## #rm(dataset)
+## #rm(dataset_name)
 
 
-## ----eval = T, message = F, warning = F-----------------------------------------------
+## ----eval = T, message = F, warning = F-------------------------------------------------------------------------
 #install.packages("dplyr")
 library(dplyr)
 
 
-## ----eval = T, echo = T, warning=F, message=F-----------------------------------------
+## ----eval = T, echo = T, warning=F, message=F-------------------------------------------------------------------
 # Read dataset
 panda_data <- read.csv(file="Data/panda_data.csv")
 
@@ -36,7 +36,7 @@ panda_data <- read.csv(file="Data/panda_data.csv")
 head(panda_data)
 
 
-## ----warning=F, message=F, eval=F, echo=F---------------------------------------------
+## ----warning=F, message=F, eval=F, echo=F-----------------------------------------------------------------------
 ## # Print the first 3 rows
 ## head(panda_data, n = 3)
 ## 
@@ -52,7 +52,7 @@ head(panda_data)
 ## tail(panda_data)
 
 
-## ----warning = F, message = F---------------------------------------------------------
+## ----warning = F, message = F-----------------------------------------------------------------------------------
 # select column called panda_name
 select(panda_data, panda_name) 
 
@@ -63,12 +63,12 @@ select(panda_data, -panda_name)
 select(panda_data, age:sex)
 
 
-## ----warning = F, message = F---------------------------------------------------------
+## ----warning = F, message = F-----------------------------------------------------------------------------------
 # select all columns that start with "genetic" in their column names
 select(panda_data, starts_with("genetic")) 
 
 
-## ----warning = F, message = F, eval=F, echo=F-----------------------------------------
+## ----warning = F, message = F, eval=F, echo=F-------------------------------------------------------------------
 ## # Select all the columns that contain "value" in the column name.
 ## select(panda_data, contains("value"))
 ## 
@@ -77,7 +77,7 @@ select(panda_data, starts_with("genetic"))
 ## select(panda_data, !c(panda_name, age))
 
 
-## ----warning=F, message=F-------------------------------------------------------------
+## ----warning=F, message=F---------------------------------------------------------------------------------------
 # Select rows where pandas are greater than or equal to 5 years of age
 filter(panda_data, age >= 5)
 
@@ -91,7 +91,7 @@ filter(panda_data, age > 5 & base == "CD")
 filter(panda_data, age %in% c(4,5,7))
 
 
-## ----warning = F, message = F, eval=F, echo=F-----------------------------------------
+## ----warning = F, message = F, eval=F, echo=F-------------------------------------------------------------------
 ## # Select rows with `NA` in the genetic_value2 column.
 ## filter(panda_data, is.na(genetic_value2))
 ## 
@@ -99,7 +99,7 @@ filter(panda_data, age %in% c(4,5,7))
 ## filter(panda_data, panda_name == 'bao_bao' | panda_name == 'bei_bei')
 
 
-## ----message=F, warning=F-------------------------------------------------------------
+## ----message=F, warning=F---------------------------------------------------------------------------------------
 # Use a simple pipe to select the panda name and it's sex, and output the result.
 # Create a new object named 'pipe_result'
 pipe_result <- panda_data %>%
@@ -110,7 +110,7 @@ pipe_result <- panda_data %>%
 pipe_result
 
 
-## ----message=F, warning=F, eval=F, echo=F---------------------------------------------
+## ----message=F, warning=F, eval=F, echo=F-----------------------------------------------------------------------
 ## # Select columns that contain genetic and then selection values based on these columns
 ## panda_data %>%
 ##   select(contains("genetic")) %>%
@@ -123,7 +123,7 @@ pipe_result
 ## #   filter(weight_kg > 90)
 
 
-## ----warning=F, message=F-------------------------------------------------------------
+## ----warning=F, message=F---------------------------------------------------------------------------------------
 # Create a new column, based on values from other columns that exist
 # By default, keep = all
 new_col_ex1 <- panda_data %>%
@@ -132,7 +132,7 @@ new_col_ex1 <- panda_data %>%
 # Print
 new_col_ex1
 
-# You can create multiple columns at once.  Best to put each new column on a separate line.  This simply makes the code more readable.
+# You can create multiple columns at once.  Best to put each new column on a separate line.  This makes the code more readable.
 new_col_ex2 <- panda_data %>%
 	mutate(genetic_dif = genetic_value1 - genetic_value2, 
 	       weight_g = weight_kg * 1000) 
@@ -140,13 +140,13 @@ new_col_ex2 <- panda_data %>%
 new_col_ex2
 
 
-## ----warning=F, message=F, eval=F, echo=F---------------------------------------------
+## ----warning=F, message=F, eval=F, echo=F-----------------------------------------------------------------------
 ## # Create a new column called zero
 ## panda_data %>%
 ##   mutate(zero = 0)
 
 
-## -------------------------------------------------------------------------------------
+## ---------------------------------------------------------------------------------------------------------------
 # Arrange the panda_data by panda_name in descending order
 # Place the sex column after the ID column
 order_data_ex1 <- panda_data %>% 
@@ -165,7 +165,7 @@ order_data_ex2 <- panda_data %>%
 head(order_data_ex2)
 
 
-## ----message=F, warning=F, eval=F, echo=F---------------------------------------------
+## ----message=F, warning=F, eval=F, echo=F-----------------------------------------------------------------------
 ## # Arrange the panda dataset by age and weight, relocating columns and renaming the weight column
 ## panda_data %>%
 ##   arrange(age, weight_kg) %>%
@@ -174,7 +174,7 @@ head(order_data_ex2)
 ##   rename(panda_wgt_kg = weight_kg)
 
 
-## ----message=F, warning=F-------------------------------------------------------------
+## ----message=F, warning=F---------------------------------------------------------------------------------------
 # Calculate the mean weight of the pandas and provide a count.
 sum_table <- panda_data %>% 
   summarise(mean_wgt = mean(weight_kg),
@@ -188,7 +188,7 @@ panda_data %>%
             min_wt = min(weight_kg))
 
 
-## ----warning=F, message=F-------------------------------------------------------------
+## ----warning=F, message=F---------------------------------------------------------------------------------------
 # Similar to above, calculate average and minimum weight, but summarize based on 'base' column.  Include a count of each group.
 panda_data %>%
   summarise(avg_wt = mean(weight_kg),
@@ -205,7 +205,7 @@ panda_data %>%
             .by = c(base, sex))
 
 
-## ----warning=F, message=F-------------------------------------------------------------
+## ----warning=F, message=F---------------------------------------------------------------------------------------
 # Read in the vaccination table
 panda_med <- read.csv(file="Data/panda_data_med.csv")
 
@@ -226,7 +226,7 @@ panda_join_ex2 <- panda_data %>%
 head(panda_join_ex2)
 
 
-## ----warning=T, message=T, eval=F, echo=F---------------------------------------------
+## ----warning=T, message=T, eval=F, echo=F-----------------------------------------------------------------------
 ## # Read in the CSV
 ## survey_sample <- read.csv(file = "Data/SampleData.csv")
 ## 
