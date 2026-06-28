@@ -1,5 +1,5 @@
 ---
-pdf_document: default
+pdf_doument: default
 author: "Jared Stabach, Smithsonian's National Zoo & Conservation Biology Institute"
 date: '`r format(Sys.time(), "%d %B %Y")`'
 output:

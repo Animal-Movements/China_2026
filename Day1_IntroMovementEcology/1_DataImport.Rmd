@@ -1,53 +1,61 @@
 ---
-title: "M1: Data Import & Movebank"
-subtitle: "Day 1 — Introduction to Movement Data"
-author: "Animal Movement Analyses for Ecologists | SYSU Shenzhen, July 2026"
-date: "`r Sys.Date()`"
+title: "Introduction to Movement Ecology - Data Import"
+author: "Animal Movement Analyses for Ecologists | SYSU Shenzhen"
+date: '`r format(Sys.time(), "%d %B %Y")`'
 output:
   html_document:
     toc: true
-    toc_float: true
-    toc_depth: 3
-    theme: flatly
-    highlight: tango
-    df_print: paged
+    toc_depth: 4
+    toc_float: 
+      collapsed: true
+      smooth_scroll: true
+    number_sections: false
+pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 ```
 
-
 <a href="https://github.com/Animal-Movements/China_2026.git" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
 
----
+# Introduction
+  >Example: White-bearded wildebeest (2010-2013)
 
-## Learning Objectives
+Throughout this introductory exercise, we will use a dataset on white-bearded wildebeest (*Connochaetes taurinus*) collected from 2010-2013 across the Athi-Kaputiei Plains in southern Kenya. Unlike their more famous Serengeti counterparts, wildebeest in Kenya navigate a landscape increasingly fragmented by fencing, roads, and peri-urban development. Study goals were to understand how natural and anthropogenic change impact wildebeest movements.
 
-By the end of this module you will be able to:
+Today, we focus on getting these data into [R](https://cran.r-project.org/) in a clean and reproducible way.
 
-1. Download animal tracking data directly from Movebank into R using the `move2` package
-2. Understand the structure of a `move2` object — how GPS locations and individual metadata are organized
-3. Import data from a local CSV file as an alternative workflow
-4. Perform initial exploration to understand your dataset: who, where, and for how long
+<div style="float:right">
+<img width="270" height="176" src="Figures/DSC_0287.jpg">
+</div>
+
+These data can be referenced as:
+
+Stabach JA, Hughey LF, Crego RD, Fleming CH, Hopcraft JGC, Leimgruber P, Morrison TA, Ogutu JO, Reid RS, Worden JS, Boone RB. 2022. Increasing anthropogenic disturbance restricts wildebeest movement across East African grazing systems. Frontiers in Ecology and Evolution. [doi.org/10.3389/fevo.2022.846171](https://doi.org/10.3389/fevo.2022.846171)
+
+Stabach JA, Hughey LF, Reid RS, Worden JS, Leimgruber P, Boone RB. 2020. Data from: Comparison of movement strategies of three populations of white-bearded wildebeest. Movebank Data Repository. [doi:10.5441/001/1.h0t27719](https://www.datarepository.movebank.org/handle/10255/move.1095)
+
+In this exercise, we will:
+
+  * Download animal tracking data directly from [Movebank](https://www.movebank.org/) using the `move2` package
+  * Understand the structure of a `move2` object
+  * Import data from a local CSV file as an alternative workflow
+  * Perform initial exploration to understand your dataset
 
 **Packages used:** `move2`, `tidyverse`, `lubridate`, `sf`, `mapview`
 
----
+# Setup
+As a first step, we will import the necessary packages to conduct our analysis and setup our time zone and coordinate system.
 
-## Ecological context
+## Load packages
+Remove everything held in [R's](https://cran.r-project.org/) memory and load the required libraries for analysis.
 
-The white-bearded wildebeest (*Connochaetes taurinus*) of the Athi-Kaputiei Plains in southern Kenya represent one of the few remaining migratory wildebeest populations outside the Serengeti ecosystem. Unlike their more famous Serengeti counterparts, these animals navigate a landscape increasingly fragmented by fencing, roads, and peri-urban development around Nairobi. Understanding where they go, when, and why is essential for guiding conservation interventions — but that understanding starts with the data.
+```{r Load Libraries}
+# Remove from memory
+rm(list=ls())
 
-Throughout this workshop, we will work with GPS collar data from this population. Today, we focus on getting that data into R in a clean, reproducible way.
-
----
-
-## 1. Setup
-
-### 1.1 Load packages
-
-```{r packages}
+# You may need to install these packages first
 # install.packages(c("move2", "tidyverse", "lubridate", "sf", "mapview"))
 
 library(move2)       # Movebank interface and the move2 spatial data class
@@ -55,48 +63,82 @@ library(tidyverse)   # Data wrangling and visualization (dplyr, ggplot2, etc.)
 library(lubridate)   # Working with timestamps and timezones
 library(sf)          # Spatial vector data (move2 is built on sf)
 library(mapview)     # Quick interactive maps
-library(units)  
 ```
 
-### 1.2 Define coordinate reference systems
+## Set Time Zone
+Data in this example were collected in Kenya.  We will import our data in UTC (Coordinated Universal Time) time, but convert to local time (East Africa Time - EAT).  See the [wiki](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) for your appropriate timezone identifier.  
 
-We set our CRS upfront and refer to them by name throughout. GPS data always arrives in geographic coordinates (lat/long). Any analysis involving distances or areas requires projection to a metric system.
+```{r Clean Timezone}
+# Set TimeZone
+tz_utc   <- "UTC"
+tz_local <- "Africa/Nairobi"  # East Africa Time (EAT = UTC+3)
+```
 
-```{r crs}
+## Coordinate Systems and Projections
+Data collected via a GPS device must be encoded with an appropriate projection system to link the coordinates to specific locations on the earth’s surface.
+
+Any geospatial data (e.g., a set of points) with an incorrect projection or with an unknown projection system can be visualized on its own. However, you will be unable to plot the data with other spatially referenced data, since the coordinate reference system is missing. Importantly, you will not be able to conduct any spatial analysis (e.g., calculate the distance of a given point to a road, or extract the value of the underlining raster value at the point locations), since the incorrectly projected (or unprojected) spatial data is pointing to a completely different location on earth than intended.
+
+When you acquire or download geospatial data, make sure you know the projection of the data.  This information is usually found in the metadata of a given dataset or should be provided by the person that is sharing the data with you.  A qualified GIS analyst should not provide data to you without specifying the projection and datum in which the data were collected.
+
+There are EPSG Codes that can be used to avoid manually setting all the parameters needed in a projection. For instance, the code EPSG:32637 references the UTM37N projection with WGS84 datum and ellipsoid. The code EPSG:32736 references UTM36S.  You can find the EPSG reference listed in [http://spatialreference.org/ref/epsg/](http://spatialreference.org/ref/epsg/) and [https://epsg.io/](https://epsg.io/).
+
+<center>
+![[Source: ESRI](https://www.esri.com/arcgis-blog/products/arcgis-pro/mapping/gcs_vs_pcs)](Figures/projections-esri-blog.png){width=75%}
+</center>
+<br>
+
+It is important to understand that projections try to minimize distortion of a 3-dimensional object (the earth) on a 2-dimensional surface (paper map or computer screen). Choosing a projection that minimizes this distortion is especially important when doing calculations of area or speed. I recommend collecting all GPS data in geographic coordinates and projecting data into a coordinate system that minimizes distortion of your objects of interest.
+
+The Universal Tranverse Mercator (UTM) projection is a common projection used for assigning coordinates to locations on the surface of the earth.  The UTM projection divides earth into 60 distinct zones, using the equator as the origin (0) and spanning 1,000,000 meters.  The center of the zone is defined as 500,000 meters.  As a result, you can identify any geographic point on earth to a specific UTM zone and meter coordinate.
+
+<center>
+![[Source: Wikimedia](https://upload.wikimedia.org/wikipedia/commons/e/ed/Utm-zones.jpg)](Figures/Utm-zones.jpg){width=75%}
+</center>
+<br>
+
+## Set Coordinate System
+In this example, we will project all geographic data to the Universe Transverse Mercator (UTM) coordinate system, zone 37 south. The unit of measurement of this coordinate system is meters, advantageous for calculating relevant distances between sequential points in time. 
+
+Identifying the correct UTM zones is relatively simple, with multiple options:
+
+  1. Mathematical Approach
+      + Take a longitudinal coordinate (or calculate the mean value) from your dataset and add 180.  Then divide by 6 and round up to the nearest whole number.
+      + Example: -39 + 180 = 141 / 6 = 23.5 == 24
+      + 39$^\circ$W is UTM zone 24.  Then simply determine if the point is above (N) or below (S) the equator.
+  
+  2. Check the PRJ File
+      + Check a .prj file from a shapefile associated with your study area.   
+
+  3. Download the World UTM Grid
+      + ArcGIS (or similar GIS software) include downloadable [UTM Zones](https://hub.arcgis.com/datasets/esri::world-utm-grid/explore) data layers.  Loading this file with your point dataset will show you where your data overlap.
+
+  4. Check the Zone Number in Google Earth (might be difficult in China)
+      + Convert your dataset to a KMZ/KML file and load into Google Earth.  Be sure your units are set to UTMs in Google Earth.  The zone number will appear at the bottom center of your screen when you zoom into your file.
+  
+> **NOTE**: The data we are using spans multiple UTM zones (UTM 36 south and UTM 37 south).  In this case, there is no problem because we will be subsetting our data, only using data that overlap with UTM 37 south.  Other coordinator systems, such as Lambert's or Alber's Equal-Area conic projections, could be used for datasets that span multiple UTM zones, minimizing distortion.  It's important to correctly input the parameters of your selected coordinate system.
+
+```{r Set UTM Zone}
 latlong_crs <- "EPSG:4326"   # WGS84 geographic — standard for GPS and Movebank
 utm_crs     <- "EPSG:32737"  # UTM Zone 37S — metric, appropriate for Athi-Kaputiei, Kenya
 ```
 
-> **Why does CRS matter?** In EPSG:4326, one "degree" of distance is not a consistent unit — it is ~111 km at the equator but shrinks toward the poles. Calculations like step length (km), home range area (km²), or buffer distances require projected coordinates where units are meters.
+## Download Data from Movebank
+[Movebank](https://www.movebank.org) is the world's largest repository of animal tracking data, hosting data for thousands of studies across taxa. The `move2` package provides a direct interface to [Movebank](https://www.movebank.org), allowing you to download data directly into [R][R](https://cran.r-project.org/) without ever leaving your script.  [Movebank](https://www.movebank.org) allows data owners to control access to their tracking data through customizable permissions. Users can choose to make their data fully public, viewable but not downloadable, or completely private—facilitating data sharing while respecting ownership and confidentiality.  
 
-### 1.3 Set timezone
-
-Movebank stores all timestamps in UTC. We define the local timezone for the study area to convert when needed.
-
-```{r timezone}
-tz_utc   <- "UTC"
-tz_local <- "Africa/Nairobi"  # East Africa Time (EAT = UTC+3)
-# Full list of timezone names: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-```
-
----
-
-## 2. Download data from Movebank
-
-[Movebank](https://www.movebank.org) is the world's largest repository of animal tracking data, hosting data for thousands of studies across taxa. The `move2` package provides a direct interface, so you can download data into R without ever leaving your script.
-
-### 2.1 Store your credentials (once per computer)
-
-```{r credentials, eval=FALSE}
+### Store your credentials (once per computer)
+Provide your credentials to access the [Movebank](https://www.movebank.org) API.
+```{r Credentials, eval=FALSE}
 # Run this once — credentials are stored securely in your system keychain
 movebank_store_credentials("your_username", "your_password")
 ```
 
-> **Security note:** Never hardcode your password in a script that you share or commit to GitHub. `movebank_store_credentials()` stores it once in your OS keychain; after that, all `move2` Movebank functions use it automatically.
+> **Security note:** Never hardcode your password in a script that you share or commit to GitHub. `movebank_store_credentials()` stores it once in your OS keychain. After saving once, `move2` functions will use it automatically.
 
-### 2.2 Explore available studies (optional)
+### Explore available studies (optional)
+See what's available on [Movebank](https://www.movebank.org) that is publicly accessible.
 
-```{r search_studies, eval=FALSE}
+```{r Search Studies, eval=FALSE}
 # Search for open-data studies that you can download data from
 movebank_download_study_info(
   license_type = "CC_0",
@@ -105,48 +147,41 @@ movebank_download_study_info(
 )
 ```
 
-### 2.3 Download the study
-For this exercise, we will use the wildebeest data. Data based on below study: 
-Stabach JA, et al. (2022). Increasing anthropogenic disturbance restricts wildebeest movement across East African grazing systems. Frontiers in Ecology and Evolution. 10.3389/fevo.2022.846171
-Stabach JA, et al. (2020). Data from: Comparison of movement strategies of three populations of white-bearded wildebeest. Movebank Data Repository. doi:10.5441/001/1.h0t27719
+### Download the Wildebeest Data
+All we need to do to download these data from [Movebank](https://www.movebank.org) is to specify the Movebank ID using the `movebank_download_study()` function.
 
-```{r download_movebank, eval=FALSE}
-WB.mv2 <- movebank_download_study(
-  study_id      =  208413731
+```{r Download Movebank, eval=FALSE}
+WB.mb <- movebank_download_study(
+  study_id = 208413731 # Use the Movebank ID or the Study Name
+  #study_id = "White-bearded wildebeest (Connochaetes taurinus) movements - Kenya"
 )
-```
 
-Often you will be prompted to accept the data license. You will see messages like: "In R is done by adding the following to a download request:
-'license-md5'='xxxxxx'. Copy the license number and run again:
+# You may be prompted to accept the data license. If so, you can append the license number to your code and run again, like this:
 
-```{r download_movebank2, eval=FALSE}
-WB.mv2 <- movebank_download_study(
-  study_id      =  208413731,
+WB.mb <- movebank_download_study(
+  study_id = 208413731,
+  #study_id = "White-bearded wildebeest (Connochaetes taurinus) movements - Kenya"
   'license-md5'='xxxxxx' # <- copy license number here
 )
 ```
 
-```{r load_provided, echo=FALSE}
-# For the workshop, we load a pre-downloaded version to avoid Movebank API delays.
-# The object WB.mv2 is identical to what movebank_download_study() would return.
+For these exercies, we load a pre-downloaded version to avoid delays. This object is identical to what `movebank_download_study()` would return. 
+
+```{r Load RData, echo=FALSE}
+# Load
 load("./Data/wildebeest_data.rdata")
 ```
 
----
-
-## 3. Understand the move2 object
-
+## Understanding the move2 object
 `move2` is a relatively new package (2022) designed to make working with tracking data more intuitive. A `move2` object is fundamentally an `sf` (simple features) object — meaning every row already carries a spatial point geometry — with extra structure to handle multiple individuals and timestamps.
 
-### 3.1 Object class and basic summary
+### Object class and basic summary
 
 ```{r class}
-class(WB.mv2)   # move2, sf, tbl_df, tbl, data.frame
-```
-
-```{r print}
+# Printing the class of the move 2 object
+class(WB.mb)   # move2, sf, tbl_df, tbl, data.frame
 # Printing a move2 object gives a structured summary
-WB.mv2
+WB.mb
 ```
 
 Notice the summary tells you: number of tracks, time range, CRS, and a preview of the data.
