@@ -393,4 +393,4 @@ Range size and intensity of use, together with displacement, maximum displacemen
 
 ---
 
-*Next: **Module 2 — Population-level comparison** — having estimated and summarized home ranges individual by individual, we turn to comparing space use across the population as a whole.*
+*Next: **[CTMM] Module 2 — Occurrence vs. Range Distributions & Effective Sample Sizes** — having estimated home ranges and two repeated space-use traits under the independence assumption, we turn to `ctmm`, which models the autocorrelation in GPS data directly instead of assuming it away.*
