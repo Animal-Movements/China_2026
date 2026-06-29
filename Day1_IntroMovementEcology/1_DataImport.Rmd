@@ -80,21 +80,21 @@ The Universal Tranverse Mercator (UTM) projection is a common projection used fo
 
 ```{r Set UTM Zone}
 # Set TimeZone
-tz_utc   <- "UTC"
+tz_utc <- "UTC"
 tz_local <- "Africa/Nairobi"  # East Africa Time (EAT = UTC+3)
 
 # Set UTM
 latlong_crs <- "EPSG:4326"   # WGS84 geographic — standard for GPS and Movebank
-utm_crs     <- "EPSG:32737"  # UTM Zone 37S — metric, appropriate for Athi-Kaputiei, Kenya
+utm_crs <- "EPSG:32737"  # UTM Zone 37S — metric, appropriate for Athi-Kaputiei, Kenya
 ```
 
 > **NOTE**: The data we are using spans multiple UTM zones (UTM 36 south and UTM 37 south).  This should be avoided in most cases by choosing other coordinate systems, such as Lambert's or Alber's Equal-Area conic projections, that span multiple UTM zones. Doing so will minimize distortion.
 
 # Downloading Data
-We will two different methods for downloading data for us.
+We will demonstrate two methods for downloading data for analysis. In the first method, data are downloaded directly from [Movebank](https://www.movebank.org). In the second, data are downloaded from a .csv file. Both approaches produce the same end result. However, downloading data from [Movebank](https://www.movebank.org) offers additional advantages: it provides a standardized data structure and enables access to data that are continuously updated as new data are collected.
 
 ## Movebank
-[Movebank](https://www.movebank.org) is the world's largest repository of animal tracking data, hosting data for thousands of studies across taxa. The `move2` package provides a direct interface to [Movebank](https://www.movebank.org), allowing you to download data directly into [R](https://cran.r-project.org/) for analysis.  
+[Movebank](https://www.movebank.org) is the world's largest repository of animal tracking data, hosting data for thousands of studies across various taxa. The `move2` package provides a direct interface to [Movebank](https://www.movebank.org), allowing you to download data directly into [R](https://cran.r-project.org/) for analysis.  
 
 ### Store your credentials (once per computer)
 Provide your credentials to access the [Movebank](https://www.movebank.org) API.
@@ -118,8 +118,8 @@ movebank_download_study_info(
 )
 ```
 
-### Download the Wildebeest Data
-Use the function `movebank_download_study()` and specify the Movebank ID to download the wildebeest data from [Movebank](https://www.movebank.org).
+### Wildebeest Data Download
+Use the function `movebank_download_study()` and specify the ID to download the wildebeest data from [Movebank](https://www.movebank.org).
 
 ```{r Download Movebank, eval=FALSE}
 WB.mv2 <- movebank_download_study(
@@ -135,12 +135,41 @@ WB.mv2 <- movebank_download_study(
 )
 ```
 
-For these exercises, we load a pre-downloaded version to avoid delays. This object is identical to what `movebank_download_study()` would return. 
+For these exercises, we will load a pre-downloaded version to avoid delays. This object is identical to what `movebank_download_study()` would return. 
 
 ```{r Load RData, echo=FALSE}
 # Load
 load("./Data/wildebeest_data.rdata")
 ```
+
+## CSV Import
+If you are unable to connect to [Movebank](https://www.movebank.org), or if your data exists elsewhere, you can import from a .CSV and convert to a `move2` object using `mt_as_move2()`.  Make sure you force the 'timestamp' field to be read as raw text ('col_character'), rather than letting `read_csv()` set the datetime.  
+
+```{r csv_import, eval=FALSE}
+# Read file
+# Change the date format (here ymd_hms) to match with your dataset
+WB.csv <- read_csv("Data/WB_FullDataset.csv",
+                   col_types = cols(timestamp = col_character())) %>% 
+  mutate(timestamp = ymd_hms(timestamp, tz = tz_utc))
+
+# Always verify the timestap before moving on
+# The result of this query should be 0:
+# sum(is.na(WB.csv$timestamp))
+
+# Convert to move2 object
+WB.csv <- mt_as_move2(WB.csv, 
+                      coords = c("longitude", "latitude"),  # column names for x, y
+                      crs = latlong_crs,
+                      time_column = "timestamp",
+                      track_id_column  = "individual_local_identifier"
+                      )
+
+# Note, the reference information was not included with this file.  If reference data were included, they would need to be joined together based on a common field.  This could be easily accomplished using the `left_join()` function on a shared field (e.g., ID).
+```
+
+> **Note:** `mt_as_move2()` works with any data frame that has coordinates and timestamps. Once converted, the object behaves identically to a Movebank download — all the same `mt_*` functions apply.
+
+
 
 ### Understanding the move2 object
 `move2` is a relatively new package (2022) designed to make working with tracking data more intuitive. A `move2` object is fundamentally an `sf` (simple features) object — meaning every row already carries a spatial point geometry — with extra structure to handle multiple individuals and timestamps. Using `move2` will be useful as we explore other analysis that have been developed to work with the library.
@@ -193,32 +222,7 @@ names(WB.mv2)
 
 > When you download from Movebank with `move2`, the deployment metadata (individual info, study site, sex, deploy on/off dates) is automatically embedded in the track data. In Module 2, we will use this information to subset to the study area and filter by deployment period.
 
-## CSV Import - alternate workflow
-If you cannot connect to Movebank — or if your data lives elsewhere — you can import from a CSV and convert to a `move2` object using `mt_as_move2()`.
 
-```{r csv_import, eval=FALSE}
-# Step 1: Read the event data as a CSV
-# Force `timestamp` to be read in as raw text (col_character), rather than letting read_csv() auto-detect and parse it as a datetime itself.  Then set the timestamp format and parse with the timezone.
-WB.csv <- read_csv("Data/WB_FullDataset.csv",
-                   col_types = cols(timestamp = col_character())) %>% 
-  mutate(timestamp = ymd_hms(timestamp, tz = tz_utc))
-
-# Always verify the timestap before moving on
-# The result of this query should be 0:
-# sum(is.na(WB.csv$timestamp))
-
-# Step 2: Convert to move2
-WB.csv <- mt_as_move2(WB.csv, 
-                      coords = c("longitude", "latitude"),  # column names for x, y
-                      crs = latlong_crs,
-                      time_column = "timestamp",
-                      track_id_column  = "individual_local_identifier"
-                      )
-
-# Note, the reference information was not included with this file.  If reference data were included, they would need to be joined together based on a common field.  This could be easily accomplished using the `left_join()` function on a shared field (e.g., ID).
-```
-
-> **Note:** `mt_as_move2()` works with any data frame that has coordinates and timestamps. Once converted, the object behaves identically to a Movebank download — all the same `mt_*` functions apply.
 
 # Initial Data Exploration
 Explore the basic properties of the dataset, querying the dimensions and structure of the data collected.
