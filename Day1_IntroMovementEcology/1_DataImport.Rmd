@@ -143,7 +143,7 @@ load("./Data/wildebeest_data.rdata")
 ```
 
 ## CSV Import
-If you are unable to connect to [Movebank](https://www.movebank.org), or if your data exists elsewhere, you can import from a .CSV and convert to a `move2` object using `mt_as_move2()`.  Make sure you force the 'timestamp' field to be read as raw text ('col_character'), rather than letting `read_csv()` set the datetime.  
+If you are unable to connect to [Movebank](https://www.movebank.org), or if your data exists elsewhere, you can import from a .CSV and convert to a `move2` object using `mt_as_move2()`.  Make sure you force the 'timestamp' field to be read as raw text ('col_character'), rather than letting `read_csv()` set the datetime and always verify that the timestamp was imported properly.   
 
 ```{r csv_import, eval=FALSE}
 # Read file
@@ -164,15 +164,13 @@ WB.csv <- mt_as_move2(WB.csv,
                       track_id_column  = "individual_local_identifier"
                       )
 
-# Note, the reference information was not included with this file.  If reference data were included, they would need to be joined together based on a common field.  This could be easily accomplished using the `left_join()` function on a shared field (e.g., ID).
+# Note, the reference information was not included in the folder.  If included, they would need to be joined together based on a common field.  This could be easily accomplished using the `left_join()` function on a shared field (e.g., ID).
 ```
 
 > **Note:** `mt_as_move2()` works with any data frame that has coordinates and timestamps. Once converted, the object behaves identically to a Movebank download — all the same `mt_*` functions apply.
 
-
-
-### Understanding the move2 object
-`move2` is a relatively new package (2022) designed to make working with tracking data more intuitive. A `move2` object is fundamentally an `sf` (simple features) object — meaning every row already carries a spatial point geometry — with extra structure to handle multiple individuals and timestamps. Using `move2` will be useful as we explore other analysis that have been developed to work with the library.
+# Understanding the Move2 Object
+`move2` is a relatively new package (2022) designed to make working with tracking data more intuitive. A `move2` object is fundamentally an `sf` (simple features) object — meaning every row already carries a spatial point geometry — with extra structure to handle multiple individuals and timestamps. Using `move2` will be useful as we explore other analyses that have been developed to work with the library.
 
 ### Data Summary
 Summarizing the data will provide you with the number of tracks, time range of data collection, the Coordinate reference systemS, and a preview of the data.
