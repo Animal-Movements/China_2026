@@ -286,33 +286,12 @@ save(WB.mv2, file = "Data/WB_clean.rdata")
 cat("Saved cleaned WB.mv2 —", n_distinct(mt_track_id(WB.mv2)), "animals,", nrow(WB.mv2), "fixes\n")
 ```
 
----
-
-## Practice: Apply to your own data
-
+## Exercise: 
 Now run the same QC workflow on your own dataset.
 
 1. **Inspect your track metadata** with `mt_track_data()`. Does it include the fields you need to subset (study site, deployment dates, sex)? If a field is missing, where else might that information live (a separate reference sheet, metadata you recorded yourself)?
 2. **Check what precision metric your tags report.** Look for DOP, HDOP, fix type, or a manufacturer-specific quality field. If your tags don't report precision at all, what other QC steps (speed filters, spatial outlier checks) might substitute?
 3. **Run the duplicate/invalid-coordinate check** — this step is universal regardless of tag type.
 4. **Build your own QC accounting table.** How much data survives each step? Is that consistent with what you'd expect given your species and study design?
-
----
-
-## Key functions reference
-
-| Function | Package | Purpose |
-|---|---|---|
-| `mt_track_data()` | `move2` | Access track-level (per-individual) metadata |
-| `mt_track_id()` | `move2` | Extract track ID vector (use with `n_distinct()` to count animals) |
-| `filter()` | `dplyr` | Subset rows — works directly on `move2` objects |
-| `distinct()` | `dplyr` | Remove duplicate rows by key columns |
-| `arrange()` | `dplyr` | Re-sort rows — use after filtering to restore track + time order |
-| `st_coordinates()` | `sf` | Extract numeric x/y columns from a spatial object |
-| `st_as_sf()` | `sf` | Convert a data frame to an `sf` object |
-| `gt()` | `gt` | Build a formatted summary table |
-| `mapview()` | `mapview` | Quick interactive map |
-
----
 
 *Next: **Module 3 — Trajectory Creation & Visualization** — we convert the cleaned data into an `amt` track, check sampling regularity, and visualize trajectories.*
