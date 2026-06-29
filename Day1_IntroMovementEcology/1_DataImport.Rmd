@@ -25,8 +25,8 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 By the end of this module you will be able to:
 
 1. Download animal tracking data directly from [Movebank](https://www.movebank.org/) using the `move2` package
-2. Understand the structure of a `move2` object
-3. Import data from a local CSV file as an alternative workflow
+2. Import data from a local CSV file as an alternative workflow
+3. Understand the structure of a `move2` object
 4. Perform initial exploration to understand your dataset
 
 **Packages used:** `move2`, `tidyverse`, `lubridate`, `sf`, `mapview`, `units`
@@ -34,13 +34,13 @@ By the end of this module you will be able to:
 # Introduction
   >Example: White-bearded wildebeest (2010-2013)
 
-Throughout this exercise, we will use a dataset on white-bearded wildebeest (*Connochaetes taurinus*) collected from 2010-2013 across southern Kenya. We will focus on getting these data into [R](https://cran.r-project.org/) in a clean and reproducible way, using data formats and functions introduced in the `move2` package.
+Throughout this exercise, we will use a dataset on white-bearded wildebeest (*Connochaetes taurinus*) collected from 2010-2013 in southern Kenya. We will focus on getting these data into [R](https://cran.r-project.org/) in a clean and reproducible way, using data formats and functions introduced in the `move2` package.
 
 <div style="float:right">
 <img width="270" height="176" src="Figures/DSC_0287.jpg">
 </div>
 
-These data can be referenced as:
+The data used in this exercise can be referenced as:
 
 Stabach JA, Hughey LF, Crego RD, Fleming CH, Hopcraft JGC, Leimgruber P, Morrison TA, Ogutu JO, Reid RS, Worden JS, Boone RB. 2022. Increasing anthropogenic disturbance restricts wildebeest movement across East African grazing systems. Frontiers in Ecology and Evolution. [doi.org/10.3389/fevo.2022.846171](https://doi.org/10.3389/fevo.2022.846171)
 
@@ -64,37 +64,35 @@ library(mapview)     # Quick interactive maps
 library(units)       # Provides support for measurement units
 ```
 
-## Set Time Zone
-Data in this example were collected in Kenya.  Data are stored in (https://www.movebank.org/) in UTC (Coordinated Universal Time) time, but will be converted to local time (East Africa Time - EAT).  See this [wiki](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) for additional information on choosing the appropriate timezone identifier.  
+## Setting the Time Zone and Coordinate System
+Data in this example were collected in Kenya.  Data are stored in [Movebank](https://www.movebank.org/), however, are stored in UTC (Coordinated Universal Time).  This is standard practice, but means that data need to be converted to local time (East Africa Time - EAT) prior to conducting analyses.  A helpful [wiki](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) exists to help in choosing the appropriate timezone identifier for your study.
 
-```{r Clean Timezone}
-# Set TimeZone
-tz_utc   <- "UTC"
-tz_local <- "Africa/Nairobi"  # East Africa Time (EAT = UTC+3)
-```
+Data collected via a GPS device must be encoded with an appropriate projection system to link the coordinates to specific locations on the earth’s surface. When you acquire or download geospatial data, make sure you know the projection of the data.  This information is usually found in the metadata of a given dataset or should be provided by the person that is sharing the data with you. Checking and re-checking your dataset is very important. 
 
-## Coordinate Systems and Projections
-Data collected via a GPS device must be encoded with an appropriate projection system to link the coordinates to specific locations on the earth’s surface.  
-
-When you acquire or download geospatial data, make sure you know the projection of the data.  This information is usually found in the metadata of a given dataset or should be provided by the person that is sharing the data with you.  
-
-The Universal Tranverse Mercator (UTM) projection is a common projection used for assigning coordinates to locations on the surface of the earth.  The UTM projection divides earth into 60 distinct zones, using the equator as the origin (0) and spanning 1,000,000 meters.  The center of the zone is defined as 500,000 meters.  As a result, you can identify any geographic point on earth to a specific UTM zone and meter coordinate.  In this example, we will re-project the data to UTM's. You can find the reference information for UTM zones listed in [http://spatialreference.org/ref/epsg/](http://spatialreference.org/ref/epsg/) and [https://epsg.io/](https://epsg.io/).
+It is important to recognize that projections try to minimize distortion of a 3-dimensional object (the earth) on a 2-dimensional surface (paper map or computer screen). Choosing a projection that minimizes this distortion is especially important when doing calculations of area or speed. It is recommended to collect all GPS data in geographic coordinates and project into a coordinate system that minimizes distortion of your objects of interest.
 
 <center>
 ![[Source: ESRI](https://www.esri.com/arcgis-blog/products/arcgis-pro/mapping/gcs_vs_pcs)](Figures/projections-esri-blog.png){width=75%}
 </center>
 <br>
 
-It is important to understand that projections try to minimize distortion of a 3-dimensional object (the earth) on a 2-dimensional surface (paper map or computer screen). Choosing a projection that minimizes this distortion is especially important when doing calculations of area or speed. It is recommended to collect all GPS data in geographic coordinates and project into a coordinate system that minimizes distortion of your objects of interest.
-
-> **NOTE**: The data we are using spans multiple UTM zones (UTM 36 south and UTM 37 south).  This should be avoided in most cases by choosing other coordinate systems, such as Lambert's or Alber's Equal-Area conic projections, that span multiple UTM zones. Doing so will minimize distortion.
+The Universal Tranverse Mercator (UTM) projection is a common projection used for assigning coordinates to locations on the surface of the earth.  The UTM projection divides earth into 60 distinct zones, using the equator as the origin (0) and spanning 1,000,000 meters.  The center of the zone is defined as 500,000 meters.  As a result, you can identify any geographic point on earth to a specific UTM zone and meter coordinate.  In this example, we will re-project the data to UTM's. You can find the reference information for UTM zones listed in [http://spatialreference.org/ref/epsg/](http://spatialreference.org/ref/epsg/) and [https://epsg.io/](https://epsg.io/).
 
 ```{r Set UTM Zone}
+# Set TimeZone
+tz_utc   <- "UTC"
+tz_local <- "Africa/Nairobi"  # East Africa Time (EAT = UTC+3)
+
+# Set UTM
 latlong_crs <- "EPSG:4326"   # WGS84 geographic — standard for GPS and Movebank
 utm_crs     <- "EPSG:32737"  # UTM Zone 37S — metric, appropriate for Athi-Kaputiei, Kenya
 ```
 
-# Download Data
+> **NOTE**: The data we are using spans multiple UTM zones (UTM 36 south and UTM 37 south).  This should be avoided in most cases by choosing other coordinate systems, such as Lambert's or Alber's Equal-Area conic projections, that span multiple UTM zones. Doing so will minimize distortion.
+
+# Downloading Data
+We will two different methods for downloading data for us.
+
 ## Movebank
 [Movebank](https://www.movebank.org) is the world's largest repository of animal tracking data, hosting data for thousands of studies across taxa. The `move2` package provides a direct interface to [Movebank](https://www.movebank.org), allowing you to download data directly into [R](https://cran.r-project.org/) for analysis.  
 
@@ -124,13 +122,13 @@ movebank_download_study_info(
 Use the function `movebank_download_study()` and specify the Movebank ID to download the wildebeest data from [Movebank](https://www.movebank.org).
 
 ```{r Download Movebank, eval=FALSE}
-WB.mb <- movebank_download_study(
+WB.mv2 <- movebank_download_study(
   study_id = 208413731 # Use the Movebank ID or the Study Name
   #study_id = "White-bearded wildebeest (Connochaetes taurinus) movements - Kenya"
 )
 
 # You may be prompted to accept the data license. If so, you can append the license number to your code and run again, like this:
-WB.mb <- movebank_download_study(
+WB.mv2 <- movebank_download_study(
   study_id = 208413731,
   #study_id = "White-bearded wildebeest (Connochaetes taurinus) movements - Kenya"
   'license-md5'='xxxxxx' # <- copy license number here
@@ -152,28 +150,28 @@ Summarizing the data will provide you with the number of tracks, time range of d
 
 ```{r class}
 # Print the move2 object class
-class(WB.mb)   # move2, sf, tbl_df, tbl, data.frame
+class(WB.mv2)   # move2, sf, tbl_df, tbl, data.frame
 # Print a structured summary
-WB.mb
+WB.mv2
 ```
 
 ### Functions for Summarizing a Move2 Object
 
 ```{r mt_functions}
 # Number of unique animals - How many distinct individuals are there that have a track
-n_distinct(mt_track_id(WB.mb))
+n_distinct(mt_track_id(WB.mv2))
 
 # Number of tracks
-mt_n_tracks(WB.mb)
+mt_n_tracks(WB.mv2)
 
 # Name of timestamp column
-mt_time_column(WB.mb)
+mt_time_column(WB.mv2)
 
 # Name of track ID column
-mt_track_id_column(WB.mb)
+mt_track_id_column(WB.mv2)
 
 # Overall time range
-range(mt_time(WB.mb), na.rm = TRUE)
+range(mt_time(WB.mv2), na.rm = TRUE)
 ```
 
 ### Event Data vs Track Metadata
@@ -184,13 +182,13 @@ A `move2` object holds two distinct types of information:
 
 ```{r track_data}
 # Individual-level metadata (deployment information)
-track_info <- mt_track_data(WB.mb)
+track_info <- mt_track_data(WB.mv2)
 glimpse(track_info)
 ```
 
 ```{r column_names}
 # Column names in the event data
-names(WB.mb)
+names(WB.mv2)
 ```
 
 > When you download from Movebank with `move2`, the deployment metadata (individual info, study site, sex, deploy on/off dates) is automatically embedded in the track data. In Module 2, we will use this information to subset to the study area and filter by deployment period.
@@ -226,17 +224,17 @@ WB.csv <- mt_as_move2(WB.csv,
 Explore the basic properties of the dataset, querying the dimensions and structure of the data collected.
 
 ```{r dimensions}
-nrow(WB.mb) # Total number of rows in the dataset
-ncol(WB.mb) # Total number of columns in the dataset
-dim(WB.mb) # Total number of rows and columns
-glimpse(WB.mb) # Get a quick view of each column
+nrow(WB.mv2) # Total number of rows in the dataset
+ncol(WB.mv2) # Total number of columns in the dataset
+dim(WB.mv2) # Total number of rows and columns
+glimpse(WB.mv2) # Get a quick view of each column
 ```
 
 ## Per-individual Summary
 Here, we will use `summarise()` to create a query of the data collected, summarizing how many fixes were collected for each animal and for how long. 
 
 ```{r individual_summary}
-animal_summary <- WB.mb %>%
+animal_summary <- WB.mv2 %>%
   as_tibble() %>%
   summarise(n_fixes = n(), 
             first_fix = min(timestamp, na.rm = TRUE), 
@@ -257,7 +255,7 @@ Many movement analyses assume a regular sampling interval (or at least close to 
 
 ```{r sampling_interval}
 # mt_time_lags() returns the time difference to the NEXT location for each row in the dataset
-time_lags <- WB.mb %>%
+time_lags <- WB.mv2 %>%
   arrange(individual_local_identifier, timestamp) %>%
   mutate(dt_hours = mt_time_lags(.) %>% # default to minutes
            set_units("hours") %>%  # convert to hours
@@ -371,7 +369,7 @@ if (nrow(synchronized_gaps) > 0 & synchronized_gaps$n_individuals_affected[1] >=
 
 ```{r temporal_plot}
 # Setup a blank graph with all indiviudals
-p <- WB.mb %>%
+p <- WB.mv2 %>%
   as_tibble() %>%
   mutate(date = as_date(timestamp)) %>%
   count(individual_local_identifier, date) %>%
@@ -404,7 +402,7 @@ Before doing any cleaning or analysis, always visualize your raw data. This is t
 
 ```{r quick_map}
 # Convert to sf
-WB.sf <- sf::st_as_sf(as.data.frame(WB.mb))
+WB.sf <- sf::st_as_sf(as.data.frame(WB.mv2))
 
 # Create graph, plotting a subset of the data for speed
 WB.sf %>%
@@ -421,8 +419,8 @@ WB.sf %>%
 Save the raw `move2` object so that we can use it in future exercises.  
 
 ```{r Save}
-save(WB.mb, file = "Output/WB_raw.rdata")
-cat("Saved WB.mb —", n_distinct(mt_track_id(WB.mb)), "animals,", nrow(WB.mb), "fixes\n")
+save(WB.mv2, file = "Output/WB_raw.rdata")
+cat("Saved WB.mv2 —", n_distinct(mt_track_id(WB.mv2)), "animals,", nrow(WB.mv2), "fixes\n")
 ```
 
 # Exercise: Apply to your own data
