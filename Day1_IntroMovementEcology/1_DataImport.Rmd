@@ -143,11 +143,10 @@ load("./Data/wildebeest_data.rdata")
 ```
 
 ## CSV Import
-If you are unable to connect to [Movebank](https://www.movebank.org), or if your data exists elsewhere, you can import from a .CSV and convert to a `move2` object using `mt_as_move2()`.  Make sure you force the 'timestamp' field to be read as raw text ('col_character'), rather than letting `read_csv()` set the datetime and always verify that the timestamp was imported properly.   
+If you are unable to connect to [Movebank](https://www.movebank.org), or if your data exists elsewhere, you can import from a .CSV and convert to a `move2` object using `mt_as_move2()`.  Make sure you force the 'timestamp' field to be read as raw text ('col_character'), rather than letting `read_csv()` set the datetime. Always verify that the timestamp was imported properly.   
 
 ```{r csv_import, eval=FALSE}
-# Read file
-# Change the date format (here ymd_hms) to match with your dataset
+# Import file, changing the date format (formatted here as ymd_hms()) to match your dataset
 WB.csv <- read_csv("Data/WB_FullDataset.csv",
                    col_types = cols(timestamp = col_character())) %>% 
   mutate(timestamp = ymd_hms(timestamp, tz = tz_utc))
@@ -164,7 +163,7 @@ WB.csv <- mt_as_move2(WB.csv,
                       track_id_column  = "individual_local_identifier"
                       )
 
-# Note, the reference information was not included in the folder.  If included, they would need to be joined together based on a common field.  This could be easily accomplished using the `left_join()` function on a shared field (e.g., ID).
+# Note, the reference information was not imported.  If imported, the dataframe would need to be joined to the original based on a common field.  This could be easily accomplished using the `left_join()` function on a shared field (e.g., ID).
 ```
 
 > **Note:** `mt_as_move2()` works with any data frame that has coordinates and timestamps. Once converted, the object behaves identically to a Movebank download — all the same `mt_*` functions apply.
