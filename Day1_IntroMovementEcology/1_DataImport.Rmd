@@ -163,65 +163,57 @@ WB.csv <- mt_as_move2(WB.csv,
                       track_id_column  = "individual_local_identifier"
                       )
 
-# Note, the reference information was not imported.  If imported, the dataframe would need to be joined to the original based on a common field.  This could be easily accomplished using the `left_join()` function on a shared field (e.g., ID).
+# Note, the reference information was not imported, although it is provided in the Data directory (wildebeest_ref.csv).  If imported, the dataframe would need to be joined to the original by a common field.  This could be easily accomplished using the `left_join()` function on a shared field (e.g., ID).
 ```
 
 > **Note:** `mt_as_move2()` works with any data frame that has coordinates and timestamps. Once converted, the object behaves identically to a Movebank download — all the same `mt_*` functions apply.
 
 # Understanding the Move2 Object
-`move2` is a relatively new package (2022) designed to make working with tracking data more intuitive. A `move2` object is fundamentally an `sf` (simple features) object — meaning every row already carries a spatial point geometry — with extra structure to handle multiple individuals and timestamps. Using `move2` will be useful as we explore other analyses that have been developed to work with the library.
+`move2` is a relatively new package (2022) designed to make working with tracking data more intuitive. A `move2` object is fundamentally an `sf` (simple features) object — meaning every row already carries a spatial point geometry — with extra structure to handle multiple individuals and timestamps. Using `move2` will be useful as we explore other analyses that have been developed to work with this library, but can be confusing if you are used to working with dataframes.
 
-### Data Summary
-Summarizing the data will provide you with the number of tracks, time range of data collection, the Coordinate reference systemS, and a preview of the data.
+## Data Summary
+Summarizing a `move2` object will provide the number of tracks, time range of data collection, the coordinate reference system, and a preview of the data.
 
-```{r class}
+```{r Mv2 Functions}
 # Print the move2 object class
 class(WB.mv2)   # move2, sf, tbl_df, tbl, data.frame
+
 # Print a structured summary
 WB.mv2
-```
 
-### Functions for Summarizing a Move2 Object
+# Print the number of unique animals by accessing the track_id column. 
+n_distinct(mt_track_id(WB.mv2)) # n_distinct is the same as length(unique(mt_track_id(WB.mv2))), but easier to write and understand
 
-```{r mt_functions}
-# Number of unique animals - How many distinct individuals are there that have a track
-n_distinct(mt_track_id(WB.mv2))
-
-# Number of tracks
+# Print the number of unique tracks
 mt_n_tracks(WB.mv2)
 
-# Name of timestamp column
+# Print the name of the timestamp column
 mt_time_column(WB.mv2)
 
-# Name of track ID column
+# Print the name of the track ID column
 mt_track_id_column(WB.mv2)
 
 # Overall time range
 range(mt_time(WB.mv2), na.rm = TRUE)
 ```
 
-### Event Data vs Track Metadata
+## Event Data vs Track Metadata
 A `move2` object holds two distinct types of information:
 
 1. Event data: One row per GPS fix — location, timestamp, sensor readings
 2. Track metadata: One row per individual — sex, deployment dates, study site
 
 ```{r track_data}
-# Individual-level metadata (deployment information)
+# Individual-level metadata (deployment information) and use the function glimpse() to provide a brief summary
 track_info <- mt_track_data(WB.mv2)
 glimpse(track_info)
+
+# Or just look at the column names from the event data
+names(WB.mv2) # Same as colnames(WB.mv2)
 ```
+> When you download from Movebank with `move2`, the deployment metadata (e.g., individual info, study site, sex, deploy on/off dates) is automatically embedded in the track data. In Module 2, we will use this information to subset to the study area and filter by deployment period.
 
-```{r column_names}
-# Column names in the event data
-names(WB.mv2)
-```
-
-> When you download from Movebank with `move2`, the deployment metadata (individual info, study site, sex, deploy on/off dates) is automatically embedded in the track data. In Module 2, we will use this information to subset to the study area and filter by deployment period.
-
-
-
-# Initial Data Exploration
+# Data Exploration
 Explore the basic properties of the dataset, querying the dimensions and structure of the data collected.
 
 ```{r dimensions}
@@ -232,33 +224,34 @@ glimpse(WB.mv2) # Get a quick view of each column
 ```
 
 ## Per-individual Summary
-Here, we will use `summarise()` to create a query of the data collected, summarizing how many fixes were collected for each animal and for how long. 
+Here, we will use `summarise()` to create a query of the data collected, summarizing how many fixes were collected for each animal and for how long a period. 
 
 ```{r individual_summary}
-animal_summary <- WB.mv2 %>%
+wb.Summary <- WB.mv2 %>%
   as_tibble() %>%
   summarise(n_fixes = n(), 
             first_fix = min(timestamp, na.rm = TRUE), 
             last_fix = max(timestamp, na.rm = TRUE), 
             duration_d = round(as.numeric(difftime(max(timestamp, na.rm = TRUE),
                                                    min(timestamp, na.rm = TRUE),
-                                                   units = "days")), 1),
+                                                   units = "days")), digits = 1),
             .by = individual_local_identifier) %>%
   arrange(individual_local_identifier)
 
-animal_summary
+# Print Results
+wb.Summary
 ```
 
 > **Discussion:** Notice the variation in tracking duration and number of fixes across individuals. This kind of imbalance is common in real tracking datasets and has implications for comparative analyses. What might cause an individual to have fewer fixes than others?
 
 ## Sampling interval
-Many movement analyses assume a regular sampling interval (or at least close to regular). It is important to understand your data's fix rate distribution before proceeding.  Calculate the time between consecutive fixes for each animal and summarize as a histogram.
+Many movement analyses assume a regular sampling interval (or at least close to regular). It is important to understand your data's fix rate distribution before proceeding.  Here we will calculate the time between consecutive fixes for each animal and summarize results as a histogram.
 
 ```{r sampling_interval}
 # mt_time_lags() returns the time difference to the NEXT location for each row in the dataset
 time_lags <- WB.mv2 %>%
   arrange(individual_local_identifier, timestamp) %>%
-  mutate(dt_hours = mt_time_lags(.) %>% # default to minutes
+  mutate(dt_hours = mt_time_lags(.) %>% # A function to retrieve the interval duration between locations, defaults to minutes
            set_units("hours") %>%  # convert to hours
            as.numeric()) %>%
   as_tibble()
@@ -284,9 +277,9 @@ time_lags %>%
     .by = individual_local_identifier
   )
 
-# Distribution of intervals for one individual
+# Graph the interval distribution for one individual
 time_lags %>%
-  filter(individual_local_identifier == first(individual_local_identifier),
+  filter(individual_local_identifier == first(individual_local_identifier), # Could change this to a different individual
          dt_hours < 12) %>%
   ggplot(aes(x = dt_hours)) +
   geom_histogram(binwidth = 0.25, fill = "steelblue", color = "white") +
@@ -416,11 +409,11 @@ WB.sf %>%
 
 > **Question:** Do all points fall within the expected study area? Are there any obvious outliers far from the main cluster? Do individual clusters seem reasonable for wildebeest?
 
-# Save
-Save the raw `move2` object so that we can use it in future exercises.  
+# Save the Result
+In this case, we didn't make any changes to the file we imported.  If we wanted to save the file, we could easily export the file using the following command.  
 
-```{r Save}
-save(WB.mv2, file = "Output/WB_raw.rdata")
+```{r Save, eval=F}
+save(WB.mv2, file = "Data/WB_raw.rdata")
 cat("Saved WB.mv2 —", n_distinct(mt_track_id(WB.mv2)), "animals,", nrow(WB.mv2), "fixes\n")
 ```
 
@@ -432,6 +425,7 @@ Now that you have uploaded and manipulated the wildebeest dataset in [R](https:/
 3. Run the temporal coverage heatmap and quickly map your own data. 
 
 **Useful questions to answer for your own dataset:**
+
 * How many individuals were imported? How long was each individual tracked?
 * What is the sampling interval of your data? Is it regularly sampled?
 * Are there any obvious spatial outliers?  Do you notice any gaps or suspicious points?
