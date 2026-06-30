@@ -143,7 +143,7 @@ help("as.telemetry")
 ```{r import_data2}
 
 # Load data from Movebank CSV (which can be compressed)
-Buffalo <- as.telemetry("data/Kruger African Buffalo, GPS tracking, South Africa.zip")
+Buffalo <- as.telemetry("Data/Kruger African Buffalo, GPS tracking, South Africa.zip")
 ## You can also import from a move object, data.frame, etc.
 ## GPS location error can be an issue if greater than the sampling timesteps
 
@@ -227,7 +227,7 @@ To work with spatial data accurately, we need Coordinate Reference Systems (CRS)
 
 <center>
 
-![](figures/Figure-1-Standard-3D-Coordinate-Frame.png){width=250px height=250px}
+![](Figures/Figure-1-Standard-3D-Coordinate-Frame.png){width=250px height=250px}
 
 <span style="color: gray;"> 2-dimensional projection plane with reference to 3-dimensional geography. Image from [Janssen (2011).](https://www.researchgate.net/figure/Ellipsoidal-coordinate-reference-systems-Cartesian-geographic-and-local-topocentric_fig1_260210654) </span>
 
@@ -345,7 +345,7 @@ zoom(SVF, main = "Variogram with good CIs", level = c(0.95,0.96))
 
 ```
 
-![](figures/variogram_zoom.png)
+![](Figures/variogram_zoom.png)
 
 The initial quadratic curvature (if the data are clean and finely sampled) indicates the mean speed of animal (or square of mean speed of animal).
 
@@ -409,7 +409,7 @@ ctmm.guess(DATA, variogram = SVF)  # automates guesses for parameters
 
 ```
 
-![](figures/ctmm.guess_interactive.png)
+![](Figures/ctmm.guess_interactive.png)
 
 If you'd like to adjust the initial parameter guesses yourself, you can save your values to the GUESS object using the "save to GUESS" button at the bottom. Most often, the automated guesses are sufficient initial values for the optimization process, so we can just automate the guess without the interactive mode:
 
@@ -434,7 +434,7 @@ help("ctmm.select")
 
 <center>
 
-![](figures/continuous-time_movement_models.png)
+![](Figures/continuous-time_movement_models.png)
 
 </center>
 
@@ -460,7 +460,7 @@ FITS <- ctmm.select(DATA, GUESS, trace = 3, verbose = TRUE, cores = -1)
 ## Candidate models: OUF, OUf, OUΩ, IOU, BM, IID, inactive
 ## verbose = TRUE --> returns all models (only top models returned by default)
 
-save(FITS, file = "data/cillas.rda")  # store results
+save(FITS, file = "Data/cillas.rda")  # store results
 
 ```
 
@@ -469,7 +469,7 @@ save(FITS, file = "data/cillas.rda")  # store results
 ```{r ctmm.select3}
 
 # We have already run this code for you:
-load("data/cillas.rda")  # All autocorrelation models stored
+load("Data/cillas.rda")  # All autocorrelation models stored
 
 # Let's look at the results
 summary(FITS)
@@ -642,7 +642,7 @@ ctmm.guess(DATA, ctmm(range = FALSE)) # `range = FALSE` for non-resident indivs
 
 <center>
 
-![](figures/ctmm.guess_interactive_nonresident.png){width=80%}
+![](Figures/ctmm.guess_interactive_nonresident.png){width=80%}
 
 </center>
 
