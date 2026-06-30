@@ -29,7 +29,7 @@ By the end of this module you will be able to:
 3. Understand the structure of a `move2` object
 4. Perform initial exploration to understand your dataset
 
-**Packages used:** `move2`, `tidyverse`, `lubridate`, `sf`, `mapview`, `units`
+**Packages used:** `move2`, `tidyverse`, `lubridate`, `sf`, `mapview`, `units`, `gt`
 
 # Introduction
   >Example: White-bearded wildebeest (2010-2013)
@@ -46,7 +46,7 @@ Stabach JA, Hughey LF, Crego RD, Fleming CH, Hopcraft JGC, Leimgruber P, Morriso
 
 Stabach JA, Hughey LF, Reid RS, Worden JS, Leimgruber P, Boone RB. 2020. Data from: Comparison of movement strategies of three populations of white-bearded wildebeest. Movebank Data Repository. [doi:10.5441/001/1.h0t27719](https://www.datarepository.movebank.org/handle/10255/move.1095)
 
-# Setup
+# 1. Setup
 As a first step, we will import the necessary packages to conduct our analysis. This requires clearing your console and loading the required libraries for analysis.
 
 ```{r Load Libraries}
@@ -54,7 +54,7 @@ As a first step, we will import the necessary packages to conduct our analysis. 
 rm(list=ls())
 
 # You may need to install these packages first
-# install.packages(c("move2", "tidyverse", "lubridate", "sf", "mapview", "units"))
+# install.packages(c("move2", "tidyverse", "lubridate", "sf", "mapview", "units", "gt"))
 
 library(move2)       # Movebank interface and the move2 spatial data class
 library(tidyverse)   # Data wrangling and visualization (dplyr, ggplot2, etc.)
@@ -62,41 +62,39 @@ library(lubridate)   # Working with timestamps and timezones
 library(sf)          # Spatial vector data (move2 is built on sf)
 library(mapview)     # Quick interactive maps
 library(units)       # Provides support for measurement units
+library(gt)          # Makes presentation-ready display tables
 ```
 
-## Setting the Time Zone and Coordinate System
-Data in this example were collected in Kenya.  Data are stored in [Movebank](https://www.movebank.org/), however, are stored in UTC (Coordinated Universal Time).  This is standard practice, but means that data need to be converted to local time (East Africa Time - EAT) prior to conducting analyses.  A helpful [wiki](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) exists to help in choosing the appropriate timezone identifier for your study.
+## 1.1 Setting the Time Zone and Coordinate System
+Data in this example were collected in Kenya.  Data stored in [Movebank](https://www.movebank.org/), however, are stored in UTC (Coordinated Universal Time).  This is standard practice, but means that data need to be converted to local time (in this case, East Africa Time - EAT) prior to conducting analyses.  A helpful [wiki](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) exists to help in choosing the appropriate timezone identifier for your particular study area.
 
-Data collected via a GPS device must be encoded with an appropriate projection system to link the coordinates to specific locations on the earth’s surface. When you acquire or download geospatial data, make sure you know the projection of the data.  This information is usually found in the metadata of a given dataset or should be provided by the person that is sharing the data with you. Checking and re-checking your dataset is very important. 
+Data collected via a GPS device must be encoded with an appropriate projection system to link the coordinates to specific locations on the earth’s surface. When you acquire or download geospatial data, make sure you know the projection of the data.  This information is usually found in the metadata of a given dataset or should be provided by the person that is sharing the data with you. 
 
-It is important to recognize that projections try to minimize distortion of a 3-dimensional object (the earth) on a 2-dimensional surface (paper map or computer screen). Choosing a projection that minimizes this distortion is especially important when doing calculations of area or speed. It is recommended to collect all GPS data in geographic coordinates and project into a coordinate system that minimizes distortion of your objects of interest.
+It is important to recognize that projections try to minimize distortion of a 3-dimensional object (the earth) on a 2-dimensional surface (paper map or computer screen). Choosing a projection that minimizes this distortion is especially important when doing calculations of area or speed. It is recommended to collect all GPS data in geographic coordinates and project into a coordinate system that minimizes distortion of your objects of interest.  The coordinate reference system (CRS) information needed to re-project your data are listed in [http://spatialreference.org/ref/epsg/](http://spatialreference.org/ref/epsg/) and [https://epsg.io/](https://epsg.io/).
 
 <center>
 ![[Source: ESRI](https://www.esri.com/arcgis-blog/products/arcgis-pro/mapping/gcs_vs_pcs)](Figures/projections-esri-blog.png){width=75%}
 </center>
 <br>
 
-The Universal Tranverse Mercator (UTM) projection is a common projection used for assigning coordinates to locations on the surface of the earth.  The UTM projection divides earth into 60 distinct zones, using the equator as the origin (0) and spanning 1,000,000 meters.  The center of the zone is defined as 500,000 meters.  As a result, you can identify any geographic point on earth to a specific UTM zone and meter coordinate.  In this example, we will re-project the data to UTM's. You can find the reference information for UTM zones listed in [http://spatialreference.org/ref/epsg/](http://spatialreference.org/ref/epsg/) and [https://epsg.io/](https://epsg.io/).
+In this initial exercise, we will not project the data to a new coordinate system, instead keeping the dataset in its native format (i.e., decimal degrees).  In future exercises, however, this will become an important topic for further discussion.
 
 ```{r Set UTM Zone}
 # Set TimeZone
 tz_utc <- "UTC"
 tz_local <- "Africa/Nairobi"  # East Africa Time (EAT = UTC+3)
 
-# Set UTM
+# Set Coordinate System
 latlong_crs <- "EPSG:4326"   # WGS84 geographic — standard for GPS and Movebank
-utm_crs <- "EPSG:32737"  # UTM Zone 37S — metric, appropriate for Athi-Kaputiei, Kenya
 ```
 
-> **NOTE**: The data we are using spans multiple UTM zones (UTM 36 south and UTM 37 south).  This should be avoided in most cases by choosing other coordinate systems, such as Lambert's or Alber's Equal-Area conic projections, that span multiple UTM zones. Doing so will minimize distortion.
+# 2. Downloading Data
+We will demonstrate two methods for downloading data for analysis. In the first method, data are downloaded directly from [Movebank](https://www.movebank.org). In the second, data are downloaded from a .csv file. Both approaches produce the same end result. However, downloading data from [Movebank](https://www.movebank.org) offers additional advantages by providing a standardized data structure and enabling access to data that are continuously updated as new data are collected.
 
-# Downloading Data
-We will demonstrate two methods for downloading data for analysis. In the first method, data are downloaded directly from [Movebank](https://www.movebank.org). In the second, data are downloaded from a .csv file. Both approaches produce the same end result. However, downloading data from [Movebank](https://www.movebank.org) offers additional advantages: it provides a standardized data structure and enables access to data that are continuously updated as new data are collected.
-
-## Movebank
+## 2.2 Movebank
 [Movebank](https://www.movebank.org) is the world's largest repository of animal tracking data, hosting data for thousands of studies across various taxa. The `move2` package provides a direct interface to [Movebank](https://www.movebank.org), allowing you to download data directly into [R](https://cran.r-project.org/) for analysis.  
 
-### Store your credentials (once per computer)
+### 2.2.1 Store your Credentials (Once per Computer)
 Provide your credentials to access the [Movebank](https://www.movebank.org) API.
 
 ```{r Credentials, eval=FALSE}
@@ -106,7 +104,7 @@ movebank_store_credentials("your_username", "your_password")
 
 > **Security note:** Never hardcode your password in a script that you share or commit to GitHub. `movebank_store_credentials()` stores it once in your Operating System (OS) keychain. After saving once, `move2` functions will use it automatically.
 
-### Explore available studies (optional)
+### 2.2.2 Explore Available Studies (optional)
 See what's available on [Movebank](https://www.movebank.org) that is publicly accessible.  This is often more easily accomplished by logging on to [Movebank](https://www.movebank.org) and using the online interface.
 
 ```{r Search Studies, eval=FALSE}
@@ -118,7 +116,7 @@ movebank_download_study_info(
 )
 ```
 
-### Wildebeest Data Download
+### 2.2.3 Wildebeest Data Download
 Use the function `movebank_download_study()` and specify the ID to download the wildebeest data from [Movebank](https://www.movebank.org).
 
 ```{r Download Movebank, eval=FALSE}
@@ -142,8 +140,8 @@ For these exercises, we will load a pre-downloaded version to avoid delays. This
 load("./Data/wildebeest_data.rdata")
 ```
 
-## CSV Import
-If you are unable to connect to [Movebank](https://www.movebank.org), or if your data exists elsewhere, you can import from a .CSV and convert to a `move2` object using `mt_as_move2()`.  Make sure you force the 'timestamp' field to be read as raw text ('col_character'), rather than letting `read_csv()` set the datetime. Always verify that the timestamp was imported properly.   
+## 2.3 CSV Import
+If you are unable to connect to [Movebank](https://www.movebank.org) or if your data exists elsewhere, you can import from a .CSV and convert to a `move2` object using `mt_as_move2()`.  Make sure you force the 'timestamp' field to be read as raw text ('col_character'), rather than letting `read_csv()` set the datetime. Always verify that the timestamp was imported properly.   
 
 ```{r csv_import, eval=FALSE}
 # Import file, changing the date format (formatted here as ymd_hms()) to match your dataset
@@ -156,23 +154,23 @@ WB.csv <- read_csv("Data/WB_FullDataset.csv",
 # sum(is.na(WB.csv$timestamp))
 
 # Convert to move2 object
-WB.csv <- mt_as_move2(WB.csv, 
+WB.csv <- mt_as_move2(WB.csv, # Note that I am overwriting the original WB.csv file
                       coords = c("longitude", "latitude"),  # column names for x, y
                       crs = latlong_crs,
                       time_column = "timestamp",
                       track_id_column  = "individual_local_identifier"
                       )
 
-# Note, the reference information was not imported, although it is provided in the Data directory (wildebeest_ref.csv).  If imported, the dataframe would need to be joined to the original by a common field.  This could be easily accomplished using the `left_join()` function on a shared field (e.g., ID).
+# Note, the reference information was not imported, although it is provided in the Data directory (Data/wildebeest_ref.csv).  If imported, the dataframe would need to be joined to the original by a common field.  This could be easily accomplished using the `left_join()` function on a shared field (e.g., ID).
 ```
 
-> **Note:** `mt_as_move2()` works with any data frame that has coordinates and timestamps. Once converted, the object behaves identically to a Movebank download — all the same `mt_*` functions apply.
+> **Note:** `mt_as_move2()` works with any dataframe that has coordinates and timestamps. Once converted, the object behaves identical to a Movebank download — all the same `mt_*` functions apply.
 
-# Understanding the Move2 Object
-`move2` is a relatively new package (2022) designed to make working with tracking data more intuitive. A `move2` object is fundamentally an `sf` (simple features) object — meaning every row already carries a spatial point geometry — with extra structure to handle multiple individuals and timestamps. Using `move2` will be useful as we explore other analyses that have been developed to work with this library, but can be confusing if you are used to working with dataframes.
+# 3. Understanding the Move2 Object
+`Move2` is a relatively new package (2022) designed to make working with tracking data more intuitive. A `move2` object is fundamentally an `sf` (simple features) object — meaning every row already includes a spatial point geometry — with extra structure to handle multiple individuals and timestamps. Using `move2` will be useful as we explore other analyses that have been developed to work with this library, but can be confusing if you are more comfortable working with dataframes.
 
-## Data Summary
-Summarizing a `move2` object will provide the number of tracks, time range of data collection, the coordinate reference system, and a preview of the data.
+## 3.1 Data Summary
+`Move2` includes various functions that have been developed to provide summary information, such as the number of tracks, the time range of data collection, the coordinate reference system, and a general preview of the data.  
 
 ```{r Mv2 Functions}
 # Print the move2 object class
@@ -197,24 +195,26 @@ mt_track_id_column(WB.mv2)
 range(mt_time(WB.mv2), na.rm = TRUE)
 ```
 
-## Event Data vs Track Metadata
+## 3.2 Event Data vs Track Metadata
 A `move2` object holds two distinct types of information:
 
 1. Event data: One row per GPS fix — location, timestamp, sensor readings
 2. Track metadata: One row per individual — sex, deployment dates, study site
 
 ```{r track_data}
-# Individual-level metadata (deployment information) and use the function glimpse() to provide a brief summary
+# mt_track_data() returns a data.frame contianing the track attribute data
+# glimpse() can then be used to provide a brief summary (a transposed version of print())
 track_info <- mt_track_data(WB.mv2)
 glimpse(track_info)
 
 # Or just look at the column names from the event data
 names(WB.mv2) # Same as colnames(WB.mv2)
 ```
+
 > When you download from Movebank with `move2`, the deployment metadata (e.g., individual info, study site, sex, deploy on/off dates) is automatically embedded in the track data. In Module 2, we will use this information to subset to the study area and filter by deployment period.
 
-# Data Exploration
-Explore the basic properties of the dataset, querying the dimensions and structure of the data collected.
+# 4. Data Exploration
+To explore the basic properties of the dataset, such as querying the dimensions and structure of the data collected, many base [R](https://www.r-project.org/) functions can be used.
 
 ```{r dimensions}
 nrow(WB.mv2) # Total number of rows in the dataset
@@ -223,16 +223,16 @@ dim(WB.mv2) # Total number of rows and columns
 glimpse(WB.mv2) # Get a quick view of each column
 ```
 
-## Per-individual Summary
-Here, we will use `summarise()` to create a query of the data collected, summarizing how many fixes were collected for each animal and for how long a period. 
+## 4.1 Per-individual Summary
+We can also use the `summarise()` function to create a query of the data collected, summarizing how many fixes were collected for each animal and for what period of time. 
 
 ```{r individual_summary}
 wb.Summary <- WB.mv2 %>%
   as_tibble() %>%
-  summarise(n_fixes = n(), 
-            first_fix = min(timestamp, na.rm = TRUE), 
-            last_fix = max(timestamp, na.rm = TRUE), 
-            duration_d = round(as.numeric(difftime(max(timestamp, na.rm = TRUE),
+  summarise(Locations = n(), 
+            Start = min(timestamp, na.rm = TRUE), 
+            End = max(timestamp, na.rm = TRUE), 
+            Duration = round(as.numeric(difftime(max(timestamp, na.rm = TRUE),
                                                    min(timestamp, na.rm = TRUE),
                                                    units = "days")), digits = 1),
             .by = individual_local_identifier) %>%
@@ -240,11 +240,46 @@ wb.Summary <- WB.mv2 %>%
 
 # Print Results
 wb.Summary
+
+# Now make a prettier table and output the file 
+gt_gnu <- wb.Summary %>% 
+  
+  # initialize gt table
+  gt() %>%
+  
+  # Make the table easier to read with alternating grey bars
+  opt_row_striping() %>%
+  
+  # Add title and subtitle, pulling date of creation
+  tab_header(
+    title = "White-bearded Wildebeest in Kenya: Tracking Data Summary",
+    subtitle = paste0("Created: ",Sys.Date())) %>%
+  
+  # Easy preset date formatting
+  fmt_date(
+    columns = c(Start, End),
+    date_style = 8) %>%
+  
+  # Change the column labels for the table
+  cols_label(individual_local_identifier = "Wildebeest ID",
+             Locations = "Total points",
+             Start = "First location",
+             End = "Last location",
+             Duration = "Tracking period (days)") %>%
+  
+  # Center text inside columns
+  cols_align(align = "center") 
+
+# Print result
+gt_gnu
+
+# Save as html table to send to the project manager, or a shiny app
+gtsave(gt_gnu, filename = "Output/summary_gnu.html")
 ```
 
 > **Discussion:** Notice the variation in tracking duration and number of fixes across individuals. This kind of imbalance is common in real tracking datasets and has implications for comparative analyses. What might cause an individual to have fewer fixes than others?
 
-## Sampling interval
+## 4.2 Sampling interval
 Many movement analyses assume a regular sampling interval (or at least close to regular). It is important to understand your data's fix rate distribution before proceeding.  Here we will calculate the time between consecutive fixes for each animal and summarize results as a histogram.
 
 ```{r sampling_interval}
@@ -253,13 +288,16 @@ time_lags <- WB.mv2 %>%
   arrange(individual_local_identifier, timestamp) %>%
   mutate(dt_hours = mt_time_lags(.) %>% # A function to retrieve the interval duration between locations, defaults to minutes
            set_units("hours") %>%  # convert to hours
-           as.numeric()) %>%
+           as.numeric()) %>% # Make the field numeric
   as_tibble()
 
-# The last time lag of each individual track will always be NA, so the total NA should be equal to the number of individuals and needs to be removed for calculations
-sum(is.na(time_lags$dt_hours)) 
+# Notice the "dt_hours" column
+head(time_lags)
 
-# Use filter to remove NA values
+# The last time lag of each individual track will always be NA, so the total NA should be equal to the number of individuals
+sum(is.na(time_lags$dt_hours))  == n_distinct(time_lags$individual_local_identifier)
+
+# Use filter to remove these NA values
 time_lags <- time_lags %>%
   filter(!is.na(dt_hours))
 
@@ -272,8 +310,8 @@ time_lags %>%
   summarise(
     median_interval_h = round(median(dt_hours), 2),
     min_interval_h = round(min(dt_hours), 2),
-    max_interval_h = round(max(dt_hours), 2),
-    pct_irregular = round(mean(abs(dt_hours - target_interval_h) > 0.1) * 100, 1),
+    max_interval_h = round(max(dt_hours), 2), 
+    pct_irregular = round(mean(abs(dt_hours - target_interval_h) > 0.1) * 100, 1), # Calculate the percent irregular from the median value calculated
     .by = individual_local_identifier
   )
 
@@ -293,10 +331,10 @@ time_lags %>%
 This graph shows that the sampling intervals peak at 1 and 3 hours. In this case, the resulting sampling interval is by design - Wildebeest are more active during the day. As a result, collars were programmed to collect hourly fixes during daylight hours and every 3 hours at night, a duty cycle that collects relatively high resolution data during the day while saving battery overnight. We can check that this two-peak pattern really does line up with time of day, rather than just being an artifact of the histogram's binning.
 
 ```{r interval_by_hour}
-# Tag each interval by the local hour of day of the fix that starts it, and
-# check whether short (~1h) vs. long (~3h) intervals separate by time of day.
+# Pull out the hour of the timestamp using the hour() function, converting the result to local time.
+# Check to see if (~1h) vs. long (~3h) intervals separate by time of day.
 time_lags <- time_lags %>%
-  mutate(hour_local = hour(with_tz(timestamp, tz_local)))
+  mutate(hour_local = hour(with_tz(timestamp, tz_local))) 
 
 time_lags %>%
   filter(dt_hours < 6) %>%
@@ -310,7 +348,7 @@ time_lags %>%
   theme_minimal()
 ```
 
-The ~1-hour intervals cluster during daylight hours and the ~3-hour intervals cluster overnight, confirming the duty cycle described, not random noise. Not every irregularity in tracking data is designed, however. 
+**Start HERE**The ~1-hour intervals cluster during daylight hours and the ~3-hour intervals cluster overnight, confirming the duty cycle described, not random noise. Not every irregularity in tracking data is designed, however. 
 
 A single `max_interval_h` will almost always look alarming. Over a multi-year deployment, nearly every individual will have some unusually long gap somewhere in its track. This isn't necessarily evidence of a problem. The more useful question is *whether long gaps are isolated to a single tag or shared across many individuals at the same time*. An isolated gap on one animal, on a random date, points to a tag- or animal-specific cause (battery, poor satellite geometry, dense cover). The same gap appearing on many animals at once, all resolving within the same few days, points to a system-wide cause instead — a ground-station/uplink outage or a network-wide duty-cycle change.
 
@@ -359,7 +397,7 @@ if (nrow(synchronized_gaps) > 0 & synchronized_gaps$n_individuals_affected[1] >=
 
 > **What this reveals:** a cluster of individuals all lose and regain signal within the same few-day window — far too many, and too synchronized, to be independent animal behavior or coincidental tag failures. That pattern is the signature of a real telemetry event (e.g., an uplink or ground-station outage), not a data error — it's genuine missing data, not a duplicate or invalid fix. It does need to be respected downstream: when we compute step lengths and movement metrics later in the workshop, a multi-day gap should never be treated as a single "step".
 
-## Temporal coverage
+## 4.3 Temporal coverage
 
 ```{r temporal_plot}
 # Setup a blank graph with all indiviudals
@@ -391,7 +429,7 @@ p +
 
 >This plot gives an immediate visual of data gaps, deployment start/end dates, and variation across individuals. The shaded red band marks the candidate system-wide outage detected — notice it cuts vertically across *many* individual's. That's the visual signature of a shared, external cause, as opposed to a gap confined to a single row, which points to a tag- or animal-specific issue instead.
 
-# Graph the Data Collected
+# 5. Graph the Data Collected
 Before doing any cleaning or analysis, always visualize your raw data. This is the fastest way to spot obvious errors — locations in the ocean, impossible coordinates, or fixes far outside the study area.  The `mapview` package provides tools that allow for interactive mapping.  To do so, we need to first convert te object to a simple features object (`sf`).
 
 ```{r quick_map}
@@ -409,7 +447,7 @@ WB.sf %>%
 
 > **Question:** Do all points fall within the expected study area? Are there any obvious outliers far from the main cluster? Do individual clusters seem reasonable for wildebeest?
 
-# Save the Result
+# 6. Save the Result
 In this case, we didn't make any changes to the file we imported.  If we wanted to save the file, we could easily export the file using the following command.  
 
 ```{r Save, eval=F}
@@ -417,7 +455,7 @@ save(WB.mv2, file = "Data/WB_raw.rdata")
 cat("Saved WB.mv2 —", n_distinct(mt_track_id(WB.mv2)), "animals,", nrow(WB.mv2), "fixes\n")
 ```
 
-# Exercise: Apply to your own data
+# 7. Exercise: Apply to your own data
 Now that you have uploaded and manipulated the wildebeest dataset in [R](https://cran.r-project.org/), adapt the code with your own data.  Use [Movebank](https://www.movebank.org/) to download an available dataset or upload your data directly using `read_csv()`.  Please do the following:
 
 1. If you are pulling data from [Movebank](https://www.movebank.org/), use `movebank_download_study()` to download it. Run `n_distinct(mt_track_id())`, `mt_track_data()`, and create an individual summary table.
