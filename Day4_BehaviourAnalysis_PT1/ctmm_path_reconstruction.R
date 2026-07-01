@@ -13,9 +13,9 @@ DATA <- buffalo$Cilla
 # selected autocorrelation model
 GUESS <- ctmm.guess(DATA,interactive=FALSE)
 FIT <- ctmm.select(DATA,GUESS,trace=3)
-# save(FIT,file="cilla.rda")
+# save(FIT,file="Day4_BehaviourAnalysis_PT1/Data/cilla.rda")
 # I've already run this
-load("data/cilla.rda")
+load("Day4_BehaviourAnalysis_PT1/Data/cilla.rda")
 
 #############
 # PREDICT

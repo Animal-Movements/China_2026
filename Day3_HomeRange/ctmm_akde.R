@@ -36,7 +36,7 @@ GUESS <- ctmm.guess(DATA,interactive=FALSE)
 FIT <- ctmm.select(DATA,GUESS,trace=3)
 # save(FIT,file="pepper.rda")
 # I've already run this
-load("data/pepper.rda")
+load("Day3_HomeRange/Data/pepper.rda")
 
 summary(FIT)
 ## velocity autocorrelation ~ 30-40 mins
@@ -108,12 +108,12 @@ for(i in 1:length(buffalo))
 }
 names(FITS) <- names(buffalo)
 # save(FITS,file="data/buffalo.rda")
-load("data/buffalo.rda")
+load("Day3_HomeRange/Data/buffalo.rda")
 
 # calculate AKDES on a consistent grid
 AKDES <- akde(buffalo,FITS,weights=TRUE)
 # save(AKDES,file="data/buffalo_akdes.rda")
-load("data/buffalo_akdes.rda")
+load("Day3_HomeRange/Data/buffalo_akdes.rda")
 
 # color to be spatially distinct
 COL <- color(AKDES,by='individual')

@@ -38,7 +38,7 @@ GUESS <- ctmm.guess(DATA,interactive=FALSE)
 # select best model
 FIT <- ctmm.select(DATA,GUESS,trace=3)
 # save("FIT",file="gazelle.rda")
-load("data/gazelle.rda")
+load("Day3_HomeRange/Data/gazelle.rda")
 
 # summarize data
 summary(DATA)

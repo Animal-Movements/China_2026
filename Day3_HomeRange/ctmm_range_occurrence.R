@@ -7,7 +7,7 @@ library(ctmm)
 data(buffalo)
 projection(buffalo) <- median(buffalo)
 DATA <- buffalo$Cilla
-load("data/cilla.rda")
+load("Day3_HomeRange/Data/cilla.rda")
 
 FITS <- list("OUF anisotropic"=FIT)
 # include Brownian motion models
