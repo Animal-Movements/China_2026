@@ -34,9 +34,9 @@ By the end of this module you will be able to:
 
 # Ecological context
 
-A GPS fix is an estimate, not a fact. Every location carries some error and that error is rarely random or harmless: a handful of bad fixes can inflate steplengths into biologically impossible "teleports", bias a home range estimate outward, or manufacture an apparent "fast directed movement" behavioral state that never happened. For wide-ranging grazers like wildebeest moving across open, fenced, and increasingly developed landscapes, these artifacts can directly mislead conservation conclusions — for example, overestimating how often animals cross a fence line or inflate the size of a population's range.
+A GPS fix is an estimate, not a fact. Every location carries some amount of error and that error is rarely random or harmless: a handful of bad fixes can inflate steplengths into biologically impossible "teleports", bias a home range estimate outward, or manufacture an apparent "fast directed movement" behavioral state that never happened. For wide-ranging grazers like wildebeest moving across open, fenced, and increasingly developed landscapes, these artifacts can directly mislead conservation conclusions. For example, overestimating how often animals cross a fence line or inflate the size of a population's range can mislead conclusions.
 
-The Movebank study we downloaded in Module 1 also pools data across several wildebeest populations in Kenya (not just Athi-Kaputiei). Before we can say anything about *this* population's movement, we need to: (1) isolate the right subset of animals and time window, and (2) remove fixes that don't meet a minimum precision standard. This module does both, and gives you a reusable template for QC-ing your own tracking data.
+The wildebeest dataset we downloaded in Module 1 pooled data across several wildebeest populations in Kenya. Before we can say anything about *this* population's movement, we need to: (1) isolate the right subset of animals and time window, and (2) remove fixes that don't meet a minimum precision standard. This module does both, and gives you a reusable template for QC-ing your own tracking data.
 
 ---
 

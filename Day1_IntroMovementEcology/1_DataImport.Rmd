@@ -46,7 +46,9 @@ Stabach JA, Hughey LF, Crego RD, Fleming CH, Hopcraft JGC, Leimgruber P, Morriso
 
 Stabach JA, Hughey LF, Reid RS, Worden JS, Leimgruber P, Boone RB. 2020. Data from: Comparison of movement strategies of three populations of white-bearded wildebeest. Movebank Data Repository. [doi:10.5441/001/1.h0t27719](https://www.datarepository.movebank.org/handle/10255/move.1095)
 
-# 1. Setup
+---
+
+## 1. Setup
 As a first step, we will import the necessary packages to conduct our analysis. This requires clearing your console and loading the required libraries for analysis.
 
 ```{r Load Libraries}
@@ -65,7 +67,7 @@ library(units)       # Provides support for measurement units
 library(gt)          # Makes presentation-ready display tables
 ```
 
-## 1.1 Setting the Time Zone and Coordinate System
+### 1.1 Setting the Time Zone and Coordinate System
 Data in this example were collected in Kenya.  Data stored in [Movebank](https://www.movebank.org/), however, are stored in UTC (Coordinated Universal Time).  This is standard practice, but means that data need to be converted to local time (in this case, East Africa Time - EAT) prior to conducting analyses.  A helpful [wiki](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) exists to help in choosing the appropriate timezone identifier for your particular study area.
 
 Data collected via a GPS device must be encoded with an appropriate projection system to link the coordinates to specific locations on the earth’s surface. When you acquire or download geospatial data, make sure you know the projection of the data.  This information is usually found in the metadata of a given dataset or should be provided by the person that is sharing the data with you. 
@@ -88,13 +90,13 @@ tz_local <- "Africa/Nairobi"  # East Africa Time (EAT = UTC+3)
 latlong_crs <- "EPSG:4326"   # WGS84 geographic — standard for GPS and Movebank
 ```
 
-# 2. Downloading Data
+## 2. Downloading Data
 We will demonstrate two methods for downloading data for analysis. In the first method, data are downloaded directly from [Movebank](https://www.movebank.org). In the second, data are downloaded from a .csv file. Both approaches produce the same end result. However, downloading data from [Movebank](https://www.movebank.org) offers additional advantages by providing a standardized data structure and enabling access to data that are continuously updated as new data are collected.
 
-## 2.2 Movebank
+### 2.2 Movebank
 [Movebank](https://www.movebank.org) is the world's largest repository of animal tracking data, hosting data for thousands of studies across various taxa. The `move2` package provides a direct interface to [Movebank](https://www.movebank.org), allowing you to download data directly into [R](https://cran.r-project.org/) for analysis.  
 
-### 2.2.1 Store your Credentials (Once per Computer)
+###### 2.2.1 Store your Credentials (Once per Computer)
 Provide your credentials to access the [Movebank](https://www.movebank.org) API.
 
 ```{r Credentials, eval=FALSE}
@@ -104,7 +106,7 @@ movebank_store_credentials("your_username", "your_password")
 
 > **Security note:** Never hardcode your password in a script that you share or commit to GitHub. `movebank_store_credentials()` stores it once in your Operating System (OS) keychain. After saving once, `move2` functions will use it automatically.
 
-### 2.2.2 Explore Available Studies (optional)
+#### 2.2.2 Explore Available Studies (optional)
 See what's available on [Movebank](https://www.movebank.org) that is publicly accessible.  This is often more easily accomplished by logging on to [Movebank](https://www.movebank.org) and using the online interface.
 
 ```{r Search Studies, eval=FALSE}
@@ -116,7 +118,7 @@ movebank_download_study_info(
 )
 ```
 
-### 2.2.3 Wildebeest Data Download
+##### 2.2.3 Wildebeest Data Download
 Use the function `movebank_download_study()` and specify the ID to download the wildebeest data from [Movebank](https://www.movebank.org).
 
 ```{r Download Movebank, eval=FALSE}
@@ -140,7 +142,7 @@ For these exercises, we will load a pre-downloaded version to avoid delays. This
 load("./Data/wildebeest_data.rdata")
 ```
 
-## 2.3 CSV Import
+### 2.3 CSV Import
 If you are unable to connect to [Movebank](https://www.movebank.org) or if your data exists elsewhere, you can import from a .CSV and convert to a `move2` object using `mt_as_move2()`.  Make sure you force the 'timestamp' field to be read as raw text ('col_character'), rather than letting `read_csv()` set the datetime. Always verify that the timestamp was imported properly.   
 
 ```{r csv_import, eval=FALSE}
@@ -166,10 +168,10 @@ WB.csv <- mt_as_move2(WB.csv, # Note that I am overwriting the original WB.csv f
 
 > **Note:** `mt_as_move2()` works with any dataframe that has coordinates and timestamps. Once converted, the object behaves identical to a Movebank download — all the same `mt_*` functions apply.
 
-# 3. Understanding the Move2 Object
+## 3. Understanding the Move2 Object
 `Move2` is a relatively new package (2022) designed to make working with tracking data more intuitive. A `move2` object is fundamentally an `sf` (simple features) object — meaning every row already includes a spatial point geometry — with extra structure to handle multiple individuals and timestamps. Using `move2` will be useful as we explore other analyses that have been developed to work with this library, but can be confusing if you are more comfortable working with dataframes.
 
-## 3.1 Data Summary
+### 3.1 Data Summary
 `Move2` includes various functions that have been developed to provide summary information, such as the number of tracks, the time range of data collection, the coordinate reference system, and a general preview of the data.  
 
 ```{r Mv2 Functions}
@@ -195,7 +197,7 @@ mt_track_id_column(WB.mv2)
 range(mt_time(WB.mv2), na.rm = TRUE)
 ```
 
-## 3.2 Event Data vs Track Metadata
+### 3.2 Event Data vs Track Metadata
 A `move2` object holds two distinct types of information:
 
 1. Event data: One row per GPS fix — location, timestamp, sensor readings
@@ -213,7 +215,7 @@ names(WB.mv2) # Same as colnames(WB.mv2)
 
 > When you download from Movebank with `move2`, the deployment metadata (e.g., individual info, study site, sex, deploy on/off dates) is automatically embedded in the track data. In Module 2, we will use this information to subset to the study area and filter by deployment period.
 
-# 4. Data Exploration
+## 4. Data Exploration
 To explore the basic properties of the dataset, such as querying the dimensions and structure of the data collected, many base [R](https://www.r-project.org/) functions can be used.
 
 ```{r dimensions}
@@ -223,7 +225,7 @@ dim(WB.mv2) # Total number of rows and columns
 glimpse(WB.mv2) # Get a quick view of each column
 ```
 
-## 4.1 Per-individual Summary
+### 4.1 Per-individual Summary
 We can also use the `summarise()` function to create a query of the data collected, summarizing how many fixes were collected for each animal and for what period of time. 
 
 ```{r individual_summary}
@@ -279,7 +281,7 @@ gtsave(gt_gnu, filename = "Output/summary_gnu.html")
 
 > **Discussion:** Notice the variation in tracking duration and number of fixes across individuals. This kind of imbalance is common in real tracking datasets and has implications for comparative analyses. What might cause an individual to have fewer fixes than others?
 
-## 4.2 Sampling interval
+### 4.2 Sampling interval
 Many movement analyses assume a regular sampling interval (or at least close to regular). It is important to understand your data's fix rate distribution before proceeding.  Here we will calculate the time between consecutive fixes for each animal and summarize results as a histogram.
 
 ```{r sampling_interval}
@@ -317,7 +319,7 @@ time_lags %>%
 
 # Graph the interval distribution for one individual
 time_lags %>%
-  filter(individual_local_identifier == first(individual_local_identifier), # Could change this to a different individual
+  filter(individual_local_identifier == first(individual_local_identifier), # Could change this to a different individual or create a loop to print result for every individual
          dt_hours < 12) %>%
   ggplot(aes(x = dt_hours)) +
   geom_histogram(binwidth = 0.25, fill = "steelblue", color = "white") +
@@ -348,9 +350,9 @@ time_lags %>%
   theme_minimal()
 ```
 
-**Start HERE**The ~1-hour intervals cluster during daylight hours and the ~3-hour intervals cluster overnight, confirming the duty cycle described, not random noise. Not every irregularity in tracking data is designed, however. 
+The ~1-hour intervals cluster during daylight hours and the ~3-hour intervals cluster overnight, confirming the duty cycle described. Not every irregularity in tracking data is designed, however. 
 
-A single `max_interval_h` will almost always look alarming. Over a multi-year deployment, nearly every individual will have some unusually long gap somewhere in its track. This isn't necessarily evidence of a problem. The more useful question is *whether long gaps are isolated to a single tag or shared across many individuals at the same time*. An isolated gap on one animal, on a random date, points to a tag- or animal-specific cause (battery, poor satellite geometry, dense cover). The same gap appearing on many animals at once, all resolving within the same few days, points to a system-wide cause instead — a ground-station/uplink outage or a network-wide duty-cycle change.
+A single `max_interval_h` will almost always look alarming. Over a multi-year deployment, nearly every individual will have some unusually long gap somewhere in its track. This isn't necessarily evidence of a problem. The more useful question is *whether long gaps are isolated to a single tag or shared across many individuals at the same time*. An isolated gap on one animal, on a random date, points to a tag- or animal-specific cause (e.g., battery issue, poor satellite geometry, dense forest cover). The same gap appearing on many animals at once, all resolving within the same few days, points to a system-wide cause, such as a ground-station/uplink outage or a network-wide duty-cycle change.
 
 ```{r gap_diagnostics}
 # Flag long gaps (> 1 day) and ask: Are these gaps spread randomly across individuals and dates? Or, do many individuals lose/regain signal together?
@@ -368,14 +370,17 @@ cat(nrow(long_gaps), "gaps longer than", gap_threshold_h, "hours, across",
 
 # Bin gap *resolutions* (gap_end) by week: a spike in the number of distinct individuals resolving a long gap in the same week is the signature of a synchronized, fleet-wide event rather than independent tag failures.
 synchronized_gaps <- long_gaps %>%
-  mutate(resume_week = floor_date(gap_end, "week")) %>%
+  mutate(resume_week = floor_date(gap_end, "week")) %>% # Floor_date rounds down to the nearest boundary of the time unit
   group_by(resume_week) %>%
   summarise(n_individuals_affected = n_distinct(individual_local_identifier),
             n_gaps = n(), .groups = "drop") %>%
   arrange(desc(n_individuals_affected))
 
-synchronized_gaps %>% slice_head(n = 5)
+# Display the first 6 rows
+head(synchronized_gaps)
 ```
+
+We can also investigate the date when most individuals were impacted by a system-wide outage, using a conditional statement to evaluate if the instance was isolated.  Here, we take one step beyond the previous summary to query how many individuals were impacted and within what time period.
 
 ```{r outage_window}
 # Treat the week with the most individuals affected as a candidate system-wide outage (require >= 5 individuals so isolated coincidences don't get flagged). Then recover the full span -- earliest signal loss to latest signal recovery -- so that the temporal coverage can be plotted.
@@ -395,9 +400,10 @@ if (nrow(synchronized_gaps) > 0 & synchronized_gaps$n_individuals_affected[1] >=
 }
 ```
 
-> **What this reveals:** a cluster of individuals all lose and regain signal within the same few-day window — far too many, and too synchronized, to be independent animal behavior or coincidental tag failures. That pattern is the signature of a real telemetry event (e.g., an uplink or ground-station outage), not a data error — it's genuine missing data, not a duplicate or invalid fix. It does need to be respected downstream: when we compute step lengths and movement metrics later in the workshop, a multi-day gap should never be treated as a single "step".
+> **What this reveals:** a cluster of individuals all lose and regain signal within the same few-day window — far too many, and too synchronized, to be independent animal behavior or coincidental tag failures. That pattern is the signature of a real telemetry event (e.g., an uplink or ground-station outage), not a data error — it's genuine missing data, not a duplicate or invalid fix. When we compute step lengths and movement metrics later in the workshop, we should not consider this multi-day gap as a single "step".
 
-## 4.3 Temporal coverage
+### 4.3 Temporal coverage
+Graphically display the deployment start/ends dates for each individual, including data gaps and variation across individuals. The shaded red band marks the candidate system-wide outage detected — notice it cuts vertically across *many* individual's. That's the visual signature of a shared, external cause, as opposed to a gap confined to a single row, which points to a tag- or animal-specific issue instead.
 
 ```{r temporal_plot}
 # Setup a blank graph with all indiviudals
@@ -408,7 +414,7 @@ p <- WB.mv2 %>%
   ggplot(aes(x = date, y = individual_local_identifier, fill = n))
 
 # Create a rectangular to place on the graph if a synchronized outage window occurred
-if (!is.na(outage_start)) {
+if (!is.na(outage_start)) { # Only include if a system-wide outage occurred (if outage_start is null, do nothing)
   p <- p +
     annotate("rect",
              xmin = as_date(outage_start), xmax = as_date(outage_end),
@@ -424,17 +430,23 @@ p +
        subtitle = if (!is.na(outage_start)) "Shaded band = candidate synchronized outage" else NULL,
        x = NULL, y = NULL) +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) #tilt the labels on the axis
 ```
 
->This plot gives an immediate visual of data gaps, deployment start/end dates, and variation across individuals. The shaded red band marks the candidate system-wide outage detected — notice it cuts vertically across *many* individual's. That's the visual signature of a shared, external cause, as opposed to a gap confined to a single row, which points to a tag- or animal-specific issue instead.
+> Based on this graph, there seems to be two system-wide outages, one that we identified in red and another in early 2012 that impacts nearly every individual.
 
-# 5. Graph the Data Collected
-Before doing any cleaning or analysis, always visualize your raw data. This is the fastest way to spot obvious errors — locations in the ocean, impossible coordinates, or fixes far outside the study area.  The `mapview` package provides tools that allow for interactive mapping.  To do so, we need to first convert te object to a simple features object (`sf`).
+## 5. Graph the Data Collected
+Before doing any cleaning or analysis, **always** visualize your data on a map. This is the fastest way to spot obvious errors — locations in places where the should not be (i.e., a position in the ocean for a terrestrial mammal), impossible coordinates, or fixes far outside the study area.  The `mapview` package provides tools that allow for interactive mapping.  To do so, we need to first convert the object to a "Simple Features" object (`sf`).
+
+The [sf](https://search.r-project.org/CRAN/refmans/sf/html/sf-package.html) class is an extension of a dataframe. Essentially, [sf](https://search.r-project.org/CRAN/refmans/sf/html/sf-package.html) objects can be treated as dataframes that also contain spatial data, as opposed to spatial data that may or may not also contain data frames. This enables [sf](https://search.r-project.org/CRAN/refmans/sf/html/sf-package.html) objects to fit within the [tidyverse](https://cran.r-project.org/web/packages/tidyverse/index.html) workflow, making it possible to manipulate them with the [dplyr](https://cran.r-project.org/web/packages/tidyverse/index.html) commands we used previously.
+
+![Artwork by [Allison Horst](https://allisonhorst.com/allison-horst)](Figures/AllisonHorst_sf.png)
+
+<br>
 
 ```{r quick_map}
-# Convert to sf
-WB.sf <- sf::st_as_sf(as.data.frame(WB.mv2))
+# Convert to sf object
+WB.sf <- st_as_sf(as.data.frame(WB.mv2))
 
 # Create graph, plotting a subset of the data for speed
 WB.sf %>%
@@ -447,15 +459,15 @@ WB.sf %>%
 
 > **Question:** Do all points fall within the expected study area? Are there any obvious outliers far from the main cluster? Do individual clusters seem reasonable for wildebeest?
 
-# 6. Save the Result
-In this case, we didn't make any changes to the file we imported.  If we wanted to save the file, we could easily export the file using the following command.  
+## 6. Save the Result
+Save the two files (WB.mv2, WB.sf) we have been working with for future exercises.
 
-```{r Save, eval=F}
-save(WB.mv2, file = "Data/WB_raw.rdata")
+```{r Save, eval=T}
+save(WB.mv2, WB.sf, file = "Data/WB_raw.rdata")
 cat("Saved WB.mv2 —", n_distinct(mt_track_id(WB.mv2)), "animals,", nrow(WB.mv2), "fixes\n")
 ```
 
-# 7. Exercise: Apply to your own data
+# Exercise: Apply to your own data
 Now that you have uploaded and manipulated the wildebeest dataset in [R](https://cran.r-project.org/), adapt the code with your own data.  Use [Movebank](https://www.movebank.org/) to download an available dataset or upload your data directly using `read_csv()`.  Please do the following:
 
 1. If you are pulling data from [Movebank](https://www.movebank.org/), use `movebank_download_study()` to download it. Run `n_distinct(mt_track_id())`, `mt_track_data()`, and create an individual summary table.
