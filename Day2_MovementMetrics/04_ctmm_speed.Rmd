@@ -68,6 +68,8 @@ plot(DATA, col = color(DATA, by = "time"),  # color by time
 
 ### Model Selection
 
+Remember that model selection (`ctmm.select`) is often the slowest step of the analysis, but also absolutely integral to any continuous-time analysis, so it is good practice to store the results and save it as an R data file (.rda) that can be easily (and quickly) reloaded whenever it is needed.
+
 ```{r ctmm.select, eval = FALSE}
 
 # Model selection
@@ -91,7 +93,7 @@ load("Data/cilla.rda")
 
 ```
 
-For the sake of time, we will demonstrate speed estimation on only the first week of data. This is where handy `%#%` unit conversion operator can be especially helpful. We will use it to subset our data to the first week, by having it calculate the number of seconds in 1 week and keeping everything in our data that is equal or less than that.
+For the sake of time, we will demonstrate speed estimation on only the first week of data. This is where handy `%#%` unit conversion operator can be especially helpful. We will use it to subset our data to the first week, by having it calculate the number of seconds in 1 week and keeping everything in our data that is equal or less than that. Then, we will re-fit our movement models to that data subset, in case Cilla behaved differently in that first week compared to her overall movement. We can just use the models we already fit (`FIT`) as a starting point for this.
 
 ```{r ctmm.select3}
 
@@ -111,30 +113,54 @@ summary(FIT)$name  # OUF anisotropic was the best fit model
 
 ## Speed and Distance Estimation
 
+The summary of parameter estimates output from model selection gives a value for speed from the best fit model. This is the estimate for Gaussian root-mean squared (RMS) speed, which is a proxy for the actual average speed.
+
+$$\text{RMS Speed}=\hat{v}_{RMS}=\sqrt{E[v^2]}$$
+
+$$\text{Mean Speed}=\hat{\bar{v}}=E[v]=\frac{1}{t_n-t_1}\times\int_{t_1}^{t_n}{v(t)\space dt}$$
+
+Both speed estimates assume Gaussian (Normal) distributed locations and speeds.
+
 ```{r speed}
 
-# the speed estimate here is RMS Gaussian
+# Gaussian RMS speed from summary statistics
 summary(FIT)
 ## contains Gaussian root-mean squared (RMS) speed -- proxy of speed
 ## mean speed: v^- = E[v] = 1/(tn-t1)*integral of speed over time
 ## RMS speed: v_rms = root(E[v^2])
 
-# calculate Gaussian (regular mean speed - not RMS)  -- should be w/in an order of magnitude from RMS speed
-speed(FIT, trace = FALSE)  # keep trace = TRUE to see the progress bar
-## both speeds assume Gaussian distr of locations and speeds
+```
 
-# non-parametric speed estimation
-# "2019 Noonan Fleming Akre ... Calabrese.pdf" in Readings/Continuous_Time folder
-speed(DATA, FIT, trace = FALSE)
-## gives mean of mean speed
-## data for species w/ vary distinct movement behaviours, speed calcs should be segmented
-#### ex. birds stationary/feeding on ground VS flying around
-## can also segment day and night; if not, slight underestimation during day, slight overestimation at night
-## fairly insensitive to the effect of coarsening data (other methods would estimate animal to be slower for coarser sampled data)
+Now let's calculate the Gaussian mean speed (regular mean speed, not RMS speed) from the best fit model. This should be within an order of magnitude of the RMS speed.
+
+```{r speed2}
+
+# Calculate Gaussian (regular mean speed - not RMS)
+speed(FIT, trace = FALSE)  # keep trace = TRUE to see the progress bar
 
 ```
 
+### Continuous-time Speed and Distance (CTSD)
+
+It can often be difficult to disentangle the continuous-time movement process that dictates the speed of an animal, from the discrete-time sampling process (only track points every so often). [**Continuous-time speed and distance (CTSD)** estimation](https://doi.org/10.1186/s40462-019-0177-1) provides a non-parametric method for estimating mean speed, which targets the underlying continuous-time movement process of an individual. CTSD uses a simulation-based approach to sample from the distribution of trajectories conditioned on our data. we calculate the mean speeds of the trajectories simulated from our tracking data and the best-fit movement model to obtain a more robust mean speed estimate (averaging the simulated mean speeds).
+
+The function used is the same (`speed`), but here we will add the telemetry data for the simulations to condition, along with the selected movement model. We caution that speed estimation requires a model that includes the **velocity autocorrelation parameter** ($\tau_v$). Additionally, it is best practice to fit an error model (*more to come*) based on device calibration data to the data, as speed estimates can be overestimated if there is little movement relative to the magnitude of location error.
+
+```{r speed3}
+
+# Non-parametric speed estimation (CTSD: Noonan, et al., 2019)
+speed(DATA, CTMM = FIT, trace = FALSE)
+## This gives mean of mean speeds (from simulations)
+
+```
+
+> **NOTE:** When handling data for species with very distinct movement behaviours, *speed calculations should be segmented*.
+> For example, speeds should be calculated separately for birds when they are stationary/feeding on ground VS flying around. 
+> You can also segment day and night depending on the diel activity of your species; if not, for a diurnal species, there will be slight underestimation during day (when they are more active) and slight overestimation at night (when they are less active). Otherwise, CTSD is fairly insensitive to the effect of coarsening data. Other methods would estimate animal to be slower when data is sampled more coarsely (less frequently).
+
 ### Sensitivity Analysis Case Study
+
+Ideally, we want our speed estimates to be robust and as accurate to the true average speed of our animal as possible, but this is often limited by our ability to collect high enough resolution data. In this section, we will demonstrate how sampling parameters can impact speed estimates calculated using RMS speed, mean speed, and non-parametric speed estimation (CTSD), by conducting a sensitivity analysis to the sampling interval (i.e., time between consecutive location points).
 
 ```{r speed_coarsen}
 
@@ -228,7 +254,7 @@ head(INST_SPEEDS)
 
 | Function | Package | Purpose | 
 |:---|:---|:---|
-| `speed()` | `ctmm` | Estimate the average speed of a tracked animal | 
+| `speed()` | `ctmm` | Estimate the average speed of a tracked animal or use non-parametric estimation conditioned on the data | 
 | `speeds()` | `ctmm` | Calculate the instantaneous speed of a tracked animal at any given time |
 | `meta()` | `ctmm` | Estimate population-level mean parameters from individual movement models and estimates (meta-analysis) |
 
