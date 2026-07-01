@@ -13,9 +13,11 @@
 ## read up on "spatial point processes"
 
 library(ctmm)
-load("data/tapir.rda")
+load("Day6_HabitatSelection/Data/tapir.rda")
 # E.P. Medici, Data from: Study "Lowland tapirs, Tapirus terrestris, in Southern Brazil", Movebank Data Repository (2023)
 # tree cover data from the Hansen forest map based on Landsat 7
+summary(tapir)  # 29 individuals
+class(treecover)  # RasterLayer (`raster` package)
 
 # plot one tapir with treecover raster, to make sure we have appropriate environmental data & projection
 i <- 1
@@ -29,7 +31,7 @@ plot(DATA,error=2,R=treecover,main="Lowland tapir under tree cover")
 GUESS <- ctmm.guess(DATA,CTMM=ctmm(error=TRUE,isotropic=TRUE),interactive=FALSE)
 FIT <- ctmm.select(DATA,GUESS,trace=3)
 # save(FIT,file="data/tapir-iso.rda")
-load("data/tapir-iso.rda")
+load("Day6_HabitatSelection/Data/tapir-iso.rda")
 
 # raster covariates must be in a named list
 R <- list(tree=treecover)

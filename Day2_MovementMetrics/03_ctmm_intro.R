@@ -48,7 +48,7 @@ library(ctmm)
 help("as.telemetry")
 
 # loading data from Movebank CSV (which can be compressed)
-Buffalo <- as.telemetry('data/Kruger African Buffalo, GPS tracking, South Africa.zip')
+Buffalo <- as.telemetry("Day2_MovementMetrics/Data/Kruger African Buffalo, GPS tracking, South Africa.zip")
 # you can also import from a move object, data.frame, etc.
 # GPS location error can be an issue if greater than the sampling timesteps
 
@@ -249,7 +249,7 @@ FITS <- ctmm.select(DATA,GUESS,trace=3,verbose=TRUE,cores=-1)
 # candidate models: OUF, OUf, OUΩ, IOU, BM, IID, inactive
 # I've already run this code for you -- slowest step of analysis
 # save(FITS,file="cillas.rda") -- store results
-load("data/cillas.rda") # All autocorrelation models stored
+load("Day2_MovementMetrics/Data/cillas.rda") # All autocorrelation models stored
 
 # lets look at the results
 summary(FITS)

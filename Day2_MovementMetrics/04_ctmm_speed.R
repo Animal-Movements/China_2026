@@ -13,7 +13,7 @@ projection(buffalo) <- median(buffalo)
 DATA <- buffalo[[1]]
 
 # load model fits from ctmm.select
-load("data/cilla.rda")
+load("Day2_MovementMetrics/Data/cilla.rda")
 
 # units operator
 ?`%#%`
@@ -79,7 +79,7 @@ speed(SUB,FIT.SUB)  # fits more slowly w/ less data (note lower DoF for speed, e
 help('meta')
 
 #Load in the fitted movement models
-load("data/buffalo.rda")
+load("Day2_MovementMetrics/Data/buffalo.rda")
 
 #Estimate mean spead for each animal
 SPEEDS <- list()
@@ -89,7 +89,7 @@ for(i in 1:length(buffalo))
 }
 names(SPEEDS) <- names(buffalo)
 # save(SPEEDS,file="data/buffalo_speeds.rda")
-load("data/buffalo_speeds.rda")  # estimate mean speed of every buffalo
+load("Day2_MovementMetrics/Data/buffalo_speeds.rda")  # estimate mean speed of every buffalo
 
 
 meta(SPEEDS,sort=TRUE)  # mean = pop mean of mean speeds

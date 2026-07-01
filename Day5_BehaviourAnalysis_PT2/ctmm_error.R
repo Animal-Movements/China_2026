@@ -208,8 +208,8 @@ GUESS <- ctmm.guess(DATA,CTMM=ctmm(error=TRUE),interactive=FALSE)
 FITS <- ctmm.select(DATA,GUESS,verbose=TRUE,trace=3,cores=-1)
 # verbose=TRUE returns all candidate models
 # I've already run this code for you
-# save(FITS,file="data/turtle.rda")
-load("data/turtle.rda")
+# save(FITS,file="Day5_BehaviourAnalysis_PT2/Data/turtle.rda")
+load("Day5_BehaviourAnalysis_PT2/Data/turtle.rda")
 
 # look at all models
 summary(FITS)
@@ -274,8 +274,8 @@ uere(turtle) <- PRIOR
 GUESS <- ctmm.guess(turtle[[3]],CTMM=ctmm(error=TRUE),interactive=FALSE)
 FIT.PRIOR <- ctmm.select(turtle[[3]],GUESS,trace=3,cores=-1)
 # this will take a while, but comes out consistent
-# save(FIT.PRIOR,file="data/turtle-prior.rda")
-load("data/turtle-prior.rda")
+# save(FIT.PRIOR,file="Day5_BehaviourAnalysis_PT2/Data/turtle-prior.rda")
+load("Day5_BehaviourAnalysis_PT2/Data/turtle-prior.rda")
 
 summary(FIT.PRIOR)  # using prior and updating it
 

@@ -12,8 +12,8 @@
 library(ctmm)
 data("buffalo")
 projection(buffalo) <- median(buffalo)
-load("data/buffalo.rda") # Fitted movement models; object called 'FITS'
-load("data/buffalo_akdes.rda") # Estimated HR areas; object called 'AKDES'
+load("Day4_BehaviourAnalysis_PT1/Data/buffalo.rda") # Fitted movement models; object called 'FITS'
+load("Day4_BehaviourAnalysis_PT1/Data/buffalo_akdes.rda") # Estimated HR areas; object called 'AKDES'
 
 #-----------------------------------------------------
 # Home-range overlap
@@ -143,13 +143,13 @@ help('proximity')
 
 PROXIMITY <- proximity(buffalo[c("Cilla","Mvubu")],
                        FITS[c("Cilla","Mvubu")])
-load("data/buffalo_proximity.rda")  # ond statistic only works if they are moving tog or actually avoiding each
+load("Day4_BehaviourAnalysis_PT1/Data/buffalo_proximity.rda")  # ond statistic only works if they are moving tog or actually avoiding each
 PROXIMITY  ## >1 = farther apart than each other <1 closer together than expected
 
 # Proximity ratio for simulated animals
 SIM_PROXIMITY <- proximity(list(cilla_sim, mvubu_sim),
                            FITS[c("Cilla","Mvubu")])
-load("data/simulated_proximity.rda")
+load("Day4_BehaviourAnalysis_PT1/Data/simulated_proximity.rda")
 SIM_PROXIMITY
 
 #-----------------------------------------------------
