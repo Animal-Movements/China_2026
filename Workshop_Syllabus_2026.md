@@ -142,7 +142,7 @@ Each day's materials will also be shared as a zip file to the WeChat group befor
 | Day 5 | Aug 1 | | 9:30–10:00 | M1: Environmental annotation — raster extraction & GEE intro (`terra`, `amt`) |
 | Day 5 | Aug 1 | | 10:15–11:00 | M2: Hidden Markov Models with GPS data (`momentuHMM`) |
 | Day 5 | Aug 1 | | 11:15–12:30 | M3: Hidden Markov Models with accelerometer data (`momentuHMM`) |
-| Day 5 | Aug 1 | | PM | Mini lecture on location error (tentative) |
+| Day 5 | Aug 1 | | PM | Mini lecture on location error (tentative) + **[CTMM]** M4: Accounting for Location Error |
 | Day 6 | Aug 2 | Habitat Selection | 9:00–9:45 | Q&A + mini lecture: habitat selection |
 | Day 6 | Aug 2 | | 10:00–11:00 | M1: Resource & step selection functions (`amt`; pre-annotated dataset) |
 | Day 6 | Aug 2 | | 11:15–12:30 | **[CTMM]** M2: CTMM-based habitat selection — iRSFs & RSF+AKDE (`ctmm`) |
