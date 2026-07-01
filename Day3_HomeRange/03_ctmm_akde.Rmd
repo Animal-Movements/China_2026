@@ -1,5 +1,5 @@
 ---
-title: "M2-b: Effective Sample Sizes"
+title: "M3: AKDE, Home Range Meta-Analysis, Population Ranges"
 author: "Animal Movement Analyses for Ecologists | SYSU Shenzhen, July 2026"
 date: "`r Sys.Date()`"
 output: 
@@ -25,8 +25,10 @@ knitr::opts_chunk$set(echo = TRUE)
 
 By the end of this module you will be able to:
 
-1. Understand the effective and absolute sample sizes.
-2. Perform parametric bootstrapping to improve parameter estimates and confidence intervals.
+1. Estimate a home range using autocorrelated kernel density estimation (AKDE).
+2. Account for issues that may bias home range estimation.
+3. Perform a meta-analysis to estimate mean home-range parameters across individuals.
+4. Estimate a population range distribution using autocorrelated kernel density estimation (PKDE).
 
 **Packages used:** `ctmm`
 
@@ -40,17 +42,21 @@ By the end of this module you will be able to:
 
 ### Model Selection
 
-## Effective Sample Size
+## Home Range Estimation
 
-## Bootstrapping
+### AKDE
+
+### Weighted AKDE (wAKDE)
+
+## Home Range Meta-Analysis
+
+## Population Range Estimation
 
 ## Key functions reference
 
 | Function | Package | Purpose | 
 |:---|:---|:---|
-| `ctmm.boot()` | `ctmm` | Perform parametric bootstrapping to improve on point estimates and confidence intervals from an initial estimated movement model (NOTE: computationally expensive) | 
-
----
-
-_Next: **Module 3 — AKDE, Home Range Meta-Analysis, Population Ranges** — We estimate home ranges using autocorrelated kernel density estimation (AKDE), perform a meta-analysis to compare home ranges across individuals, and estimate population-level range distributions._
+| `akde()` | `ctmm` | Calculate a range distribution based on autocorrelated kernel density estimation (AKDE) | 
+| `meta()` | `ctmm` | Estimate population-level mean parameters from individual movement models and estimates (meta-analysis) |
+| `pkde()` | `ctmm` | Calculate a population-level range distribution based on autocorrelated kernel density estimation (PKDE) |
 
