@@ -131,7 +131,7 @@ Each day's materials will also be shared as a zip file to the WeChat group befor
 | Day 3 | Jul 30 | Home Range Estimation | AM | **Field trip** |
 | Day 3 | Jul 30 | | 1:00–1:30 | Q&A + mini lecture: home range |
 | Day 3 | Jul 30 | | 1:30–2:00 | M1: Discrete home range — MCP & KDE & home range comparison (`amt`) |
-| Day 3 | Jul 30 | | 2:15–3:00 | **[CTMM]** M2: Occurrence vs. range distributions & effective sample sizes (`ctmm`) |
+| Day 3 | Jul 30 | | 2:15–3:00 | **[CTMM]** M2-a: Occurrence vs. range distributions & M2-b: effective sample sizes (`ctmm`) |
 | Day 3 | Jul 30 | | 3:15–4:15 | **[CTMM]** M3: AKDE & population-range meta-analysis (`ctmm`) |
 | Day 4 | Jul 31 | Behaviour Analysis | 9:00–9:30 | Q&A + mini lecture: behavior |
 | Day 4 | Jul 31 | | 9:30–10:00 | M1: Barrier behaviour analysis (BaBA) |
