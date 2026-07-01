@@ -1,0 +1,3680 @@
+Date,Species,GroupSize,TransectID,Year
+2017-11-02,Hartebeest,8,Balanite plains,2017
+2018-01-11,Hartebeest,1,Balanite plains,2018
+2018-01-11,Hartebeest,2,Balanite plains,2018
+2018-01-11,Hartebeest,2,Balanite plains,2018
+2018-02-01,Hartebeest,1,Balanite plains,2018
+2018-08-02,Hartebeest,5,Balanite plains,2018
+2018-12-06,Hartebeest,1,Balanite plains,2018
+2017-11-07,Hartebeest,2,Rekero bushlands,2017
+2017-11-07,Hartebeest,1,Rekero bushlands,2017
+2018-01-01,Hartebeest,1,Rekero bushlands,2018
+2018-01-01,Hartebeest,4,Rekero bushlands,2018
+2018-01-01,Hartebeest,5,Rekero bushlands,2018
+2018-02-13,Hartebeest,1,Rekero bushlands,2018
+2018-03-06,Hartebeest,1,Rekero bushlands,2018
+2018-05-08,Hartebeest,1,Rekero bushlands,2018
+2018-08-02,Hartebeest,1,Rekero bushlands,2018
+2018-09-04,Hartebeest,3,Rekero bushlands,2018
+2018-10-02,Hartebeest,4,Rekero bushlands,2018
+2018-10-02,Hartebeest,4,Rekero bushlands,2018
+2018-12-04,Hartebeest,5,Rekero bushlands,2018
+2018-12-04,Hartebeest,8,Rekero bushlands,2018
+2018-12-04,Hartebeest,3,Rekero bushlands,2018
+2018-12-04,Hartebeest,4,Rekero bushlands,2018
+2018-12-06,Hartebeest,1,Enoolera plains,2018
+2017-10-17,Eland,7,Olare Sampu bushlands,2017
+2018-01-09,Eland,1,Olare Sampu bushlands,2018
+2018-04-03,Eland,12,Olare Sampu bushlands,2018
+2018-06-05,Eland,8,Olare Sampu bushlands,2018
+2018-06-05,Eland,1,Olare Sampu bushlands,2018
+2018-10-02,Eland,6,Olare Sampu bushlands,2018
+2018-01-16,Eland,4,Sampu Enkare bushlands,2018
+2018-01-16,Eland,13,Sampu Enkare bushlands,2018
+2018-01-16,Eland,6,Sampu Enkare bushlands,2018
+2018-01-16,Eland,2,Sampu Enkare bushlands,2018
+2018-01-16,Eland,17,Sampu Enkare bushlands,2018
+2018-03-06,Eland,6,Sampu Enkare bushlands,2018
+2018-10-02,Eland,1,Sampu Enkare bushlands,2018
+2018-12-04,Eland,12,Sampu Enkare bushlands,2018
+2018-01-11,Eland,1,Balanite plains,2018
+2018-04-05,Eland,1,Balanite plains,2018
+2018-05-03,Eland,1,Balanite plains,2018
+2018-06-21,Eland,19,Balanite plains,2018
+2018-05-08,Eland,3,Ilkisieusieu bushlands,2018
+2018-05-08,Eland,54,Ilkisieusieu bushlands,2018
+2017-10-24,Eland,1,Rekero bushlands,2017
+2018-05-08,Eland,2,Rekero bushlands,2018
+2018-07-03,Eland,5,Rekero bushlands,2018
+2018-11-06,Eland,1,Rekero bushlands,2018
+2018-05-03,Eland,9,Enoolera plains,2018
+2018-05-03,Eland,1,Enoolera plains,2018
+2018-06-21,Eland,1,Enoolera plains,2018
+2018-07-05,Eland,1,Enoolera plains,2018
+2018-02-06,Eland,2,Rekero plains,2018
+2018-04-05,Eland,1,Rekero plains,2018
+2018-05-03,Eland,98,Rekero plains,2018
+2018-05-03,Eland,5,Rekero plains,2018
+2018-05-03,Eland,3,Rekero plains,2018
+2018-07-05,Eland,9,Rekero plains,2018
+2017-10-17,Giraffe,1,Olare Sampu bushlands,2017
+2017-11-07,Giraffe,1,Olare Sampu bushlands,2017
+2017-11-07,Giraffe,1,Olare Sampu bushlands,2017
+2017-11-07,Giraffe,3,Olare Sampu bushlands,2017
+2017-11-07,Giraffe,3,Olare Sampu bushlands,2017
+2017-11-07,Giraffe,4,Olare Sampu bushlands,2017
+2018-01-16,Giraffe,1,Olare Sampu bushlands,2018
+2018-01-16,Giraffe,3,Olare Sampu bushlands,2018
+2018-01-16,Giraffe,2,Olare Sampu bushlands,2018
+2018-03-06,Giraffe,2,Olare Sampu bushlands,2018
+2018-03-06,Giraffe,1,Olare Sampu bushlands,2018
+2018-03-06,Giraffe,1,Olare Sampu bushlands,2018
+2018-07-01,Giraffe,1,Olare Sampu bushlands,2018
+2018-09-04,Giraffe,7,Olare Sampu bushlands,2018
+2018-10-02,Giraffe,8,Olare Sampu bushlands,2018
+2017-11-07,Giraffe,1,Sampu Enkare bushlands,2017
+2017-11-07,Giraffe,1,Sampu Enkare bushlands,2017
+2018-03-06,Giraffe,1,Sampu Enkare bushlands,2018
+2018-03-06,Giraffe,2,Sampu Enkare bushlands,2018
+2018-05-08,Giraffe,2,Sampu Enkare bushlands,2018
+2018-06-05,Giraffe,1,Sampu Enkare bushlands,2018
+2018-09-04,Giraffe,4,Sampu Enkare bushlands,2018
+2018-09-04,Giraffe,3,Sampu Enkare bushlands,2018
+2018-09-04,Giraffe,1,Sampu Enkare bushlands,2018
+2018-09-04,Giraffe,12,Sampu Enkare bushlands,2018
+2018-09-04,Giraffe,2,Sampu Enkare bushlands,2018
+2018-10-02,Giraffe,2,Sampu Enkare bushlands,2018
+2018-11-06,Giraffe,2,Sampu Enkare bushlands,2018
+2018-11-06,Giraffe,4,Sampu Enkare bushlands,2018
+2017-10-20,Giraffe,1,Balanite plains,2017
+2017-10-20,Giraffe,2,Balanite plains,2017
+2018-01-11,Giraffe,7,Balanite plains,2018
+2018-10-04,Giraffe,3,Balanite plains,2018
+2018-10-04,Giraffe,1,Balanite plains,2018
+2018-12-06,Giraffe,1,Balanite plains,2018
+2018-12-06,Giraffe,2,Balanite plains,2018
+2017-10-24,Giraffe,5,Ilkisieusieu bushlands,2017
+2017-11-01,Giraffe,6,Ilkisieusieu bushlands,2017
+2018-02-13,Giraffe,7,Ilkisieusieu bushlands,2018
+2018-02-06,Giraffe,1,Ilkisieusieu bushlands,2018
+2018-02-06,Giraffe,1,Ilkisieusieu bushlands,2018
+2018-05-08,Giraffe,1,Ilkisieusieu bushlands,2018
+2018-05-08,Giraffe,1,Ilkisieusieu bushlands,2018
+2018-05-08,Giraffe,1,Ilkisieusieu bushlands,2018
+2018-05-08,Giraffe,1,Ilkisieusieu bushlands,2018
+2018-05-08,Giraffe,3,Ilkisieusieu bushlands,2018
+2018-05-08,Giraffe,1,Ilkisieusieu bushlands,2018
+2018-05-08,Giraffe,7,Ilkisieusieu bushlands,2018
+2018-06-19,Giraffe,2,Ilkisieusieu bushlands,2018
+2018-06-19,Giraffe,2,Ilkisieusieu bushlands,2018
+2018-06-19,Giraffe,1,Ilkisieusieu bushlands,2018
+2018-07-03,Giraffe,1,Ilkisieusieu bushlands,2018
+2018-08-02,Giraffe,1,Ilkisieusieu bushlands,2018
+2018-11-06,Giraffe,1,Ilkisieusieu bushlands,2018
+2018-11-06,Giraffe,1,Ilkisieusieu bushlands,2018
+2018-11-06,Giraffe,1,Ilkisieusieu bushlands,2018
+2017-10-24,Giraffe,4,Rekero bushlands,2017
+2017-11-07,Giraffe,1,Rekero bushlands,2017
+2017-11-07,Giraffe,1,Rekero bushlands,2017
+2018-02-13,Giraffe,1,Rekero bushlands,2018
+2018-02-13,Giraffe,3,Rekero bushlands,2018
+2018-02-13,Giraffe,3,Rekero bushlands,2018
+2018-03-06,Giraffe,1,Rekero bushlands,2018
+2018-03-06,Giraffe,2,Rekero bushlands,2018
+2018-03-06,Giraffe,3,Rekero bushlands,2018
+2018-04-03,Giraffe,3,Rekero bushlands,2018
+2018-06-19,Giraffe,5,Rekero bushlands,2018
+2018-06-19,Giraffe,1,Rekero bushlands,2018
+2018-11-06,Giraffe,2,Rekero bushlands,2018
+2018-12-04,Giraffe,2,Rekero bushlands,2018
+2018-01-11,Giraffe,3,Enoolera plains,2018
+2018-01-11,Giraffe,1,Enoolera plains,2018
+2018-04-05,Giraffe,8,Rekero plains,2018
+2018-05-03,Giraffe,7,Rekero plains,2018
+2018-09-06,Giraffe,2,Rekero plains,2018
+2018-03-01,Giraffe,3,Payia plains,2018
+2018-11-01,Giraffe,6,Payia plains,2018
+2017-10-17,Grant's gazelle,2,Olare Sampu bushlands,2017
+2017-10-17,Grant's gazelle,3,Olare Sampu bushlands,2017
+2017-11-07,Grant's gazelle,6,Olare Sampu bushlands,2017
+2017-11-07,Grant's gazelle,11,Olare Sampu bushlands,2017
+2017-11-07,Grant's gazelle,1,Olare Sampu bushlands,2017
+2017-12-05,Grant's gazelle,1,Olare Sampu bushlands,2017
+2017-12-05,Grant's gazelle,2,Olare Sampu bushlands,2017
+2017-12-05,Grant's gazelle,7,Olare Sampu bushlands,2017
+2017-12-05,Grant's gazelle,4,Olare Sampu bushlands,2017
+2017-12-05,Grant's gazelle,2,Olare Sampu bushlands,2017
+2017-12-05,Grant's gazelle,8,Olare Sampu bushlands,2017
+2017-12-05,Grant's gazelle,6,Olare Sampu bushlands,2017
+2018-01-09,Grant's gazelle,6,Olare Sampu bushlands,2018
+2018-01-16,Grant's gazelle,1,Olare Sampu bushlands,2018
+2018-03-06,Grant's gazelle,4,Olare Sampu bushlands,2018
+2018-04-03,Grant's gazelle,3,Olare Sampu bushlands,2018
+2018-05-08,Grant's gazelle,2,Olare Sampu bushlands,2018
+2018-07-01,Grant's gazelle,3,Olare Sampu bushlands,2018
+2018-08-02,Grant's gazelle,2,Olare Sampu bushlands,2018
+2018-09-04,Grant's gazelle,4,Olare Sampu bushlands,2018
+2018-10-02,Grant's gazelle,3,Olare Sampu bushlands,2018
+2018-12-04,Grant's gazelle,7,Olare Sampu bushlands,2018
+2017-10-17,Grant's gazelle,1,Sampu Enkare bushlands,2017
+2017-10-17,Grant's gazelle,8,Sampu Enkare bushlands,2017
+2017-12-05,Grant's gazelle,1,Sampu Enkare bushlands,2017
+2017-12-05,Grant's gazelle,1,Sampu Enkare bushlands,2017
+2018-01-16,Grant's gazelle,1,Sampu Enkare bushlands,2018
+2018-03-06,Grant's gazelle,4,Sampu Enkare bushlands,2018
+2018-03-06,Grant's gazelle,3,Sampu Enkare bushlands,2018
+2018-03-06,Grant's gazelle,1,Sampu Enkare bushlands,2018
+2018-05-08,Grant's gazelle,10,Sampu Enkare bushlands,2018
+2018-05-08,Grant's gazelle,3,Sampu Enkare bushlands,2018
+2018-05-08,Grant's gazelle,2,Sampu Enkare bushlands,2018
+2018-06-19,Grant's gazelle,8,Sampu Enkare bushlands,2018
+2018-07-03,Grant's gazelle,1,Sampu Enkare bushlands,2018
+2018-08-02,Grant's gazelle,2,Sampu Enkare bushlands,2018
+2018-09-04,Grant's gazelle,1,Sampu Enkare bushlands,2018
+2018-09-04,Grant's gazelle,2,Sampu Enkare bushlands,2018
+2018-10-02,Grant's gazelle,1,Sampu Enkare bushlands,2018
+2018-10-02,Grant's gazelle,1,Sampu Enkare bushlands,2018
+2018-10-02,Grant's gazelle,2,Sampu Enkare bushlands,2018
+2018-11-06,Grant's gazelle,3,Sampu Enkare bushlands,2018
+2018-12-04,Grant's gazelle,1,Sampu Enkare bushlands,2018
+2018-12-04,Grant's gazelle,1,Sampu Enkare bushlands,2018
+2018-12-04,Grant's gazelle,4,Sampu Enkare bushlands,2018
+2018-12-04,Grant's gazelle,1,Sampu Enkare bushlands,2018
+2017-10-20,Grant's gazelle,8,Balanite plains,2017
+2017-10-20,Grant's gazelle,3,Balanite plains,2017
+2017-10-20,Grant's gazelle,5,Balanite plains,2017
+2017-10-20,Grant's gazelle,1,Balanite plains,2017
+2017-10-20,Grant's gazelle,1,Balanite plains,2017
+2017-10-20,Grant's gazelle,3,Balanite plains,2017
+2017-11-02,Grant's gazelle,5,Balanite plains,2017
+2017-11-02,Grant's gazelle,2,Balanite plains,2017
+2017-12-07,Grant's gazelle,13,Balanite plains,2017
+2017-12-07,Grant's gazelle,2,Balanite plains,2017
+2017-12-07,Grant's gazelle,2,Balanite plains,2017
+2017-12-07,Grant's gazelle,1,Balanite plains,2017
+2017-12-07,Grant's gazelle,10,Balanite plains,2017
+2017-12-07,Grant's gazelle,2,Balanite plains,2017
+2017-12-07,Grant's gazelle,4,Balanite plains,2017
+2018-01-11,Grant's gazelle,3,Balanite plains,2018
+2018-01-11,Grant's gazelle,4,Balanite plains,2018
+2018-01-11,Grant's gazelle,3,Balanite plains,2018
+2018-01-11,Grant's gazelle,1,Balanite plains,2018
+2018-01-11,Grant's gazelle,5,Balanite plains,2018
+2018-02-01,Grant's gazelle,4,Balanite plains,2018
+2018-02-01,Grant's gazelle,1,Balanite plains,2018
+2018-02-01,Grant's gazelle,4,Balanite plains,2018
+2018-03-01,Grant's gazelle,4,Balanite plains,2018
+2018-03-01,Grant's gazelle,2,Balanite plains,2018
+2018-04-05,Grant's gazelle,1,Balanite plains,2018
+2018-04-05,Grant's gazelle,5,Balanite plains,2018
+2018-08-02,Grant's gazelle,1,Balanite plains,2018
+2018-08-02,Grant's gazelle,2,Balanite plains,2018
+2018-09-06,Grant's gazelle,3,Balanite plains,2018
+2018-10-04,Grant's gazelle,7,Balanite plains,2018
+2018-10-04,Grant's gazelle,3,Balanite plains,2018
+2018-10-04,Grant's gazelle,5,Balanite plains,2018
+2018-11-01,Grant's gazelle,1,Balanite plains,2018
+2018-11-01,Grant's gazelle,3,Balanite plains,2018
+2018-11-01,Grant's gazelle,18,Balanite plains,2018
+2018-12-06,Grant's gazelle,1,Balanite plains,2018
+2018-12-06,Grant's gazelle,9,Balanite plains,2018
+2018-12-06,Grant's gazelle,3,Balanite plains,2018
+2018-12-06,Grant's gazelle,5,Balanite plains,2018
+2018-12-06,Grant's gazelle,4,Balanite plains,2018
+2017-11-07,Grant's gazelle,5,Ilkisieusieu bushlands,2017
+2018-02-06,Grant's gazelle,1,Ilkisieusieu bushlands,2018
+2018-04-03,Grant's gazelle,2,Ilkisieusieu bushlands,2018
+2018-05-08,Grant's gazelle,3,Ilkisieusieu bushlands,2018
+2018-06-05,Grant's gazelle,2,Ilkisieusieu bushlands,2018
+2018-07-03,Grant's gazelle,7,Ilkisieusieu bushlands,2018
+2018-08-02,Grant's gazelle,6,Ilkisieusieu bushlands,2018
+2018-09-04,Grant's gazelle,2,Ilkisieusieu bushlands,2018
+2018-09-04,Grant's gazelle,1,Ilkisieusieu bushlands,2018
+2018-12-04,Grant's gazelle,3,Ilkisieusieu bushlands,2018
+2017-10-17,Grant's gazelle,2,Rekero bushlands,2017
+2017-10-17,Grant's gazelle,2,Rekero bushlands,2017
+2017-10-17,Grant's gazelle,9,Rekero bushlands,2017
+2017-10-17,Grant's gazelle,1,Rekero bushlands,2017
+2017-10-17,Grant's gazelle,2,Rekero bushlands,2017
+2017-10-24,Grant's gazelle,2,Rekero bushlands,2017
+2017-10-24,Grant's gazelle,1,Rekero bushlands,2017
+2017-11-07,Grant's gazelle,1,Rekero bushlands,2017
+2017-11-07,Grant's gazelle,4,Rekero bushlands,2017
+2017-11-01,Grant's gazelle,2,Rekero bushlands,2017
+2017-11-01,Grant's gazelle,1,Rekero bushlands,2017
+2018-01-09,Grant's gazelle,1,Rekero bushlands,2018
+2018-01-09,Grant's gazelle,1,Rekero bushlands,2018
+2018-01-16,Grant's gazelle,1,Rekero bushlands,2018
+2018-01-01,Grant's gazelle,2,Rekero bushlands,2018
+2018-02-13,Grant's gazelle,1,Rekero bushlands,2018
+2018-03-06,Grant's gazelle,2,Rekero bushlands,2018
+2018-08-02,Grant's gazelle,3,Rekero bushlands,2018
+2018-08-02,Grant's gazelle,3,Rekero bushlands,2018
+2018-08-02,Grant's gazelle,2,Rekero bushlands,2018
+2018-08-02,Grant's gazelle,1,Rekero bushlands,2018
+2018-10-02,Grant's gazelle,5,Rekero bushlands,2018
+2018-11-06,Grant's gazelle,6,Rekero bushlands,2018
+2018-11-06,Grant's gazelle,2,Rekero bushlands,2018
+2018-11-06,Grant's gazelle,2,Rekero bushlands,2018
+2018-11-06,Grant's gazelle,10,Rekero bushlands,2018
+2018-12-04,Grant's gazelle,2,Rekero bushlands,2018
+2018-12-04,Grant's gazelle,1,Rekero bushlands,2018
+2018-12-04,Grant's gazelle,2,Rekero bushlands,2018
+2018-12-04,Grant's gazelle,1,Rekero bushlands,2018
+2018-12-04,Grant's gazelle,7,Rekero bushlands,2018
+2017-10-20,Grant's gazelle,2,Enoolera plains,2017
+2017-11-02,Grant's gazelle,4,Enoolera plains,2017
+2017-11-02,Grant's gazelle,2,Enoolera plains,2017
+2017-11-02,Grant's gazelle,2,Enoolera plains,2017
+2017-11-02,Grant's gazelle,1,Enoolera plains,2017
+2017-11-02,Grant's gazelle,1,Enoolera plains,2017
+2017-11-02,Grant's gazelle,2,Enoolera plains,2017
+2017-11-02,Grant's gazelle,1,Enoolera plains,2017
+2017-11-02,Grant's gazelle,1,Enoolera plains,2017
+2018-01-11,Grant's gazelle,2,Enoolera plains,2018
+2018-03-01,Grant's gazelle,8,Enoolera plains,2018
+2018-03-01,Grant's gazelle,1,Enoolera plains,2018
+2018-03-01,Grant's gazelle,3,Enoolera plains,2018
+2018-04-05,Grant's gazelle,6,Enoolera plains,2018
+2018-04-05,Grant's gazelle,4,Enoolera plains,2018
+2018-04-05,Grant's gazelle,2,Enoolera plains,2018
+2018-05-03,Grant's gazelle,1,Enoolera plains,2018
+2018-05-03,Grant's gazelle,5,Enoolera plains,2018
+2018-06-21,Grant's gazelle,1,Enoolera plains,2018
+2018-06-21,Grant's gazelle,1,Enoolera plains,2018
+2018-09-06,Grant's gazelle,4,Enoolera plains,2018
+2018-10-04,Grant's gazelle,1,Enoolera plains,2018
+2018-10-04,Grant's gazelle,5,Enoolera plains,2018
+2018-10-04,Grant's gazelle,1,Enoolera plains,2018
+2018-11-01,Grant's gazelle,2,Enoolera plains,2018
+2017-12-05,Grant's gazelle,1,Rekero plains,2017
+2017-12-05,Grant's gazelle,2,Rekero plains,2017
+2017-12-07,Grant's gazelle,1,Rekero plains,2017
+2017-12-07,Grant's gazelle,1,Rekero plains,2017
+2018-02-06,Grant's gazelle,1,Rekero plains,2018
+2018-03-01,Grant's gazelle,1,Rekero plains,2018
+2018-03-01,Grant's gazelle,2,Rekero plains,2018
+2018-03-01,Grant's gazelle,2,Rekero plains,2018
+2018-04-05,Grant's gazelle,1,Rekero plains,2018
+2018-04-05,Grant's gazelle,1,Rekero plains,2018
+2018-07-05,Grant's gazelle,2,Rekero plains,2018
+2018-07-05,Grant's gazelle,3,Rekero plains,2018
+2018-09-06,Grant's gazelle,5,Rekero plains,2018
+2018-09-06,Grant's gazelle,2,Rekero plains,2018
+2018-11-01,Grant's gazelle,1,Rekero plains,2018
+2018-06-21,Grant's gazelle,2,Payia plains,2018
+2018-06-21,Grant's gazelle,3,Payia plains,2018
+2018-08-02,Grant's gazelle,4,Payia plains,2018
+2018-09-06,Grant's gazelle,1,Payia plains,2018
+2018-10-04,Grant's gazelle,4,Payia plains,2018
+2018-12-05,Grant's gazelle,4,Payia plains,2018
+2018-12-05,Grant's gazelle,1,Payia plains,2018
+2017-10-17,Impala,1,Olare Sampu bushlands,2017
+2017-10-17,Impala,2,Olare Sampu bushlands,2017
+2017-10-17,Impala,1,Olare Sampu bushlands,2017
+2017-11-07,Impala,1,Olare Sampu bushlands,2017
+2017-11-07,Impala,3,Olare Sampu bushlands,2017
+2017-11-07,Impala,3,Olare Sampu bushlands,2017
+2017-11-07,Impala,5,Olare Sampu bushlands,2017
+2017-11-07,Impala,3,Olare Sampu bushlands,2017
+2017-11-07,Impala,6,Olare Sampu bushlands,2017
+2017-11-07,Impala,14,Olare Sampu bushlands,2017
+2017-11-07,Impala,1,Olare Sampu bushlands,2017
+2017-11-07,Impala,2,Olare Sampu bushlands,2017
+2017-11-07,Impala,1,Olare Sampu bushlands,2017
+2017-11-07,Impala,1,Olare Sampu bushlands,2017
+2017-11-07,Impala,1,Olare Sampu bushlands,2017
+2017-11-07,Impala,11,Olare Sampu bushlands,2017
+2017-11-07,Impala,5,Olare Sampu bushlands,2017
+2017-11-07,Impala,6,Olare Sampu bushlands,2017
+2017-11-07,Impala,1,Olare Sampu bushlands,2017
+2017-11-07,Impala,2,Olare Sampu bushlands,2017
+2017-11-07,Impala,2,Olare Sampu bushlands,2017
+2017-12-05,Impala,1,Olare Sampu bushlands,2017
+2017-12-05,Impala,2,Olare Sampu bushlands,2017
+2017-12-05,Impala,1,Olare Sampu bushlands,2017
+2017-12-05,Impala,1,Olare Sampu bushlands,2017
+2017-12-05,Impala,6,Olare Sampu bushlands,2017
+2017-12-05,Impala,3,Olare Sampu bushlands,2017
+2017-12-05,Impala,6,Olare Sampu bushlands,2017
+2017-12-05,Impala,1,Olare Sampu bushlands,2017
+2017-12-05,Impala,2,Olare Sampu bushlands,2017
+2018-01-09,Impala,2,Olare Sampu bushlands,2018
+2018-01-09,Impala,2,Olare Sampu bushlands,2018
+2018-01-09,Impala,1,Olare Sampu bushlands,2018
+2018-01-09,Impala,3,Olare Sampu bushlands,2018
+2018-01-09,Impala,5,Olare Sampu bushlands,2018
+2018-01-09,Impala,2,Olare Sampu bushlands,2018
+2018-01-09,Impala,2,Olare Sampu bushlands,2018
+2018-01-09,Impala,13,Olare Sampu bushlands,2018
+2018-01-09,Impala,1,Olare Sampu bushlands,2018
+2018-01-09,Impala,2,Olare Sampu bushlands,2018
+2018-01-09,Impala,2,Olare Sampu bushlands,2018
+2018-01-09,Impala,2,Olare Sampu bushlands,2018
+2018-01-09,Impala,6,Olare Sampu bushlands,2018
+2018-01-16,Impala,23,Olare Sampu bushlands,2018
+2018-01-16,Impala,3,Olare Sampu bushlands,2018
+2018-01-16,Impala,2,Olare Sampu bushlands,2018
+2018-01-16,Impala,2,Olare Sampu bushlands,2018
+2018-01-16,Impala,2,Olare Sampu bushlands,2018
+2018-01-16,Impala,13,Olare Sampu bushlands,2018
+2018-01-16,Impala,1,Olare Sampu bushlands,2018
+2018-01-16,Impala,1,Olare Sampu bushlands,2018
+2018-02-13,Impala,5,Olare Sampu bushlands,2018
+2018-02-13,Impala,3,Olare Sampu bushlands,2018
+2018-02-13,Impala,1,Olare Sampu bushlands,2018
+2018-02-13,Impala,32,Olare Sampu bushlands,2018
+2018-03-06,Impala,4,Olare Sampu bushlands,2018
+2018-03-06,Impala,1,Olare Sampu bushlands,2018
+2018-03-06,Impala,3,Olare Sampu bushlands,2018
+2018-03-06,Impala,2,Olare Sampu bushlands,2018
+2018-03-06,Impala,1,Olare Sampu bushlands,2018
+2018-03-06,Impala,1,Olare Sampu bushlands,2018
+2018-03-06,Impala,12,Olare Sampu bushlands,2018
+2018-03-06,Impala,1,Olare Sampu bushlands,2018
+2018-03-06,Impala,9,Olare Sampu bushlands,2018
+2018-03-06,Impala,1,Olare Sampu bushlands,2018
+2018-03-06,Impala,2,Olare Sampu bushlands,2018
+2018-03-06,Impala,1,Olare Sampu bushlands,2018
+2018-04-03,Impala,25,Olare Sampu bushlands,2018
+2018-04-03,Impala,10,Olare Sampu bushlands,2018
+2018-04-03,Impala,1,Olare Sampu bushlands,2018
+2018-04-03,Impala,10,Olare Sampu bushlands,2018
+2018-04-03,Impala,1,Olare Sampu bushlands,2018
+2018-04-03,Impala,1,Olare Sampu bushlands,2018
+2018-05-08,Impala,1,Olare Sampu bushlands,2018
+2018-05-08,Impala,26,Olare Sampu bushlands,2018
+2018-05-08,Impala,1,Olare Sampu bushlands,2018
+2018-05-08,Impala,25,Olare Sampu bushlands,2018
+2018-06-05,Impala,3,Olare Sampu bushlands,2018
+2018-07-01,Impala,1,Olare Sampu bushlands,2018
+2018-07-01,Impala,31,Olare Sampu bushlands,2018
+2018-07-01,Impala,14,Olare Sampu bushlands,2018
+2018-07-01,Impala,5,Olare Sampu bushlands,2018
+2018-07-01,Impala,5,Olare Sampu bushlands,2018
+2018-07-01,Impala,9,Olare Sampu bushlands,2018
+2018-07-01,Impala,3,Olare Sampu bushlands,2018
+2018-07-01,Impala,4,Olare Sampu bushlands,2018
+2018-07-01,Impala,37,Olare Sampu bushlands,2018
+2018-07-01,Impala,10,Olare Sampu bushlands,2018
+2018-07-01,Impala,3,Olare Sampu bushlands,2018
+2018-08-02,Impala,1,Olare Sampu bushlands,2018
+2018-08-02,Impala,2,Olare Sampu bushlands,2018
+2018-08-02,Impala,4,Olare Sampu bushlands,2018
+2018-09-04,Impala,1,Olare Sampu bushlands,2018
+2018-09-04,Impala,35,Olare Sampu bushlands,2018
+2018-09-04,Impala,1,Olare Sampu bushlands,2018
+2018-09-04,Impala,3,Olare Sampu bushlands,2018
+2018-10-02,Impala,2,Olare Sampu bushlands,2018
+2018-10-02,Impala,2,Olare Sampu bushlands,2018
+2018-10-02,Impala,1,Olare Sampu bushlands,2018
+2018-10-02,Impala,21,Olare Sampu bushlands,2018
+2018-11-06,Impala,5,Olare Sampu bushlands,2018
+2018-12-04,Impala,1,Olare Sampu bushlands,2018
+2018-12-04,Impala,2,Olare Sampu bushlands,2018
+2018-12-04,Impala,7,Olare Sampu bushlands,2018
+2018-12-04,Impala,65,Olare Sampu bushlands,2018
+2018-12-04,Impala,4,Olare Sampu bushlands,2018
+2017-10-17,Impala,1,Sampu Enkare bushlands,2017
+2017-10-17,Impala,1,Sampu Enkare bushlands,2017
+2017-10-17,Impala,1,Sampu Enkare bushlands,2017
+2017-10-17,Impala,4,Sampu Enkare bushlands,2017
+2017-10-17,Impala,13,Sampu Enkare bushlands,2017
+2017-10-17,Impala,3,Sampu Enkare bushlands,2017
+2017-10-17,Impala,17,Sampu Enkare bushlands,2017
+2017-10-17,Impala,2,Sampu Enkare bushlands,2017
+2017-10-17,Impala,1,Sampu Enkare bushlands,2017
+2017-10-17,Impala,1,Sampu Enkare bushlands,2017
+2017-10-17,Impala,3,Sampu Enkare bushlands,2017
+2017-10-17,Impala,3,Sampu Enkare bushlands,2017
+2017-10-17,Impala,1,Sampu Enkare bushlands,2017
+2017-11-07,Impala,2,Sampu Enkare bushlands,2017
+2017-11-07,Impala,5,Sampu Enkare bushlands,2017
+2017-11-07,Impala,1,Sampu Enkare bushlands,2017
+2017-11-07,Impala,2,Sampu Enkare bushlands,2017
+2017-11-07,Impala,2,Sampu Enkare bushlands,2017
+2017-11-07,Impala,1,Sampu Enkare bushlands,2017
+2017-12-05,Impala,1,Sampu Enkare bushlands,2017
+2017-12-05,Impala,1,Sampu Enkare bushlands,2017
+2018-01-16,Impala,1,Sampu Enkare bushlands,2018
+2018-01-16,Impala,1,Sampu Enkare bushlands,2018
+2018-01-16,Impala,1,Sampu Enkare bushlands,2018
+2018-01-16,Impala,3,Sampu Enkare bushlands,2018
+2018-01-16,Impala,1,Sampu Enkare bushlands,2018
+2018-01-16,Impala,2,Sampu Enkare bushlands,2018
+2018-01-16,Impala,1,Sampu Enkare bushlands,2018
+2018-02-13,Impala,2,Sampu Enkare bushlands,2018
+2018-02-13,Impala,10,Sampu Enkare bushlands,2018
+2018-02-13,Impala,4,Sampu Enkare bushlands,2018
+2018-02-13,Impala,1,Sampu Enkare bushlands,2018
+2018-03-06,Impala,3,Sampu Enkare bushlands,2018
+2018-03-06,Impala,1,Sampu Enkare bushlands,2018
+2018-03-06,Impala,1,Sampu Enkare bushlands,2018
+2018-03-06,Impala,1,Sampu Enkare bushlands,2018
+2018-03-06,Impala,1,Sampu Enkare bushlands,2018
+2018-03-06,Impala,2,Sampu Enkare bushlands,2018
+2018-03-06,Impala,3,Sampu Enkare bushlands,2018
+2018-03-06,Impala,21,Sampu Enkare bushlands,2018
+2018-03-06,Impala,2,Sampu Enkare bushlands,2018
+2018-03-06,Impala,1,Sampu Enkare bushlands,2018
+2018-04-03,Impala,1,Sampu Enkare bushlands,2018
+2018-04-03,Impala,1,Sampu Enkare bushlands,2018
+2018-04-03,Impala,3,Sampu Enkare bushlands,2018
+2018-04-03,Impala,80,Sampu Enkare bushlands,2018
+2018-05-08,Impala,1,Sampu Enkare bushlands,2018
+2018-05-08,Impala,3,Sampu Enkare bushlands,2018
+2018-05-08,Impala,30,Sampu Enkare bushlands,2018
+2018-05-08,Impala,1,Sampu Enkare bushlands,2018
+2018-05-08,Impala,26,Sampu Enkare bushlands,2018
+2018-05-08,Impala,1,Sampu Enkare bushlands,2018
+2018-06-05,Impala,1,Sampu Enkare bushlands,2018
+2018-06-05,Impala,5,Sampu Enkare bushlands,2018
+2018-06-05,Impala,4,Sampu Enkare bushlands,2018
+2018-06-19,Impala,1,Sampu Enkare bushlands,2018
+2018-06-19,Impala,81,Sampu Enkare bushlands,2018
+2018-06-19,Impala,1,Sampu Enkare bushlands,2018
+2018-07-03,Impala,3,Sampu Enkare bushlands,2018
+2018-08-02,Impala,2,Sampu Enkare bushlands,2018
+2018-08-02,Impala,1,Sampu Enkare bushlands,2018
+2018-08-02,Impala,6,Sampu Enkare bushlands,2018
+2018-09-04,Impala,3,Sampu Enkare bushlands,2018
+2018-09-04,Impala,1,Sampu Enkare bushlands,2018
+2018-09-04,Impala,1,Sampu Enkare bushlands,2018
+2018-09-04,Impala,3,Sampu Enkare bushlands,2018
+2018-09-04,Impala,2,Sampu Enkare bushlands,2018
+2018-09-04,Impala,1,Sampu Enkare bushlands,2018
+2018-09-04,Impala,5,Sampu Enkare bushlands,2018
+2018-10-02,Impala,1,Sampu Enkare bushlands,2018
+2018-10-02,Impala,2,Sampu Enkare bushlands,2018
+2018-11-06,Impala,1,Sampu Enkare bushlands,2018
+2018-11-06,Impala,1,Sampu Enkare bushlands,2018
+2018-11-06,Impala,3,Sampu Enkare bushlands,2018
+2018-11-06,Impala,1,Sampu Enkare bushlands,2018
+2018-11-06,Impala,1,Sampu Enkare bushlands,2018
+2018-11-06,Impala,1,Sampu Enkare bushlands,2018
+2018-12-04,Impala,5,Sampu Enkare bushlands,2018
+2018-12-04,Impala,6,Sampu Enkare bushlands,2018
+2018-12-04,Impala,2,Sampu Enkare bushlands,2018
+2017-10-20,Impala,6,Balanite plains,2017
+2017-10-20,Impala,4,Balanite plains,2017
+2017-10-20,Impala,6,Balanite plains,2017
+2017-10-20,Impala,4,Balanite plains,2017
+2017-10-20,Impala,21,Balanite plains,2017
+2017-10-20,Impala,6,Balanite plains,2017
+2017-10-20,Impala,19,Balanite plains,2017
+2017-10-20,Impala,1,Balanite plains,2017
+2017-11-02,Impala,1,Balanite plains,2017
+2017-11-02,Impala,10,Balanite plains,2017
+2017-11-02,Impala,1,Balanite plains,2017
+2017-11-02,Impala,2,Balanite plains,2017
+2017-11-02,Impala,1,Balanite plains,2017
+2017-11-02,Impala,1,Balanite plains,2017
+2017-11-02,Impala,4,Balanite plains,2017
+2017-12-07,Impala,25,Balanite plains,2017
+2017-12-07,Impala,1,Balanite plains,2017
+2017-12-07,Impala,2,Balanite plains,2017
+2017-12-07,Impala,1,Balanite plains,2017
+2017-12-07,Impala,1,Balanite plains,2017
+2017-12-07,Impala,1,Balanite plains,2017
+2017-12-07,Impala,2,Balanite plains,2017
+2018-01-11,Impala,1,Balanite plains,2018
+2018-01-11,Impala,1,Balanite plains,2018
+2018-01-11,Impala,1,Balanite plains,2018
+2018-01-11,Impala,1,Balanite plains,2018
+2018-01-11,Impala,1,Balanite plains,2018
+2018-01-11,Impala,2,Balanite plains,2018
+2018-02-01,Impala,1,Balanite plains,2018
+2018-02-01,Impala,2,Balanite plains,2018
+2018-03-01,Impala,1,Balanite plains,2018
+2018-04-05,Impala,1,Balanite plains,2018
+2018-05-03,Impala,1,Balanite plains,2018
+2018-07-05,Impala,23,Balanite plains,2018
+2018-08-02,Impala,6,Balanite plains,2018
+2018-08-02,Impala,1,Balanite plains,2018
+2018-08-02,Impala,2,Balanite plains,2018
+2018-08-02,Impala,1,Balanite plains,2018
+2018-08-02,Impala,5,Balanite plains,2018
+2018-08-02,Impala,3,Balanite plains,2018
+2018-09-06,Impala,6,Balanite plains,2018
+2018-09-06,Impala,8,Balanite plains,2018
+2018-09-06,Impala,5,Balanite plains,2018
+2018-09-06,Impala,1,Balanite plains,2018
+2018-09-06,Impala,1,Balanite plains,2018
+2018-10-04,Impala,49,Balanite plains,2018
+2018-10-04,Impala,3,Balanite plains,2018
+2018-10-04,Impala,2,Balanite plains,2018
+2018-10-04,Impala,4,Balanite plains,2018
+2018-11-01,Impala,2,Balanite plains,2018
+2018-12-06,Impala,1,Balanite plains,2018
+2017-10-24,Impala,35,Ilkisieusieu bushlands,2017
+2017-11-07,Impala,2,Ilkisieusieu bushlands,2017
+2017-11-07,Impala,1,Ilkisieusieu bushlands,2017
+2017-11-07,Impala,1,Ilkisieusieu bushlands,2017
+2017-11-07,Impala,50,Ilkisieusieu bushlands,2017
+2017-11-07,Impala,51,Ilkisieusieu bushlands,2017
+2017-11-07,Impala,6,Ilkisieusieu bushlands,2017
+2017-11-07,Impala,15,Ilkisieusieu bushlands,2017
+2017-11-01,Impala,20,Ilkisieusieu bushlands,2017
+2017-11-01,Impala,2,Ilkisieusieu bushlands,2017
+2017-11-01,Impala,10,Ilkisieusieu bushlands,2017
+2018-01-09,Impala,5,Ilkisieusieu bushlands,2018
+2018-01-09,Impala,1,Ilkisieusieu bushlands,2018
+2018-01-09,Impala,1,Ilkisieusieu bushlands,2018
+2018-02-13,Impala,40,Ilkisieusieu bushlands,2018
+2018-02-13,Impala,1,Ilkisieusieu bushlands,2018
+2018-02-13,Impala,1,Ilkisieusieu bushlands,2018
+2018-02-13,Impala,1,Ilkisieusieu bushlands,2018
+2018-02-06,Impala,1,Ilkisieusieu bushlands,2018
+2018-02-06,Impala,1,Ilkisieusieu bushlands,2018
+2018-02-06,Impala,2,Ilkisieusieu bushlands,2018
+2018-02-06,Impala,1,Ilkisieusieu bushlands,2018
+2018-02-06,Impala,2,Ilkisieusieu bushlands,2018
+2018-02-06,Impala,1,Ilkisieusieu bushlands,2018
+2018-03-06,Impala,6,Ilkisieusieu bushlands,2018
+2018-03-06,Impala,5,Ilkisieusieu bushlands,2018
+2018-04-03,Impala,1,Ilkisieusieu bushlands,2018
+2018-04-03,Impala,1,Ilkisieusieu bushlands,2018
+2018-04-03,Impala,48,Ilkisieusieu bushlands,2018
+2018-04-03,Impala,3,Ilkisieusieu bushlands,2018
+2018-05-08,Impala,1,Ilkisieusieu bushlands,2018
+2018-05-08,Impala,80,Ilkisieusieu bushlands,2018
+2018-05-08,Impala,33,Ilkisieusieu bushlands,2018
+2018-06-19,Impala,1,Ilkisieusieu bushlands,2018
+2018-07-03,Impala,6,Ilkisieusieu bushlands,2018
+2018-07-03,Impala,10,Ilkisieusieu bushlands,2018
+2018-08-02,Impala,1,Ilkisieusieu bushlands,2018
+2018-08-02,Impala,2,Ilkisieusieu bushlands,2018
+2018-08-02,Impala,2,Ilkisieusieu bushlands,2018
+2018-08-02,Impala,3,Ilkisieusieu bushlands,2018
+2018-08-02,Impala,4,Ilkisieusieu bushlands,2018
+2018-08-02,Impala,2,Ilkisieusieu bushlands,2018
+2018-08-02,Impala,1,Ilkisieusieu bushlands,2018
+2018-09-04,Impala,11,Ilkisieusieu bushlands,2018
+2018-09-04,Impala,1,Ilkisieusieu bushlands,2018
+2018-09-04,Impala,1,Ilkisieusieu bushlands,2018
+2018-10-02,Impala,1,Ilkisieusieu bushlands,2018
+2018-10-02,Impala,5,Ilkisieusieu bushlands,2018
+2018-10-02,Impala,5,Ilkisieusieu bushlands,2018
+2018-12-04,Impala,2,Ilkisieusieu bushlands,2018
+2018-12-04,Impala,11,Ilkisieusieu bushlands,2018
+2017-10-17,Impala,5,Rekero bushlands,2017
+2017-10-17,Impala,37,Rekero bushlands,2017
+2017-10-17,Impala,4,Rekero bushlands,2017
+2017-10-17,Impala,3,Rekero bushlands,2017
+2017-10-17,Impala,2,Rekero bushlands,2017
+2017-10-17,Impala,2,Rekero bushlands,2017
+2017-10-17,Impala,3,Rekero bushlands,2017
+2017-10-17,Impala,5,Rekero bushlands,2017
+2017-10-17,Impala,4,Rekero bushlands,2017
+2017-10-17,Impala,13,Rekero bushlands,2017
+2017-10-17,Impala,5,Rekero bushlands,2017
+2017-10-17,Impala,1,Rekero bushlands,2017
+2017-10-24,Impala,42,Rekero bushlands,2017
+2017-10-24,Impala,7,Rekero bushlands,2017
+2017-10-24,Impala,8,Rekero bushlands,2017
+2017-10-24,Impala,5,Rekero bushlands,2017
+2017-10-24,Impala,4,Rekero bushlands,2017
+2017-10-24,Impala,2,Rekero bushlands,2017
+2017-10-24,Impala,1,Rekero bushlands,2017
+2017-10-24,Impala,4,Rekero bushlands,2017
+2017-10-24,Impala,1,Rekero bushlands,2017
+2017-10-24,Impala,19,Rekero bushlands,2017
+2017-10-24,Impala,1,Rekero bushlands,2017
+2017-10-24,Impala,1,Rekero bushlands,2017
+2017-10-24,Impala,2,Rekero bushlands,2017
+2017-10-24,Impala,2,Rekero bushlands,2017
+2017-10-24,Impala,1,Rekero bushlands,2017
+2017-10-24,Impala,3,Rekero bushlands,2017
+2017-10-24,Impala,1,Rekero bushlands,2017
+2017-11-07,Impala,1,Rekero bushlands,2017
+2017-11-07,Impala,3,Rekero bushlands,2017
+2017-11-07,Impala,10,Rekero bushlands,2017
+2017-11-07,Impala,1,Rekero bushlands,2017
+2017-11-07,Impala,31,Rekero bushlands,2017
+2017-11-07,Impala,30,Rekero bushlands,2017
+2017-11-07,Impala,11,Rekero bushlands,2017
+2017-11-07,Impala,2,Rekero bushlands,2017
+2017-11-07,Impala,6,Rekero bushlands,2017
+2017-11-07,Impala,5,Rekero bushlands,2017
+2017-11-07,Impala,1,Rekero bushlands,2017
+2017-11-07,Impala,1,Rekero bushlands,2017
+2017-11-07,Impala,1,Rekero bushlands,2017
+2017-11-07,Impala,1,Rekero bushlands,2017
+2017-11-07,Impala,2,Rekero bushlands,2017
+2017-11-07,Impala,1,Rekero bushlands,2017
+2017-11-07,Impala,1,Rekero bushlands,2017
+2017-11-07,Impala,2,Rekero bushlands,2017
+2017-11-07,Impala,3,Rekero bushlands,2017
+2017-11-01,Impala,1,Rekero bushlands,2017
+2017-11-01,Impala,10,Rekero bushlands,2017
+2017-11-01,Impala,3,Rekero bushlands,2017
+2017-11-01,Impala,1,Rekero bushlands,2017
+2017-11-01,Impala,1,Rekero bushlands,2017
+2017-11-01,Impala,6,Rekero bushlands,2017
+2017-11-01,Impala,6,Rekero bushlands,2017
+2017-11-01,Impala,6,Rekero bushlands,2017
+2017-11-01,Impala,10,Rekero bushlands,2017
+2017-11-01,Impala,3,Rekero bushlands,2017
+2017-11-01,Impala,1,Rekero bushlands,2017
+2018-01-09,Impala,1,Rekero bushlands,2018
+2018-01-09,Impala,1,Rekero bushlands,2018
+2018-01-09,Impala,3,Rekero bushlands,2018
+2018-01-09,Impala,1,Rekero bushlands,2018
+2018-01-09,Impala,1,Rekero bushlands,2018
+2018-01-09,Impala,1,Rekero bushlands,2018
+2018-01-09,Impala,5,Rekero bushlands,2018
+2018-01-16,Impala,2,Rekero bushlands,2018
+2018-01-16,Impala,1,Rekero bushlands,2018
+2018-01-16,Impala,4,Rekero bushlands,2018
+2018-01-16,Impala,2,Rekero bushlands,2018
+2018-01-01,Impala,11,Rekero bushlands,2018
+2018-01-01,Impala,1,Rekero bushlands,2018
+2018-01-01,Impala,4,Rekero bushlands,2018
+2018-01-01,Impala,12,Rekero bushlands,2018
+2018-02-13,Impala,1,Rekero bushlands,2018
+2018-02-13,Impala,1,Rekero bushlands,2018
+2018-02-13,Impala,2,Rekero bushlands,2018
+2018-02-13,Impala,12,Rekero bushlands,2018
+2018-02-13,Impala,5,Rekero bushlands,2018
+2018-02-13,Impala,5,Rekero bushlands,2018
+2018-02-13,Impala,1,Rekero bushlands,2018
+2018-02-13,Impala,3,Rekero bushlands,2018
+2018-02-13,Impala,1,Rekero bushlands,2018
+2018-02-13,Impala,1,Rekero bushlands,2018
+2018-03-06,Impala,1,Rekero bushlands,2018
+2018-03-06,Impala,3,Rekero bushlands,2018
+2018-03-06,Impala,1,Rekero bushlands,2018
+2018-03-06,Impala,4,Rekero bushlands,2018
+2018-03-06,Impala,5,Rekero bushlands,2018
+2018-03-06,Impala,1,Rekero bushlands,2018
+2018-03-06,Impala,4,Rekero bushlands,2018
+2018-03-06,Impala,2,Rekero bushlands,2018
+2018-04-03,Impala,37,Rekero bushlands,2018
+2018-04-03,Impala,38,Rekero bushlands,2018
+2018-04-03,Impala,3,Rekero bushlands,2018
+2018-04-03,Impala,16,Rekero bushlands,2018
+2018-04-03,Impala,5,Rekero bushlands,2018
+2018-04-03,Impala,42,Rekero bushlands,2018
+2018-05-08,Impala,3,Rekero bushlands,2018
+2018-08-02,Impala,8,Rekero bushlands,2018
+2018-08-02,Impala,2,Rekero bushlands,2018
+2018-08-02,Impala,9,Rekero bushlands,2018
+2018-09-04,Impala,3,Rekero bushlands,2018
+2018-09-04,Impala,3,Rekero bushlands,2018
+2018-09-04,Impala,45,Rekero bushlands,2018
+2018-09-04,Impala,6,Rekero bushlands,2018
+2018-09-04,Impala,35,Rekero bushlands,2018
+2018-10-02,Impala,48,Rekero bushlands,2018
+2018-10-02,Impala,2,Rekero bushlands,2018
+2018-10-02,Impala,11,Rekero bushlands,2018
+2018-10-02,Impala,5,Rekero bushlands,2018
+2018-10-02,Impala,33,Rekero bushlands,2018
+2018-10-02,Impala,6,Rekero bushlands,2018
+2018-11-06,Impala,1,Rekero bushlands,2018
+2018-11-06,Impala,1,Rekero bushlands,2018
+2018-11-06,Impala,19,Rekero bushlands,2018
+2018-11-06,Impala,3,Rekero bushlands,2018
+2018-12-04,Impala,1,Rekero bushlands,2018
+2018-12-04,Impala,20,Rekero bushlands,2018
+2018-12-04,Impala,5,Rekero bushlands,2018
+2018-12-04,Impala,24,Rekero bushlands,2018
+2018-12-04,Impala,8,Rekero bushlands,2018
+2018-12-04,Impala,2,Rekero bushlands,2018
+2018-12-04,Impala,1,Rekero bushlands,2018
+2018-12-04,Impala,19,Rekero bushlands,2018
+2018-12-04,Impala,17,Rekero bushlands,2018
+2017-10-20,Impala,2,Enoolera plains,2017
+2017-10-20,Impala,1,Enoolera plains,2017
+2017-10-20,Impala,1,Enoolera plains,2017
+2017-11-02,Impala,1,Enoolera plains,2017
+2017-11-02,Impala,4,Enoolera plains,2017
+2017-11-02,Impala,3,Enoolera plains,2017
+2017-11-02,Impala,3,Enoolera plains,2017
+2017-11-02,Impala,1,Enoolera plains,2017
+2017-11-02,Impala,3,Enoolera plains,2017
+2018-03-01,Impala,1,Enoolera plains,2018
+2018-03-01,Impala,1,Enoolera plains,2018
+2018-03-01,Impala,4,Enoolera plains,2018
+2018-04-05,Impala,1,Enoolera plains,2018
+2018-05-03,Impala,1,Enoolera plains,2018
+2018-09-06,Impala,1,Enoolera plains,2018
+2018-09-06,Impala,38,Enoolera plains,2018
+2018-09-06,Impala,4,Enoolera plains,2018
+2018-09-06,Impala,3,Enoolera plains,2018
+2018-09-06,Impala,1,Enoolera plains,2018
+2018-12-06,Impala,1,Enoolera plains,2018
+2017-12-05,Impala,20,Rekero plains,2017
+2017-12-05,Impala,2,Rekero plains,2017
+2017-12-05,Impala,1,Rekero plains,2017
+2017-12-05,Impala,8,Rekero plains,2017
+2017-12-05,Impala,1,Rekero plains,2017
+2018-01-11,Impala,2,Rekero plains,2018
+2018-01-11,Impala,3,Rekero plains,2018
+2018-01-11,Impala,1,Rekero plains,2018
+2018-02-06,Impala,1,Rekero plains,2018
+2018-02-06,Impala,3,Rekero plains,2018
+2018-02-06,Impala,1,Rekero plains,2018
+2018-02-06,Impala,4,Rekero plains,2018
+2018-03-06,Impala,1,Rekero plains,2018
+2018-11-01,Impala,14,Rekero plains,2018
+2018-12-06,Impala,8,Rekero plains,2018
+2017-11-02,Impala,100,Payia plains,2017
+2018-05-03,Impala,1,Payia plains,2018
+2018-06-21,Impala,10,Payia plains,2018
+2018-06-21,Impala,15,Payia plains,2018
+2018-07-05,Impala,31,Payia plains,2018
+2018-08-02,Impala,42,Payia plains,2018
+2018-08-02,Impala,27,Payia plains,2018
+2018-08-02,Impala,30,Payia plains,2018
+2017-10-17,Thomson's gazelle,1,Olare Sampu bushlands,2017
+2017-10-17,Thomson's gazelle,27,Olare Sampu bushlands,2017
+2017-10-17,Thomson's gazelle,8,Olare Sampu bushlands,2017
+2017-10-17,Thomson's gazelle,3,Olare Sampu bushlands,2017
+2017-10-17,Thomson's gazelle,2,Olare Sampu bushlands,2017
+2017-10-17,Thomson's gazelle,1,Olare Sampu bushlands,2017
+2017-10-17,Thomson's gazelle,39,Olare Sampu bushlands,2017
+2017-11-07,Thomson's gazelle,1,Olare Sampu bushlands,2017
+2017-11-07,Thomson's gazelle,1,Olare Sampu bushlands,2017
+2017-11-07,Thomson's gazelle,3,Olare Sampu bushlands,2017
+2017-11-07,Thomson's gazelle,9,Olare Sampu bushlands,2017
+2017-11-07,Thomson's gazelle,1,Olare Sampu bushlands,2017
+2017-11-07,Thomson's gazelle,3,Olare Sampu bushlands,2017
+2018-01-09,Thomson's gazelle,4,Olare Sampu bushlands,2018
+2018-01-09,Thomson's gazelle,2,Olare Sampu bushlands,2018
+2018-01-09,Thomson's gazelle,1,Olare Sampu bushlands,2018
+2018-01-09,Thomson's gazelle,6,Olare Sampu bushlands,2018
+2018-01-09,Thomson's gazelle,1,Olare Sampu bushlands,2018
+2018-01-09,Thomson's gazelle,2,Olare Sampu bushlands,2018
+2018-01-09,Thomson's gazelle,2,Olare Sampu bushlands,2018
+2018-01-16,Thomson's gazelle,1,Olare Sampu bushlands,2018
+2018-01-16,Thomson's gazelle,1,Olare Sampu bushlands,2018
+2018-01-16,Thomson's gazelle,6,Olare Sampu bushlands,2018
+2018-01-16,Thomson's gazelle,3,Olare Sampu bushlands,2018
+2018-02-13,Thomson's gazelle,3,Olare Sampu bushlands,2018
+2018-02-13,Thomson's gazelle,1,Olare Sampu bushlands,2018
+2018-02-13,Thomson's gazelle,2,Olare Sampu bushlands,2018
+2018-03-06,Thomson's gazelle,1,Olare Sampu bushlands,2018
+2018-03-06,Thomson's gazelle,2,Olare Sampu bushlands,2018
+2018-04-03,Thomson's gazelle,1,Olare Sampu bushlands,2018
+2018-04-03,Thomson's gazelle,3,Olare Sampu bushlands,2018
+2018-05-08,Thomson's gazelle,1,Olare Sampu bushlands,2018
+2018-05-08,Thomson's gazelle,20,Olare Sampu bushlands,2018
+2018-07-01,Thomson's gazelle,1,Olare Sampu bushlands,2018
+2018-07-01,Thomson's gazelle,2,Olare Sampu bushlands,2018
+2018-07-01,Thomson's gazelle,3,Olare Sampu bushlands,2018
+2018-07-01,Thomson's gazelle,6,Olare Sampu bushlands,2018
+2018-07-01,Thomson's gazelle,5,Olare Sampu bushlands,2018
+2018-07-01,Thomson's gazelle,2,Olare Sampu bushlands,2018
+2018-07-01,Thomson's gazelle,3,Olare Sampu bushlands,2018
+2018-07-01,Thomson's gazelle,3,Olare Sampu bushlands,2018
+2018-07-01,Thomson's gazelle,12,Olare Sampu bushlands,2018
+2018-07-01,Thomson's gazelle,2,Olare Sampu bushlands,2018
+2018-08-02,Thomson's gazelle,13,Olare Sampu bushlands,2018
+2018-08-02,Thomson's gazelle,5,Olare Sampu bushlands,2018
+2018-08-02,Thomson's gazelle,1,Olare Sampu bushlands,2018
+2018-08-02,Thomson's gazelle,1,Olare Sampu bushlands,2018
+2018-09-04,Thomson's gazelle,2,Olare Sampu bushlands,2018
+2018-09-04,Thomson's gazelle,40,Olare Sampu bushlands,2018
+2018-09-04,Thomson's gazelle,1,Olare Sampu bushlands,2018
+2018-09-04,Thomson's gazelle,11,Olare Sampu bushlands,2018
+2018-10-02,Thomson's gazelle,1,Olare Sampu bushlands,2018
+2018-10-02,Thomson's gazelle,3,Olare Sampu bushlands,2018
+2018-12-04,Thomson's gazelle,5,Olare Sampu bushlands,2018
+2018-12-04,Thomson's gazelle,6,Olare Sampu bushlands,2018
+2018-12-04,Thomson's gazelle,1,Olare Sampu bushlands,2018
+2018-12-04,Thomson's gazelle,1,Olare Sampu bushlands,2018
+2017-10-17,Thomson's gazelle,9,Sampu Enkare bushlands,2017
+2017-10-17,Thomson's gazelle,7,Sampu Enkare bushlands,2017
+2017-10-17,Thomson's gazelle,12,Sampu Enkare bushlands,2017
+2017-10-17,Thomson's gazelle,3,Sampu Enkare bushlands,2017
+2017-10-17,Thomson's gazelle,19,Sampu Enkare bushlands,2017
+2017-10-17,Thomson's gazelle,1,Sampu Enkare bushlands,2017
+2017-10-17,Thomson's gazelle,6,Sampu Enkare bushlands,2017
+2017-10-17,Thomson's gazelle,12,Sampu Enkare bushlands,2017
+2017-10-17,Thomson's gazelle,2,Sampu Enkare bushlands,2017
+2017-11-07,Thomson's gazelle,1,Sampu Enkare bushlands,2017
+2017-11-07,Thomson's gazelle,1,Sampu Enkare bushlands,2017
+2017-11-07,Thomson's gazelle,1,Sampu Enkare bushlands,2017
+2017-11-07,Thomson's gazelle,1,Sampu Enkare bushlands,2017
+2017-11-07,Thomson's gazelle,2,Sampu Enkare bushlands,2017
+2017-11-07,Thomson's gazelle,1,Sampu Enkare bushlands,2017
+2017-11-07,Thomson's gazelle,4,Sampu Enkare bushlands,2017
+2017-11-07,Thomson's gazelle,2,Sampu Enkare bushlands,2017
+2017-11-07,Thomson's gazelle,2,Sampu Enkare bushlands,2017
+2017-11-07,Thomson's gazelle,2,Sampu Enkare bushlands,2017
+2017-12-05,Thomson's gazelle,2,Sampu Enkare bushlands,2017
+2017-12-05,Thomson's gazelle,2,Sampu Enkare bushlands,2017
+2017-12-05,Thomson's gazelle,1,Sampu Enkare bushlands,2017
+2017-12-05,Thomson's gazelle,1,Sampu Enkare bushlands,2017
+2017-12-05,Thomson's gazelle,8,Sampu Enkare bushlands,2017
+2017-12-05,Thomson's gazelle,3,Sampu Enkare bushlands,2017
+2017-12-05,Thomson's gazelle,1,Sampu Enkare bushlands,2017
+2017-12-05,Thomson's gazelle,3,Sampu Enkare bushlands,2017
+2018-01-16,Thomson's gazelle,1,Sampu Enkare bushlands,2018
+2018-01-16,Thomson's gazelle,1,Sampu Enkare bushlands,2018
+2018-02-13,Thomson's gazelle,1,Sampu Enkare bushlands,2018
+2018-02-13,Thomson's gazelle,24,Sampu Enkare bushlands,2018
+2018-02-13,Thomson's gazelle,10,Sampu Enkare bushlands,2018
+2018-02-13,Thomson's gazelle,6,Sampu Enkare bushlands,2018
+2018-02-13,Thomson's gazelle,1,Sampu Enkare bushlands,2018
+2018-02-13,Thomson's gazelle,1,Sampu Enkare bushlands,2018
+2018-02-13,Thomson's gazelle,1,Sampu Enkare bushlands,2018
+2018-02-13,Thomson's gazelle,2,Sampu Enkare bushlands,2018
+2018-02-13,Thomson's gazelle,1,Sampu Enkare bushlands,2018
+2018-02-13,Thomson's gazelle,2,Sampu Enkare bushlands,2018
+2018-02-13,Thomson's gazelle,37,Sampu Enkare bushlands,2018
+2018-03-06,Thomson's gazelle,3,Sampu Enkare bushlands,2018
+2018-03-06,Thomson's gazelle,1,Sampu Enkare bushlands,2018
+2018-03-06,Thomson's gazelle,1,Sampu Enkare bushlands,2018
+2018-03-06,Thomson's gazelle,1,Sampu Enkare bushlands,2018
+2018-03-06,Thomson's gazelle,1,Sampu Enkare bushlands,2018
+2018-03-06,Thomson's gazelle,8,Sampu Enkare bushlands,2018
+2018-03-06,Thomson's gazelle,1,Sampu Enkare bushlands,2018
+2018-03-06,Thomson's gazelle,10,Sampu Enkare bushlands,2018
+2018-03-06,Thomson's gazelle,4,Sampu Enkare bushlands,2018
+2018-03-06,Thomson's gazelle,13,Sampu Enkare bushlands,2018
+2018-03-06,Thomson's gazelle,2,Sampu Enkare bushlands,2018
+2018-03-06,Thomson's gazelle,1,Sampu Enkare bushlands,2018
+2018-03-06,Thomson's gazelle,7,Sampu Enkare bushlands,2018
+2018-03-06,Thomson's gazelle,2,Sampu Enkare bushlands,2018
+2018-04-03,Thomson's gazelle,2,Sampu Enkare bushlands,2018
+2018-04-03,Thomson's gazelle,2,Sampu Enkare bushlands,2018
+2018-04-03,Thomson's gazelle,1,Sampu Enkare bushlands,2018
+2018-04-03,Thomson's gazelle,1,Sampu Enkare bushlands,2018
+2018-04-03,Thomson's gazelle,1,Sampu Enkare bushlands,2018
+2018-04-03,Thomson's gazelle,3,Sampu Enkare bushlands,2018
+2018-04-03,Thomson's gazelle,9,Sampu Enkare bushlands,2018
+2018-04-03,Thomson's gazelle,1,Sampu Enkare bushlands,2018
+2018-05-08,Thomson's gazelle,5,Sampu Enkare bushlands,2018
+2018-05-08,Thomson's gazelle,7,Sampu Enkare bushlands,2018
+2018-05-08,Thomson's gazelle,1,Sampu Enkare bushlands,2018
+2018-05-08,Thomson's gazelle,11,Sampu Enkare bushlands,2018
+2018-05-08,Thomson's gazelle,31,Sampu Enkare bushlands,2018
+2018-05-08,Thomson's gazelle,11,Sampu Enkare bushlands,2018
+2018-05-08,Thomson's gazelle,30,Sampu Enkare bushlands,2018
+2018-05-08,Thomson's gazelle,1,Sampu Enkare bushlands,2018
+2018-05-08,Thomson's gazelle,1,Sampu Enkare bushlands,2018
+2018-05-08,Thomson's gazelle,4,Sampu Enkare bushlands,2018
+2018-06-05,Thomson's gazelle,1,Sampu Enkare bushlands,2018
+2018-06-05,Thomson's gazelle,3,Sampu Enkare bushlands,2018
+2018-06-05,Thomson's gazelle,5,Sampu Enkare bushlands,2018
+2018-06-05,Thomson's gazelle,9,Sampu Enkare bushlands,2018
+2018-06-19,Thomson's gazelle,2,Sampu Enkare bushlands,2018
+2018-06-19,Thomson's gazelle,24,Sampu Enkare bushlands,2018
+2018-06-19,Thomson's gazelle,10,Sampu Enkare bushlands,2018
+2018-06-19,Thomson's gazelle,2,Sampu Enkare bushlands,2018
+2018-06-19,Thomson's gazelle,25,Sampu Enkare bushlands,2018
+2018-06-19,Thomson's gazelle,10,Sampu Enkare bushlands,2018
+2018-07-03,Thomson's gazelle,6,Sampu Enkare bushlands,2018
+2018-07-03,Thomson's gazelle,1,Sampu Enkare bushlands,2018
+2018-08-02,Thomson's gazelle,5,Sampu Enkare bushlands,2018
+2018-08-02,Thomson's gazelle,7,Sampu Enkare bushlands,2018
+2018-08-02,Thomson's gazelle,2,Sampu Enkare bushlands,2018
+2018-08-02,Thomson's gazelle,8,Sampu Enkare bushlands,2018
+2018-08-02,Thomson's gazelle,14,Sampu Enkare bushlands,2018
+2018-08-02,Thomson's gazelle,3,Sampu Enkare bushlands,2018
+2018-08-02,Thomson's gazelle,8,Sampu Enkare bushlands,2018
+2018-08-02,Thomson's gazelle,4,Sampu Enkare bushlands,2018
+2018-08-02,Thomson's gazelle,3,Sampu Enkare bushlands,2018
+2018-08-02,Thomson's gazelle,2,Sampu Enkare bushlands,2018
+2018-08-02,Thomson's gazelle,1,Sampu Enkare bushlands,2018
+2018-08-02,Thomson's gazelle,8,Sampu Enkare bushlands,2018
+2018-08-02,Thomson's gazelle,7,Sampu Enkare bushlands,2018
+2018-09-04,Thomson's gazelle,2,Sampu Enkare bushlands,2018
+2018-09-04,Thomson's gazelle,14,Sampu Enkare bushlands,2018
+2018-09-04,Thomson's gazelle,1,Sampu Enkare bushlands,2018
+2018-09-04,Thomson's gazelle,4,Sampu Enkare bushlands,2018
+2018-09-04,Thomson's gazelle,15,Sampu Enkare bushlands,2018
+2018-09-04,Thomson's gazelle,3,Sampu Enkare bushlands,2018
+2018-09-04,Thomson's gazelle,3,Sampu Enkare bushlands,2018
+2018-09-04,Thomson's gazelle,4,Sampu Enkare bushlands,2018
+2018-10-02,Thomson's gazelle,6,Sampu Enkare bushlands,2018
+2018-10-02,Thomson's gazelle,14,Sampu Enkare bushlands,2018
+2018-10-02,Thomson's gazelle,6,Sampu Enkare bushlands,2018
+2018-10-02,Thomson's gazelle,18,Sampu Enkare bushlands,2018
+2018-10-02,Thomson's gazelle,11,Sampu Enkare bushlands,2018
+2018-10-02,Thomson's gazelle,1,Sampu Enkare bushlands,2018
+2018-10-02,Thomson's gazelle,7,Sampu Enkare bushlands,2018
+2018-10-02,Thomson's gazelle,21,Sampu Enkare bushlands,2018
+2018-10-02,Thomson's gazelle,5,Sampu Enkare bushlands,2018
+2018-10-02,Thomson's gazelle,14,Sampu Enkare bushlands,2018
+2018-10-02,Thomson's gazelle,4,Sampu Enkare bushlands,2018
+2018-10-02,Thomson's gazelle,2,Sampu Enkare bushlands,2018
+2018-10-02,Thomson's gazelle,6,Sampu Enkare bushlands,2018
+2018-11-06,Thomson's gazelle,3,Sampu Enkare bushlands,2018
+2018-11-06,Thomson's gazelle,3,Sampu Enkare bushlands,2018
+2018-11-06,Thomson's gazelle,6,Sampu Enkare bushlands,2018
+2018-11-06,Thomson's gazelle,4,Sampu Enkare bushlands,2018
+2018-11-06,Thomson's gazelle,11,Sampu Enkare bushlands,2018
+2018-11-06,Thomson's gazelle,4,Sampu Enkare bushlands,2018
+2018-11-06,Thomson's gazelle,1,Sampu Enkare bushlands,2018
+2018-11-06,Thomson's gazelle,1,Sampu Enkare bushlands,2018
+2018-11-06,Thomson's gazelle,4,Sampu Enkare bushlands,2018
+2018-11-06,Thomson's gazelle,12,Sampu Enkare bushlands,2018
+2018-11-06,Thomson's gazelle,5,Sampu Enkare bushlands,2018
+2018-11-06,Thomson's gazelle,1,Sampu Enkare bushlands,2018
+2018-11-06,Thomson's gazelle,1,Sampu Enkare bushlands,2018
+2018-12-04,Thomson's gazelle,12,Sampu Enkare bushlands,2018
+2018-12-04,Thomson's gazelle,10,Sampu Enkare bushlands,2018
+2018-12-04,Thomson's gazelle,2,Sampu Enkare bushlands,2018
+2018-12-04,Thomson's gazelle,1,Sampu Enkare bushlands,2018
+2018-12-04,Thomson's gazelle,9,Sampu Enkare bushlands,2018
+2018-12-04,Thomson's gazelle,8,Sampu Enkare bushlands,2018
+2018-12-04,Thomson's gazelle,2,Sampu Enkare bushlands,2018
+2018-12-04,Thomson's gazelle,4,Sampu Enkare bushlands,2018
+2018-12-04,Thomson's gazelle,14,Sampu Enkare bushlands,2018
+2018-12-04,Thomson's gazelle,12,Sampu Enkare bushlands,2018
+2018-12-04,Thomson's gazelle,4,Sampu Enkare bushlands,2018
+2018-12-04,Thomson's gazelle,8,Sampu Enkare bushlands,2018
+2017-10-20,Thomson's gazelle,1,Balanite plains,2017
+2017-10-20,Thomson's gazelle,2,Balanite plains,2017
+2017-10-20,Thomson's gazelle,7,Balanite plains,2017
+2017-10-20,Thomson's gazelle,4,Balanite plains,2017
+2017-10-20,Thomson's gazelle,2,Balanite plains,2017
+2017-10-20,Thomson's gazelle,12,Balanite plains,2017
+2017-10-20,Thomson's gazelle,5,Balanite plains,2017
+2017-10-20,Thomson's gazelle,3,Balanite plains,2017
+2017-10-20,Thomson's gazelle,3,Balanite plains,2017
+2017-10-20,Thomson's gazelle,4,Balanite plains,2017
+2017-10-20,Thomson's gazelle,11,Balanite plains,2017
+2017-10-20,Thomson's gazelle,11,Balanite plains,2017
+2017-10-20,Thomson's gazelle,1,Balanite plains,2017
+2017-10-20,Thomson's gazelle,2,Balanite plains,2017
+2017-10-20,Thomson's gazelle,1,Balanite plains,2017
+2017-10-20,Thomson's gazelle,8,Balanite plains,2017
+2017-10-20,Thomson's gazelle,1,Balanite plains,2017
+2017-10-20,Thomson's gazelle,1,Balanite plains,2017
+2017-10-20,Thomson's gazelle,4,Balanite plains,2017
+2017-10-20,Thomson's gazelle,2,Balanite plains,2017
+2017-10-20,Thomson's gazelle,3,Balanite plains,2017
+2017-10-20,Thomson's gazelle,2,Balanite plains,2017
+2017-10-20,Thomson's gazelle,2,Balanite plains,2017
+2017-10-20,Thomson's gazelle,17,Balanite plains,2017
+2017-10-20,Thomson's gazelle,3,Balanite plains,2017
+2017-10-20,Thomson's gazelle,2,Balanite plains,2017
+2017-11-02,Thomson's gazelle,1,Balanite plains,2017
+2017-11-02,Thomson's gazelle,30,Balanite plains,2017
+2017-11-02,Thomson's gazelle,1,Balanite plains,2017
+2017-11-02,Thomson's gazelle,5,Balanite plains,2017
+2017-11-02,Thomson's gazelle,5,Balanite plains,2017
+2017-11-02,Thomson's gazelle,6,Balanite plains,2017
+2017-11-02,Thomson's gazelle,2,Balanite plains,2017
+2017-11-02,Thomson's gazelle,14,Balanite plains,2017
+2017-11-02,Thomson's gazelle,4,Balanite plains,2017
+2017-11-02,Thomson's gazelle,3,Balanite plains,2017
+2017-11-02,Thomson's gazelle,1,Balanite plains,2017
+2017-11-02,Thomson's gazelle,1,Balanite plains,2017
+2017-11-02,Thomson's gazelle,10,Balanite plains,2017
+2017-12-07,Thomson's gazelle,3,Balanite plains,2017
+2017-12-07,Thomson's gazelle,2,Balanite plains,2017
+2017-12-07,Thomson's gazelle,3,Balanite plains,2017
+2017-12-07,Thomson's gazelle,3,Balanite plains,2017
+2017-12-07,Thomson's gazelle,3,Balanite plains,2017
+2017-12-07,Thomson's gazelle,25,Balanite plains,2017
+2017-12-07,Thomson's gazelle,7,Balanite plains,2017
+2017-12-07,Thomson's gazelle,7,Balanite plains,2017
+2017-12-07,Thomson's gazelle,10,Balanite plains,2017
+2017-12-07,Thomson's gazelle,10,Balanite plains,2017
+2017-12-07,Thomson's gazelle,3,Balanite plains,2017
+2017-12-07,Thomson's gazelle,3,Balanite plains,2017
+2017-12-07,Thomson's gazelle,3,Balanite plains,2017
+2017-12-07,Thomson's gazelle,4,Balanite plains,2017
+2017-12-07,Thomson's gazelle,3,Balanite plains,2017
+2017-12-07,Thomson's gazelle,3,Balanite plains,2017
+2017-12-07,Thomson's gazelle,1,Balanite plains,2017
+2017-12-07,Thomson's gazelle,3,Balanite plains,2017
+2017-12-07,Thomson's gazelle,3,Balanite plains,2017
+2018-01-11,Thomson's gazelle,1,Balanite plains,2018
+2018-01-11,Thomson's gazelle,4,Balanite plains,2018
+2018-01-11,Thomson's gazelle,5,Balanite plains,2018
+2018-01-11,Thomson's gazelle,8,Balanite plains,2018
+2018-01-11,Thomson's gazelle,5,Balanite plains,2018
+2018-01-11,Thomson's gazelle,1,Balanite plains,2018
+2018-01-11,Thomson's gazelle,1,Balanite plains,2018
+2018-01-11,Thomson's gazelle,3,Balanite plains,2018
+2018-01-11,Thomson's gazelle,3,Balanite plains,2018
+2018-01-11,Thomson's gazelle,2,Balanite plains,2018
+2018-01-11,Thomson's gazelle,17,Balanite plains,2018
+2018-01-11,Thomson's gazelle,1,Balanite plains,2018
+2018-01-11,Thomson's gazelle,3,Balanite plains,2018
+2018-01-11,Thomson's gazelle,1,Balanite plains,2018
+2018-01-11,Thomson's gazelle,3,Balanite plains,2018
+2018-01-11,Thomson's gazelle,3,Balanite plains,2018
+2018-02-01,Thomson's gazelle,4,Balanite plains,2018
+2018-02-01,Thomson's gazelle,2,Balanite plains,2018
+2018-02-01,Thomson's gazelle,37,Balanite plains,2018
+2018-02-01,Thomson's gazelle,8,Balanite plains,2018
+2018-02-01,Thomson's gazelle,1,Balanite plains,2018
+2018-02-01,Thomson's gazelle,20,Balanite plains,2018
+2018-02-01,Thomson's gazelle,1,Balanite plains,2018
+2018-02-01,Thomson's gazelle,1,Balanite plains,2018
+2018-02-01,Thomson's gazelle,2,Balanite plains,2018
+2018-02-01,Thomson's gazelle,1,Balanite plains,2018
+2018-03-01,Thomson's gazelle,20,Balanite plains,2018
+2018-03-01,Thomson's gazelle,6,Balanite plains,2018
+2018-03-01,Thomson's gazelle,11,Balanite plains,2018
+2018-03-01,Thomson's gazelle,4,Balanite plains,2018
+2018-03-01,Thomson's gazelle,1,Balanite plains,2018
+2018-03-01,Thomson's gazelle,15,Balanite plains,2018
+2018-03-01,Thomson's gazelle,2,Balanite plains,2018
+2018-03-01,Thomson's gazelle,11,Balanite plains,2018
+2018-03-01,Thomson's gazelle,17,Balanite plains,2018
+2018-03-01,Thomson's gazelle,8,Balanite plains,2018
+2018-03-01,Thomson's gazelle,8,Balanite plains,2018
+2018-04-05,Thomson's gazelle,10,Balanite plains,2018
+2018-04-05,Thomson's gazelle,1,Balanite plains,2018
+2018-04-05,Thomson's gazelle,1,Balanite plains,2018
+2018-04-05,Thomson's gazelle,1,Balanite plains,2018
+2018-04-05,Thomson's gazelle,2,Balanite plains,2018
+2018-04-05,Thomson's gazelle,1,Balanite plains,2018
+2018-04-05,Thomson's gazelle,1,Balanite plains,2018
+2018-04-05,Thomson's gazelle,9,Balanite plains,2018
+2018-04-05,Thomson's gazelle,1,Balanite plains,2018
+2018-04-05,Thomson's gazelle,1,Balanite plains,2018
+2018-04-05,Thomson's gazelle,1,Balanite plains,2018
+2018-05-03,Thomson's gazelle,1,Balanite plains,2018
+2018-05-03,Thomson's gazelle,7,Balanite plains,2018
+2018-05-03,Thomson's gazelle,15,Balanite plains,2018
+2018-05-03,Thomson's gazelle,20,Balanite plains,2018
+2018-05-03,Thomson's gazelle,1,Balanite plains,2018
+2018-05-03,Thomson's gazelle,1,Balanite plains,2018
+2018-06-21,Thomson's gazelle,1,Balanite plains,2018
+2018-06-21,Thomson's gazelle,3,Balanite plains,2018
+2018-07-05,Thomson's gazelle,12,Balanite plains,2018
+2018-07-05,Thomson's gazelle,13,Balanite plains,2018
+2018-07-05,Thomson's gazelle,9,Balanite plains,2018
+2018-07-05,Thomson's gazelle,2,Balanite plains,2018
+2018-07-05,Thomson's gazelle,29,Balanite plains,2018
+2018-07-05,Thomson's gazelle,3,Balanite plains,2018
+2018-07-05,Thomson's gazelle,7,Balanite plains,2018
+2018-07-05,Thomson's gazelle,19,Balanite plains,2018
+2018-07-05,Thomson's gazelle,6,Balanite plains,2018
+2018-07-05,Thomson's gazelle,3,Balanite plains,2018
+2018-08-02,Thomson's gazelle,1,Balanite plains,2018
+2018-08-02,Thomson's gazelle,3,Balanite plains,2018
+2018-08-02,Thomson's gazelle,19,Balanite plains,2018
+2018-08-02,Thomson's gazelle,7,Balanite plains,2018
+2018-08-02,Thomson's gazelle,3,Balanite plains,2018
+2018-08-02,Thomson's gazelle,2,Balanite plains,2018
+2018-08-02,Thomson's gazelle,3,Balanite plains,2018
+2018-08-02,Thomson's gazelle,3,Balanite plains,2018
+2018-08-02,Thomson's gazelle,20,Balanite plains,2018
+2018-08-02,Thomson's gazelle,1,Balanite plains,2018
+2018-08-02,Thomson's gazelle,1,Balanite plains,2018
+2018-08-02,Thomson's gazelle,1,Balanite plains,2018
+2018-08-02,Thomson's gazelle,6,Balanite plains,2018
+2018-09-06,Thomson's gazelle,1,Balanite plains,2018
+2018-09-06,Thomson's gazelle,6,Balanite plains,2018
+2018-09-06,Thomson's gazelle,6,Balanite plains,2018
+2018-09-06,Thomson's gazelle,1,Balanite plains,2018
+2018-09-06,Thomson's gazelle,1,Balanite plains,2018
+2018-09-06,Thomson's gazelle,2,Balanite plains,2018
+2018-10-04,Thomson's gazelle,18,Balanite plains,2018
+2018-10-04,Thomson's gazelle,18,Balanite plains,2018
+2018-10-04,Thomson's gazelle,7,Balanite plains,2018
+2018-10-04,Thomson's gazelle,4,Balanite plains,2018
+2018-10-04,Thomson's gazelle,39,Balanite plains,2018
+2018-10-04,Thomson's gazelle,29,Balanite plains,2018
+2018-11-01,Thomson's gazelle,2,Balanite plains,2018
+2018-11-01,Thomson's gazelle,2,Balanite plains,2018
+2018-11-01,Thomson's gazelle,11,Balanite plains,2018
+2018-11-01,Thomson's gazelle,1,Balanite plains,2018
+2018-11-01,Thomson's gazelle,14,Balanite plains,2018
+2018-11-01,Thomson's gazelle,2,Balanite plains,2018
+2018-11-01,Thomson's gazelle,19,Balanite plains,2018
+2018-11-01,Thomson's gazelle,1,Balanite plains,2018
+2018-12-06,Thomson's gazelle,19,Balanite plains,2018
+2018-12-06,Thomson's gazelle,2,Balanite plains,2018
+2018-12-06,Thomson's gazelle,16,Balanite plains,2018
+2018-12-06,Thomson's gazelle,6,Balanite plains,2018
+2018-12-06,Thomson's gazelle,10,Balanite plains,2018
+2018-12-06,Thomson's gazelle,1,Balanite plains,2018
+2018-12-06,Thomson's gazelle,1,Balanite plains,2018
+2018-12-06,Thomson's gazelle,2,Balanite plains,2018
+2018-12-06,Thomson's gazelle,1,Balanite plains,2018
+2017-10-24,Thomson's gazelle,7,Ilkisieusieu bushlands,2017
+2017-10-24,Thomson's gazelle,2,Ilkisieusieu bushlands,2017
+2017-11-07,Thomson's gazelle,3,Ilkisieusieu bushlands,2017
+2017-11-07,Thomson's gazelle,2,Ilkisieusieu bushlands,2017
+2017-11-07,Thomson's gazelle,15,Ilkisieusieu bushlands,2017
+2017-11-07,Thomson's gazelle,6,Ilkisieusieu bushlands,2017
+2017-11-07,Thomson's gazelle,3,Ilkisieusieu bushlands,2017
+2017-11-01,Thomson's gazelle,1,Ilkisieusieu bushlands,2017
+2017-12-05,Thomson's gazelle,2,Ilkisieusieu bushlands,2017
+2017-12-05,Thomson's gazelle,4,Ilkisieusieu bushlands,2017
+2017-12-05,Thomson's gazelle,1,Ilkisieusieu bushlands,2017
+2017-12-05,Thomson's gazelle,5,Ilkisieusieu bushlands,2017
+2018-01-09,Thomson's gazelle,2,Ilkisieusieu bushlands,2018
+2018-02-13,Thomson's gazelle,2,Ilkisieusieu bushlands,2018
+2018-02-13,Thomson's gazelle,1,Ilkisieusieu bushlands,2018
+2018-02-13,Thomson's gazelle,7,Ilkisieusieu bushlands,2018
+2018-02-13,Thomson's gazelle,26,Ilkisieusieu bushlands,2018
+2018-02-06,Thomson's gazelle,18,Ilkisieusieu bushlands,2018
+2018-02-06,Thomson's gazelle,1,Ilkisieusieu bushlands,2018
+2018-02-06,Thomson's gazelle,6,Ilkisieusieu bushlands,2018
+2018-02-06,Thomson's gazelle,1,Ilkisieusieu bushlands,2018
+2018-03-06,Thomson's gazelle,2,Ilkisieusieu bushlands,2018
+2018-03-06,Thomson's gazelle,3,Ilkisieusieu bushlands,2018
+2018-03-06,Thomson's gazelle,8,Ilkisieusieu bushlands,2018
+2018-04-03,Thomson's gazelle,3,Ilkisieusieu bushlands,2018
+2018-04-03,Thomson's gazelle,1,Ilkisieusieu bushlands,2018
+2018-04-03,Thomson's gazelle,21,Ilkisieusieu bushlands,2018
+2018-05-08,Thomson's gazelle,1,Ilkisieusieu bushlands,2018
+2018-05-08,Thomson's gazelle,16,Ilkisieusieu bushlands,2018
+2018-05-08,Thomson's gazelle,3,Ilkisieusieu bushlands,2018
+2018-05-08,Thomson's gazelle,1,Ilkisieusieu bushlands,2018
+2018-05-08,Thomson's gazelle,1,Ilkisieusieu bushlands,2018
+2018-05-08,Thomson's gazelle,7,Ilkisieusieu bushlands,2018
+2018-06-05,Thomson's gazelle,1,Ilkisieusieu bushlands,2018
+2018-06-19,Thomson's gazelle,1,Ilkisieusieu bushlands,2018
+2018-07-03,Thomson's gazelle,15,Ilkisieusieu bushlands,2018
+2018-07-03,Thomson's gazelle,2,Ilkisieusieu bushlands,2018
+2018-08-02,Thomson's gazelle,2,Ilkisieusieu bushlands,2018
+2018-08-02,Thomson's gazelle,3,Ilkisieusieu bushlands,2018
+2018-08-02,Thomson's gazelle,9,Ilkisieusieu bushlands,2018
+2018-08-02,Thomson's gazelle,1,Ilkisieusieu bushlands,2018
+2018-08-02,Thomson's gazelle,2,Ilkisieusieu bushlands,2018
+2018-08-02,Thomson's gazelle,9,Ilkisieusieu bushlands,2018
+2018-08-02,Thomson's gazelle,10,Ilkisieusieu bushlands,2018
+2018-09-04,Thomson's gazelle,4,Ilkisieusieu bushlands,2018
+2018-09-04,Thomson's gazelle,2,Ilkisieusieu bushlands,2018
+2018-09-04,Thomson's gazelle,1,Ilkisieusieu bushlands,2018
+2018-10-02,Thomson's gazelle,11,Ilkisieusieu bushlands,2018
+2018-10-02,Thomson's gazelle,21,Ilkisieusieu bushlands,2018
+2018-10-02,Thomson's gazelle,25,Ilkisieusieu bushlands,2018
+2018-11-06,Thomson's gazelle,1,Ilkisieusieu bushlands,2018
+2018-11-06,Thomson's gazelle,1,Ilkisieusieu bushlands,2018
+2018-11-06,Thomson's gazelle,6,Ilkisieusieu bushlands,2018
+2018-11-06,Thomson's gazelle,1,Ilkisieusieu bushlands,2018
+2018-11-06,Thomson's gazelle,6,Ilkisieusieu bushlands,2018
+2018-11-06,Thomson's gazelle,14,Ilkisieusieu bushlands,2018
+2018-11-06,Thomson's gazelle,1,Ilkisieusieu bushlands,2018
+2018-12-04,Thomson's gazelle,1,Ilkisieusieu bushlands,2018
+2018-12-04,Thomson's gazelle,20,Ilkisieusieu bushlands,2018
+2018-12-04,Thomson's gazelle,4,Ilkisieusieu bushlands,2018
+2018-12-04,Thomson's gazelle,6,Ilkisieusieu bushlands,2018
+2018-12-04,Thomson's gazelle,12,Ilkisieusieu bushlands,2018
+2018-12-04,Thomson's gazelle,10,Ilkisieusieu bushlands,2018
+2018-12-04,Thomson's gazelle,7,Ilkisieusieu bushlands,2018
+2017-10-17,Thomson's gazelle,1,Rekero bushlands,2017
+2017-10-17,Thomson's gazelle,6,Rekero bushlands,2017
+2017-10-17,Thomson's gazelle,1,Rekero bushlands,2017
+2017-10-17,Thomson's gazelle,4,Rekero bushlands,2017
+2017-10-24,Thomson's gazelle,8,Rekero bushlands,2017
+2017-10-24,Thomson's gazelle,6,Rekero bushlands,2017
+2017-10-24,Thomson's gazelle,3,Rekero bushlands,2017
+2017-10-24,Thomson's gazelle,2,Rekero bushlands,2017
+2017-10-24,Thomson's gazelle,1,Rekero bushlands,2017
+2017-11-07,Thomson's gazelle,1,Rekero bushlands,2017
+2017-11-07,Thomson's gazelle,4,Rekero bushlands,2017
+2017-11-07,Thomson's gazelle,2,Rekero bushlands,2017
+2017-11-07,Thomson's gazelle,1,Rekero bushlands,2017
+2017-11-02,Thomson's gazelle,6,Rekero bushlands,2017
+2017-11-01,Thomson's gazelle,23,Rekero bushlands,2017
+2017-11-01,Thomson's gazelle,2,Rekero bushlands,2017
+2017-12-07,Thomson's gazelle,8,Rekero bushlands,2017
+2018-01-09,Thomson's gazelle,10,Rekero bushlands,2018
+2018-01-09,Thomson's gazelle,1,Rekero bushlands,2018
+2018-01-09,Thomson's gazelle,1,Rekero bushlands,2018
+2018-01-09,Thomson's gazelle,1,Rekero bushlands,2018
+2018-01-16,Thomson's gazelle,9,Rekero bushlands,2018
+2018-01-16,Thomson's gazelle,2,Rekero bushlands,2018
+2018-01-16,Thomson's gazelle,5,Rekero bushlands,2018
+2018-01-16,Thomson's gazelle,5,Rekero bushlands,2018
+2018-01-16,Thomson's gazelle,9,Rekero bushlands,2018
+2018-01-01,Thomson's gazelle,1,Rekero bushlands,2018
+2018-01-01,Thomson's gazelle,1,Rekero bushlands,2018
+2018-02-13,Thomson's gazelle,1,Rekero bushlands,2018
+2018-02-13,Thomson's gazelle,13,Rekero bushlands,2018
+2018-02-13,Thomson's gazelle,10,Rekero bushlands,2018
+2018-03-06,Thomson's gazelle,6,Rekero bushlands,2018
+2018-03-06,Thomson's gazelle,2,Rekero bushlands,2018
+2018-03-06,Thomson's gazelle,1,Rekero bushlands,2018
+2018-03-06,Thomson's gazelle,2,Rekero bushlands,2018
+2018-03-06,Thomson's gazelle,3,Rekero bushlands,2018
+2018-03-06,Thomson's gazelle,8,Rekero bushlands,2018
+2018-04-03,Thomson's gazelle,1,Rekero bushlands,2018
+2018-07-03,Thomson's gazelle,15,Rekero bushlands,2018
+2018-07-03,Thomson's gazelle,3,Rekero bushlands,2018
+2018-08-02,Thomson's gazelle,1,Rekero bushlands,2018
+2018-10-02,Thomson's gazelle,13,Rekero bushlands,2018
+2018-11-06,Thomson's gazelle,2,Rekero bushlands,2018
+2018-12-04,Thomson's gazelle,11,Rekero bushlands,2018
+2018-12-04,Thomson's gazelle,7,Rekero bushlands,2018
+2018-12-04,Thomson's gazelle,3,Rekero bushlands,2018
+2018-12-04,Thomson's gazelle,1,Rekero bushlands,2018
+2017-10-20,Thomson's gazelle,4,Enoolera plains,2017
+2017-10-20,Thomson's gazelle,4,Enoolera plains,2017
+2017-10-20,Thomson's gazelle,9,Enoolera plains,2017
+2017-10-20,Thomson's gazelle,6,Enoolera plains,2017
+2017-10-20,Thomson's gazelle,5,Enoolera plains,2017
+2017-10-20,Thomson's gazelle,27,Enoolera plains,2017
+2017-10-20,Thomson's gazelle,3,Enoolera plains,2017
+2017-10-20,Thomson's gazelle,1,Enoolera plains,2017
+2017-10-20,Thomson's gazelle,1,Enoolera plains,2017
+2017-10-20,Thomson's gazelle,1,Enoolera plains,2017
+2017-10-20,Thomson's gazelle,1,Enoolera plains,2017
+2017-10-20,Thomson's gazelle,1,Enoolera plains,2017
+2017-10-20,Thomson's gazelle,2,Enoolera plains,2017
+2017-10-20,Thomson's gazelle,1,Enoolera plains,2017
+2017-11-02,Thomson's gazelle,28,Enoolera plains,2017
+2017-11-02,Thomson's gazelle,2,Enoolera plains,2017
+2017-11-02,Thomson's gazelle,1,Enoolera plains,2017
+2017-11-02,Thomson's gazelle,1,Enoolera plains,2017
+2017-11-02,Thomson's gazelle,1,Enoolera plains,2017
+2017-11-02,Thomson's gazelle,34,Enoolera plains,2017
+2017-11-02,Thomson's gazelle,1,Enoolera plains,2017
+2017-11-02,Thomson's gazelle,30,Enoolera plains,2017
+2017-11-02,Thomson's gazelle,1,Enoolera plains,2017
+2017-11-02,Thomson's gazelle,28,Enoolera plains,2017
+2017-11-02,Thomson's gazelle,5,Enoolera plains,2017
+2017-11-02,Thomson's gazelle,2,Enoolera plains,2017
+2017-11-02,Thomson's gazelle,81,Enoolera plains,2017
+2017-11-02,Thomson's gazelle,8,Enoolera plains,2017
+2017-11-02,Thomson's gazelle,1,Enoolera plains,2017
+2017-12-07,Thomson's gazelle,2,Enoolera plains,2017
+2017-12-07,Thomson's gazelle,6,Enoolera plains,2017
+2017-12-07,Thomson's gazelle,1,Enoolera plains,2017
+2017-12-07,Thomson's gazelle,1,Enoolera plains,2017
+2017-12-07,Thomson's gazelle,1,Enoolera plains,2017
+2017-12-07,Thomson's gazelle,7,Enoolera plains,2017
+2017-12-07,Thomson's gazelle,5,Enoolera plains,2017
+2017-12-07,Thomson's gazelle,1,Enoolera plains,2017
+2017-12-07,Thomson's gazelle,4,Enoolera plains,2017
+2017-12-07,Thomson's gazelle,5,Enoolera plains,2017
+2017-12-07,Thomson's gazelle,2,Enoolera plains,2017
+2017-12-07,Thomson's gazelle,4,Enoolera plains,2017
+2017-12-07,Thomson's gazelle,1,Enoolera plains,2017
+2017-12-07,Thomson's gazelle,1,Enoolera plains,2017
+2017-12-07,Thomson's gazelle,2,Enoolera plains,2017
+2017-12-07,Thomson's gazelle,5,Enoolera plains,2017
+2017-12-07,Thomson's gazelle,1,Enoolera plains,2017
+2018-01-11,Thomson's gazelle,4,Enoolera plains,2018
+2018-01-11,Thomson's gazelle,4,Enoolera plains,2018
+2018-01-11,Thomson's gazelle,1,Enoolera plains,2018
+2018-01-11,Thomson's gazelle,2,Enoolera plains,2018
+2018-01-11,Thomson's gazelle,10,Enoolera plains,2018
+2018-01-11,Thomson's gazelle,3,Enoolera plains,2018
+2018-01-11,Thomson's gazelle,4,Enoolera plains,2018
+2018-01-11,Thomson's gazelle,4,Enoolera plains,2018
+2018-01-11,Thomson's gazelle,23,Enoolera plains,2018
+2018-01-11,Thomson's gazelle,5,Enoolera plains,2018
+2018-01-11,Thomson's gazelle,11,Enoolera plains,2018
+2018-01-11,Thomson's gazelle,2,Enoolera plains,2018
+2018-01-11,Thomson's gazelle,1,Enoolera plains,2018
+2018-01-11,Thomson's gazelle,7,Enoolera plains,2018
+2018-01-11,Thomson's gazelle,12,Enoolera plains,2018
+2018-01-11,Thomson's gazelle,5,Enoolera plains,2018
+2018-01-11,Thomson's gazelle,12,Enoolera plains,2018
+2018-01-11,Thomson's gazelle,7,Enoolera plains,2018
+2018-01-11,Thomson's gazelle,20,Enoolera plains,2018
+2018-01-11,Thomson's gazelle,8,Enoolera plains,2018
+2018-01-11,Thomson's gazelle,9,Enoolera plains,2018
+2018-03-01,Thomson's gazelle,8,Enoolera plains,2018
+2018-03-01,Thomson's gazelle,1,Enoolera plains,2018
+2018-03-01,Thomson's gazelle,1,Enoolera plains,2018
+2018-03-01,Thomson's gazelle,2,Enoolera plains,2018
+2018-03-01,Thomson's gazelle,15,Enoolera plains,2018
+2018-03-01,Thomson's gazelle,2,Enoolera plains,2018
+2018-03-01,Thomson's gazelle,11,Enoolera plains,2018
+2018-03-01,Thomson's gazelle,2,Enoolera plains,2018
+2018-03-01,Thomson's gazelle,4,Enoolera plains,2018
+2018-03-01,Thomson's gazelle,1,Enoolera plains,2018
+2018-03-01,Thomson's gazelle,1,Enoolera plains,2018
+2018-03-01,Thomson's gazelle,19,Enoolera plains,2018
+2018-04-05,Thomson's gazelle,7,Enoolera plains,2018
+2018-04-05,Thomson's gazelle,1,Enoolera plains,2018
+2018-04-05,Thomson's gazelle,2,Enoolera plains,2018
+2018-04-05,Thomson's gazelle,1,Enoolera plains,2018
+2018-04-05,Thomson's gazelle,20,Enoolera plains,2018
+2018-04-05,Thomson's gazelle,3,Enoolera plains,2018
+2018-04-05,Thomson's gazelle,1,Enoolera plains,2018
+2018-04-05,Thomson's gazelle,2,Enoolera plains,2018
+2018-04-05,Thomson's gazelle,2,Enoolera plains,2018
+2018-04-05,Thomson's gazelle,3,Enoolera plains,2018
+2018-04-05,Thomson's gazelle,2,Enoolera plains,2018
+2018-05-03,Thomson's gazelle,2,Enoolera plains,2018
+2018-05-03,Thomson's gazelle,7,Enoolera plains,2018
+2018-05-03,Thomson's gazelle,2,Enoolera plains,2018
+2018-05-03,Thomson's gazelle,1,Enoolera plains,2018
+2018-05-03,Thomson's gazelle,5,Enoolera plains,2018
+2018-05-03,Thomson's gazelle,3,Enoolera plains,2018
+2018-05-03,Thomson's gazelle,47,Enoolera plains,2018
+2018-05-03,Thomson's gazelle,1,Enoolera plains,2018
+2018-05-03,Thomson's gazelle,4,Enoolera plains,2018
+2018-05-03,Thomson's gazelle,11,Enoolera plains,2018
+2018-05-03,Thomson's gazelle,3,Enoolera plains,2018
+2018-05-03,Thomson's gazelle,79,Enoolera plains,2018
+2018-06-21,Thomson's gazelle,2,Enoolera plains,2018
+2018-06-21,Thomson's gazelle,2,Enoolera plains,2018
+2018-06-21,Thomson's gazelle,2,Enoolera plains,2018
+2018-06-21,Thomson's gazelle,4,Enoolera plains,2018
+2018-06-21,Thomson's gazelle,7,Enoolera plains,2018
+2018-06-21,Thomson's gazelle,21,Enoolera plains,2018
+2018-06-21,Thomson's gazelle,4,Enoolera plains,2018
+2018-07-05,Thomson's gazelle,1,Enoolera plains,2018
+2018-07-05,Thomson's gazelle,6,Enoolera plains,2018
+2018-07-05,Thomson's gazelle,2,Enoolera plains,2018
+2018-08-02,Thomson's gazelle,14,Enoolera plains,2018
+2018-08-02,Thomson's gazelle,3,Enoolera plains,2018
+2018-08-02,Thomson's gazelle,1,Enoolera plains,2018
+2018-08-02,Thomson's gazelle,3,Enoolera plains,2018
+2018-08-02,Thomson's gazelle,9,Enoolera plains,2018
+2018-08-02,Thomson's gazelle,2,Enoolera plains,2018
+2018-08-02,Thomson's gazelle,1,Enoolera plains,2018
+2018-09-06,Thomson's gazelle,2,Enoolera plains,2018
+2018-09-06,Thomson's gazelle,2,Enoolera plains,2018
+2018-09-06,Thomson's gazelle,5,Enoolera plains,2018
+2018-09-06,Thomson's gazelle,24,Enoolera plains,2018
+2018-09-06,Thomson's gazelle,34,Enoolera plains,2018
+2018-09-06,Thomson's gazelle,2,Enoolera plains,2018
+2018-09-06,Thomson's gazelle,25,Enoolera plains,2018
+2018-09-06,Thomson's gazelle,1,Enoolera plains,2018
+2018-09-06,Thomson's gazelle,11,Enoolera plains,2018
+2018-09-06,Thomson's gazelle,19,Enoolera plains,2018
+2018-09-06,Thomson's gazelle,31,Enoolera plains,2018
+2018-09-06,Thomson's gazelle,15,Enoolera plains,2018
+2018-09-06,Thomson's gazelle,35,Enoolera plains,2018
+2018-10-04,Thomson's gazelle,2,Enoolera plains,2018
+2018-10-04,Thomson's gazelle,2,Enoolera plains,2018
+2018-10-04,Thomson's gazelle,2,Enoolera plains,2018
+2018-10-04,Thomson's gazelle,7,Enoolera plains,2018
+2018-10-04,Thomson's gazelle,12,Enoolera plains,2018
+2018-10-04,Thomson's gazelle,11,Enoolera plains,2018
+2018-10-04,Thomson's gazelle,9,Enoolera plains,2018
+2018-10-04,Thomson's gazelle,1,Enoolera plains,2018
+2018-11-01,Thomson's gazelle,4,Enoolera plains,2018
+2018-11-01,Thomson's gazelle,2,Enoolera plains,2018
+2018-11-01,Thomson's gazelle,5,Enoolera plains,2018
+2018-11-01,Thomson's gazelle,7,Enoolera plains,2018
+2018-11-01,Thomson's gazelle,6,Enoolera plains,2018
+2018-11-01,Thomson's gazelle,2,Enoolera plains,2018
+2018-11-01,Thomson's gazelle,2,Enoolera plains,2018
+2018-11-01,Thomson's gazelle,1,Enoolera plains,2018
+2018-12-06,Thomson's gazelle,6,Enoolera plains,2018
+2018-12-06,Thomson's gazelle,3,Enoolera plains,2018
+2018-12-06,Thomson's gazelle,3,Enoolera plains,2018
+2018-12-06,Thomson's gazelle,7,Enoolera plains,2018
+2018-12-06,Thomson's gazelle,1,Enoolera plains,2018
+2018-12-06,Thomson's gazelle,1,Enoolera plains,2018
+2018-12-06,Thomson's gazelle,4,Enoolera plains,2018
+2018-12-06,Thomson's gazelle,6,Enoolera plains,2018
+2018-12-05,Thomson's gazelle,11,Enoolera plains,2018
+2017-10-20,Thomson's gazelle,2,Rekero plains,2017
+2017-10-20,Thomson's gazelle,3,Rekero plains,2017
+2017-10-20,Thomson's gazelle,1,Rekero plains,2017
+2017-10-20,Thomson's gazelle,1,Rekero plains,2017
+2017-10-20,Thomson's gazelle,2,Rekero plains,2017
+2017-10-20,Thomson's gazelle,1,Rekero plains,2017
+2017-10-20,Thomson's gazelle,2,Rekero plains,2017
+2017-10-20,Thomson's gazelle,1,Rekero plains,2017
+2017-10-20,Thomson's gazelle,1,Rekero plains,2017
+2017-10-20,Thomson's gazelle,2,Rekero plains,2017
+2017-10-20,Thomson's gazelle,2,Rekero plains,2017
+2017-10-20,Thomson's gazelle,1,Rekero plains,2017
+2017-10-20,Thomson's gazelle,2,Rekero plains,2017
+2017-10-20,Thomson's gazelle,1,Rekero plains,2017
+2017-10-20,Thomson's gazelle,6,Rekero plains,2017
+2017-10-20,Thomson's gazelle,5,Rekero plains,2017
+2017-10-20,Thomson's gazelle,4,Rekero plains,2017
+2017-10-20,Thomson's gazelle,1,Rekero plains,2017
+2017-10-20,Thomson's gazelle,1,Rekero plains,2017
+2017-10-20,Thomson's gazelle,1,Rekero plains,2017
+2017-10-20,Thomson's gazelle,1,Rekero plains,2017
+2017-10-20,Thomson's gazelle,1,Rekero plains,2017
+2017-10-20,Thomson's gazelle,1,Rekero plains,2017
+2017-10-20,Thomson's gazelle,2,Rekero plains,2017
+2017-10-20,Thomson's gazelle,4,Rekero plains,2017
+2017-10-20,Thomson's gazelle,1,Rekero plains,2017
+2017-11-02,Thomson's gazelle,2,Rekero plains,2017
+2017-11-02,Thomson's gazelle,9,Rekero plains,2017
+2017-11-02,Thomson's gazelle,1,Rekero plains,2017
+2017-11-02,Thomson's gazelle,9,Rekero plains,2017
+2017-11-02,Thomson's gazelle,9,Rekero plains,2017
+2017-11-02,Thomson's gazelle,1,Rekero plains,2017
+2017-11-02,Thomson's gazelle,1,Rekero plains,2017
+2017-12-05,Thomson's gazelle,4,Rekero plains,2017
+2017-12-05,Thomson's gazelle,6,Rekero plains,2017
+2017-12-05,Thomson's gazelle,10,Rekero plains,2017
+2017-12-07,Thomson's gazelle,1,Rekero plains,2017
+2017-12-07,Thomson's gazelle,3,Rekero plains,2017
+2017-12-07,Thomson's gazelle,8,Rekero plains,2017
+2017-12-07,Thomson's gazelle,7,Rekero plains,2017
+2017-12-07,Thomson's gazelle,3,Rekero plains,2017
+2017-12-07,Thomson's gazelle,6,Rekero plains,2017
+2017-12-07,Thomson's gazelle,1,Rekero plains,2017
+2017-12-07,Thomson's gazelle,7,Rekero plains,2017
+2017-12-07,Thomson's gazelle,16,Rekero plains,2017
+2017-12-07,Thomson's gazelle,4,Rekero plains,2017
+2017-12-07,Thomson's gazelle,2,Rekero plains,2017
+2017-12-07,Thomson's gazelle,1,Rekero plains,2017
+2017-12-07,Thomson's gazelle,1,Rekero plains,2017
+2017-12-07,Thomson's gazelle,3,Rekero plains,2017
+2017-12-07,Thomson's gazelle,27,Rekero plains,2017
+2017-12-07,Thomson's gazelle,24,Rekero plains,2017
+2017-12-07,Thomson's gazelle,14,Rekero plains,2017
+2017-12-07,Thomson's gazelle,6,Rekero plains,2017
+2017-12-07,Thomson's gazelle,2,Rekero plains,2017
+2018-01-11,Thomson's gazelle,4,Rekero plains,2018
+2018-01-11,Thomson's gazelle,2,Rekero plains,2018
+2018-01-11,Thomson's gazelle,4,Rekero plains,2018
+2018-01-11,Thomson's gazelle,1,Rekero plains,2018
+2018-01-11,Thomson's gazelle,1,Rekero plains,2018
+2018-01-11,Thomson's gazelle,1,Rekero plains,2018
+2018-01-11,Thomson's gazelle,2,Rekero plains,2018
+2018-01-11,Thomson's gazelle,1,Rekero plains,2018
+2018-01-11,Thomson's gazelle,3,Rekero plains,2018
+2018-01-11,Thomson's gazelle,2,Rekero plains,2018
+2018-01-11,Thomson's gazelle,2,Rekero plains,2018
+2018-01-11,Thomson's gazelle,2,Rekero plains,2018
+2018-01-11,Thomson's gazelle,1,Rekero plains,2018
+2018-01-11,Thomson's gazelle,2,Rekero plains,2018
+2018-02-06,Thomson's gazelle,5,Rekero plains,2018
+2018-02-06,Thomson's gazelle,2,Rekero plains,2018
+2018-02-06,Thomson's gazelle,9,Rekero plains,2018
+2018-03-01,Thomson's gazelle,2,Rekero plains,2018
+2018-03-01,Thomson's gazelle,2,Rekero plains,2018
+2018-03-01,Thomson's gazelle,1,Rekero plains,2018
+2018-03-01,Thomson's gazelle,4,Rekero plains,2018
+2018-03-01,Thomson's gazelle,3,Rekero plains,2018
+2018-03-01,Thomson's gazelle,5,Rekero plains,2018
+2018-03-01,Thomson's gazelle,1,Rekero plains,2018
+2018-03-01,Thomson's gazelle,3,Rekero plains,2018
+2018-03-01,Thomson's gazelle,1,Rekero plains,2018
+2018-03-01,Thomson's gazelle,30,Rekero plains,2018
+2018-03-01,Thomson's gazelle,2,Rekero plains,2018
+2018-04-05,Thomson's gazelle,1,Rekero plains,2018
+2018-04-05,Thomson's gazelle,4,Rekero plains,2018
+2018-04-05,Thomson's gazelle,4,Rekero plains,2018
+2018-04-05,Thomson's gazelle,1,Rekero plains,2018
+2018-04-05,Thomson's gazelle,9,Rekero plains,2018
+2018-04-05,Thomson's gazelle,3,Rekero plains,2018
+2018-04-05,Thomson's gazelle,1,Rekero plains,2018
+2018-04-05,Thomson's gazelle,1,Rekero plains,2018
+2018-04-05,Thomson's gazelle,20,Rekero plains,2018
+2018-04-05,Thomson's gazelle,24,Rekero plains,2018
+2018-04-05,Thomson's gazelle,1,Rekero plains,2018
+2018-04-05,Thomson's gazelle,20,Rekero plains,2018
+2018-04-05,Thomson's gazelle,8,Rekero plains,2018
+2018-04-05,Thomson's gazelle,1,Rekero plains,2018
+2018-04-05,Thomson's gazelle,20,Rekero plains,2018
+2018-04-05,Thomson's gazelle,6,Rekero plains,2018
+2018-04-05,Thomson's gazelle,10,Rekero plains,2018
+2018-04-05,Thomson's gazelle,2,Rekero plains,2018
+2018-04-05,Thomson's gazelle,1,Rekero plains,2018
+2018-04-05,Thomson's gazelle,1,Rekero plains,2018
+2018-05-03,Thomson's gazelle,15,Rekero plains,2018
+2018-05-03,Thomson's gazelle,4,Rekero plains,2018
+2018-05-03,Thomson's gazelle,3,Rekero plains,2018
+2018-05-03,Thomson's gazelle,1,Rekero plains,2018
+2018-05-03,Thomson's gazelle,36,Rekero plains,2018
+2018-05-03,Thomson's gazelle,1,Rekero plains,2018
+2018-05-03,Thomson's gazelle,5,Rekero plains,2018
+2018-05-03,Thomson's gazelle,14,Rekero plains,2018
+2018-05-03,Thomson's gazelle,6,Rekero plains,2018
+2018-05-03,Thomson's gazelle,1,Rekero plains,2018
+2018-05-03,Thomson's gazelle,16,Rekero plains,2018
+2018-05-03,Thomson's gazelle,16,Rekero plains,2018
+2018-05-03,Thomson's gazelle,55,Rekero plains,2018
+2018-05-03,Thomson's gazelle,1,Rekero plains,2018
+2018-05-03,Thomson's gazelle,1,Rekero plains,2018
+2018-05-03,Thomson's gazelle,10,Rekero plains,2018
+2018-06-21,Thomson's gazelle,43,Rekero plains,2018
+2018-06-21,Thomson's gazelle,2,Rekero plains,2018
+2018-06-21,Thomson's gazelle,46,Rekero plains,2018
+2018-06-21,Thomson's gazelle,14,Rekero plains,2018
+2018-06-21,Thomson's gazelle,1,Rekero plains,2018
+2018-07-05,Thomson's gazelle,14,Rekero plains,2018
+2018-07-05,Thomson's gazelle,2,Rekero plains,2018
+2018-07-05,Thomson's gazelle,16,Rekero plains,2018
+2018-08-02,Thomson's gazelle,3,Rekero plains,2018
+2018-08-02,Thomson's gazelle,9,Rekero plains,2018
+2018-08-02,Thomson's gazelle,7,Rekero plains,2018
+2018-08-02,Thomson's gazelle,17,Rekero plains,2018
+2018-08-02,Thomson's gazelle,4,Rekero plains,2018
+2018-08-02,Thomson's gazelle,7,Rekero plains,2018
+2018-09-06,Thomson's gazelle,10,Rekero plains,2018
+2018-09-06,Thomson's gazelle,2,Rekero plains,2018
+2018-09-06,Thomson's gazelle,1,Rekero plains,2018
+2018-09-06,Thomson's gazelle,2,Rekero plains,2018
+2018-09-06,Thomson's gazelle,15,Rekero plains,2018
+2018-09-06,Thomson's gazelle,3,Rekero plains,2018
+2018-09-06,Thomson's gazelle,21,Rekero plains,2018
+2018-09-06,Thomson's gazelle,14,Rekero plains,2018
+2018-10-04,Thomson's gazelle,2,Rekero plains,2018
+2018-10-04,Thomson's gazelle,2,Rekero plains,2018
+2018-10-04,Thomson's gazelle,1,Rekero plains,2018
+2018-10-04,Thomson's gazelle,2,Rekero plains,2018
+2018-11-01,Thomson's gazelle,24,Rekero plains,2018
+2018-11-01,Thomson's gazelle,22,Rekero plains,2018
+2018-11-01,Thomson's gazelle,2,Rekero plains,2018
+2018-11-01,Thomson's gazelle,1,Rekero plains,2018
+2018-11-01,Thomson's gazelle,1,Rekero plains,2018
+2018-11-01,Thomson's gazelle,20,Rekero plains,2018
+2018-11-01,Thomson's gazelle,17,Rekero plains,2018
+2018-11-01,Thomson's gazelle,8,Rekero plains,2018
+2018-11-01,Thomson's gazelle,3,Rekero plains,2018
+2018-11-01,Thomson's gazelle,11,Rekero plains,2018
+2018-11-01,Thomson's gazelle,1,Rekero plains,2018
+2018-12-06,Thomson's gazelle,3,Rekero plains,2018
+2018-12-06,Thomson's gazelle,1,Rekero plains,2018
+2018-12-06,Thomson's gazelle,12,Rekero plains,2018
+2018-12-06,Thomson's gazelle,1,Rekero plains,2018
+2018-12-05,Thomson's gazelle,5,Rekero plains,2018
+2017-10-20,Thomson's gazelle,1,Payia plains,2017
+2017-10-20,Thomson's gazelle,9,Payia plains,2017
+2017-10-20,Thomson's gazelle,3,Payia plains,2017
+2017-10-20,Thomson's gazelle,25,Payia plains,2017
+2017-10-20,Thomson's gazelle,4,Payia plains,2017
+2017-10-20,Thomson's gazelle,1,Payia plains,2017
+2017-10-20,Thomson's gazelle,2,Payia plains,2017
+2017-10-20,Thomson's gazelle,2,Payia plains,2017
+2017-10-20,Thomson's gazelle,3,Payia plains,2017
+2017-10-20,Thomson's gazelle,2,Payia plains,2017
+2017-10-20,Thomson's gazelle,4,Payia plains,2017
+2017-10-20,Thomson's gazelle,1,Payia plains,2017
+2017-10-20,Thomson's gazelle,1,Payia plains,2017
+2017-10-20,Thomson's gazelle,2,Payia plains,2017
+2017-10-20,Thomson's gazelle,2,Payia plains,2017
+2017-10-20,Thomson's gazelle,4,Payia plains,2017
+2017-10-20,Thomson's gazelle,8,Payia plains,2017
+2017-10-20,Thomson's gazelle,3,Payia plains,2017
+2017-10-20,Thomson's gazelle,3,Payia plains,2017
+2017-10-20,Thomson's gazelle,4,Payia plains,2017
+2017-10-20,Thomson's gazelle,1,Payia plains,2017
+2017-10-20,Thomson's gazelle,1,Payia plains,2017
+2017-10-20,Thomson's gazelle,1,Payia plains,2017
+2017-10-20,Thomson's gazelle,2,Payia plains,2017
+2017-10-20,Thomson's gazelle,1,Payia plains,2017
+2017-11-02,Thomson's gazelle,14,Payia plains,2017
+2017-11-02,Thomson's gazelle,1,Payia plains,2017
+2017-11-02,Thomson's gazelle,2,Payia plains,2017
+2017-11-02,Thomson's gazelle,23,Payia plains,2017
+2017-11-02,Thomson's gazelle,1,Payia plains,2017
+2017-11-02,Thomson's gazelle,8,Payia plains,2017
+2017-11-02,Thomson's gazelle,6,Payia plains,2017
+2017-11-02,Thomson's gazelle,1,Payia plains,2017
+2017-11-02,Thomson's gazelle,2,Payia plains,2017
+2017-11-02,Thomson's gazelle,4,Payia plains,2017
+2017-11-02,Thomson's gazelle,50,Payia plains,2017
+2017-11-02,Thomson's gazelle,1,Payia plains,2017
+2017-11-02,Thomson's gazelle,2,Payia plains,2017
+2017-11-02,Thomson's gazelle,8,Payia plains,2017
+2017-11-02,Thomson's gazelle,10,Payia plains,2017
+2017-11-02,Thomson's gazelle,1,Payia plains,2017
+2017-12-07,Thomson's gazelle,1,Payia plains,2017
+2017-12-07,Thomson's gazelle,1,Payia plains,2017
+2017-12-07,Thomson's gazelle,1,Payia plains,2017
+2017-12-07,Thomson's gazelle,4,Payia plains,2017
+2017-12-07,Thomson's gazelle,2,Payia plains,2017
+2017-12-07,Thomson's gazelle,1,Payia plains,2017
+2017-12-07,Thomson's gazelle,3,Payia plains,2017
+2017-12-07,Thomson's gazelle,1,Payia plains,2017
+2017-12-07,Thomson's gazelle,2,Payia plains,2017
+2017-12-07,Thomson's gazelle,13,Payia plains,2017
+2017-12-07,Thomson's gazelle,9,Payia plains,2017
+2017-12-07,Thomson's gazelle,4,Payia plains,2017
+2017-12-07,Thomson's gazelle,1,Payia plains,2017
+2017-12-07,Thomson's gazelle,1,Payia plains,2017
+2017-12-07,Thomson's gazelle,1,Payia plains,2017
+2017-12-07,Thomson's gazelle,1,Payia plains,2017
+2017-12-07,Thomson's gazelle,2,Payia plains,2017
+2017-12-07,Thomson's gazelle,1,Payia plains,2017
+2017-12-07,Thomson's gazelle,1,Payia plains,2017
+2017-12-07,Thomson's gazelle,2,Payia plains,2017
+2017-12-07,Thomson's gazelle,1,Payia plains,2017
+2017-12-07,Thomson's gazelle,1,Payia plains,2017
+2017-12-07,Thomson's gazelle,15,Payia plains,2017
+2017-12-07,Thomson's gazelle,27,Payia plains,2017
+2017-12-07,Thomson's gazelle,2,Payia plains,2017
+2017-12-07,Thomson's gazelle,8,Payia plains,2017
+2017-12-07,Thomson's gazelle,4,Payia plains,2017
+2017-12-07,Thomson's gazelle,1,Payia plains,2017
+2018-01-11,Thomson's gazelle,1,Payia plains,2018
+2018-01-11,Thomson's gazelle,1,Payia plains,2018
+2018-01-11,Thomson's gazelle,10,Payia plains,2018
+2018-01-11,Thomson's gazelle,1,Payia plains,2018
+2018-01-11,Thomson's gazelle,2,Payia plains,2018
+2018-01-11,Thomson's gazelle,4,Payia plains,2018
+2018-01-11,Thomson's gazelle,2,Payia plains,2018
+2018-01-11,Thomson's gazelle,2,Payia plains,2018
+2018-01-11,Thomson's gazelle,4,Payia plains,2018
+2018-01-11,Thomson's gazelle,21,Payia plains,2018
+2018-01-11,Thomson's gazelle,4,Payia plains,2018
+2018-01-11,Thomson's gazelle,16,Payia plains,2018
+2018-01-11,Thomson's gazelle,1,Payia plains,2018
+2018-01-11,Thomson's gazelle,1,Payia plains,2018
+2018-01-11,Thomson's gazelle,1,Payia plains,2018
+2018-01-11,Thomson's gazelle,3,Payia plains,2018
+2018-01-11,Thomson's gazelle,1,Payia plains,2018
+2018-01-11,Thomson's gazelle,3,Payia plains,2018
+2018-01-11,Thomson's gazelle,1,Payia plains,2018
+2018-01-11,Thomson's gazelle,1,Payia plains,2018
+2018-01-11,Thomson's gazelle,4,Payia plains,2018
+2018-01-11,Thomson's gazelle,2,Payia plains,2018
+2018-01-11,Thomson's gazelle,4,Payia plains,2018
+2018-01-11,Thomson's gazelle,1,Payia plains,2018
+2018-01-11,Thomson's gazelle,4,Payia plains,2018
+2018-01-11,Thomson's gazelle,4,Payia plains,2018
+2018-01-11,Thomson's gazelle,12,Payia plains,2018
+2018-01-11,Thomson's gazelle,2,Payia plains,2018
+2018-01-11,Thomson's gazelle,3,Payia plains,2018
+2018-01-11,Thomson's gazelle,3,Payia plains,2018
+2018-01-11,Thomson's gazelle,10,Payia plains,2018
+2018-01-11,Thomson's gazelle,2,Payia plains,2018
+2018-01-11,Thomson's gazelle,1,Payia plains,2018
+2018-01-11,Thomson's gazelle,1,Payia plains,2018
+2018-02-01,Thomson's gazelle,2,Payia plains,2018
+2018-02-01,Thomson's gazelle,4,Payia plains,2018
+2018-02-01,Thomson's gazelle,50,Payia plains,2018
+2018-02-01,Thomson's gazelle,26,Payia plains,2018
+2018-02-01,Thomson's gazelle,48,Payia plains,2018
+2018-02-01,Thomson's gazelle,1,Payia plains,2018
+2018-02-01,Thomson's gazelle,2,Payia plains,2018
+2018-02-01,Thomson's gazelle,1,Payia plains,2018
+2018-02-01,Thomson's gazelle,12,Payia plains,2018
+2018-02-01,Thomson's gazelle,3,Payia plains,2018
+2018-02-01,Thomson's gazelle,15,Payia plains,2018
+2018-02-01,Thomson's gazelle,5,Payia plains,2018
+2018-02-01,Thomson's gazelle,7,Payia plains,2018
+2018-03-01,Thomson's gazelle,4,Payia plains,2018
+2018-03-01,Thomson's gazelle,1,Payia plains,2018
+2018-03-01,Thomson's gazelle,10,Payia plains,2018
+2018-03-01,Thomson's gazelle,15,Payia plains,2018
+2018-03-01,Thomson's gazelle,10,Payia plains,2018
+2018-03-01,Thomson's gazelle,2,Payia plains,2018
+2018-03-01,Thomson's gazelle,13,Payia plains,2018
+2018-03-01,Thomson's gazelle,2,Payia plains,2018
+2018-03-01,Thomson's gazelle,1,Payia plains,2018
+2018-03-01,Thomson's gazelle,10,Payia plains,2018
+2018-03-01,Thomson's gazelle,4,Payia plains,2018
+2018-03-01,Thomson's gazelle,6,Payia plains,2018
+2018-03-01,Thomson's gazelle,20,Payia plains,2018
+2018-03-01,Thomson's gazelle,1,Payia plains,2018
+2018-04-05,Thomson's gazelle,2,Payia plains,2018
+2018-04-05,Thomson's gazelle,2,Payia plains,2018
+2018-04-05,Thomson's gazelle,2,Payia plains,2018
+2018-04-05,Thomson's gazelle,2,Payia plains,2018
+2018-04-05,Thomson's gazelle,2,Payia plains,2018
+2018-04-05,Thomson's gazelle,1,Payia plains,2018
+2018-04-05,Thomson's gazelle,35,Payia plains,2018
+2018-04-05,Thomson's gazelle,5,Payia plains,2018
+2018-04-05,Thomson's gazelle,1,Payia plains,2018
+2018-04-05,Thomson's gazelle,1,Payia plains,2018
+2018-04-05,Thomson's gazelle,2,Payia plains,2018
+2018-04-05,Thomson's gazelle,5,Payia plains,2018
+2018-04-05,Thomson's gazelle,3,Payia plains,2018
+2018-04-05,Thomson's gazelle,2,Payia plains,2018
+2018-04-05,Thomson's gazelle,2,Payia plains,2018
+2018-04-05,Thomson's gazelle,1,Payia plains,2018
+2018-04-05,Thomson's gazelle,8,Payia plains,2018
+2018-04-05,Thomson's gazelle,4,Payia plains,2018
+2018-04-05,Thomson's gazelle,2,Payia plains,2018
+2018-04-05,Thomson's gazelle,5,Payia plains,2018
+2018-04-05,Thomson's gazelle,1,Payia plains,2018
+2018-04-05,Thomson's gazelle,3,Payia plains,2018
+2018-05-03,Thomson's gazelle,8,Payia plains,2018
+2018-05-03,Thomson's gazelle,6,Payia plains,2018
+2018-05-03,Thomson's gazelle,3,Payia plains,2018
+2018-05-03,Thomson's gazelle,6,Payia plains,2018
+2018-05-03,Thomson's gazelle,4,Payia plains,2018
+2018-05-03,Thomson's gazelle,14,Payia plains,2018
+2018-05-03,Thomson's gazelle,1,Payia plains,2018
+2018-05-03,Thomson's gazelle,2,Payia plains,2018
+2018-05-03,Thomson's gazelle,6,Payia plains,2018
+2018-05-03,Thomson's gazelle,7,Payia plains,2018
+2018-05-03,Thomson's gazelle,4,Payia plains,2018
+2018-05-03,Thomson's gazelle,10,Payia plains,2018
+2018-05-03,Thomson's gazelle,5,Payia plains,2018
+2018-05-03,Thomson's gazelle,1,Payia plains,2018
+2018-05-03,Thomson's gazelle,1,Payia plains,2018
+2018-05-03,Thomson's gazelle,50,Payia plains,2018
+2018-05-03,Thomson's gazelle,1,Payia plains,2018
+2018-05-03,Thomson's gazelle,8,Payia plains,2018
+2018-05-03,Thomson's gazelle,8,Payia plains,2018
+2018-05-03,Thomson's gazelle,12,Payia plains,2018
+2018-05-03,Thomson's gazelle,28,Payia plains,2018
+2018-05-03,Thomson's gazelle,11,Payia plains,2018
+2018-05-03,Thomson's gazelle,18,Payia plains,2018
+2018-05-03,Thomson's gazelle,10,Payia plains,2018
+2018-05-03,Thomson's gazelle,2,Payia plains,2018
+2018-05-03,Thomson's gazelle,1,Payia plains,2018
+2018-06-21,Thomson's gazelle,6,Payia plains,2018
+2018-06-21,Thomson's gazelle,3,Payia plains,2018
+2018-06-21,Thomson's gazelle,2,Payia plains,2018
+2018-06-21,Thomson's gazelle,1,Payia plains,2018
+2018-06-21,Thomson's gazelle,3,Payia plains,2018
+2018-06-21,Thomson's gazelle,21,Payia plains,2018
+2018-06-21,Thomson's gazelle,5,Payia plains,2018
+2018-07-05,Thomson's gazelle,8,Payia plains,2018
+2018-07-05,Thomson's gazelle,6,Payia plains,2018
+2018-07-05,Thomson's gazelle,13,Payia plains,2018
+2018-07-05,Thomson's gazelle,4,Payia plains,2018
+2018-07-05,Thomson's gazelle,3,Payia plains,2018
+2018-07-05,Thomson's gazelle,5,Payia plains,2018
+2018-07-05,Thomson's gazelle,2,Payia plains,2018
+2018-08-02,Thomson's gazelle,10,Payia plains,2018
+2018-08-02,Thomson's gazelle,3,Payia plains,2018
+2018-08-02,Thomson's gazelle,3,Payia plains,2018
+2018-08-02,Thomson's gazelle,1,Payia plains,2018
+2018-08-02,Thomson's gazelle,2,Payia plains,2018
+2018-08-02,Thomson's gazelle,1,Payia plains,2018
+2018-08-02,Thomson's gazelle,26,Payia plains,2018
+2018-08-02,Thomson's gazelle,9,Payia plains,2018
+2018-08-02,Thomson's gazelle,5,Payia plains,2018
+2018-08-02,Thomson's gazelle,1,Payia plains,2018
+2018-08-02,Thomson's gazelle,1,Payia plains,2018
+2018-08-02,Thomson's gazelle,10,Payia plains,2018
+2018-08-02,Thomson's gazelle,2,Payia plains,2018
+2018-08-02,Thomson's gazelle,16,Payia plains,2018
+2018-09-06,Thomson's gazelle,36,Payia plains,2018
+2018-09-06,Thomson's gazelle,8,Payia plains,2018
+2018-09-06,Thomson's gazelle,21,Payia plains,2018
+2018-09-06,Thomson's gazelle,39,Payia plains,2018
+2018-09-06,Thomson's gazelle,2,Payia plains,2018
+2018-09-06,Thomson's gazelle,9,Payia plains,2018
+2018-09-06,Thomson's gazelle,3,Payia plains,2018
+2018-09-06,Thomson's gazelle,7,Payia plains,2018
+2018-09-06,Thomson's gazelle,1,Payia plains,2018
+2018-09-06,Thomson's gazelle,8,Payia plains,2018
+2018-09-06,Thomson's gazelle,3,Payia plains,2018
+2018-09-06,Thomson's gazelle,1,Payia plains,2018
+2018-10-04,Thomson's gazelle,4,Payia plains,2018
+2018-10-04,Thomson's gazelle,6,Payia plains,2018
+2018-10-04,Thomson's gazelle,14,Payia plains,2018
+2018-10-04,Thomson's gazelle,16,Payia plains,2018
+2018-10-04,Thomson's gazelle,4,Payia plains,2018
+2018-10-04,Thomson's gazelle,14,Payia plains,2018
+2018-10-04,Thomson's gazelle,3,Payia plains,2018
+2018-10-04,Thomson's gazelle,24,Payia plains,2018
+2018-10-04,Thomson's gazelle,9,Payia plains,2018
+2018-11-01,Thomson's gazelle,1,Payia plains,2018
+2018-11-01,Thomson's gazelle,1,Payia plains,2018
+2018-11-01,Thomson's gazelle,10,Payia plains,2018
+2018-11-01,Thomson's gazelle,5,Payia plains,2018
+2018-11-01,Thomson's gazelle,1,Payia plains,2018
+2018-11-01,Thomson's gazelle,5,Payia plains,2018
+2018-11-01,Thomson's gazelle,8,Payia plains,2018
+2018-12-06,Thomson's gazelle,4,Payia plains,2018
+2018-12-06,Thomson's gazelle,1,Payia plains,2018
+2018-12-06,Thomson's gazelle,3,Payia plains,2018
+2018-12-06,Thomson's gazelle,1,Payia plains,2018
+2017-11-07,Topi,1,Olare Sampu bushlands,2017
+2017-12-05,Topi,2,Olare Sampu bushlands,2017
+2017-12-05,Topi,1,Olare Sampu bushlands,2017
+2018-01-09,Topi,1,Olare Sampu bushlands,2018
+2018-02-13,Topi,1,Olare Sampu bushlands,2018
+2018-03-06,Topi,1,Olare Sampu bushlands,2018
+2018-04-03,Topi,3,Olare Sampu bushlands,2018
+2018-05-08,Topi,10,Olare Sampu bushlands,2018
+2018-06-05,Topi,3,Olare Sampu bushlands,2018
+2018-07-01,Topi,4,Olare Sampu bushlands,2018
+2018-07-01,Topi,4,Olare Sampu bushlands,2018
+2018-07-01,Topi,1,Olare Sampu bushlands,2018
+2018-07-01,Topi,2,Olare Sampu bushlands,2018
+2018-07-03,Topi,1,Olare Sampu bushlands,2018
+2018-08-02,Topi,3,Olare Sampu bushlands,2018
+2018-08-02,Topi,6,Olare Sampu bushlands,2018
+2018-09-04,Topi,1,Olare Sampu bushlands,2018
+2018-09-04,Topi,2,Olare Sampu bushlands,2018
+2018-10-02,Topi,3,Olare Sampu bushlands,2018
+2018-12-04,Topi,3,Olare Sampu bushlands,2018
+2017-10-17,Topi,1,Sampu Enkare bushlands,2017
+2017-10-17,Topi,4,Sampu Enkare bushlands,2017
+2017-10-17,Topi,1,Sampu Enkare bushlands,2017
+2017-10-17,Topi,1,Sampu Enkare bushlands,2017
+2017-11-07,Topi,2,Sampu Enkare bushlands,2017
+2017-11-07,Topi,2,Sampu Enkare bushlands,2017
+2018-01-16,Topi,1,Sampu Enkare bushlands,2018
+2018-01-16,Topi,3,Sampu Enkare bushlands,2018
+2018-01-16,Topi,1,Sampu Enkare bushlands,2018
+2018-02-13,Topi,1,Sampu Enkare bushlands,2018
+2018-02-13,Topi,2,Sampu Enkare bushlands,2018
+2018-02-13,Topi,1,Sampu Enkare bushlands,2018
+2018-02-13,Topi,1,Sampu Enkare bushlands,2018
+2018-02-13,Topi,1,Sampu Enkare bushlands,2018
+2018-04-03,Topi,12,Sampu Enkare bushlands,2018
+2018-04-03,Topi,1,Sampu Enkare bushlands,2018
+2018-04-03,Topi,1,Sampu Enkare bushlands,2018
+2018-04-03,Topi,3,Sampu Enkare bushlands,2018
+2018-04-03,Topi,1,Sampu Enkare bushlands,2018
+2018-05-08,Topi,1,Sampu Enkare bushlands,2018
+2018-05-08,Topi,1,Sampu Enkare bushlands,2018
+2018-05-08,Topi,1,Sampu Enkare bushlands,2018
+2018-05-08,Topi,1,Sampu Enkare bushlands,2018
+2018-06-05,Topi,6,Sampu Enkare bushlands,2018
+2018-06-05,Topi,1,Sampu Enkare bushlands,2018
+2018-06-19,Topi,2,Sampu Enkare bushlands,2018
+2018-07-03,Topi,1,Sampu Enkare bushlands,2018
+2018-08-02,Topi,1,Sampu Enkare bushlands,2018
+2018-08-02,Topi,3,Sampu Enkare bushlands,2018
+2018-09-04,Topi,1,Sampu Enkare bushlands,2018
+2018-09-04,Topi,1,Sampu Enkare bushlands,2018
+2018-09-04,Topi,1,Sampu Enkare bushlands,2018
+2018-10-02,Topi,1,Sampu Enkare bushlands,2018
+2018-10-02,Topi,4,Sampu Enkare bushlands,2018
+2018-11-06,Topi,2,Sampu Enkare bushlands,2018
+2018-12-04,Topi,1,Sampu Enkare bushlands,2018
+2018-12-04,Topi,1,Sampu Enkare bushlands,2018
+2018-12-04,Topi,1,Sampu Enkare bushlands,2018
+2018-12-04,Topi,1,Sampu Enkare bushlands,2018
+2017-10-20,Topi,4,Balanite plains,2017
+2017-10-20,Topi,1,Balanite plains,2017
+2017-10-20,Topi,3,Balanite plains,2017
+2017-12-07,Topi,3,Balanite plains,2017
+2017-12-07,Topi,3,Balanite plains,2017
+2018-01-11,Topi,1,Balanite plains,2018
+2018-01-11,Topi,2,Balanite plains,2018
+2018-01-11,Topi,2,Balanite plains,2018
+2018-01-11,Topi,9,Balanite plains,2018
+2018-01-11,Topi,1,Balanite plains,2018
+2018-02-01,Topi,1,Balanite plains,2018
+2018-03-01,Topi,1,Balanite plains,2018
+2018-04-05,Topi,1,Balanite plains,2018
+2018-04-05,Topi,4,Balanite plains,2018
+2018-04-05,Topi,6,Balanite plains,2018
+2018-04-05,Topi,1,Balanite plains,2018
+2018-04-05,Topi,3,Balanite plains,2018
+2018-05-03,Topi,22,Balanite plains,2018
+2018-05-03,Topi,2,Balanite plains,2018
+2018-05-03,Topi,1,Balanite plains,2018
+2018-05-03,Topi,6,Balanite plains,2018
+2018-06-21,Topi,2,Balanite plains,2018
+2018-06-21,Topi,12,Balanite plains,2018
+2018-07-05,Topi,4,Balanite plains,2018
+2018-07-05,Topi,6,Balanite plains,2018
+2018-07-05,Topi,4,Balanite plains,2018
+2018-07-05,Topi,2,Balanite plains,2018
+2018-08-02,Topi,3,Balanite plains,2018
+2018-08-02,Topi,10,Balanite plains,2018
+2018-08-02,Topi,6,Balanite plains,2018
+2018-09-06,Topi,2,Balanite plains,2018
+2018-09-06,Topi,11,Balanite plains,2018
+2018-11-01,Topi,3,Balanite plains,2018
+2018-11-01,Topi,12,Balanite plains,2018
+2018-11-01,Topi,3,Balanite plains,2018
+2018-12-06,Topi,2,Balanite plains,2018
+2018-12-06,Topi,4,Balanite plains,2018
+2018-12-06,Topi,3,Balanite plains,2018
+2017-11-07,Topi,4,Ilkisieusieu bushlands,2017
+2018-02-13,Topi,2,Ilkisieusieu bushlands,2018
+2018-02-06,Topi,8,Ilkisieusieu bushlands,2018
+2018-05-08,Topi,1,Ilkisieusieu bushlands,2018
+2018-06-19,Topi,8,Ilkisieusieu bushlands,2018
+2018-06-19,Topi,1,Ilkisieusieu bushlands,2018
+2018-06-19,Topi,1,Ilkisieusieu bushlands,2018
+2018-07-03,Topi,2,Ilkisieusieu bushlands,2018
+2017-10-17,Topi,2,Rekero bushlands,2017
+2017-10-17,Topi,2,Rekero bushlands,2017
+2017-10-24,Topi,5,Rekero bushlands,2017
+2017-10-24,Topi,2,Rekero bushlands,2017
+2017-10-24,Topi,1,Rekero bushlands,2017
+2017-10-24,Topi,6,Rekero bushlands,2017
+2017-10-24,Topi,5,Rekero bushlands,2017
+2017-10-24,Topi,9,Rekero bushlands,2017
+2017-10-24,Topi,1,Rekero bushlands,2017
+2017-10-24,Topi,1,Rekero bushlands,2017
+2017-11-07,Topi,5,Rekero bushlands,2017
+2017-11-07,Topi,3,Rekero bushlands,2017
+2017-11-07,Topi,2,Rekero bushlands,2017
+2017-11-07,Topi,4,Rekero bushlands,2017
+2017-11-07,Topi,2,Rekero bushlands,2017
+2017-11-07,Topi,1,Rekero bushlands,2017
+2017-11-07,Topi,4,Rekero bushlands,2017
+2017-11-07,Topi,3,Rekero bushlands,2017
+2017-11-07,Topi,1,Rekero bushlands,2017
+2017-11-07,Topi,2,Rekero bushlands,2017
+2017-11-07,Topi,4,Rekero bushlands,2017
+2017-11-07,Topi,2,Rekero bushlands,2017
+2017-11-07,Topi,1,Rekero bushlands,2017
+2017-11-07,Topi,1,Rekero bushlands,2017
+2017-11-07,Topi,1,Rekero bushlands,2017
+2017-11-07,Topi,1,Rekero bushlands,2017
+2017-11-01,Topi,8,Rekero bushlands,2017
+2017-11-01,Topi,6,Rekero bushlands,2017
+2017-11-01,Topi,2,Rekero bushlands,2017
+2017-11-01,Topi,2,Rekero bushlands,2017
+2017-11-01,Topi,1,Rekero bushlands,2017
+2017-11-01,Topi,2,Rekero bushlands,2017
+2018-01-16,Topi,1,Rekero bushlands,2018
+2018-01-16,Topi,2,Rekero bushlands,2018
+2018-01-16,Topi,2,Rekero bushlands,2018
+2018-01-01,Topi,6,Rekero bushlands,2018
+2018-01-01,Topi,2,Rekero bushlands,2018
+2018-01-01,Topi,1,Rekero bushlands,2018
+2018-01-01,Topi,1,Rekero bushlands,2018
+2018-01-01,Topi,1,Rekero bushlands,2018
+2018-01-01,Topi,2,Rekero bushlands,2018
+2018-01-01,Topi,3,Rekero bushlands,2018
+2018-02-13,Topi,1,Rekero bushlands,2018
+2018-02-13,Topi,2,Rekero bushlands,2018
+2018-03-06,Topi,1,Rekero bushlands,2018
+2018-03-06,Topi,1,Rekero bushlands,2018
+2018-03-06,Topi,1,Rekero bushlands,2018
+2018-03-06,Topi,1,Rekero bushlands,2018
+2018-04-03,Topi,1,Rekero bushlands,2018
+2018-05-08,Topi,2,Rekero bushlands,2018
+2018-05-08,Topi,1,Rekero bushlands,2018
+2018-05-08,Topi,2,Rekero bushlands,2018
+2018-05-08,Topi,5,Rekero bushlands,2018
+2018-07-03,Topi,4,Rekero bushlands,2018
+2018-07-03,Topi,1,Rekero bushlands,2018
+2018-07-03,Topi,1,Rekero bushlands,2018
+2018-08-02,Topi,3,Rekero bushlands,2018
+2018-08-02,Topi,4,Rekero bushlands,2018
+2018-08-02,Topi,1,Rekero bushlands,2018
+2018-08-02,Topi,2,Rekero bushlands,2018
+2018-08-02,Topi,1,Rekero bushlands,2018
+2018-09-04,Topi,1,Rekero bushlands,2018
+2018-09-04,Topi,2,Rekero bushlands,2018
+2018-09-04,Topi,2,Rekero bushlands,2018
+2018-09-04,Topi,1,Rekero bushlands,2018
+2018-09-04,Topi,1,Rekero bushlands,2018
+2018-10-02,Topi,1,Rekero bushlands,2018
+2018-10-02,Topi,2,Rekero bushlands,2018
+2018-11-06,Topi,2,Rekero bushlands,2018
+2018-11-06,Topi,4,Rekero bushlands,2018
+2018-11-06,Topi,1,Rekero bushlands,2018
+2018-11-06,Topi,1,Rekero bushlands,2018
+2018-12-04,Topi,1,Rekero bushlands,2018
+2018-12-04,Topi,3,Rekero bushlands,2018
+2018-12-04,Topi,2,Rekero bushlands,2018
+2018-12-04,Topi,1,Rekero bushlands,2018
+2018-12-04,Topi,2,Rekero bushlands,2018
+2018-12-04,Topi,4,Rekero bushlands,2018
+2017-10-20,Topi,1,Enoolera plains,2017
+2017-10-20,Topi,1,Enoolera plains,2017
+2017-11-02,Topi,1,Enoolera plains,2017
+2017-11-02,Topi,1,Enoolera plains,2017
+2017-11-02,Topi,6,Enoolera plains,2017
+2017-11-02,Topi,2,Enoolera plains,2017
+2017-11-02,Topi,6,Enoolera plains,2017
+2017-11-02,Topi,3,Enoolera plains,2017
+2017-11-02,Topi,2,Enoolera plains,2017
+2017-11-02,Topi,2,Enoolera plains,2017
+2017-12-07,Topi,1,Enoolera plains,2017
+2018-01-11,Topi,1,Enoolera plains,2018
+2018-01-11,Topi,1,Enoolera plains,2018
+2018-03-01,Topi,2,Enoolera plains,2018
+2018-03-01,Topi,2,Enoolera plains,2018
+2018-04-05,Topi,1,Enoolera plains,2018
+2018-04-05,Topi,10,Enoolera plains,2018
+2018-04-05,Topi,2,Enoolera plains,2018
+2018-04-05,Topi,1,Enoolera plains,2018
+2018-04-05,Topi,1,Enoolera plains,2018
+2018-05-03,Topi,7,Enoolera plains,2018
+2018-05-03,Topi,1,Enoolera plains,2018
+2018-05-03,Topi,6,Enoolera plains,2018
+2018-05-03,Topi,2,Enoolera plains,2018
+2018-05-03,Topi,1,Enoolera plains,2018
+2018-05-03,Topi,2,Enoolera plains,2018
+2018-05-03,Topi,2,Enoolera plains,2018
+2018-06-21,Topi,1,Enoolera plains,2018
+2018-06-21,Topi,1,Enoolera plains,2018
+2018-07-05,Topi,3,Enoolera plains,2018
+2018-08-02,Topi,1,Enoolera plains,2018
+2018-09-06,Topi,2,Enoolera plains,2018
+2018-09-06,Topi,4,Enoolera plains,2018
+2018-10-04,Topi,1,Enoolera plains,2018
+2018-11-01,Topi,1,Enoolera plains,2018
+2018-12-06,Topi,1,Enoolera plains,2018
+2018-12-05,Topi,1,Enoolera plains,2018
+2017-11-02,Topi,1,Rekero plains,2017
+2017-12-05,Topi,1,Rekero plains,2017
+2018-01-11,Topi,2,Rekero plains,2018
+2018-01-11,Topi,1,Rekero plains,2018
+2018-01-11,Topi,1,Rekero plains,2018
+2018-02-06,Topi,7,Rekero plains,2018
+2018-04-05,Topi,1,Rekero plains,2018
+2018-05-03,Topi,1,Rekero plains,2018
+2018-05-03,Topi,3,Rekero plains,2018
+2018-07-05,Topi,6,Rekero plains,2018
+2018-04-05,Topi,1,Payia plains,2018
+2017-10-17,Warthog,2,Olare Sampu bushlands,2017
+2017-10-17,Warthog,4,Olare Sampu bushlands,2017
+2017-10-17,Warthog,2,Olare Sampu bushlands,2017
+2017-10-17,Warthog,1,Olare Sampu bushlands,2017
+2017-11-07,Warthog,2,Olare Sampu bushlands,2017
+2017-11-07,Warthog,2,Olare Sampu bushlands,2017
+2017-11-07,Warthog,1,Olare Sampu bushlands,2017
+2017-12-05,Warthog,2,Olare Sampu bushlands,2017
+2018-01-09,Warthog,1,Olare Sampu bushlands,2018
+2018-01-09,Warthog,3,Olare Sampu bushlands,2018
+2018-01-16,Warthog,1,Olare Sampu bushlands,2018
+2018-01-16,Warthog,5,Olare Sampu bushlands,2018
+2018-01-16,Warthog,2,Olare Sampu bushlands,2018
+2018-03-06,Warthog,2,Olare Sampu bushlands,2018
+2018-03-06,Warthog,1,Olare Sampu bushlands,2018
+2018-03-06,Warthog,5,Olare Sampu bushlands,2018
+2018-03-06,Warthog,2,Olare Sampu bushlands,2018
+2018-03-06,Warthog,1,Olare Sampu bushlands,2018
+2018-04-03,Warthog,3,Olare Sampu bushlands,2018
+2018-04-03,Warthog,3,Olare Sampu bushlands,2018
+2018-04-03,Warthog,19,Olare Sampu bushlands,2018
+2018-05-08,Warthog,3,Olare Sampu bushlands,2018
+2018-05-08,Warthog,1,Olare Sampu bushlands,2018
+2018-05-08,Warthog,3,Olare Sampu bushlands,2018
+2018-06-05,Warthog,6,Olare Sampu bushlands,2018
+2018-07-01,Warthog,2,Olare Sampu bushlands,2018
+2018-07-01,Warthog,1,Olare Sampu bushlands,2018
+2018-07-01,Warthog,1,Olare Sampu bushlands,2018
+2018-07-01,Warthog,1,Olare Sampu bushlands,2018
+2018-07-01,Warthog,1,Olare Sampu bushlands,2018
+2018-07-01,Warthog,10,Olare Sampu bushlands,2018
+2018-07-01,Warthog,2,Olare Sampu bushlands,2018
+2018-07-03,Warthog,1,Olare Sampu bushlands,2018
+2018-07-03,Warthog,1,Olare Sampu bushlands,2018
+2018-08-02,Warthog,3,Olare Sampu bushlands,2018
+2018-08-02,Warthog,2,Olare Sampu bushlands,2018
+2018-08-02,Warthog,2,Olare Sampu bushlands,2018
+2018-08-02,Warthog,7,Olare Sampu bushlands,2018
+2018-09-04,Warthog,2,Olare Sampu bushlands,2018
+2018-09-04,Warthog,2,Olare Sampu bushlands,2018
+2018-09-04,Warthog,1,Olare Sampu bushlands,2018
+2018-09-04,Warthog,1,Olare Sampu bushlands,2018
+2018-09-04,Warthog,1,Olare Sampu bushlands,2018
+2018-10-02,Warthog,1,Olare Sampu bushlands,2018
+2018-10-02,Warthog,2,Olare Sampu bushlands,2018
+2018-10-02,Warthog,5,Olare Sampu bushlands,2018
+2018-10-02,Warthog,2,Olare Sampu bushlands,2018
+2018-12-04,Warthog,2,Olare Sampu bushlands,2018
+2018-12-04,Warthog,1,Olare Sampu bushlands,2018
+2018-12-04,Warthog,2,Olare Sampu bushlands,2018
+2018-12-04,Warthog,1,Olare Sampu bushlands,2018
+2018-12-04,Warthog,1,Olare Sampu bushlands,2018
+2017-10-17,Warthog,3,Sampu Enkare bushlands,2017
+2017-10-17,Warthog,1,Sampu Enkare bushlands,2017
+2017-10-17,Warthog,1,Sampu Enkare bushlands,2017
+2017-10-17,Warthog,2,Sampu Enkare bushlands,2017
+2017-12-05,Warthog,1,Sampu Enkare bushlands,2017
+2017-12-05,Warthog,3,Sampu Enkare bushlands,2017
+2017-12-05,Warthog,3,Sampu Enkare bushlands,2017
+2018-02-13,Warthog,7,Sampu Enkare bushlands,2018
+2018-02-13,Warthog,1,Sampu Enkare bushlands,2018
+2018-02-13,Warthog,2,Sampu Enkare bushlands,2018
+2018-03-06,Warthog,1,Sampu Enkare bushlands,2018
+2018-04-03,Warthog,8,Sampu Enkare bushlands,2018
+2018-04-03,Warthog,4,Sampu Enkare bushlands,2018
+2018-04-03,Warthog,3,Sampu Enkare bushlands,2018
+2018-05-08,Warthog,3,Sampu Enkare bushlands,2018
+2018-05-08,Warthog,10,Sampu Enkare bushlands,2018
+2018-05-08,Warthog,7,Sampu Enkare bushlands,2018
+2018-06-05,Warthog,5,Sampu Enkare bushlands,2018
+2018-06-19,Warthog,2,Sampu Enkare bushlands,2018
+2018-07-03,Warthog,1,Sampu Enkare bushlands,2018
+2018-07-03,Warthog,5,Sampu Enkare bushlands,2018
+2018-08-02,Warthog,3,Sampu Enkare bushlands,2018
+2018-08-02,Warthog,1,Sampu Enkare bushlands,2018
+2018-08-02,Warthog,2,Sampu Enkare bushlands,2018
+2018-08-02,Warthog,3,Sampu Enkare bushlands,2018
+2018-08-02,Warthog,6,Sampu Enkare bushlands,2018
+2018-08-02,Warthog,4,Sampu Enkare bushlands,2018
+2018-08-02,Warthog,1,Sampu Enkare bushlands,2018
+2018-09-04,Warthog,2,Sampu Enkare bushlands,2018
+2018-09-04,Warthog,2,Sampu Enkare bushlands,2018
+2018-09-04,Warthog,9,Sampu Enkare bushlands,2018
+2018-09-04,Warthog,5,Sampu Enkare bushlands,2018
+2018-09-04,Warthog,1,Sampu Enkare bushlands,2018
+2018-09-04,Warthog,2,Sampu Enkare bushlands,2018
+2018-10-02,Warthog,6,Sampu Enkare bushlands,2018
+2018-10-02,Warthog,3,Sampu Enkare bushlands,2018
+2018-10-02,Warthog,3,Sampu Enkare bushlands,2018
+2018-10-02,Warthog,4,Sampu Enkare bushlands,2018
+2018-11-06,Warthog,4,Sampu Enkare bushlands,2018
+2018-11-06,Warthog,1,Sampu Enkare bushlands,2018
+2018-11-06,Warthog,5,Sampu Enkare bushlands,2018
+2018-11-06,Warthog,1,Sampu Enkare bushlands,2018
+2018-12-04,Warthog,1,Sampu Enkare bushlands,2018
+2018-12-04,Warthog,3,Sampu Enkare bushlands,2018
+2018-12-04,Warthog,6,Sampu Enkare bushlands,2018
+2018-12-04,Warthog,3,Sampu Enkare bushlands,2018
+2018-12-04,Warthog,1,Sampu Enkare bushlands,2018
+2018-12-04,Warthog,1,Sampu Enkare bushlands,2018
+2018-12-04,Warthog,1,Sampu Enkare bushlands,2018
+2018-12-04,Warthog,3,Sampu Enkare bushlands,2018
+2017-10-20,Warthog,3,Balanite plains,2017
+2017-10-20,Warthog,2,Balanite plains,2017
+2017-10-20,Warthog,3,Balanite plains,2017
+2017-10-20,Warthog,1,Balanite plains,2017
+2017-10-20,Warthog,1,Balanite plains,2017
+2017-11-02,Warthog,2,Balanite plains,2017
+2017-11-02,Warthog,2,Balanite plains,2017
+2017-11-02,Warthog,2,Balanite plains,2017
+2017-12-07,Warthog,2,Balanite plains,2017
+2017-12-07,Warthog,1,Balanite plains,2017
+2018-01-11,Warthog,1,Balanite plains,2018
+2018-01-11,Warthog,2,Balanite plains,2018
+2018-02-01,Warthog,1,Balanite plains,2018
+2018-02-01,Warthog,1,Balanite plains,2018
+2018-03-01,Warthog,1,Balanite plains,2018
+2018-03-01,Warthog,3,Balanite plains,2018
+2018-03-01,Warthog,2,Balanite plains,2018
+2018-03-01,Warthog,3,Balanite plains,2018
+2018-04-05,Warthog,2,Balanite plains,2018
+2018-04-05,Warthog,2,Balanite plains,2018
+2018-04-05,Warthog,2,Balanite plains,2018
+2018-05-03,Warthog,1,Balanite plains,2018
+2018-06-05,Warthog,2,Balanite plains,2018
+2018-06-21,Warthog,1,Balanite plains,2018
+2018-07-05,Warthog,1,Balanite plains,2018
+2018-08-02,Warthog,3,Balanite plains,2018
+2018-08-02,Warthog,5,Balanite plains,2018
+2018-09-06,Warthog,3,Balanite plains,2018
+2018-09-06,Warthog,5,Balanite plains,2018
+2018-09-06,Warthog,7,Balanite plains,2018
+2018-10-04,Warthog,1,Balanite plains,2018
+2018-10-04,Warthog,1,Balanite plains,2018
+2018-10-04,Warthog,4,Balanite plains,2018
+2018-10-04,Warthog,4,Balanite plains,2018
+2018-11-01,Warthog,1,Balanite plains,2018
+2018-11-01,Warthog,2,Balanite plains,2018
+2018-11-01,Warthog,3,Balanite plains,2018
+2018-12-06,Warthog,4,Balanite plains,2018
+2018-12-06,Warthog,2,Balanite plains,2018
+2018-12-06,Warthog,3,Balanite plains,2018
+2018-12-06,Warthog,2,Balanite plains,2018
+2017-10-24,Warthog,3,Ilkisieusieu bushlands,2017
+2017-10-24,Warthog,1,Ilkisieusieu bushlands,2017
+2017-11-07,Warthog,4,Ilkisieusieu bushlands,2017
+2017-11-01,Warthog,2,Ilkisieusieu bushlands,2017
+2018-01-09,Warthog,5,Ilkisieusieu bushlands,2018
+2018-02-13,Warthog,3,Ilkisieusieu bushlands,2018
+2018-03-06,Warthog,3,Ilkisieusieu bushlands,2018
+2018-04-03,Warthog,1,Ilkisieusieu bushlands,2018
+2018-04-03,Warthog,2,Ilkisieusieu bushlands,2018
+2018-04-03,Warthog,3,Ilkisieusieu bushlands,2018
+2018-06-19,Warthog,1,Ilkisieusieu bushlands,2018
+2018-06-19,Warthog,1,Ilkisieusieu bushlands,2018
+2018-06-19,Warthog,1,Ilkisieusieu bushlands,2018
+2018-10-02,Warthog,4,Ilkisieusieu bushlands,2018
+2018-12-04,Warthog,2,Ilkisieusieu bushlands,2018
+2018-12-04,Warthog,3,Ilkisieusieu bushlands,2018
+2018-12-04,Warthog,1,Ilkisieusieu bushlands,2018
+2017-11-07,Warthog,1,Rekero bushlands,2017
+2017-11-01,Warthog,1,Rekero bushlands,2017
+2017-12-05,Warthog,1,Rekero bushlands,2017
+2018-01-16,Warthog,1,Rekero bushlands,2018
+2018-01-16,Warthog,1,Rekero bushlands,2018
+2018-02-13,Warthog,1,Rekero bushlands,2018
+2018-02-13,Warthog,2,Rekero bushlands,2018
+2018-03-06,Warthog,6,Rekero bushlands,2018
+2018-07-03,Warthog,2,Rekero bushlands,2018
+2018-07-03,Warthog,1,Rekero bushlands,2018
+2018-09-04,Warthog,1,Rekero bushlands,2018
+2018-10-02,Warthog,2,Rekero bushlands,2018
+2018-11-06,Warthog,3,Rekero bushlands,2018
+2018-12-04,Warthog,1,Rekero bushlands,2018
+2017-11-02,Warthog,2,Enoolera plains,2017
+2017-11-02,Warthog,4,Enoolera plains,2017
+2017-12-07,Warthog,6,Enoolera plains,2017
+2018-01-11,Warthog,5,Enoolera plains,2018
+2018-01-11,Warthog,6,Enoolera plains,2018
+2018-01-11,Warthog,1,Enoolera plains,2018
+2018-03-01,Warthog,1,Enoolera plains,2018
+2018-03-01,Warthog,3,Enoolera plains,2018
+2018-04-05,Warthog,1,Enoolera plains,2018
+2018-04-05,Warthog,5,Enoolera plains,2018
+2018-05-03,Warthog,1,Enoolera plains,2018
+2018-06-21,Warthog,3,Enoolera plains,2018
+2018-07-05,Warthog,4,Enoolera plains,2018
+2018-08-02,Warthog,3,Enoolera plains,2018
+2018-09-06,Warthog,1,Enoolera plains,2018
+2018-09-06,Warthog,3,Enoolera plains,2018
+2018-10-04,Warthog,1,Enoolera plains,2018
+2018-10-04,Warthog,1,Enoolera plains,2018
+2018-12-05,Warthog,1,Enoolera plains,2018
+2017-12-05,Warthog,1,Rekero plains,2017
+2018-05-03,Warthog,1,Rekero plains,2018
+2017-10-20,Warthog,1,Payia plains,2017
+2017-10-20,Warthog,2,Payia plains,2017
+2017-11-02,Warthog,1,Payia plains,2017
+2018-02-01,Warthog,1,Payia plains,2018
+2018-07-05,Warthog,1,Payia plains,2018
+2018-08-02,Warthog,1,Payia plains,2018
+2018-08-02,Warthog,3,Payia plains,2018
+2018-08-02,Warthog,2,Payia plains,2018
+2018-10-04,Warthog,4,Payia plains,2018
+2018-10-04,Warthog,1,Payia plains,2018
+2018-12-06,Warthog,7,Payia plains,2018
+2017-10-17,Wildebeest,2,Olare Sampu bushlands,2017
+2017-10-17,Wildebeest,38,Olare Sampu bushlands,2017
+2017-10-17,Wildebeest,9,Olare Sampu bushlands,2017
+2017-10-17,Wildebeest,6,Olare Sampu bushlands,2017
+2017-10-17,Wildebeest,25,Olare Sampu bushlands,2017
+2017-10-17,Wildebeest,5,Olare Sampu bushlands,2017
+2017-10-17,Wildebeest,40,Olare Sampu bushlands,2017
+2017-10-17,Wildebeest,6,Olare Sampu bushlands,2017
+2017-10-17,Wildebeest,3,Olare Sampu bushlands,2017
+2017-10-17,Wildebeest,4,Olare Sampu bushlands,2017
+2017-10-17,Wildebeest,3,Olare Sampu bushlands,2017
+2017-10-17,Wildebeest,10,Olare Sampu bushlands,2017
+2017-10-17,Wildebeest,6,Olare Sampu bushlands,2017
+2017-10-17,Wildebeest,5,Olare Sampu bushlands,2017
+2017-11-07,Wildebeest,19,Olare Sampu bushlands,2017
+2017-11-07,Wildebeest,48,Olare Sampu bushlands,2017
+2017-11-07,Wildebeest,30,Olare Sampu bushlands,2017
+2017-11-07,Wildebeest,38,Olare Sampu bushlands,2017
+2017-11-07,Wildebeest,8,Olare Sampu bushlands,2017
+2017-11-07,Wildebeest,6,Olare Sampu bushlands,2017
+2017-11-07,Wildebeest,8,Olare Sampu bushlands,2017
+2017-11-07,Wildebeest,30,Olare Sampu bushlands,2017
+2017-12-05,Wildebeest,25,Olare Sampu bushlands,2017
+2017-12-05,Wildebeest,1,Olare Sampu bushlands,2017
+2017-12-05,Wildebeest,10,Olare Sampu bushlands,2017
+2018-01-09,Wildebeest,2,Olare Sampu bushlands,2018
+2018-01-09,Wildebeest,9,Olare Sampu bushlands,2018
+2018-01-09,Wildebeest,3,Olare Sampu bushlands,2018
+2018-01-09,Wildebeest,12,Olare Sampu bushlands,2018
+2018-01-09,Wildebeest,5,Olare Sampu bushlands,2018
+2018-01-09,Wildebeest,8,Olare Sampu bushlands,2018
+2018-01-09,Wildebeest,5,Olare Sampu bushlands,2018
+2018-01-09,Wildebeest,26,Olare Sampu bushlands,2018
+2018-01-09,Wildebeest,32,Olare Sampu bushlands,2018
+2018-01-09,Wildebeest,4,Olare Sampu bushlands,2018
+2018-01-09,Wildebeest,8,Olare Sampu bushlands,2018
+2018-01-09,Wildebeest,10,Olare Sampu bushlands,2018
+2018-01-09,Wildebeest,4,Olare Sampu bushlands,2018
+2018-01-09,Wildebeest,4,Olare Sampu bushlands,2018
+2018-01-09,Wildebeest,9,Olare Sampu bushlands,2018
+2018-01-09,Wildebeest,5,Olare Sampu bushlands,2018
+2018-01-09,Wildebeest,8,Olare Sampu bushlands,2018
+2018-01-09,Wildebeest,12,Olare Sampu bushlands,2018
+2018-01-09,Wildebeest,7,Olare Sampu bushlands,2018
+2018-01-09,Wildebeest,4,Olare Sampu bushlands,2018
+2018-01-09,Wildebeest,4,Olare Sampu bushlands,2018
+2018-01-09,Wildebeest,6,Olare Sampu bushlands,2018
+2018-01-09,Wildebeest,30,Olare Sampu bushlands,2018
+2018-01-09,Wildebeest,45,Olare Sampu bushlands,2018
+2018-01-09,Wildebeest,30,Olare Sampu bushlands,2018
+2018-01-09,Wildebeest,45,Olare Sampu bushlands,2018
+2018-01-09,Wildebeest,2,Olare Sampu bushlands,2018
+2018-01-09,Wildebeest,2,Olare Sampu bushlands,2018
+2018-01-09,Wildebeest,3,Olare Sampu bushlands,2018
+2018-01-09,Wildebeest,1,Olare Sampu bushlands,2018
+2018-01-09,Wildebeest,1,Olare Sampu bushlands,2018
+2018-01-09,Wildebeest,2,Olare Sampu bushlands,2018
+2018-01-09,Wildebeest,1,Olare Sampu bushlands,2018
+2018-01-09,Wildebeest,1,Olare Sampu bushlands,2018
+2018-01-09,Wildebeest,20,Olare Sampu bushlands,2018
+2018-01-09,Wildebeest,2,Olare Sampu bushlands,2018
+2018-01-09,Wildebeest,5,Olare Sampu bushlands,2018
+2018-01-09,Wildebeest,9,Olare Sampu bushlands,2018
+2018-01-09,Wildebeest,3,Olare Sampu bushlands,2018
+2018-01-09,Wildebeest,6,Olare Sampu bushlands,2018
+2018-01-09,Wildebeest,8,Olare Sampu bushlands,2018
+2018-01-09,Wildebeest,6,Olare Sampu bushlands,2018
+2018-01-09,Wildebeest,6,Olare Sampu bushlands,2018
+2018-01-09,Wildebeest,23,Olare Sampu bushlands,2018
+2018-01-09,Wildebeest,7,Olare Sampu bushlands,2018
+2018-01-09,Wildebeest,18,Olare Sampu bushlands,2018
+2018-01-16,Wildebeest,18,Olare Sampu bushlands,2018
+2018-01-16,Wildebeest,1,Olare Sampu bushlands,2018
+2018-01-16,Wildebeest,31,Olare Sampu bushlands,2018
+2018-01-16,Wildebeest,3,Olare Sampu bushlands,2018
+2018-01-16,Wildebeest,2,Olare Sampu bushlands,2018
+2018-01-16,Wildebeest,2,Olare Sampu bushlands,2018
+2018-01-16,Wildebeest,2,Olare Sampu bushlands,2018
+2018-01-16,Wildebeest,1,Olare Sampu bushlands,2018
+2018-01-16,Wildebeest,6,Olare Sampu bushlands,2018
+2018-02-13,Wildebeest,18,Olare Sampu bushlands,2018
+2018-02-13,Wildebeest,5,Olare Sampu bushlands,2018
+2018-02-13,Wildebeest,6,Olare Sampu bushlands,2018
+2018-02-13,Wildebeest,5,Olare Sampu bushlands,2018
+2018-02-13,Wildebeest,2,Olare Sampu bushlands,2018
+2018-02-13,Wildebeest,37,Olare Sampu bushlands,2018
+2018-02-13,Wildebeest,40,Olare Sampu bushlands,2018
+2018-03-06,Wildebeest,5,Olare Sampu bushlands,2018
+2018-03-06,Wildebeest,2,Olare Sampu bushlands,2018
+2018-03-06,Wildebeest,28,Olare Sampu bushlands,2018
+2018-03-06,Wildebeest,19,Olare Sampu bushlands,2018
+2018-04-03,Wildebeest,2,Olare Sampu bushlands,2018
+2018-04-03,Wildebeest,1,Olare Sampu bushlands,2018
+2018-04-03,Wildebeest,1,Olare Sampu bushlands,2018
+2018-04-03,Wildebeest,2,Olare Sampu bushlands,2018
+2018-04-03,Wildebeest,1,Olare Sampu bushlands,2018
+2018-04-03,Wildebeest,3,Olare Sampu bushlands,2018
+2018-05-08,Wildebeest,7,Olare Sampu bushlands,2018
+2018-05-08,Wildebeest,16,Olare Sampu bushlands,2018
+2018-05-08,Wildebeest,21,Olare Sampu bushlands,2018
+2018-05-08,Wildebeest,5,Olare Sampu bushlands,2018
+2018-06-05,Wildebeest,1,Olare Sampu bushlands,2018
+2018-06-05,Wildebeest,1,Olare Sampu bushlands,2018
+2018-06-05,Wildebeest,1,Olare Sampu bushlands,2018
+2018-06-05,Wildebeest,4,Olare Sampu bushlands,2018
+2018-06-05,Wildebeest,1,Olare Sampu bushlands,2018
+2018-07-01,Wildebeest,1,Olare Sampu bushlands,2018
+2018-07-01,Wildebeest,45,Olare Sampu bushlands,2018
+2018-07-01,Wildebeest,1,Olare Sampu bushlands,2018
+2018-07-01,Wildebeest,1,Olare Sampu bushlands,2018
+2018-07-01,Wildebeest,1,Olare Sampu bushlands,2018
+2018-07-01,Wildebeest,1,Olare Sampu bushlands,2018
+2018-07-01,Wildebeest,1,Olare Sampu bushlands,2018
+2018-07-01,Wildebeest,1,Olare Sampu bushlands,2018
+2018-07-01,Wildebeest,5,Olare Sampu bushlands,2018
+2018-07-01,Wildebeest,4,Olare Sampu bushlands,2018
+2018-07-01,Wildebeest,3,Olare Sampu bushlands,2018
+2018-08-02,Wildebeest,8,Olare Sampu bushlands,2018
+2018-08-02,Wildebeest,4,Olare Sampu bushlands,2018
+2018-08-02,Wildebeest,3,Olare Sampu bushlands,2018
+2018-08-02,Wildebeest,15,Olare Sampu bushlands,2018
+2018-08-02,Wildebeest,4,Olare Sampu bushlands,2018
+2018-08-02,Wildebeest,16,Olare Sampu bushlands,2018
+2018-08-02,Wildebeest,1,Olare Sampu bushlands,2018
+2018-08-02,Wildebeest,5,Olare Sampu bushlands,2018
+2018-08-02,Wildebeest,41,Olare Sampu bushlands,2018
+2018-08-02,Wildebeest,18,Olare Sampu bushlands,2018
+2018-08-02,Wildebeest,24,Olare Sampu bushlands,2018
+2018-09-04,Wildebeest,24,Olare Sampu bushlands,2018
+2018-09-04,Wildebeest,29,Olare Sampu bushlands,2018
+2018-09-04,Wildebeest,76,Olare Sampu bushlands,2018
+2018-09-04,Wildebeest,99,Olare Sampu bushlands,2018
+2018-10-02,Wildebeest,12,Olare Sampu bushlands,2018
+2018-10-02,Wildebeest,13,Olare Sampu bushlands,2018
+2018-10-02,Wildebeest,15,Olare Sampu bushlands,2018
+2018-10-02,Wildebeest,14,Olare Sampu bushlands,2018
+2018-10-02,Wildebeest,22,Olare Sampu bushlands,2018
+2018-10-02,Wildebeest,8,Olare Sampu bushlands,2018
+2018-10-02,Wildebeest,6,Olare Sampu bushlands,2018
+2018-10-02,Wildebeest,24,Olare Sampu bushlands,2018
+2018-10-02,Wildebeest,11,Olare Sampu bushlands,2018
+2018-10-02,Wildebeest,26,Olare Sampu bushlands,2018
+2018-10-02,Wildebeest,7,Olare Sampu bushlands,2018
+2018-12-04,Wildebeest,37,Olare Sampu bushlands,2018
+2018-12-04,Wildebeest,14,Olare Sampu bushlands,2018
+2018-12-04,Wildebeest,3,Olare Sampu bushlands,2018
+2017-10-17,Wildebeest,31,Sampu Enkare bushlands,2017
+2017-10-17,Wildebeest,7,Sampu Enkare bushlands,2017
+2017-10-17,Wildebeest,6,Sampu Enkare bushlands,2017
+2017-10-17,Wildebeest,10,Sampu Enkare bushlands,2017
+2017-10-17,Wildebeest,4,Sampu Enkare bushlands,2017
+2017-10-17,Wildebeest,1,Sampu Enkare bushlands,2017
+2017-10-17,Wildebeest,4,Sampu Enkare bushlands,2017
+2017-10-17,Wildebeest,4,Sampu Enkare bushlands,2017
+2017-10-17,Wildebeest,4,Sampu Enkare bushlands,2017
+2017-10-17,Wildebeest,27,Sampu Enkare bushlands,2017
+2017-10-17,Wildebeest,6,Sampu Enkare bushlands,2017
+2017-11-07,Wildebeest,5,Sampu Enkare bushlands,2017
+2017-11-07,Wildebeest,5,Sampu Enkare bushlands,2017
+2017-11-07,Wildebeest,6,Sampu Enkare bushlands,2017
+2017-11-07,Wildebeest,2,Sampu Enkare bushlands,2017
+2017-11-07,Wildebeest,4,Sampu Enkare bushlands,2017
+2017-11-07,Wildebeest,9,Sampu Enkare bushlands,2017
+2017-11-07,Wildebeest,1,Sampu Enkare bushlands,2017
+2017-11-07,Wildebeest,7,Sampu Enkare bushlands,2017
+2017-11-07,Wildebeest,2,Sampu Enkare bushlands,2017
+2017-11-07,Wildebeest,11,Sampu Enkare bushlands,2017
+2017-11-07,Wildebeest,4,Sampu Enkare bushlands,2017
+2017-11-07,Wildebeest,6,Sampu Enkare bushlands,2017
+2017-11-07,Wildebeest,4,Sampu Enkare bushlands,2017
+2017-11-07,Wildebeest,23,Sampu Enkare bushlands,2017
+2017-11-07,Wildebeest,8,Sampu Enkare bushlands,2017
+2017-11-07,Wildebeest,12,Sampu Enkare bushlands,2017
+2017-11-07,Wildebeest,1,Sampu Enkare bushlands,2017
+2017-12-05,Wildebeest,2,Sampu Enkare bushlands,2017
+2017-12-05,Wildebeest,2,Sampu Enkare bushlands,2017
+2017-12-05,Wildebeest,1,Sampu Enkare bushlands,2017
+2017-12-05,Wildebeest,2,Sampu Enkare bushlands,2017
+2017-12-05,Wildebeest,23,Sampu Enkare bushlands,2017
+2017-12-05,Wildebeest,9,Sampu Enkare bushlands,2017
+2017-12-05,Wildebeest,12,Sampu Enkare bushlands,2017
+2017-12-05,Wildebeest,4,Sampu Enkare bushlands,2017
+2017-12-05,Wildebeest,15,Sampu Enkare bushlands,2017
+2017-12-05,Wildebeest,6,Sampu Enkare bushlands,2017
+2017-12-05,Wildebeest,9,Sampu Enkare bushlands,2017
+2017-12-05,Wildebeest,4,Sampu Enkare bushlands,2017
+2017-12-05,Wildebeest,15,Sampu Enkare bushlands,2017
+2017-12-05,Wildebeest,6,Sampu Enkare bushlands,2017
+2017-12-05,Wildebeest,8,Sampu Enkare bushlands,2017
+2017-12-05,Wildebeest,5,Sampu Enkare bushlands,2017
+2017-12-05,Wildebeest,7,Sampu Enkare bushlands,2017
+2017-12-05,Wildebeest,3,Sampu Enkare bushlands,2017
+2017-12-05,Wildebeest,3,Sampu Enkare bushlands,2017
+2017-12-05,Wildebeest,4,Sampu Enkare bushlands,2017
+2017-12-05,Wildebeest,10,Sampu Enkare bushlands,2017
+2017-12-05,Wildebeest,3,Sampu Enkare bushlands,2017
+2017-12-05,Wildebeest,8,Sampu Enkare bushlands,2017
+2017-12-05,Wildebeest,4,Sampu Enkare bushlands,2017
+2017-12-05,Wildebeest,4,Sampu Enkare bushlands,2017
+2018-01-16,Wildebeest,5,Sampu Enkare bushlands,2018
+2018-01-16,Wildebeest,5,Sampu Enkare bushlands,2018
+2018-01-16,Wildebeest,5,Sampu Enkare bushlands,2018
+2018-01-16,Wildebeest,7,Sampu Enkare bushlands,2018
+2018-01-16,Wildebeest,4,Sampu Enkare bushlands,2018
+2018-01-16,Wildebeest,2,Sampu Enkare bushlands,2018
+2018-01-16,Wildebeest,1,Sampu Enkare bushlands,2018
+2018-01-16,Wildebeest,1,Sampu Enkare bushlands,2018
+2018-01-16,Wildebeest,9,Sampu Enkare bushlands,2018
+2018-01-16,Wildebeest,10,Sampu Enkare bushlands,2018
+2018-01-16,Wildebeest,19,Sampu Enkare bushlands,2018
+2018-01-16,Wildebeest,9,Sampu Enkare bushlands,2018
+2018-01-16,Wildebeest,3,Sampu Enkare bushlands,2018
+2018-01-16,Wildebeest,1,Sampu Enkare bushlands,2018
+2018-01-16,Wildebeest,6,Sampu Enkare bushlands,2018
+2018-01-16,Wildebeest,6,Sampu Enkare bushlands,2018
+2018-01-16,Wildebeest,2,Sampu Enkare bushlands,2018
+2018-02-13,Wildebeest,2,Sampu Enkare bushlands,2018
+2018-02-13,Wildebeest,10,Sampu Enkare bushlands,2018
+2018-02-13,Wildebeest,1,Sampu Enkare bushlands,2018
+2018-02-13,Wildebeest,15,Sampu Enkare bushlands,2018
+2018-02-13,Wildebeest,12,Sampu Enkare bushlands,2018
+2018-03-06,Wildebeest,20,Sampu Enkare bushlands,2018
+2018-03-06,Wildebeest,11,Sampu Enkare bushlands,2018
+2018-03-06,Wildebeest,4,Sampu Enkare bushlands,2018
+2018-03-06,Wildebeest,3,Sampu Enkare bushlands,2018
+2018-03-06,Wildebeest,2,Sampu Enkare bushlands,2018
+2018-03-06,Wildebeest,2,Sampu Enkare bushlands,2018
+2018-03-06,Wildebeest,6,Sampu Enkare bushlands,2018
+2018-03-06,Wildebeest,14,Sampu Enkare bushlands,2018
+2018-04-03,Wildebeest,13,Sampu Enkare bushlands,2018
+2018-04-03,Wildebeest,3,Sampu Enkare bushlands,2018
+2018-04-03,Wildebeest,7,Sampu Enkare bushlands,2018
+2018-04-03,Wildebeest,27,Sampu Enkare bushlands,2018
+2018-04-03,Wildebeest,15,Sampu Enkare bushlands,2018
+2018-05-08,Wildebeest,1,Sampu Enkare bushlands,2018
+2018-05-08,Wildebeest,1,Sampu Enkare bushlands,2018
+2018-05-08,Wildebeest,1,Sampu Enkare bushlands,2018
+2018-05-08,Wildebeest,1,Sampu Enkare bushlands,2018
+2018-05-08,Wildebeest,1,Sampu Enkare bushlands,2018
+2018-05-08,Wildebeest,2,Sampu Enkare bushlands,2018
+2018-05-08,Wildebeest,7,Sampu Enkare bushlands,2018
+2018-05-08,Wildebeest,9,Sampu Enkare bushlands,2018
+2018-05-08,Wildebeest,1,Sampu Enkare bushlands,2018
+2018-05-08,Wildebeest,3,Sampu Enkare bushlands,2018
+2018-05-08,Wildebeest,26,Sampu Enkare bushlands,2018
+2018-06-05,Wildebeest,1,Sampu Enkare bushlands,2018
+2018-06-05,Wildebeest,1,Sampu Enkare bushlands,2018
+2018-07-03,Wildebeest,2,Sampu Enkare bushlands,2018
+2018-07-03,Wildebeest,11,Sampu Enkare bushlands,2018
+2018-07-03,Wildebeest,2,Sampu Enkare bushlands,2018
+2018-07-03,Wildebeest,1,Sampu Enkare bushlands,2018
+2018-07-03,Wildebeest,1,Sampu Enkare bushlands,2018
+2018-08-02,Wildebeest,1,Sampu Enkare bushlands,2018
+2018-08-02,Wildebeest,3,Sampu Enkare bushlands,2018
+2018-08-02,Wildebeest,1,Sampu Enkare bushlands,2018
+2018-08-02,Wildebeest,1,Sampu Enkare bushlands,2018
+2018-09-04,Wildebeest,5,Sampu Enkare bushlands,2018
+2018-09-04,Wildebeest,11,Sampu Enkare bushlands,2018
+2018-09-04,Wildebeest,1,Sampu Enkare bushlands,2018
+2018-09-04,Wildebeest,1,Sampu Enkare bushlands,2018
+2018-09-04,Wildebeest,3,Sampu Enkare bushlands,2018
+2018-09-04,Wildebeest,38,Sampu Enkare bushlands,2018
+2018-09-04,Wildebeest,7,Sampu Enkare bushlands,2018
+2018-10-02,Wildebeest,31,Sampu Enkare bushlands,2018
+2018-10-02,Wildebeest,4,Sampu Enkare bushlands,2018
+2018-10-02,Wildebeest,1,Sampu Enkare bushlands,2018
+2018-10-02,Wildebeest,6,Sampu Enkare bushlands,2018
+2018-10-02,Wildebeest,5,Sampu Enkare bushlands,2018
+2018-10-02,Wildebeest,7,Sampu Enkare bushlands,2018
+2018-10-02,Wildebeest,5,Sampu Enkare bushlands,2018
+2018-10-02,Wildebeest,91,Sampu Enkare bushlands,2018
+2018-10-02,Wildebeest,26,Sampu Enkare bushlands,2018
+2018-10-02,Wildebeest,21,Sampu Enkare bushlands,2018
+2018-10-02,Wildebeest,11,Sampu Enkare bushlands,2018
+2018-11-06,Wildebeest,5,Sampu Enkare bushlands,2018
+2018-11-06,Wildebeest,1,Sampu Enkare bushlands,2018
+2018-11-06,Wildebeest,3,Sampu Enkare bushlands,2018
+2018-11-06,Wildebeest,30,Sampu Enkare bushlands,2018
+2018-11-06,Wildebeest,3,Sampu Enkare bushlands,2018
+2018-11-06,Wildebeest,7,Sampu Enkare bushlands,2018
+2018-11-06,Wildebeest,1,Sampu Enkare bushlands,2018
+2018-11-06,Wildebeest,6,Sampu Enkare bushlands,2018
+2018-11-06,Wildebeest,5,Sampu Enkare bushlands,2018
+2018-12-04,Wildebeest,1,Sampu Enkare bushlands,2018
+2018-12-04,Wildebeest,9,Sampu Enkare bushlands,2018
+2018-12-04,Wildebeest,6,Sampu Enkare bushlands,2018
+2018-12-04,Wildebeest,8,Sampu Enkare bushlands,2018
+2018-12-04,Wildebeest,27,Sampu Enkare bushlands,2018
+2018-12-04,Wildebeest,13,Sampu Enkare bushlands,2018
+2018-12-04,Wildebeest,6,Sampu Enkare bushlands,2018
+2018-12-04,Wildebeest,6,Sampu Enkare bushlands,2018
+2017-10-20,Wildebeest,1,Balanite plains,2017
+2017-10-20,Wildebeest,18,Balanite plains,2017
+2017-11-02,Wildebeest,12,Balanite plains,2017
+2017-11-02,Wildebeest,105,Balanite plains,2017
+2017-12-07,Wildebeest,3,Balanite plains,2017
+2017-12-07,Wildebeest,6,Balanite plains,2017
+2017-12-07,Wildebeest,1,Balanite plains,2017
+2017-12-07,Wildebeest,1,Balanite plains,2017
+2017-12-07,Wildebeest,6,Balanite plains,2017
+2018-01-11,Wildebeest,1,Balanite plains,2018
+2018-01-11,Wildebeest,1,Balanite plains,2018
+2018-02-01,Wildebeest,53,Balanite plains,2018
+2018-02-01,Wildebeest,4,Balanite plains,2018
+2018-02-01,Wildebeest,5,Balanite plains,2018
+2018-02-01,Wildebeest,15,Balanite plains,2018
+2018-02-01,Wildebeest,12,Balanite plains,2018
+2018-02-01,Wildebeest,4,Balanite plains,2018
+2018-02-01,Wildebeest,2,Balanite plains,2018
+2018-02-01,Wildebeest,40,Balanite plains,2018
+2018-02-01,Wildebeest,1,Balanite plains,2018
+2018-03-01,Wildebeest,2,Balanite plains,2018
+2018-03-01,Wildebeest,1,Balanite plains,2018
+2018-03-01,Wildebeest,1,Balanite plains,2018
+2018-04-05,Wildebeest,3,Balanite plains,2018
+2018-04-05,Wildebeest,1,Balanite plains,2018
+2018-04-05,Wildebeest,2,Balanite plains,2018
+2018-04-05,Wildebeest,1,Balanite plains,2018
+2018-05-03,Wildebeest,4,Balanite plains,2018
+2018-05-03,Wildebeest,19,Balanite plains,2018
+2018-05-03,Wildebeest,1,Balanite plains,2018
+2018-05-03,Wildebeest,1,Balanite plains,2018
+2018-05-03,Wildebeest,2,Balanite plains,2018
+2018-05-03,Wildebeest,1,Balanite plains,2018
+2018-07-05,Wildebeest,1,Balanite plains,2018
+2018-07-05,Wildebeest,1,Balanite plains,2018
+2018-07-05,Wildebeest,28,Balanite plains,2018
+2018-07-05,Wildebeest,2,Balanite plains,2018
+2018-07-05,Wildebeest,1,Balanite plains,2018
+2018-07-05,Wildebeest,21,Balanite plains,2018
+2018-07-05,Wildebeest,6,Balanite plains,2018
+2018-07-05,Wildebeest,9,Balanite plains,2018
+2018-07-05,Wildebeest,8,Balanite plains,2018
+2018-07-05,Wildebeest,17,Balanite plains,2018
+2018-08-02,Wildebeest,1,Balanite plains,2018
+2018-08-02,Wildebeest,1,Balanite plains,2018
+2018-08-02,Wildebeest,1,Balanite plains,2018
+2018-09-06,Wildebeest,1,Balanite plains,2018
+2018-09-06,Wildebeest,7,Balanite plains,2018
+2018-09-06,Wildebeest,2,Balanite plains,2018
+2018-10-04,Wildebeest,22,Balanite plains,2018
+2018-10-04,Wildebeest,2,Balanite plains,2018
+2018-10-04,Wildebeest,19,Balanite plains,2018
+2018-10-04,Wildebeest,7,Balanite plains,2018
+2018-10-04,Wildebeest,1,Balanite plains,2018
+2018-11-01,Wildebeest,15,Balanite plains,2018
+2018-11-01,Wildebeest,56,Balanite plains,2018
+2018-11-01,Wildebeest,5,Balanite plains,2018
+2018-11-01,Wildebeest,14,Balanite plains,2018
+2018-11-01,Wildebeest,20,Balanite plains,2018
+2018-12-06,Wildebeest,5,Balanite plains,2018
+2018-12-06,Wildebeest,1,Balanite plains,2018
+2018-12-06,Wildebeest,2,Balanite plains,2018
+2018-12-06,Wildebeest,25,Balanite plains,2018
+2017-11-07,Wildebeest,7,Ilkisieusieu bushlands,2017
+2017-11-07,Wildebeest,3,Ilkisieusieu bushlands,2017
+2017-11-07,Wildebeest,15,Ilkisieusieu bushlands,2017
+2018-01-09,Wildebeest,11,Ilkisieusieu bushlands,2018
+2018-01-09,Wildebeest,15,Ilkisieusieu bushlands,2018
+2018-01-09,Wildebeest,43,Ilkisieusieu bushlands,2018
+2018-01-09,Wildebeest,10,Ilkisieusieu bushlands,2018
+2018-01-09,Wildebeest,11,Ilkisieusieu bushlands,2018
+2018-01-09,Wildebeest,7,Ilkisieusieu bushlands,2018
+2018-01-09,Wildebeest,11,Ilkisieusieu bushlands,2018
+2018-01-09,Wildebeest,7,Ilkisieusieu bushlands,2018
+2018-01-09,Wildebeest,20,Ilkisieusieu bushlands,2018
+2018-01-09,Wildebeest,44,Ilkisieusieu bushlands,2018
+2018-01-09,Wildebeest,13,Ilkisieusieu bushlands,2018
+2018-01-09,Wildebeest,4,Ilkisieusieu bushlands,2018
+2018-01-09,Wildebeest,2,Ilkisieusieu bushlands,2018
+2018-01-09,Wildebeest,3,Ilkisieusieu bushlands,2018
+2018-01-09,Wildebeest,20,Ilkisieusieu bushlands,2018
+2018-01-09,Wildebeest,15,Ilkisieusieu bushlands,2018
+2018-01-09,Wildebeest,20,Ilkisieusieu bushlands,2018
+2018-01-09,Wildebeest,16,Ilkisieusieu bushlands,2018
+2018-01-09,Wildebeest,17,Ilkisieusieu bushlands,2018
+2018-01-09,Wildebeest,10,Ilkisieusieu bushlands,2018
+2018-01-09,Wildebeest,14,Ilkisieusieu bushlands,2018
+2018-02-13,Wildebeest,20,Ilkisieusieu bushlands,2018
+2018-02-06,Wildebeest,1,Ilkisieusieu bushlands,2018
+2018-03-06,Wildebeest,2,Ilkisieusieu bushlands,2018
+2018-03-06,Wildebeest,16,Ilkisieusieu bushlands,2018
+2018-03-06,Wildebeest,12,Ilkisieusieu bushlands,2018
+2018-03-06,Wildebeest,24,Ilkisieusieu bushlands,2018
+2018-04-03,Wildebeest,1,Ilkisieusieu bushlands,2018
+2018-04-03,Wildebeest,1,Ilkisieusieu bushlands,2018
+2018-05-08,Wildebeest,1,Ilkisieusieu bushlands,2018
+2018-05-08,Wildebeest,63,Ilkisieusieu bushlands,2018
+2018-05-08,Wildebeest,6,Ilkisieusieu bushlands,2018
+2018-06-05,Wildebeest,2,Ilkisieusieu bushlands,2018
+2018-07-03,Wildebeest,1,Ilkisieusieu bushlands,2018
+2018-07-03,Wildebeest,1,Ilkisieusieu bushlands,2018
+2018-07-03,Wildebeest,1,Ilkisieusieu bushlands,2018
+2018-08-02,Wildebeest,4,Ilkisieusieu bushlands,2018
+2018-08-02,Wildebeest,3,Ilkisieusieu bushlands,2018
+2018-09-04,Wildebeest,101,Ilkisieusieu bushlands,2018
+2018-09-04,Wildebeest,10,Ilkisieusieu bushlands,2018
+2018-09-04,Wildebeest,30,Ilkisieusieu bushlands,2018
+2018-11-06,Wildebeest,4,Ilkisieusieu bushlands,2018
+2017-10-17,Wildebeest,1,Rekero bushlands,2017
+2017-10-17,Wildebeest,6,Rekero bushlands,2017
+2017-10-17,Wildebeest,2,Rekero bushlands,2017
+2017-10-17,Wildebeest,4,Rekero bushlands,2017
+2017-10-17,Wildebeest,4,Rekero bushlands,2017
+2017-10-17,Wildebeest,5,Rekero bushlands,2017
+2017-10-17,Wildebeest,3,Rekero bushlands,2017
+2017-10-24,Wildebeest,1,Rekero bushlands,2017
+2017-11-07,Wildebeest,2,Rekero bushlands,2017
+2017-11-07,Wildebeest,51,Rekero bushlands,2017
+2017-11-07,Wildebeest,1,Rekero bushlands,2017
+2017-11-07,Wildebeest,8,Rekero bushlands,2017
+2017-11-07,Wildebeest,6,Rekero bushlands,2017
+2017-11-07,Wildebeest,2,Rekero bushlands,2017
+2017-11-07,Wildebeest,11,Rekero bushlands,2017
+2017-11-07,Wildebeest,6,Rekero bushlands,2017
+2017-11-07,Wildebeest,3,Rekero bushlands,2017
+2017-11-07,Wildebeest,2,Rekero bushlands,2017
+2017-11-07,Wildebeest,1,Rekero bushlands,2017
+2017-11-07,Wildebeest,2,Rekero bushlands,2017
+2017-11-07,Wildebeest,2,Rekero bushlands,2017
+2017-11-07,Wildebeest,1,Rekero bushlands,2017
+2017-11-07,Wildebeest,1,Rekero bushlands,2017
+2017-11-07,Wildebeest,2,Rekero bushlands,2017
+2017-11-07,Wildebeest,1,Rekero bushlands,2017
+2017-11-07,Wildebeest,1,Rekero bushlands,2017
+2017-11-07,Wildebeest,2,Rekero bushlands,2017
+2017-11-07,Wildebeest,32,Rekero bushlands,2017
+2018-01-16,Wildebeest,7,Rekero bushlands,2018
+2018-01-01,Wildebeest,2,Rekero bushlands,2018
+2018-01-01,Wildebeest,8,Rekero bushlands,2018
+2018-01-01,Wildebeest,2,Rekero bushlands,2018
+2018-01-01,Wildebeest,2,Rekero bushlands,2018
+2018-01-01,Wildebeest,6,Rekero bushlands,2018
+2018-01-01,Wildebeest,1,Rekero bushlands,2018
+2018-01-01,Wildebeest,14,Rekero bushlands,2018
+2018-01-01,Wildebeest,17,Rekero bushlands,2018
+2018-01-01,Wildebeest,8,Rekero bushlands,2018
+2018-01-01,Wildebeest,9,Rekero bushlands,2018
+2018-01-01,Wildebeest,27,Rekero bushlands,2018
+2018-01-01,Wildebeest,3,Rekero bushlands,2018
+2018-01-01,Wildebeest,7,Rekero bushlands,2018
+2018-01-01,Wildebeest,2,Rekero bushlands,2018
+2018-01-01,Wildebeest,2,Rekero bushlands,2018
+2018-01-01,Wildebeest,5,Rekero bushlands,2018
+2018-01-01,Wildebeest,6,Rekero bushlands,2018
+2018-01-01,Wildebeest,8,Rekero bushlands,2018
+2018-01-01,Wildebeest,1,Rekero bushlands,2018
+2018-01-01,Wildebeest,2,Rekero bushlands,2018
+2018-01-01,Wildebeest,12,Rekero bushlands,2018
+2018-01-01,Wildebeest,11,Rekero bushlands,2018
+2018-01-01,Wildebeest,7,Rekero bushlands,2018
+2018-01-01,Wildebeest,12,Rekero bushlands,2018
+2018-01-01,Wildebeest,28,Rekero bushlands,2018
+2018-01-01,Wildebeest,8,Rekero bushlands,2018
+2018-01-01,Wildebeest,9,Rekero bushlands,2018
+2018-01-01,Wildebeest,7,Rekero bushlands,2018
+2018-02-13,Wildebeest,7,Rekero bushlands,2018
+2018-02-13,Wildebeest,5,Rekero bushlands,2018
+2018-02-13,Wildebeest,3,Rekero bushlands,2018
+2018-03-06,Wildebeest,6,Rekero bushlands,2018
+2018-03-06,Wildebeest,6,Rekero bushlands,2018
+2018-03-06,Wildebeest,25,Rekero bushlands,2018
+2018-03-06,Wildebeest,10,Rekero bushlands,2018
+2018-03-06,Wildebeest,8,Rekero bushlands,2018
+2018-03-06,Wildebeest,7,Rekero bushlands,2018
+2018-03-06,Wildebeest,20,Rekero bushlands,2018
+2018-03-06,Wildebeest,22,Rekero bushlands,2018
+2018-03-06,Wildebeest,18,Rekero bushlands,2018
+2018-03-06,Wildebeest,18,Rekero bushlands,2018
+2018-03-06,Wildebeest,16,Rekero bushlands,2018
+2018-03-06,Wildebeest,45,Rekero bushlands,2018
+2018-03-06,Wildebeest,15,Rekero bushlands,2018
+2018-03-06,Wildebeest,22,Rekero bushlands,2018
+2018-03-06,Wildebeest,3,Rekero bushlands,2018
+2018-03-06,Wildebeest,1,Rekero bushlands,2018
+2018-04-03,Wildebeest,1,Rekero bushlands,2018
+2018-07-03,Wildebeest,8,Rekero bushlands,2018
+2018-08-02,Wildebeest,11,Rekero bushlands,2018
+2018-08-02,Wildebeest,10,Rekero bushlands,2018
+2018-08-02,Wildebeest,5,Rekero bushlands,2018
+2018-10-02,Wildebeest,59,Rekero bushlands,2018
+2018-11-06,Wildebeest,38,Rekero bushlands,2018
+2018-11-06,Wildebeest,39,Rekero bushlands,2018
+2018-11-06,Wildebeest,120,Rekero bushlands,2018
+2018-11-06,Wildebeest,31,Rekero bushlands,2018
+2018-11-06,Wildebeest,51,Rekero bushlands,2018
+2018-12-04,Wildebeest,15,Rekero bushlands,2018
+2018-12-04,Wildebeest,200,Rekero bushlands,2018
+2018-12-04,Wildebeest,102,Rekero bushlands,2018
+2018-12-04,Wildebeest,140,Rekero bushlands,2018
+2018-12-04,Wildebeest,42,Rekero bushlands,2018
+2018-12-04,Wildebeest,39,Rekero bushlands,2018
+2018-12-04,Wildebeest,8,Rekero bushlands,2018
+2018-12-04,Wildebeest,135,Rekero bushlands,2018
+2018-12-04,Wildebeest,105,Rekero bushlands,2018
+2018-12-04,Wildebeest,180,Rekero bushlands,2018
+2018-12-04,Wildebeest,56,Rekero bushlands,2018
+2018-12-04,Wildebeest,85,Rekero bushlands,2018
+2018-12-04,Wildebeest,41,Rekero bushlands,2018
+2018-12-04,Wildebeest,66,Rekero bushlands,2018
+2017-10-20,Wildebeest,10,Enoolera plains,2017
+2017-10-20,Wildebeest,2,Enoolera plains,2017
+2017-10-20,Wildebeest,8,Enoolera plains,2017
+2017-10-20,Wildebeest,31,Enoolera plains,2017
+2017-10-20,Wildebeest,14,Enoolera plains,2017
+2017-10-20,Wildebeest,11,Enoolera plains,2017
+2017-10-20,Wildebeest,7,Enoolera plains,2017
+2017-10-20,Wildebeest,4,Enoolera plains,2017
+2017-10-20,Wildebeest,5,Enoolera plains,2017
+2017-10-20,Wildebeest,8,Enoolera plains,2017
+2017-10-20,Wildebeest,9,Enoolera plains,2017
+2017-10-20,Wildebeest,12,Enoolera plains,2017
+2017-10-20,Wildebeest,9,Enoolera plains,2017
+2017-10-20,Wildebeest,8,Enoolera plains,2017
+2017-10-20,Wildebeest,7,Enoolera plains,2017
+2017-10-20,Wildebeest,5,Enoolera plains,2017
+2017-10-20,Wildebeest,6,Enoolera plains,2017
+2017-10-20,Wildebeest,6,Enoolera plains,2017
+2017-10-20,Wildebeest,5,Enoolera plains,2017
+2017-11-02,Wildebeest,9,Enoolera plains,2017
+2017-11-02,Wildebeest,25,Enoolera plains,2017
+2017-11-02,Wildebeest,7,Enoolera plains,2017
+2017-11-02,Wildebeest,13,Enoolera plains,2017
+2017-11-02,Wildebeest,3,Enoolera plains,2017
+2017-11-02,Wildebeest,2,Enoolera plains,2017
+2017-11-02,Wildebeest,1,Enoolera plains,2017
+2017-11-02,Wildebeest,12,Enoolera plains,2017
+2017-12-07,Wildebeest,2,Enoolera plains,2017
+2017-12-07,Wildebeest,13,Enoolera plains,2017
+2017-12-07,Wildebeest,1,Enoolera plains,2017
+2017-12-07,Wildebeest,5,Enoolera plains,2017
+2018-01-11,Wildebeest,1,Enoolera plains,2018
+2018-01-11,Wildebeest,1,Enoolera plains,2018
+2018-01-11,Wildebeest,5,Enoolera plains,2018
+2018-01-11,Wildebeest,4,Enoolera plains,2018
+2018-01-11,Wildebeest,7,Enoolera plains,2018
+2018-01-11,Wildebeest,2,Enoolera plains,2018
+2018-01-11,Wildebeest,6,Enoolera plains,2018
+2018-01-11,Wildebeest,6,Enoolera plains,2018
+2018-01-11,Wildebeest,7,Enoolera plains,2018
+2018-01-11,Wildebeest,5,Enoolera plains,2018
+2018-01-11,Wildebeest,5,Enoolera plains,2018
+2018-01-11,Wildebeest,4,Enoolera plains,2018
+2018-01-11,Wildebeest,5,Enoolera plains,2018
+2018-01-11,Wildebeest,3,Enoolera plains,2018
+2018-01-11,Wildebeest,7,Enoolera plains,2018
+2018-01-11,Wildebeest,3,Enoolera plains,2018
+2018-01-11,Wildebeest,5,Enoolera plains,2018
+2018-01-11,Wildebeest,11,Enoolera plains,2018
+2018-01-11,Wildebeest,8,Enoolera plains,2018
+2018-01-11,Wildebeest,6,Enoolera plains,2018
+2018-01-11,Wildebeest,5,Enoolera plains,2018
+2018-01-11,Wildebeest,9,Enoolera plains,2018
+2018-01-11,Wildebeest,3,Enoolera plains,2018
+2018-01-11,Wildebeest,1,Enoolera plains,2018
+2018-01-11,Wildebeest,5,Enoolera plains,2018
+2018-01-11,Wildebeest,2,Enoolera plains,2018
+2018-01-11,Wildebeest,3,Enoolera plains,2018
+2018-01-11,Wildebeest,1,Enoolera plains,2018
+2018-01-11,Wildebeest,1,Enoolera plains,2018
+2018-01-11,Wildebeest,10,Enoolera plains,2018
+2018-01-11,Wildebeest,3,Enoolera plains,2018
+2018-01-11,Wildebeest,6,Enoolera plains,2018
+2018-01-11,Wildebeest,6,Enoolera plains,2018
+2018-01-11,Wildebeest,1,Enoolera plains,2018
+2018-01-11,Wildebeest,6,Enoolera plains,2018
+2018-01-11,Wildebeest,1,Enoolera plains,2018
+2018-03-01,Wildebeest,19,Enoolera plains,2018
+2018-03-01,Wildebeest,1,Enoolera plains,2018
+2018-03-01,Wildebeest,5,Enoolera plains,2018
+2018-03-01,Wildebeest,1,Enoolera plains,2018
+2018-03-01,Wildebeest,1,Enoolera plains,2018
+2018-03-01,Wildebeest,13,Enoolera plains,2018
+2018-03-01,Wildebeest,35,Enoolera plains,2018
+2018-03-01,Wildebeest,8,Enoolera plains,2018
+2018-03-01,Wildebeest,49,Enoolera plains,2018
+2018-03-01,Wildebeest,3,Enoolera plains,2018
+2018-03-01,Wildebeest,50,Enoolera plains,2018
+2018-04-05,Wildebeest,1,Enoolera plains,2018
+2018-04-05,Wildebeest,2,Enoolera plains,2018
+2018-04-05,Wildebeest,1,Enoolera plains,2018
+2018-04-05,Wildebeest,1,Enoolera plains,2018
+2018-04-05,Wildebeest,4,Enoolera plains,2018
+2018-04-05,Wildebeest,1,Enoolera plains,2018
+2018-04-05,Wildebeest,1,Enoolera plains,2018
+2018-04-05,Wildebeest,2,Enoolera plains,2018
+2018-04-05,Wildebeest,1,Enoolera plains,2018
+2018-05-03,Wildebeest,1,Enoolera plains,2018
+2018-05-03,Wildebeest,18,Enoolera plains,2018
+2018-05-03,Wildebeest,1,Enoolera plains,2018
+2018-06-21,Wildebeest,4,Enoolera plains,2018
+2018-06-21,Wildebeest,18,Enoolera plains,2018
+2018-07-05,Wildebeest,6,Enoolera plains,2018
+2018-07-05,Wildebeest,32,Enoolera plains,2018
+2018-07-05,Wildebeest,12,Enoolera plains,2018
+2018-07-05,Wildebeest,3,Enoolera plains,2018
+2018-07-05,Wildebeest,62,Enoolera plains,2018
+2018-07-05,Wildebeest,8,Enoolera plains,2018
+2018-07-05,Wildebeest,34,Enoolera plains,2018
+2018-07-05,Wildebeest,6,Enoolera plains,2018
+2018-07-05,Wildebeest,3,Enoolera plains,2018
+2018-07-05,Wildebeest,5,Enoolera plains,2018
+2018-07-05,Wildebeest,4,Enoolera plains,2018
+2018-08-02,Wildebeest,1,Enoolera plains,2018
+2018-08-02,Wildebeest,6,Enoolera plains,2018
+2018-08-02,Wildebeest,3,Enoolera plains,2018
+2018-08-02,Wildebeest,4,Enoolera plains,2018
+2018-08-02,Wildebeest,3,Enoolera plains,2018
+2018-08-02,Wildebeest,1,Enoolera plains,2018
+2018-08-02,Wildebeest,2,Enoolera plains,2018
+2018-08-02,Wildebeest,1,Enoolera plains,2018
+2018-08-02,Wildebeest,1,Enoolera plains,2018
+2018-08-02,Wildebeest,6,Enoolera plains,2018
+2018-09-06,Wildebeest,67,Enoolera plains,2018
+2018-09-06,Wildebeest,36,Enoolera plains,2018
+2018-09-06,Wildebeest,19,Enoolera plains,2018
+2018-09-06,Wildebeest,78,Enoolera plains,2018
+2018-09-06,Wildebeest,12,Enoolera plains,2018
+2018-09-06,Wildebeest,11,Enoolera plains,2018
+2018-10-04,Wildebeest,12,Enoolera plains,2018
+2018-10-04,Wildebeest,11,Enoolera plains,2018
+2018-10-04,Wildebeest,1,Enoolera plains,2018
+2018-10-04,Wildebeest,25,Enoolera plains,2018
+2018-10-04,Wildebeest,4,Enoolera plains,2018
+2018-10-04,Wildebeest,7,Enoolera plains,2018
+2018-10-04,Wildebeest,28,Enoolera plains,2018
+2018-10-04,Wildebeest,25,Enoolera plains,2018
+2018-10-04,Wildebeest,27,Enoolera plains,2018
+2018-10-04,Wildebeest,35,Enoolera plains,2018
+2018-10-04,Wildebeest,38,Enoolera plains,2018
+2018-11-01,Wildebeest,1,Enoolera plains,2018
+2018-11-01,Wildebeest,1,Enoolera plains,2018
+2018-11-01,Wildebeest,10,Enoolera plains,2018
+2018-11-01,Wildebeest,10,Enoolera plains,2018
+2018-11-01,Wildebeest,1,Enoolera plains,2018
+2018-11-01,Wildebeest,8,Enoolera plains,2018
+2018-12-06,Wildebeest,5,Enoolera plains,2018
+2018-12-06,Wildebeest,1,Enoolera plains,2018
+2018-12-06,Wildebeest,1,Enoolera plains,2018
+2018-12-06,Wildebeest,2,Enoolera plains,2018
+2018-12-06,Wildebeest,4,Enoolera plains,2018
+2018-12-06,Wildebeest,11,Enoolera plains,2018
+2018-12-05,Wildebeest,1,Enoolera plains,2018
+2018-12-05,Wildebeest,3,Enoolera plains,2018
+2017-12-05,Wildebeest,4,Rekero plains,2017
+2017-12-07,Wildebeest,2,Rekero plains,2017
+2017-12-07,Wildebeest,5,Rekero plains,2017
+2017-12-07,Wildebeest,9,Rekero plains,2017
+2017-12-07,Wildebeest,3,Rekero plains,2017
+2017-12-07,Wildebeest,9,Rekero plains,2017
+2017-12-07,Wildebeest,11,Rekero plains,2017
+2017-12-07,Wildebeest,1,Rekero plains,2017
+2017-12-07,Wildebeest,2,Rekero plains,2017
+2017-12-07,Wildebeest,1,Rekero plains,2017
+2017-12-07,Wildebeest,5,Rekero plains,2017
+2017-12-07,Wildebeest,1,Rekero plains,2017
+2017-12-07,Wildebeest,1,Rekero plains,2017
+2017-12-07,Wildebeest,10,Rekero plains,2017
+2017-12-07,Wildebeest,2,Rekero plains,2017
+2017-12-07,Wildebeest,5,Rekero plains,2017
+2017-12-07,Wildebeest,1,Rekero plains,2017
+2017-12-07,Wildebeest,1,Rekero plains,2017
+2018-01-11,Wildebeest,5,Rekero plains,2018
+2018-01-11,Wildebeest,1,Rekero plains,2018
+2018-01-11,Wildebeest,1,Rekero plains,2018
+2018-01-11,Wildebeest,2,Rekero plains,2018
+2018-01-11,Wildebeest,6,Rekero plains,2018
+2018-01-11,Wildebeest,1,Rekero plains,2018
+2018-01-11,Wildebeest,1,Rekero plains,2018
+2018-01-11,Wildebeest,7,Rekero plains,2018
+2018-01-11,Wildebeest,2,Rekero plains,2018
+2018-01-11,Wildebeest,7,Rekero plains,2018
+2018-01-11,Wildebeest,2,Rekero plains,2018
+2018-01-11,Wildebeest,13,Rekero plains,2018
+2018-01-11,Wildebeest,7,Rekero plains,2018
+2018-01-11,Wildebeest,1,Rekero plains,2018
+2018-01-11,Wildebeest,2,Rekero plains,2018
+2018-01-11,Wildebeest,1,Rekero plains,2018
+2018-01-11,Wildebeest,1,Rekero plains,2018
+2018-01-11,Wildebeest,1,Rekero plains,2018
+2018-01-11,Wildebeest,10,Rekero plains,2018
+2018-01-11,Wildebeest,5,Rekero plains,2018
+2018-01-11,Wildebeest,1,Rekero plains,2018
+2018-01-11,Wildebeest,1,Rekero plains,2018
+2018-02-06,Wildebeest,9,Rekero plains,2018
+2018-03-01,Wildebeest,1,Rekero plains,2018
+2018-03-01,Wildebeest,1,Rekero plains,2018
+2018-03-01,Wildebeest,3,Rekero plains,2018
+2018-03-01,Wildebeest,1,Rekero plains,2018
+2018-03-01,Wildebeest,2,Rekero plains,2018
+2018-03-01,Wildebeest,44,Rekero plains,2018
+2018-03-01,Wildebeest,2,Rekero plains,2018
+2018-03-01,Wildebeest,20,Rekero plains,2018
+2018-03-01,Wildebeest,21,Rekero plains,2018
+2018-03-01,Wildebeest,1,Rekero plains,2018
+2018-04-05,Wildebeest,2,Rekero plains,2018
+2018-04-05,Wildebeest,2,Rekero plains,2018
+2018-04-05,Wildebeest,2,Rekero plains,2018
+2018-04-05,Wildebeest,3,Rekero plains,2018
+2018-04-05,Wildebeest,1,Rekero plains,2018
+2018-04-05,Wildebeest,1,Rekero plains,2018
+2018-04-05,Wildebeest,2,Rekero plains,2018
+2018-04-05,Wildebeest,2,Rekero plains,2018
+2018-04-05,Wildebeest,2,Rekero plains,2018
+2018-04-05,Wildebeest,1,Rekero plains,2018
+2018-04-05,Wildebeest,7,Rekero plains,2018
+2018-04-05,Wildebeest,1,Rekero plains,2018
+2018-04-05,Wildebeest,1,Rekero plains,2018
+2018-04-05,Wildebeest,3,Rekero plains,2018
+2018-04-05,Wildebeest,1,Rekero plains,2018
+2018-04-05,Wildebeest,2,Rekero plains,2018
+2018-04-05,Wildebeest,2,Rekero plains,2018
+2018-04-05,Wildebeest,1,Rekero plains,2018
+2018-04-05,Wildebeest,5,Rekero plains,2018
+2018-04-05,Wildebeest,1,Rekero plains,2018
+2018-04-05,Wildebeest,1,Rekero plains,2018
+2018-04-05,Wildebeest,1,Rekero plains,2018
+2018-04-05,Wildebeest,1,Rekero plains,2018
+2018-05-03,Wildebeest,2,Rekero plains,2018
+2018-05-03,Wildebeest,6,Rekero plains,2018
+2018-05-03,Wildebeest,1,Rekero plains,2018
+2018-05-03,Wildebeest,1,Rekero plains,2018
+2018-05-03,Wildebeest,1,Rekero plains,2018
+2018-05-03,Wildebeest,7,Rekero plains,2018
+2018-05-03,Wildebeest,11,Rekero plains,2018
+2018-05-03,Wildebeest,24,Rekero plains,2018
+2018-05-03,Wildebeest,1,Rekero plains,2018
+2018-05-03,Wildebeest,1,Rekero plains,2018
+2018-05-03,Wildebeest,2,Rekero plains,2018
+2018-05-03,Wildebeest,1,Rekero plains,2018
+2018-05-03,Wildebeest,1,Rekero plains,2018
+2018-05-03,Wildebeest,1,Rekero plains,2018
+2018-05-03,Wildebeest,1,Rekero plains,2018
+2018-05-03,Wildebeest,1,Rekero plains,2018
+2018-05-03,Wildebeest,1,Rekero plains,2018
+2018-05-03,Wildebeest,2,Rekero plains,2018
+2018-05-03,Wildebeest,1,Rekero plains,2018
+2018-05-03,Wildebeest,1,Rekero plains,2018
+2018-05-03,Wildebeest,1,Rekero plains,2018
+2018-06-21,Wildebeest,2,Rekero plains,2018
+2018-06-21,Wildebeest,42,Rekero plains,2018
+2018-06-21,Wildebeest,3,Rekero plains,2018
+2018-06-21,Wildebeest,11,Rekero plains,2018
+2018-06-21,Wildebeest,25,Rekero plains,2018
+2018-06-21,Wildebeest,34,Rekero plains,2018
+2018-07-05,Wildebeest,52,Rekero plains,2018
+2018-07-05,Wildebeest,4,Rekero plains,2018
+2018-07-05,Wildebeest,16,Rekero plains,2018
+2018-07-05,Wildebeest,16,Rekero plains,2018
+2018-07-05,Wildebeest,2,Rekero plains,2018
+2018-07-05,Wildebeest,2,Rekero plains,2018
+2018-07-05,Wildebeest,1,Rekero plains,2018
+2018-08-02,Wildebeest,1,Rekero plains,2018
+2018-08-02,Wildebeest,2,Rekero plains,2018
+2018-08-02,Wildebeest,1,Rekero plains,2018
+2018-08-02,Wildebeest,1,Rekero plains,2018
+2018-08-02,Wildebeest,15,Rekero plains,2018
+2018-08-02,Wildebeest,1,Rekero plains,2018
+2018-08-02,Wildebeest,5,Rekero plains,2018
+2018-08-02,Wildebeest,16,Rekero plains,2018
+2018-08-02,Wildebeest,2,Rekero plains,2018
+2018-08-02,Wildebeest,3,Rekero plains,2018
+2018-08-02,Wildebeest,2,Rekero plains,2018
+2018-08-02,Wildebeest,7,Rekero plains,2018
+2018-08-02,Wildebeest,4,Rekero plains,2018
+2018-08-02,Wildebeest,6,Rekero plains,2018
+2018-08-02,Wildebeest,15,Rekero plains,2018
+2018-08-02,Wildebeest,11,Rekero plains,2018
+2018-08-02,Wildebeest,1,Rekero plains,2018
+2018-08-02,Wildebeest,1,Rekero plains,2018
+2018-08-02,Wildebeest,4,Rekero plains,2018
+2018-09-06,Wildebeest,4,Rekero plains,2018
+2018-09-06,Wildebeest,15,Rekero plains,2018
+2018-09-06,Wildebeest,5,Rekero plains,2018
+2018-09-06,Wildebeest,11,Rekero plains,2018
+2018-09-06,Wildebeest,4,Rekero plains,2018
+2018-10-04,Wildebeest,1,Rekero plains,2018
+2018-10-04,Wildebeest,7,Rekero plains,2018
+2018-10-04,Wildebeest,1,Rekero plains,2018
+2018-10-04,Wildebeest,28,Rekero plains,2018
+2018-11-01,Wildebeest,8,Rekero plains,2018
+2018-11-01,Wildebeest,2,Rekero plains,2018
+2018-11-01,Wildebeest,2,Rekero plains,2018
+2018-11-01,Wildebeest,35,Rekero plains,2018
+2018-11-01,Wildebeest,1,Rekero plains,2018
+2018-12-06,Wildebeest,8,Rekero plains,2018
+2018-12-05,Wildebeest,8,Rekero plains,2018
+2018-12-05,Wildebeest,13,Rekero plains,2018
+2017-10-20,Wildebeest,6,Payia plains,2017
+2017-10-20,Wildebeest,5,Payia plains,2017
+2017-10-20,Wildebeest,3,Payia plains,2017
+2017-10-20,Wildebeest,3,Payia plains,2017
+2017-10-20,Wildebeest,4,Payia plains,2017
+2017-10-20,Wildebeest,17,Payia plains,2017
+2017-10-20,Wildebeest,6,Payia plains,2017
+2017-10-20,Wildebeest,1,Payia plains,2017
+2017-10-20,Wildebeest,2,Payia plains,2017
+2017-10-20,Wildebeest,4,Payia plains,2017
+2017-10-20,Wildebeest,2,Payia plains,2017
+2017-10-20,Wildebeest,1,Payia plains,2017
+2017-10-20,Wildebeest,1,Payia plains,2017
+2017-10-20,Wildebeest,5,Payia plains,2017
+2017-10-20,Wildebeest,10,Payia plains,2017
+2017-10-20,Wildebeest,5,Payia plains,2017
+2017-10-20,Wildebeest,12,Payia plains,2017
+2017-10-20,Wildebeest,10,Payia plains,2017
+2017-10-20,Wildebeest,21,Payia plains,2017
+2017-10-20,Wildebeest,5,Payia plains,2017
+2017-10-20,Wildebeest,11,Payia plains,2017
+2017-10-20,Wildebeest,4,Payia plains,2017
+2017-10-20,Wildebeest,4,Payia plains,2017
+2017-10-20,Wildebeest,11,Payia plains,2017
+2017-10-20,Wildebeest,15,Payia plains,2017
+2017-10-20,Wildebeest,2,Payia plains,2017
+2017-10-20,Wildebeest,2,Payia plains,2017
+2017-10-20,Wildebeest,3,Payia plains,2017
+2017-10-20,Wildebeest,3,Payia plains,2017
+2017-10-20,Wildebeest,3,Payia plains,2017
+2017-10-20,Wildebeest,1,Payia plains,2017
+2017-11-02,Wildebeest,5,Payia plains,2017
+2017-11-02,Wildebeest,12,Payia plains,2017
+2017-11-02,Wildebeest,21,Payia plains,2017
+2017-11-02,Wildebeest,15,Payia plains,2017
+2017-11-02,Wildebeest,9,Payia plains,2017
+2018-01-11,Wildebeest,1,Payia plains,2018
+2018-01-11,Wildebeest,5,Payia plains,2018
+2018-01-11,Wildebeest,7,Payia plains,2018
+2018-01-11,Wildebeest,1,Payia plains,2018
+2018-01-11,Wildebeest,1,Payia plains,2018
+2018-01-11,Wildebeest,3,Payia plains,2018
+2018-01-11,Wildebeest,11,Payia plains,2018
+2018-01-11,Wildebeest,8,Payia plains,2018
+2018-01-11,Wildebeest,4,Payia plains,2018
+2018-01-11,Wildebeest,4,Payia plains,2018
+2018-01-11,Wildebeest,4,Payia plains,2018
+2018-01-11,Wildebeest,2,Payia plains,2018
+2018-01-11,Wildebeest,10,Payia plains,2018
+2018-01-11,Wildebeest,4,Payia plains,2018
+2018-01-11,Wildebeest,5,Payia plains,2018
+2018-01-11,Wildebeest,3,Payia plains,2018
+2018-01-11,Wildebeest,9,Payia plains,2018
+2018-01-11,Wildebeest,2,Payia plains,2018
+2018-01-11,Wildebeest,5,Payia plains,2018
+2018-01-11,Wildebeest,2,Payia plains,2018
+2018-01-11,Wildebeest,4,Payia plains,2018
+2018-01-11,Wildebeest,1,Payia plains,2018
+2018-01-11,Wildebeest,25,Payia plains,2018
+2018-01-11,Wildebeest,1,Payia plains,2018
+2018-01-11,Wildebeest,2,Payia plains,2018
+2018-01-11,Wildebeest,6,Payia plains,2018
+2018-01-11,Wildebeest,5,Payia plains,2018
+2018-01-11,Wildebeest,1,Payia plains,2018
+2018-01-11,Wildebeest,2,Payia plains,2018
+2018-01-11,Wildebeest,3,Payia plains,2018
+2018-01-11,Wildebeest,4,Payia plains,2018
+2018-01-11,Wildebeest,14,Payia plains,2018
+2018-01-11,Wildebeest,11,Payia plains,2018
+2018-01-11,Wildebeest,5,Payia plains,2018
+2018-01-11,Wildebeest,4,Payia plains,2018
+2018-01-11,Wildebeest,3,Payia plains,2018
+2018-01-11,Wildebeest,3,Payia plains,2018
+2018-01-11,Wildebeest,4,Payia plains,2018
+2018-01-11,Wildebeest,5,Payia plains,2018
+2018-01-11,Wildebeest,2,Payia plains,2018
+2018-01-11,Wildebeest,1,Payia plains,2018
+2018-01-11,Wildebeest,16,Payia plains,2018
+2018-01-11,Wildebeest,1,Payia plains,2018
+2018-01-11,Wildebeest,3,Payia plains,2018
+2018-01-11,Wildebeest,4,Payia plains,2018
+2018-01-11,Wildebeest,3,Payia plains,2018
+2018-01-11,Wildebeest,2,Payia plains,2018
+2018-01-11,Wildebeest,2,Payia plains,2018
+2018-01-11,Wildebeest,3,Payia plains,2018
+2018-01-11,Wildebeest,2,Payia plains,2018
+2018-01-11,Wildebeest,4,Payia plains,2018
+2018-01-11,Wildebeest,6,Payia plains,2018
+2018-01-11,Wildebeest,2,Payia plains,2018
+2018-01-11,Wildebeest,1,Payia plains,2018
+2018-01-11,Wildebeest,5,Payia plains,2018
+2018-01-11,Wildebeest,2,Payia plains,2018
+2018-01-11,Wildebeest,4,Payia plains,2018
+2018-01-11,Wildebeest,18,Payia plains,2018
+2018-01-11,Wildebeest,10,Payia plains,2018
+2018-01-11,Wildebeest,6,Payia plains,2018
+2018-01-11,Wildebeest,17,Payia plains,2018
+2018-01-11,Wildebeest,3,Payia plains,2018
+2018-01-11,Wildebeest,5,Payia plains,2018
+2018-01-11,Wildebeest,1,Payia plains,2018
+2018-01-11,Wildebeest,1,Payia plains,2018
+2018-01-11,Wildebeest,4,Payia plains,2018
+2018-01-11,Wildebeest,5,Payia plains,2018
+2018-01-11,Wildebeest,7,Payia plains,2018
+2018-01-11,Wildebeest,7,Payia plains,2018
+2018-01-11,Wildebeest,1,Payia plains,2018
+2018-01-11,Wildebeest,11,Payia plains,2018
+2018-01-11,Wildebeest,1,Payia plains,2018
+2018-01-11,Wildebeest,2,Payia plains,2018
+2018-01-11,Wildebeest,1,Payia plains,2018
+2018-02-01,Wildebeest,11,Payia plains,2018
+2018-02-01,Wildebeest,17,Payia plains,2018
+2018-02-01,Wildebeest,13,Payia plains,2018
+2018-02-01,Wildebeest,18,Payia plains,2018
+2018-02-01,Wildebeest,42,Payia plains,2018
+2018-02-01,Wildebeest,63,Payia plains,2018
+2018-02-01,Wildebeest,46,Payia plains,2018
+2018-02-01,Wildebeest,54,Payia plains,2018
+2018-02-01,Wildebeest,26,Payia plains,2018
+2018-02-01,Wildebeest,43,Payia plains,2018
+2018-02-01,Wildebeest,5,Payia plains,2018
+2018-02-01,Wildebeest,2,Payia plains,2018
+2018-02-01,Wildebeest,1,Payia plains,2018
+2018-02-01,Wildebeest,1,Payia plains,2018
+2018-02-01,Wildebeest,4,Payia plains,2018
+2018-02-01,Wildebeest,8,Payia plains,2018
+2018-02-01,Wildebeest,7,Payia plains,2018
+2018-02-01,Wildebeest,10,Payia plains,2018
+2018-02-01,Wildebeest,16,Payia plains,2018
+2018-03-01,Wildebeest,1,Payia plains,2018
+2018-03-01,Wildebeest,1,Payia plains,2018
+2018-03-01,Wildebeest,1,Payia plains,2018
+2018-03-01,Wildebeest,1,Payia plains,2018
+2018-04-05,Wildebeest,6,Payia plains,2018
+2018-04-05,Wildebeest,1,Payia plains,2018
+2018-04-05,Wildebeest,9,Payia plains,2018
+2018-04-05,Wildebeest,1,Payia plains,2018
+2018-04-05,Wildebeest,1,Payia plains,2018
+2018-04-05,Wildebeest,9,Payia plains,2018
+2018-04-05,Wildebeest,16,Payia plains,2018
+2018-04-05,Wildebeest,5,Payia plains,2018
+2018-04-05,Wildebeest,10,Payia plains,2018
+2018-04-05,Wildebeest,7,Payia plains,2018
+2018-04-05,Wildebeest,20,Payia plains,2018
+2018-04-05,Wildebeest,10,Payia plains,2018
+2018-04-05,Wildebeest,4,Payia plains,2018
+2018-04-05,Wildebeest,1,Payia plains,2018
+2018-04-05,Wildebeest,5,Payia plains,2018
+2018-04-05,Wildebeest,6,Payia plains,2018
+2018-04-05,Wildebeest,4,Payia plains,2018
+2018-04-05,Wildebeest,10,Payia plains,2018
+2018-04-05,Wildebeest,3,Payia plains,2018
+2018-04-05,Wildebeest,13,Payia plains,2018
+2018-04-05,Wildebeest,3,Payia plains,2018
+2018-04-05,Wildebeest,7,Payia plains,2018
+2018-04-05,Wildebeest,9,Payia plains,2018
+2018-04-05,Wildebeest,10,Payia plains,2018
+2018-04-05,Wildebeest,4,Payia plains,2018
+2018-04-05,Wildebeest,3,Payia plains,2018
+2018-04-05,Wildebeest,3,Payia plains,2018
+2018-04-05,Wildebeest,8,Payia plains,2018
+2018-04-05,Wildebeest,1,Payia plains,2018
+2018-04-05,Wildebeest,1,Payia plains,2018
+2018-04-05,Wildebeest,1,Payia plains,2018
+2018-04-05,Wildebeest,3,Payia plains,2018
+2018-04-05,Wildebeest,1,Payia plains,2018
+2018-04-05,Wildebeest,1,Payia plains,2018
+2018-04-05,Wildebeest,1,Payia plains,2018
+2018-04-05,Wildebeest,1,Payia plains,2018
+2018-04-05,Wildebeest,1,Payia plains,2018
+2018-04-05,Wildebeest,2,Payia plains,2018
+2018-04-05,Wildebeest,1,Payia plains,2018
+2018-04-05,Wildebeest,1,Payia plains,2018
+2018-04-05,Wildebeest,2,Payia plains,2018
+2018-04-05,Wildebeest,2,Payia plains,2018
+2018-04-05,Wildebeest,1,Payia plains,2018
+2018-04-05,Wildebeest,2,Payia plains,2018
+2018-04-05,Wildebeest,6,Payia plains,2018
+2018-04-05,Wildebeest,19,Payia plains,2018
+2018-04-05,Wildebeest,6,Payia plains,2018
+2018-04-05,Wildebeest,1,Payia plains,2018
+2018-04-05,Wildebeest,1,Payia plains,2018
+2018-04-05,Wildebeest,3,Payia plains,2018
+2018-04-05,Wildebeest,30,Payia plains,2018
+2018-04-05,Wildebeest,28,Payia plains,2018
+2018-04-05,Wildebeest,2,Payia plains,2018
+2018-04-05,Wildebeest,3,Payia plains,2018
+2018-04-05,Wildebeest,2,Payia plains,2018
+2018-04-05,Wildebeest,22,Payia plains,2018
+2018-04-05,Wildebeest,3,Payia plains,2018
+2018-04-05,Wildebeest,16,Payia plains,2018
+2018-04-05,Wildebeest,2,Payia plains,2018
+2018-04-05,Wildebeest,15,Payia plains,2018
+2018-04-05,Wildebeest,1,Payia plains,2018
+2018-04-05,Wildebeest,8,Payia plains,2018
+2018-04-05,Wildebeest,22,Payia plains,2018
+2018-04-05,Wildebeest,14,Payia plains,2018
+2018-04-05,Wildebeest,3,Payia plains,2018
+2018-04-05,Wildebeest,16,Payia plains,2018
+2018-04-05,Wildebeest,11,Payia plains,2018
+2018-04-05,Wildebeest,10,Payia plains,2018
+2018-04-05,Wildebeest,16,Payia plains,2018
+2018-05-03,Wildebeest,3,Payia plains,2018
+2018-05-03,Wildebeest,1,Payia plains,2018
+2018-05-03,Wildebeest,5,Payia plains,2018
+2018-05-03,Wildebeest,2,Payia plains,2018
+2018-05-03,Wildebeest,1,Payia plains,2018
+2018-05-03,Wildebeest,2,Payia plains,2018
+2018-05-03,Wildebeest,1,Payia plains,2018
+2018-05-03,Wildebeest,1,Payia plains,2018
+2018-05-03,Wildebeest,3,Payia plains,2018
+2018-05-03,Wildebeest,3,Payia plains,2018
+2018-05-03,Wildebeest,1,Payia plains,2018
+2018-05-03,Wildebeest,3,Payia plains,2018
+2018-05-03,Wildebeest,1,Payia plains,2018
+2018-05-03,Wildebeest,1,Payia plains,2018
+2018-05-03,Wildebeest,1,Payia plains,2018
+2018-05-03,Wildebeest,6,Payia plains,2018
+2018-05-03,Wildebeest,1,Payia plains,2018
+2018-05-03,Wildebeest,5,Payia plains,2018
+2018-05-03,Wildebeest,4,Payia plains,2018
+2018-05-03,Wildebeest,1,Payia plains,2018
+2018-05-03,Wildebeest,6,Payia plains,2018
+2018-05-03,Wildebeest,8,Payia plains,2018
+2018-05-03,Wildebeest,1,Payia plains,2018
+2018-05-03,Wildebeest,8,Payia plains,2018
+2018-05-03,Wildebeest,9,Payia plains,2018
+2018-05-03,Wildebeest,10,Payia plains,2018
+2018-06-21,Wildebeest,7,Payia plains,2018
+2018-06-21,Wildebeest,7,Payia plains,2018
+2018-06-21,Wildebeest,15,Payia plains,2018
+2018-06-21,Wildebeest,10,Payia plains,2018
+2018-06-21,Wildebeest,9,Payia plains,2018
+2018-06-21,Wildebeest,14,Payia plains,2018
+2018-06-21,Wildebeest,20,Payia plains,2018
+2018-06-21,Wildebeest,31,Payia plains,2018
+2018-06-21,Wildebeest,16,Payia plains,2018
+2018-06-21,Wildebeest,61,Payia plains,2018
+2018-06-21,Wildebeest,60,Payia plains,2018
+2018-06-21,Wildebeest,18,Payia plains,2018
+2018-06-21,Wildebeest,35,Payia plains,2018
+2018-06-21,Wildebeest,48,Payia plains,2018
+2018-07-05,Wildebeest,1,Payia plains,2018
+2018-07-05,Wildebeest,4,Payia plains,2018
+2018-07-05,Wildebeest,6,Payia plains,2018
+2018-07-05,Wildebeest,13,Payia plains,2018
+2018-07-05,Wildebeest,23,Payia plains,2018
+2018-07-05,Wildebeest,14,Payia plains,2018
+2018-07-05,Wildebeest,12,Payia plains,2018
+2018-07-05,Wildebeest,6,Payia plains,2018
+2018-07-05,Wildebeest,12,Payia plains,2018
+2018-07-05,Wildebeest,31,Payia plains,2018
+2018-07-05,Wildebeest,14,Payia plains,2018
+2018-07-05,Wildebeest,32,Payia plains,2018
+2018-08-02,Wildebeest,4,Payia plains,2018
+2018-09-06,Wildebeest,8,Payia plains,2018
+2018-09-06,Wildebeest,20,Payia plains,2018
+2018-09-06,Wildebeest,16,Payia plains,2018
+2018-09-06,Wildebeest,20,Payia plains,2018
+2018-09-06,Wildebeest,5,Payia plains,2018
+2018-09-06,Wildebeest,12,Payia plains,2018
+2018-09-06,Wildebeest,7,Payia plains,2018
+2018-09-06,Wildebeest,9,Payia plains,2018
+2018-09-06,Wildebeest,11,Payia plains,2018
+2018-09-06,Wildebeest,26,Payia plains,2018
+2018-10-04,Wildebeest,4,Payia plains,2018
+2018-10-04,Wildebeest,2,Payia plains,2018
+2018-10-04,Wildebeest,21,Payia plains,2018
+2018-10-04,Wildebeest,9,Payia plains,2018
+2018-10-04,Wildebeest,6,Payia plains,2018
+2018-10-04,Wildebeest,5,Payia plains,2018
+2018-10-04,Wildebeest,7,Payia plains,2018
+2018-10-04,Wildebeest,11,Payia plains,2018
+2018-10-04,Wildebeest,22,Payia plains,2018
+2018-11-01,Wildebeest,1,Payia plains,2018
+2018-12-05,Wildebeest,30,Payia plains,2018
+2018-12-05,Wildebeest,35,Payia plains,2018
+2017-10-17,Plains zebra,11,Olare Sampu bushlands,2017
+2018-01-09,Plains zebra,1,Olare Sampu bushlands,2018
+2018-01-09,Plains zebra,2,Olare Sampu bushlands,2018
+2018-01-09,Plains zebra,1,Olare Sampu bushlands,2018
+2018-01-09,Plains zebra,10,Olare Sampu bushlands,2018
+2018-01-09,Plains zebra,6,Olare Sampu bushlands,2018
+2018-01-09,Plains zebra,1,Olare Sampu bushlands,2018
+2018-01-09,Plains zebra,2,Olare Sampu bushlands,2018
+2018-01-09,Plains zebra,3,Olare Sampu bushlands,2018
+2018-01-16,Plains zebra,2,Olare Sampu bushlands,2018
+2018-01-16,Plains zebra,4,Olare Sampu bushlands,2018
+2018-02-13,Plains zebra,5,Olare Sampu bushlands,2018
+2018-02-13,Plains zebra,7,Olare Sampu bushlands,2018
+2018-03-06,Plains zebra,3,Olare Sampu bushlands,2018
+2018-03-06,Plains zebra,1,Olare Sampu bushlands,2018
+2018-03-06,Plains zebra,3,Olare Sampu bushlands,2018
+2018-04-03,Plains zebra,3,Olare Sampu bushlands,2018
+2018-04-03,Plains zebra,4,Olare Sampu bushlands,2018
+2018-04-03,Plains zebra,6,Olare Sampu bushlands,2018
+2018-04-03,Plains zebra,10,Olare Sampu bushlands,2018
+2018-04-03,Plains zebra,2,Olare Sampu bushlands,2018
+2018-05-08,Plains zebra,21,Olare Sampu bushlands,2018
+2018-05-08,Plains zebra,25,Olare Sampu bushlands,2018
+2018-05-08,Plains zebra,10,Olare Sampu bushlands,2018
+2018-05-08,Plains zebra,2,Olare Sampu bushlands,2018
+2018-05-08,Plains zebra,2,Olare Sampu bushlands,2018
+2018-05-08,Plains zebra,5,Olare Sampu bushlands,2018
+2018-05-08,Plains zebra,1,Olare Sampu bushlands,2018
+2018-05-08,Plains zebra,3,Olare Sampu bushlands,2018
+2018-05-08,Plains zebra,21,Olare Sampu bushlands,2018
+2018-05-08,Plains zebra,6,Olare Sampu bushlands,2018
+2018-05-08,Plains zebra,10,Olare Sampu bushlands,2018
+2018-05-08,Plains zebra,12,Olare Sampu bushlands,2018
+2018-05-08,Plains zebra,6,Olare Sampu bushlands,2018
+2018-06-05,Plains zebra,5,Olare Sampu bushlands,2018
+2018-06-05,Plains zebra,3,Olare Sampu bushlands,2018
+2018-06-05,Plains zebra,1,Olare Sampu bushlands,2018
+2018-06-05,Plains zebra,4,Olare Sampu bushlands,2018
+2018-06-05,Plains zebra,4,Olare Sampu bushlands,2018
+2018-06-05,Plains zebra,1,Olare Sampu bushlands,2018
+2018-06-05,Plains zebra,2,Olare Sampu bushlands,2018
+2018-08-02,Plains zebra,1,Olare Sampu bushlands,2018
+2018-11-06,Plains zebra,5,Olare Sampu bushlands,2018
+2017-10-17,Plains zebra,5,Sampu Enkare bushlands,2017
+2017-11-07,Plains zebra,4,Sampu Enkare bushlands,2017
+2017-11-07,Plains zebra,2,Sampu Enkare bushlands,2017
+2017-11-07,Plains zebra,9,Sampu Enkare bushlands,2017
+2017-12-05,Plains zebra,4,Sampu Enkare bushlands,2017
+2018-01-16,Plains zebra,6,Sampu Enkare bushlands,2018
+2018-01-16,Plains zebra,4,Sampu Enkare bushlands,2018
+2018-01-16,Plains zebra,4,Sampu Enkare bushlands,2018
+2018-01-16,Plains zebra,8,Sampu Enkare bushlands,2018
+2018-01-16,Plains zebra,10,Sampu Enkare bushlands,2018
+2018-01-16,Plains zebra,3,Sampu Enkare bushlands,2018
+2018-01-16,Plains zebra,1,Sampu Enkare bushlands,2018
+2018-01-16,Plains zebra,3,Sampu Enkare bushlands,2018
+2018-01-16,Plains zebra,4,Sampu Enkare bushlands,2018
+2018-01-16,Plains zebra,2,Sampu Enkare bushlands,2018
+2018-01-16,Plains zebra,4,Sampu Enkare bushlands,2018
+2018-01-16,Plains zebra,6,Sampu Enkare bushlands,2018
+2018-02-13,Plains zebra,3,Sampu Enkare bushlands,2018
+2018-02-13,Plains zebra,2,Sampu Enkare bushlands,2018
+2018-02-13,Plains zebra,17,Sampu Enkare bushlands,2018
+2018-03-06,Plains zebra,2,Sampu Enkare bushlands,2018
+2018-03-06,Plains zebra,3,Sampu Enkare bushlands,2018
+2018-03-06,Plains zebra,3,Sampu Enkare bushlands,2018
+2018-03-06,Plains zebra,2,Sampu Enkare bushlands,2018
+2018-04-03,Plains zebra,12,Sampu Enkare bushlands,2018
+2018-05-08,Plains zebra,6,Sampu Enkare bushlands,2018
+2018-05-08,Plains zebra,4,Sampu Enkare bushlands,2018
+2018-05-08,Plains zebra,6,Sampu Enkare bushlands,2018
+2018-05-08,Plains zebra,7,Sampu Enkare bushlands,2018
+2018-05-08,Plains zebra,10,Sampu Enkare bushlands,2018
+2018-05-08,Plains zebra,3,Sampu Enkare bushlands,2018
+2018-05-08,Plains zebra,14,Sampu Enkare bushlands,2018
+2018-06-19,Plains zebra,7,Sampu Enkare bushlands,2018
+2018-06-19,Plains zebra,4,Sampu Enkare bushlands,2018
+2018-06-19,Plains zebra,2,Sampu Enkare bushlands,2018
+2018-06-19,Plains zebra,1,Sampu Enkare bushlands,2018
+2018-06-19,Plains zebra,5,Sampu Enkare bushlands,2018
+2018-06-19,Plains zebra,1,Sampu Enkare bushlands,2018
+2018-06-19,Plains zebra,2,Sampu Enkare bushlands,2018
+2018-06-19,Plains zebra,7,Sampu Enkare bushlands,2018
+2018-06-19,Plains zebra,5,Sampu Enkare bushlands,2018
+2018-06-19,Plains zebra,5,Sampu Enkare bushlands,2018
+2018-08-02,Plains zebra,6,Sampu Enkare bushlands,2018
+2018-08-02,Plains zebra,4,Sampu Enkare bushlands,2018
+2018-08-02,Plains zebra,4,Sampu Enkare bushlands,2018
+2018-09-04,Plains zebra,5,Sampu Enkare bushlands,2018
+2018-09-04,Plains zebra,11,Sampu Enkare bushlands,2018
+2018-10-02,Plains zebra,7,Sampu Enkare bushlands,2018
+2018-10-02,Plains zebra,1,Sampu Enkare bushlands,2018
+2018-12-04,Plains zebra,9,Sampu Enkare bushlands,2018
+2018-12-04,Plains zebra,2,Sampu Enkare bushlands,2018
+2017-11-02,Plains zebra,5,Balanite plains,2017
+2017-12-07,Plains zebra,4,Balanite plains,2017
+2017-12-07,Plains zebra,1,Balanite plains,2017
+2017-12-07,Plains zebra,5,Balanite plains,2017
+2017-12-07,Plains zebra,3,Balanite plains,2017
+2017-12-07,Plains zebra,3,Balanite plains,2017
+2017-12-07,Plains zebra,1,Balanite plains,2017
+2017-12-07,Plains zebra,1,Balanite plains,2017
+2017-12-07,Plains zebra,2,Balanite plains,2017
+2017-12-07,Plains zebra,3,Balanite plains,2017
+2017-12-07,Plains zebra,3,Balanite plains,2017
+2017-12-07,Plains zebra,3,Balanite plains,2017
+2017-12-07,Plains zebra,6,Balanite plains,2017
+2017-12-07,Plains zebra,4,Balanite plains,2017
+2017-12-07,Plains zebra,1,Balanite plains,2017
+2017-12-07,Plains zebra,4,Balanite plains,2017
+2017-12-07,Plains zebra,1,Balanite plains,2017
+2017-12-07,Plains zebra,4,Balanite plains,2017
+2017-12-07,Plains zebra,1,Balanite plains,2017
+2018-01-11,Plains zebra,3,Balanite plains,2018
+2018-01-11,Plains zebra,8,Balanite plains,2018
+2018-01-11,Plains zebra,4,Balanite plains,2018
+2018-01-11,Plains zebra,4,Balanite plains,2018
+2018-02-01,Plains zebra,27,Balanite plains,2018
+2018-02-01,Plains zebra,16,Balanite plains,2018
+2018-02-01,Plains zebra,62,Balanite plains,2018
+2018-02-01,Plains zebra,34,Balanite plains,2018
+2018-02-01,Plains zebra,25,Balanite plains,2018
+2018-02-01,Plains zebra,14,Balanite plains,2018
+2018-02-01,Plains zebra,19,Balanite plains,2018
+2018-02-01,Plains zebra,98,Balanite plains,2018
+2018-02-01,Plains zebra,9,Balanite plains,2018
+2018-03-01,Plains zebra,7,Balanite plains,2018
+2018-03-01,Plains zebra,2,Balanite plains,2018
+2018-04-05,Plains zebra,11,Balanite plains,2018
+2018-06-21,Plains zebra,64,Balanite plains,2018
+2018-06-21,Plains zebra,115,Balanite plains,2018
+2018-07-05,Plains zebra,2,Balanite plains,2018
+2018-07-05,Plains zebra,6,Balanite plains,2018
+2018-07-05,Plains zebra,4,Balanite plains,2018
+2018-08-02,Plains zebra,15,Balanite plains,2018
+2018-08-02,Plains zebra,3,Balanite plains,2018
+2018-09-06,Plains zebra,7,Balanite plains,2018
+2018-09-06,Plains zebra,6,Balanite plains,2018
+2018-11-01,Plains zebra,12,Balanite plains,2018
+2018-12-06,Plains zebra,1,Balanite plains,2018
+2017-11-07,Plains zebra,2,Ilkisieusieu bushlands,2017
+2017-11-07,Plains zebra,1,Ilkisieusieu bushlands,2017
+2017-11-07,Plains zebra,1,Ilkisieusieu bushlands,2017
+2017-11-07,Plains zebra,3,Ilkisieusieu bushlands,2017
+2017-11-07,Plains zebra,3,Ilkisieusieu bushlands,2017
+2017-11-07,Plains zebra,2,Ilkisieusieu bushlands,2017
+2017-11-07,Plains zebra,1,Ilkisieusieu bushlands,2017
+2017-11-07,Plains zebra,7,Ilkisieusieu bushlands,2017
+2017-11-07,Plains zebra,2,Ilkisieusieu bushlands,2017
+2017-11-07,Plains zebra,2,Ilkisieusieu bushlands,2017
+2017-11-01,Plains zebra,3,Ilkisieusieu bushlands,2017
+2018-01-09,Plains zebra,10,Ilkisieusieu bushlands,2018
+2018-01-09,Plains zebra,6,Ilkisieusieu bushlands,2018
+2018-01-09,Plains zebra,8,Ilkisieusieu bushlands,2018
+2018-01-09,Plains zebra,10,Ilkisieusieu bushlands,2018
+2018-01-09,Plains zebra,10,Ilkisieusieu bushlands,2018
+2018-01-09,Plains zebra,5,Ilkisieusieu bushlands,2018
+2018-01-09,Plains zebra,5,Ilkisieusieu bushlands,2018
+2018-01-09,Plains zebra,10,Ilkisieusieu bushlands,2018
+2018-01-09,Plains zebra,2,Ilkisieusieu bushlands,2018
+2018-01-09,Plains zebra,4,Ilkisieusieu bushlands,2018
+2018-01-09,Plains zebra,7,Ilkisieusieu bushlands,2018
+2018-01-09,Plains zebra,4,Ilkisieusieu bushlands,2018
+2018-01-09,Plains zebra,13,Ilkisieusieu bushlands,2018
+2018-01-09,Plains zebra,20,Ilkisieusieu bushlands,2018
+2018-01-09,Plains zebra,30,Ilkisieusieu bushlands,2018
+2018-01-09,Plains zebra,10,Ilkisieusieu bushlands,2018
+2018-01-09,Plains zebra,12,Ilkisieusieu bushlands,2018
+2018-01-09,Plains zebra,10,Ilkisieusieu bushlands,2018
+2018-01-09,Plains zebra,20,Ilkisieusieu bushlands,2018
+2018-01-09,Plains zebra,4,Ilkisieusieu bushlands,2018
+2018-01-09,Plains zebra,6,Ilkisieusieu bushlands,2018
+2018-01-09,Plains zebra,3,Ilkisieusieu bushlands,2018
+2018-01-09,Plains zebra,4,Ilkisieusieu bushlands,2018
+2018-01-09,Plains zebra,2,Ilkisieusieu bushlands,2018
+2018-01-09,Plains zebra,10,Ilkisieusieu bushlands,2018
+2018-01-09,Plains zebra,10,Ilkisieusieu bushlands,2018
+2018-01-09,Plains zebra,90,Ilkisieusieu bushlands,2018
+2018-01-09,Plains zebra,10,Ilkisieusieu bushlands,2018
+2018-02-13,Plains zebra,2,Ilkisieusieu bushlands,2018
+2018-02-13,Plains zebra,1,Ilkisieusieu bushlands,2018
+2018-02-13,Plains zebra,4,Ilkisieusieu bushlands,2018
+2018-02-13,Plains zebra,4,Ilkisieusieu bushlands,2018
+2018-02-06,Plains zebra,2,Ilkisieusieu bushlands,2018
+2018-03-06,Plains zebra,2,Ilkisieusieu bushlands,2018
+2018-05-08,Plains zebra,28,Ilkisieusieu bushlands,2018
+2018-05-08,Plains zebra,3,Ilkisieusieu bushlands,2018
+2018-05-08,Plains zebra,7,Ilkisieusieu bushlands,2018
+2018-05-08,Plains zebra,3,Ilkisieusieu bushlands,2018
+2018-05-08,Plains zebra,6,Ilkisieusieu bushlands,2018
+2018-05-08,Plains zebra,3,Ilkisieusieu bushlands,2018
+2018-05-08,Plains zebra,3,Ilkisieusieu bushlands,2018
+2018-06-05,Plains zebra,6,Ilkisieusieu bushlands,2018
+2018-08-02,Plains zebra,12,Ilkisieusieu bushlands,2018
+2018-08-02,Plains zebra,2,Ilkisieusieu bushlands,2018
+2018-08-02,Plains zebra,2,Ilkisieusieu bushlands,2018
+2018-11-06,Plains zebra,12,Ilkisieusieu bushlands,2018
+2017-10-17,Plains zebra,1,Rekero bushlands,2017
+2017-10-24,Plains zebra,4,Rekero bushlands,2017
+2017-11-07,Plains zebra,1,Rekero bushlands,2017
+2017-11-07,Plains zebra,1,Rekero bushlands,2017
+2017-11-07,Plains zebra,3,Rekero bushlands,2017
+2018-01-09,Plains zebra,17,Rekero bushlands,2018
+2018-01-09,Plains zebra,3,Rekero bushlands,2018
+2018-01-09,Plains zebra,3,Rekero bushlands,2018
+2018-01-09,Plains zebra,5,Rekero bushlands,2018
+2018-01-09,Plains zebra,5,Rekero bushlands,2018
+2018-01-09,Plains zebra,2,Rekero bushlands,2018
+2018-01-16,Plains zebra,6,Rekero bushlands,2018
+2018-01-16,Plains zebra,5,Rekero bushlands,2018
+2018-01-16,Plains zebra,2,Rekero bushlands,2018
+2018-01-16,Plains zebra,1,Rekero bushlands,2018
+2018-01-16,Plains zebra,3,Rekero bushlands,2018
+2018-01-16,Plains zebra,12,Rekero bushlands,2018
+2018-01-16,Plains zebra,4,Rekero bushlands,2018
+2018-01-16,Plains zebra,4,Rekero bushlands,2018
+2018-01-16,Plains zebra,1,Rekero bushlands,2018
+2018-01-16,Plains zebra,2,Rekero bushlands,2018
+2018-01-16,Plains zebra,6,Rekero bushlands,2018
+2018-01-16,Plains zebra,2,Rekero bushlands,2018
+2018-01-16,Plains zebra,2,Rekero bushlands,2018
+2018-01-16,Plains zebra,2,Rekero bushlands,2018
+2018-01-16,Plains zebra,2,Rekero bushlands,2018
+2018-01-01,Plains zebra,1,Rekero bushlands,2018
+2018-01-01,Plains zebra,4,Rekero bushlands,2018
+2018-01-01,Plains zebra,2,Rekero bushlands,2018
+2018-01-01,Plains zebra,2,Rekero bushlands,2018
+2018-01-01,Plains zebra,5,Rekero bushlands,2018
+2018-01-01,Plains zebra,5,Rekero bushlands,2018
+2018-01-01,Plains zebra,11,Rekero bushlands,2018
+2018-01-01,Plains zebra,5,Rekero bushlands,2018
+2018-01-01,Plains zebra,11,Rekero bushlands,2018
+2018-01-01,Plains zebra,6,Rekero bushlands,2018
+2018-01-01,Plains zebra,6,Rekero bushlands,2018
+2018-01-01,Plains zebra,7,Rekero bushlands,2018
+2018-01-01,Plains zebra,11,Rekero bushlands,2018
+2018-01-01,Plains zebra,3,Rekero bushlands,2018
+2018-02-13,Plains zebra,4,Rekero bushlands,2018
+2018-03-06,Plains zebra,1,Rekero bushlands,2018
+2018-03-06,Plains zebra,5,Rekero bushlands,2018
+2018-03-06,Plains zebra,7,Rekero bushlands,2018
+2018-03-06,Plains zebra,2,Rekero bushlands,2018
+2018-03-06,Plains zebra,2,Rekero bushlands,2018
+2018-03-06,Plains zebra,1,Rekero bushlands,2018
+2018-04-03,Plains zebra,21,Rekero bushlands,2018
+2018-04-03,Plains zebra,1,Rekero bushlands,2018
+2018-07-03,Plains zebra,17,Rekero bushlands,2018
+2018-07-03,Plains zebra,26,Rekero bushlands,2018
+2018-08-02,Plains zebra,11,Rekero bushlands,2018
+2018-08-02,Plains zebra,5,Rekero bushlands,2018
+2018-09-04,Plains zebra,5,Rekero bushlands,2018
+2018-10-02,Plains zebra,13,Rekero bushlands,2018
+2018-10-02,Plains zebra,4,Rekero bushlands,2018
+2018-11-06,Plains zebra,3,Rekero bushlands,2018
+2018-11-06,Plains zebra,4,Rekero bushlands,2018
+2018-12-04,Plains zebra,3,Rekero bushlands,2018
+2018-12-04,Plains zebra,6,Rekero bushlands,2018
+2018-12-04,Plains zebra,5,Rekero bushlands,2018
+2018-12-04,Plains zebra,1,Rekero bushlands,2018
+2018-12-04,Plains zebra,8,Rekero bushlands,2018
+2017-10-20,Plains zebra,6,Enoolera plains,2017
+2017-11-02,Plains zebra,6,Enoolera plains,2017
+2017-11-02,Plains zebra,5,Enoolera plains,2017
+2017-11-02,Plains zebra,10,Enoolera plains,2017
+2017-11-02,Plains zebra,5,Enoolera plains,2017
+2017-11-02,Plains zebra,2,Enoolera plains,2017
+2018-01-11,Plains zebra,6,Enoolera plains,2018
+2018-01-11,Plains zebra,1,Enoolera plains,2018
+2018-01-11,Plains zebra,6,Enoolera plains,2018
+2018-01-11,Plains zebra,2,Enoolera plains,2018
+2018-01-11,Plains zebra,3,Enoolera plains,2018
+2018-01-11,Plains zebra,2,Enoolera plains,2018
+2018-01-11,Plains zebra,4,Enoolera plains,2018
+2018-01-11,Plains zebra,1,Enoolera plains,2018
+2018-01-11,Plains zebra,3,Enoolera plains,2018
+2018-01-11,Plains zebra,5,Enoolera plains,2018
+2018-01-11,Plains zebra,3,Enoolera plains,2018
+2018-01-11,Plains zebra,4,Enoolera plains,2018
+2018-02-01,Plains zebra,11,Enoolera plains,2018
+2018-04-05,Plains zebra,5,Enoolera plains,2018
+2018-05-03,Plains zebra,4,Enoolera plains,2018
+2018-05-03,Plains zebra,6,Enoolera plains,2018
+2018-05-03,Plains zebra,8,Enoolera plains,2018
+2018-05-03,Plains zebra,4,Enoolera plains,2018
+2018-05-03,Plains zebra,5,Enoolera plains,2018
+2018-06-21,Plains zebra,6,Enoolera plains,2018
+2018-10-04,Plains zebra,4,Enoolera plains,2018
+2018-12-05,Plains zebra,6,Enoolera plains,2018
+2017-11-07,Plains zebra,1,Rekero plains,2017
+2017-12-05,Plains zebra,2,Rekero plains,2017
+2017-12-07,Plains zebra,2,Rekero plains,2017
+2017-12-07,Plains zebra,6,Rekero plains,2017
+2017-12-07,Plains zebra,5,Rekero plains,2017
+2018-01-16,Plains zebra,1,Rekero plains,2018
+2018-02-06,Plains zebra,23,Rekero plains,2018
+2018-02-06,Plains zebra,18,Rekero plains,2018
+2018-02-06,Plains zebra,7,Rekero plains,2018
+2018-03-01,Plains zebra,5,Rekero plains,2018
+2018-05-03,Plains zebra,3,Rekero plains,2018
+2018-05-03,Plains zebra,6,Rekero plains,2018
+2018-05-03,Plains zebra,5,Rekero plains,2018
+2018-05-03,Plains zebra,5,Rekero plains,2018
+2018-05-03,Plains zebra,10,Rekero plains,2018
+2018-07-05,Plains zebra,14,Rekero plains,2018
+2018-12-05,Plains zebra,10,Rekero plains,2018
+2017-10-20,Plains zebra,4,Payia plains,2017
+2017-10-20,Plains zebra,6,Payia plains,2017
+2017-10-20,Plains zebra,2,Payia plains,2017
+2017-10-20,Plains zebra,1,Payia plains,2017
+2017-10-20,Plains zebra,1,Payia plains,2017
+2017-10-20,Plains zebra,3,Payia plains,2017
+2017-10-20,Plains zebra,3,Payia plains,2017
+2017-10-20,Plains zebra,2,Payia plains,2017
+2017-10-20,Plains zebra,1,Payia plains,2017
+2017-10-20,Plains zebra,4,Payia plains,2017
+2017-10-20,Plains zebra,2,Payia plains,2017
+2017-11-02,Plains zebra,4,Payia plains,2017
+2018-01-11,Plains zebra,3,Payia plains,2018
+2018-01-11,Plains zebra,1,Payia plains,2018
+2018-01-11,Plains zebra,1,Payia plains,2018
+2018-01-11,Plains zebra,5,Payia plains,2018
+2018-01-11,Plains zebra,1,Payia plains,2018
+2018-01-11,Plains zebra,3,Payia plains,2018
+2018-01-11,Plains zebra,1,Payia plains,2018
+2018-01-11,Plains zebra,8,Payia plains,2018
+2018-01-11,Plains zebra,10,Payia plains,2018
+2018-01-11,Plains zebra,3,Payia plains,2018
+2018-01-11,Plains zebra,5,Payia plains,2018
+2018-01-11,Plains zebra,3,Payia plains,2018
+2018-01-11,Plains zebra,7,Payia plains,2018
+2018-01-11,Plains zebra,2,Payia plains,2018
+2018-01-11,Plains zebra,4,Payia plains,2018
+2018-01-11,Plains zebra,1,Payia plains,2018
+2018-01-11,Plains zebra,6,Payia plains,2018
+2018-01-11,Plains zebra,3,Payia plains,2018
+2018-01-11,Plains zebra,2,Payia plains,2018
+2018-01-11,Plains zebra,5,Payia plains,2018
+2018-02-01,Plains zebra,2,Payia plains,2018
+2018-02-01,Plains zebra,8,Payia plains,2018
+2018-02-01,Plains zebra,10,Payia plains,2018
+2018-02-01,Plains zebra,8,Payia plains,2018
+2018-02-01,Plains zebra,2,Payia plains,2018
+2018-02-01,Plains zebra,11,Payia plains,2018
+2018-02-01,Plains zebra,2,Payia plains,2018
+2018-02-01,Plains zebra,8,Payia plains,2018
+2018-02-01,Plains zebra,21,Payia plains,2018
+2018-04-05,Plains zebra,2,Payia plains,2018
+2018-04-05,Plains zebra,1,Payia plains,2018
+2018-04-05,Plains zebra,3,Payia plains,2018
+2018-04-05,Plains zebra,7,Payia plains,2018
+2018-04-05,Plains zebra,4,Payia plains,2018
+2018-04-05,Plains zebra,1,Payia plains,2018
+2018-04-05,Plains zebra,4,Payia plains,2018
+2018-04-05,Plains zebra,4,Payia plains,2018
+2018-04-05,Plains zebra,1,Payia plains,2018
+2018-04-05,Plains zebra,3,Payia plains,2018
+2018-04-05,Plains zebra,2,Payia plains,2018
+2018-04-05,Plains zebra,6,Payia plains,2018
+2018-04-05,Plains zebra,6,Payia plains,2018
+2018-05-03,Plains zebra,5,Payia plains,2018
+2018-05-03,Plains zebra,1,Payia plains,2018
+2018-05-03,Plains zebra,2,Payia plains,2018
+2018-05-03,Plains zebra,8,Payia plains,2018
+2018-05-03,Plains zebra,4,Payia plains,2018
+2018-05-03,Plains zebra,24,Payia plains,2018
+2018-05-03,Plains zebra,7,Payia plains,2018
+2018-05-03,Plains zebra,5,Payia plains,2018
+2018-06-21,Plains zebra,6,Payia plains,2018
+2018-06-21,Plains zebra,3,Payia plains,2018
+2018-06-21,Plains zebra,1,Payia plains,2018
+2018-07-05,Plains zebra,1,Payia plains,2018
+2018-07-05,Plains zebra,6,Payia plains,2018
+2018-10-04,Plains zebra,3,Payia plains,2018
+2018-10-04,Plains zebra,1,Payia plains,2018
+2018-10-04,Plains zebra,4,Payia plains,2018
+2018-12-05,Plains zebra,5,Payia plains,2018
+2018-12-05,Plains zebra,25,Payia plains,2018
