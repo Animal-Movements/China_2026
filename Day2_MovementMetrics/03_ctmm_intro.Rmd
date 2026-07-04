@@ -697,6 +697,8 @@ plot(SIM, FITS[[1]], level = NA) # did not set seed so it'll be random
 
 ```
 
+---
+
 ## Key functions reference
 
 | Function | Package | Purpose | 

@@ -52,6 +52,8 @@ By the end of this module you will be able to:
 
 ## Population Range Estimation
 
+---
+
 ## Key functions reference
 
 | Function | Package | Purpose | 
@@ -59,4 +61,8 @@ By the end of this module you will be able to:
 | `akde()` | `ctmm` | Calculate a range distribution based on autocorrelated kernel density estimation (AKDE) | 
 | `meta()` | `ctmm` | Estimate population-level mean parameters from individual movement models and estimates (meta-analysis) |
 | `pkde()` | `ctmm` | Calculate a population-level range distribution based on autocorrelated kernel density estimation (PKDE) |
+
+---
+
+_Next: **Day 4 — Behaviour Analysis Part 1** — We will explore various aspects of animal behaviour through movement through their movement ecology: barrier behaviour (BaBA), encounters and interactions between individuals, periodic patterns in space use. We will also try to reconstruct an animal's path and simulate its movement._
 
