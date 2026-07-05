@@ -1,0 +1,227 @@
+---
+title: "M2: Movement Pattern Classification"
+subtitle: "Day 4 — Behaviour Analysis"
+author: "Animal Movement Analyses for Ecologists | SYSU Shenzhen"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    theme: flatly
+    highlight: tango
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+<a href="https://github.com/Animal-Movements/China_2026.git" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(10deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+---
+
+## Learning Objectives
+
+By the end of this module you will be able to:
+
+1. Explain what net-squared displacement (NSD) measures, and why the *shape* of an individual's NSD curve over time — not just its value — is diagnostic of broad-scale movement strategy
+2. Compute and plot NSD per individual with `amt::add_nsd()`
+3. Use the Bunnefeld et al. (2011) typology to classify individuals by eye into resident, disperser, migrant, mixed-migrant, or nomadic movement patterns
+4. Weigh the trade-offs between visual and model-based (`migrateR`) classification, and recognize that neither approach is universally better — the right choice depends on the study system and how variable its movement strategies are
+
+**Packages used:** `amt`, `move2`, `sf`, `tidyverse`, `lubridate`, `slider`
+
+---
+
+## Ecological context: why classify whole-track movement strategy?
+
+This module works at an individual's entire track, asking a much broader question — is this animal migratory, resident, dispersing to a new area, or moving without any consistent long-term pattern at all?
+
+That question matters for the Athi-Kaputiei wildebeest population used throughout this workshop. Like many ungulate populations at the edge of a still-connected rangeland system, Athi-Kaputiei wildebeest are not uniformly migratory: individuals can vary in whether, and how far, they move between wet- and dry-season ranges, and that variation is itself an important signal of how much connectivity the surrounding land-use mosaic still allows (Stabach et al. 2022, *Frontiers in Ecology and Evolution* 10:846171). A single fitted home range (Day 3) or a single barrier-encounter classification (Module 1) cannot tell you this — you need a metric that summarizes the whole trajectory's shape over time.
+
+**Net-squared displacement (NSD)** is the classic tool for exactly this. Bunnefeld et al. (2011, *Journal of Animal Ecology* 80:466–476) formalized how five canonical NSD curve shapes map onto five broad movement strategies — resident, disperser, migrant, mixed migrant, and nomad — turning a purely descriptive metric into a classification framework. 
+
+---
+
+## 1. Setup
+
+### 1.1 Load packages
+
+```{r packages}
+# install.packages(c("amt", "move2", "sf", "tidyverse", "lubridate", "slider"))
+
+library(amt)         # Tracks, add_nsd()
+library(move2)       # move2 helpers
+library(sf)          # Spatial vector data
+library(tidyverse)   # Data wrangling and visualization
+library(lubridate)   # Timestamps
+library(slider)       # Time-based (not row-based) rolling window smoothing
+```
+
+### 1.2 Rebuild `trk_all`
+
+As in Day 2 and Day 3, we rebuild the multi-individual track from the cleaned `move2` data rather than relying on anything saved from a previous module.
+
+```{r load}
+load("../Day1_IntroMovementEcology/Data/WB_clean.rdata")   # loads WB.mv2
+
+latlong_crs <- "EPSG:4326"   # WGS84 geographic — what move2/Movebank gives us
+utm_crs     <- "EPSG:32737"  # UTM Zone 37S — metric, needed for distances in meters
+
+WB_df <- WB.mv2 %>%
+  mutate(x = sf::st_coordinates(.)[, 1],
+         y = sf::st_coordinates(.)[, 2]) %>%
+  as_tibble() %>%
+  transmute(id = individual_local_identifier, x, y, t = timestamp) %>%
+  arrange(id, t)
+
+trk_all <- make_track(WB_df, x, y, t, id = id, crs = latlong_crs)
+trk_all <- transform_coords(trk_all, utm_crs)
+
+trk_nested <- trk_all %>% nest(data = -id)
+trk_nested
+```
+
+---
+
+## 2. What net-squared displacement measures
+
+NSD is the squared straight-line distance between each fix and a single **reference point — almost always the individual's very first recorded fix** — plotted against time. It is a *whole-track* metric: unlike the maximum-displacement trait from Day 2 Module 2 (the largest pairwise distance between *any two* fixes inside a rolling window), NSD always measures distance from one fixed origin, for the entire deployment.
+
+That distinction matters for interpretation:
+
+- A track that moves away from its start and never returns produces an NSD curve that rises and stays high (dispersal).
+- A track that moves away and comes back produces an NSD curve that rises and falls back down (a round trip — migration).
+- A track that never moves far from its start produces an NSD curve that stays low and flat (residency).
+
+Unlike the step-length, turning-angle, and speed metrics from Day 2 — which assume a fairly consistent time interval between fixes to be comparable — NSD does **not** require a regularly sampled or resampled track. It is simply squared distance from a fixed reference point at whatever times fixes happen to have been recorded, so it can be computed directly on the raw track without any `track_resample()` step first.
+
+`amt::add_nsd()` computes this directly on a `track_xyt`:
+
+```{r add_nsd}
+trk_nsd <- trk_nested %>%
+  mutate(data = map(data, ~ .x %>% add_nsd())) %>%
+  select(id, data) %>%
+  unnest(cols = data)
+
+head(trk_nsd)
+```
+
+`add_nsd()` adds an `nsd_` column in squared distance units (m²). Squared distance is awkward to read directly, so for plotting we take the square root back to a linear "net displacement from start" in km — a labeling choice, not a different metric:
+
+```{r nsd_derived}
+trk_nsd <- trk_nsd %>%
+  mutate(net_disp_km = sqrt(nsd_) / 1000)
+```
+
+---
+
+## 3. Plotting NSD across individuals
+
+```{r nsd_facet, fig.height=8}
+trk_nsd %>%
+  ggplot(aes(x = t_, y = net_disp_km)) +
+  geom_line(linewidth = 0.4) +
+  facet_wrap(~id, scales = "free_y") +
+  scale_x_datetime(date_labels = "%Y-%m") +
+  labs(x = NULL, y = "Net displacement from first fix (km)") +
+  theme_minimal() +
+  theme(strip.text = element_text(size = 8))
+```
+
+To check whether any individual's NSD pattern repeats on an annual cycle — the signature of true seasonal migration, as opposed to a one-off move — it helps to overlay different years on a common calendar axis within each individual's own panel, rather than looking at absolute time. We remap every timestamp onto a shared reference year and color by the actual year:
+
+```{r nsd_year_prep}
+trk_nsd <- trk_nsd %>%
+  mutate(year = factor(year(t_)),
+         t_common = t_)
+
+year(trk_nsd$t_common) <- 2000   # lubridate: remap to a common calendar year for overlay; 2000 chosen because it's a leap year, so `Feb 29` in any year maps safely
+```
+
+Fix-to-fix NSD is noisy, partly from GPS error and partly from the known 1h(day)/3h(night) duty cycle established in Day 1 — a run of dense day fixes and a run of sparse night fixes will jitter the raw curve even with no real behavioral change. A 7-day rolling mean, computed over actual elapsed time rather than a fixed number of rows (so it isn't biased by the uneven fix rate), removes that fine-scale noise while preserving the monthly-to-seasonal signal relevant to migration classification:
+
+```{r nsd_smooth}
+trk_nsd <- trk_nsd %>%
+  arrange(id, t_) %>%
+  group_by(id) %>%
+  mutate(net_disp_km_smooth = slide_index_dbl(
+    net_disp_km, t_, mean,
+    .before = hours(84), .after = hours(84)   # 84h = 3.5 days each side = 7-day centered window
+  )) %>%
+  ungroup()
+```
+
+```{r nsd_by_year, fig.height=8}
+trk_nsd %>%
+  ggplot(aes(x = t_common, color = year)) +
+  geom_line(aes(y = net_disp_km), alpha = 0.25, linewidth = 0.25) +
+  geom_line(aes(y = net_disp_km_smooth), linewidth = 0.6) +
+  facet_wrap(~id, scales = "free_y") +
+  scale_x_datetime(date_labels = "%b", date_breaks = "2 months") +
+  scale_color_viridis_d() +
+  labs(x = NULL, y = "Net displacement from first fix (km)", color = "Year",
+       caption = "Faint lines: raw NSD. Bold lines: 7-day rolling mean.") +
+  theme_minimal() +
+  theme(strip.text = element_text(size = 8))
+```
+
+---
+
+## 4. Classifying movement patterns from the shape of the curve
+
+Bunnefeld et al. (2011) describe five canonical NSD curve shapes, each corresponding to a distinct movement strategy:
+
+| Pattern | NSD curve shape | Interpretation |
+|---|---|---|
+| **Resident** | Stays low and roughly flat throughout | Individual restricts itself to one area near its starting location — no large-scale directional movement |
+| **Disperser** | Rises once, then plateaus at a high value and stays there | A one-way move to a new area, with no return to the original range |
+| **Migrant** | Rises, plateaus, then falls back to a low value, repeating on a seasonal cycle | A round trip between two distinct seasonal ranges |
+| **Mixed migrant** | Similar to migrant, but with an irregular or partial round trip (e.g. an incomplete return, or migration in only some years) | Partial migration — common within populations where not every individual, or not every year, is fully migratory |
+| **Nomad** | Fluctuates continuously with no stable plateau at any point | No fixed destination or home range; movement is directionally unpredictable at the whole-track scale |
+
+> **Discussion:** Look back at the Section 3 plots — the absolute-time version for each individual's overall trajectory shape, and the year-colored, smoothed version for whether that shape repeats at the same time of year, year after year. Which individuals look closest to each canonical shape? Which are ambiguous, and does that ambiguity look like genuine mixed-migrant behavior, or could it be an artifact of the time window you're looking at (e.g. a track too short to show a full seasonal round trip)? A population showing no clean, shared seasonal signal even after smoothing is itself an ecologically meaningful result — it points toward facultative or individually variable movement rather than a strongly synchronized migration, and individual variation of exactly this kind is part of what makes partial migration ecologically interesting rather than a nuisance to average away.
+
+### A note on visual classification
+
+Classifying curves by eye is a reasonable starting point, but it may not be fully reproducible between observers, and struggles with genuinely borderline cases (a slow, partial return can look like either "migrant" or "mixed migrant" depending on where you draw the line). A model-based alternative is to fit each of Bunnefeld's canonical shapes as an explicit parametric model to an individual's NSD curve, then let model selection (e.g. AIC) choose the best-supported classification rather than a human eye. The R package `migrateR` (Spitz, Hebblewhite & Stephenson 2017, *Ecography* 40:788–799) automates exactly this workflow. However, how to parameterize the models is highly context-dependent, and fitting can be finicky in practice. If migration pattern is a core part of your research question, it is worth exploring such model-based methods.
+
+**Neither approach is always better — which one serves you best is study-dependent.** Model fitting buys objectivity and a standardized, repeatable baseline, which matters when comparing many individuals or coordinating a shared protocol across collaborators. But it does so by assuming movement follows one of a small number of idealized curve shapes, and real movement is often messier than any of them. At large enough scale and variability, that mismatch can make automated classification *less* reliable than an experienced eye, not more. Gigliotti, Xu, Zuckerman, et al. (2022, *Biological Conservation* 275:109752) is a good illustration of this: classifying migratory status for 1,088 elk across 26 herds in the Greater Yellowstone Ecosystem, the authors relied on manual visual review of NSD curves (via the Migration Mapper tool) rather than automated model fitting — precisely because elk migratory behavior in that system is so individually and herd-level variable that no small set of parametric models classified it as reliably as trained observers could. The practical takeaway: reach for a model-based method when you specifically need standardization and objectivity (e.g. a shared protocol across many collaborators or studies), but don't assume it will automatically outperform a careful visual read — especially in a system, like this one, where migratory tendency is already known to vary a great deal between individuals.
+
+---
+
+## 5. Beyond this module
+
+NSD is one metric in a broader "suite of simple metrics" tradition for characterizing movement strategy without fitting a full mechanistic model. Kays et al. (2023, *Movement Ecology* 11:61) extend this idea to multi-scale movement syndromes — describing how the same simple metrics (including displacement-based ones like NSD) can characterize movement patterns from hourly to yearly scales, and how those patterns compare across very different taxa.
+
+**Further reading:**
+
+- Bunnefeld, N., Börger, L., van Moorter, B., Rolandsen, C. M., Dettki, H., Solberg, E. J., & Ericsson, G. (2011). A model-driven approach to quantify migration patterns: individual, regional and yearly differences. *Journal of Animal Ecology*, 80(2), 466–476. https://doi.org/10.1111/j.1365-2656.2010.01776.x
+- Spitz, D. B., Hebblewhite, M., & Stephenson, T. R. (2017). 'MigrateR': extending model-driven methods for classifying and quantifying animal movement behavior. *Ecography*, 40(6), 788–799. https://doi.org/10.1111/ecog.02587
+- Abrahms, B., Seidel, D. P., Dougherty, E., Hazen, E. L., Bograd, S. J., Wilson, A. M., McNutt, J. W., et al. (2017). Suite of simple metrics reveals common movement syndromes across vertebrate taxa. *Movement Ecology*, 5, 12. https://doi.org/10.1186/s40462-017-0104-2
+- Stabach, J. A., Hughey, L. F., Crego, R. D., Fleming, C. H., Hopcraft, J. G. C., Leimgruber, P., Morrison, T. A., et al. (2022). Increasing anthropogenic disturbance restricts wildebeest movement across East African grazing systems. *Frontiers in Ecology and Evolution*, 10, 846171. https://doi.org/10.3389/fevo.2022.846171
+- Gigliotti, L. C., Xu, W., Zuckerman, G. R., Atwood, M. P., Cole, E. K., Courtemanch, A., Dewey, S., et al. (2022). Wildlife migrations highlight importance of both private lands and protected areas in the Greater Yellowstone Ecosystem. *Biological Conservation*, 275, 109752. https://doi.org/10.1016/j.biocon.2022.109752
+
+---
+
+## Practice: Apply to your own data (if relevant to your work)
+
+1. **Compute NSD** for one or more individuals from your own dataset with `amt::add_nsd()`, and plot it against time as in Section 3.
+2. **Classify by eye** against the Section 4 typology. Which individuals are unambiguous, and which are borderline?
+3. **Check your temporal window.** Does your tracking duration cover at least one full expected cycle (e.g. a full year, for a seasonal migrant)? A track that's too short can make a migrant look like a disperser, simply because you never observed the return leg.
+4. Weigh visual vs. model-based classification for your own case (Section 4). If you need a standardized, repeatable protocol across many individuals or collaborators, `migrateR` is worth trying — but if your system shows highly variable movement strategies, a careful visual read may classify it just as well, or better, as it did for Gigliotti et al. (2022)'s 1,088 elk.
+
+---
+
+## Key functions reference
+
+| Function | Package | Purpose |
+|---|---|---|
+| `add_nsd()` | `amt` | Add a net-squared-displacement column (`nsd_`) to a track, measured from its first fix |
+| `make_track()` / `transform_coords()` | `amt` | Build a track and reproject it to a metric CRS |
+| `nest()` / `unnest()` / `map()` | `tidyr` / `purrr` | Apply a track-level function (like `add_nsd()`) independently to each individual's nested data |
+| `slide_index_dbl()` | `slider` | Compute a rolling summary (e.g. mean) over a time-based window, correctly handling irregularly-sampled data |
+
+---
+
+*Next: **Site Fidelity and Revisitation Analysis** — having classified whole-track movement strategy, we turn to a third, complementary question: not how far an individual moves overall, but how often it returns to the same specific locations.*

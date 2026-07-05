@@ -257,7 +257,7 @@ Next: the same demo window, animated with `moveVis` and a real basemap underneat
 library(moveVis)
 library(units)
 
-source("R/align_move_fixed.R")
+source("./align_move_fixed.R")
 ```
 
 > Curious what the patch actually does? Open `R/align_move_fixed.R` — each fix is commented at the point it applies, with citations. Confirmed working on the demo subset below (2026-06-27); if you scale this up to the full dataset, rerun the sanity check in 4.6 first.

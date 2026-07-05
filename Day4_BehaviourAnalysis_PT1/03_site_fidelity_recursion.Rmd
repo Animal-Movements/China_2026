@@ -1,0 +1,226 @@
+---
+title: "Site Fidelity and Revisitation Analysis (`recurse`)"
+subtitle: "Day 4 — Behaviour Analysis (supplementary)"
+author: "Animal Movement Analyses for Ecologists | SYSU Shenzhen"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    theme: flatly
+    highlight: tango
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+<a href="https://github.com/Animal-Movements/China_2026.git" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(10deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+---
+
+## Learning Objectives
+
+By the end of this module you will be able to:
+
+1. Explain what site fidelity / revisitation means ecologically, and why it is a distinct question from home range size (Day 3), whole-track movement strategy (Module 2), or a single barrier-encounter event (Module 1)
+2. Explain how `recurse::getRecursions()` quantifies revisitation using a radius-based circle around each fixed location — number of revisits, residence time, and time since last visit
+3. Compute and visualize revisitation patterns for wildebeest individuals, and explain how the choice of radius changes which ecological question you're actually answering
+4. Identify example research questions for which a recursion analysis, rather than a home-range or barrier analysis, is the right tool
+
+**Packages used:** `recurse`, `move2`, `sf`, `tidyverse`, `lubridate`
+
+---
+
+## Ecological context: why ask about revisitation specifically?
+
+Home range (Day 3) answers "how much space does this individual use?" Movement-pattern classification (Module 2) answers "does this individual's whole track show a resident, migratory, dispersing, or nomadic strategy?" Neither answers a third, equally important question: **does this individual keep coming back to the same specific places** — a denning or calving site, a permanent waterhole, a stopover along a migration route — regardless of how big its overall range is or what category its NSD curve falls into?
+
+Site fidelity — the tendency to return to a previously used location — is itself under active selection: Switzer (1993, *Evolutionary Ecology* 7:533–555) showed theoretically that fidelity should be favored when habitat quality is predictable, when the cost of switching locations is high, and when an individual is likely to survive long enough to benefit from the local knowledge that comes with reuse. For ungulates specifically, Morrison et al. (2021, *Journal of Animal Ecology* 90:955–966) found that site fidelity in migratory ungulates is shaped by a mix of individual experience, forage predictability, and predation risk, and that it varies substantially both within and across populations.
+
+For a rangeland system like Athi-Kaputiei, plausible reasons an individual wildebeest might show strong site fidelity include a reliable dry-season waterhole, a preferred calving area with lower predation risk, or an area where animals are trapped by anthropogenic barriers. None of these show up directly in a home-range polygon or an NSD curve. Bracis, Bildstein & Mueller (2018, *Ecography* 41:1801–1811) developed the `recurse` package specifically to quantify this pattern directly from GPS data, without requiring the site of interest to be known or specified in advance.
+
+---
+
+## 1. Setup
+
+### 1.1 Install and load `recurse`
+
+`recurse` is on CRAN and is a new package for this workshop:
+
+```{r install_recurse, eval = FALSE}
+install.packages("recurse")
+```
+
+```{r packages}
+library(recurse)     # Revisitation / recursion analysis
+library(move2)       # move2 helpers
+library(sf)          # Spatial vector data
+library(tidyverse)   # Data wrangling and visualization
+library(lubridate)   # Timestamps
+```
+
+### 1.2 Load and reproject data
+
+`getRecursions()` counts revisits by drawing a fixed-radius circle around each location, so the coordinate reference system matters: a geographic (lat/lon) CRS is not recommended, since a "radius" in degrees does not correspond to a constant distance on the ground. We reproject to the same projected UTM CRS used throughout this workshop before extracting plain x/y/t/id columns — the same preparation pattern used in Day 2 and Day 3.
+
+```{r load}
+load("../Day1_IntroMovementEcology/Data/WB_clean.rdata")   # loads WB.mv2
+
+utm_crs <- "EPSG:32737"   # UTM Zone 37S — projected, meters
+
+WB_utm <- sf::st_transform(WB.mv2, utm_crs)
+
+# recursion requires data frame or move2 object. For data frame, it requires this order: the x-coordinate, the y-coordinate, the datetime, and the animal id. Here we use data frame. 
+WB_df <- data.frame(
+  x  = sf::st_coordinates(WB_utm)[, 1],
+  y  = sf::st_coordinates(WB_utm)[, 2],
+  t  = WB_utm$timestamp,
+  id = as.character(WB_utm$individual_local_identifier)
+)
+WB_df <- WB_df[order(WB_df$id, WB_df$t), ]
+
+head(WB_df)
+```
+
+---
+
+## 2. Computing revisitations for one individual
+
+We continue with Sotua as an example.
+
+```{r one_ind}
+sotua_df <- WB_df %>% filter(id == "Sotua")
+```
+
+The only required parameter is `radius`: for each point in the trajectory, `getRecursions()` draws a circle of that radius and counts how many separate passes through it the whole track makes. The right radius depends entirely on the ecological question — a small radius (tens to low hundreds of meters) targets a specific, precise site like a den or a waterhole; a larger radius (kilometers) targets revisitation to a broader patch or seasonal range. There is no universally "correct" value, so it is worth trying more than one.
+
+```{r radius_500}
+sotua_500 <- getRecursions(sotua_df, radius = 500, timeunits = "hours")
+```
+
+```{r radius_5000}
+sotua_5000 <- getRecursions(sotua_df, radius = 5000, timeunits = "hours")
+```
+
+`timeunits = "hours"` is a deliberate choice here, not just the default — Day 1 established that this dataset has a 1h(day)/3h(night) duty cycle, so residence times and revisit intervals expressed in hours are directly comparable to that known sampling structure.
+
+### 2.1 Visualizing revisits spatially
+
+`recurse` provides its own `plot.recurse()` method, which maps the trajectory colored by number of revisits at each point:
+
+```{r plot_500, fig.width=6, fig.height=6}
+plot(sotua_500, sotua_df, legendPos = c(min(sotua_df$x), max(sotua_df$y)))
+```
+
+```{r plot_5000, fig.width=6, fig.height=6}
+plot(sotua_5000, sotua_df, legendPos = c(min(sotua_df$x), max(sotua_df$y)))
+```
+
+> **Discussion:** Compare the two maps. At `radius = 500`, high-revisit points should stand out as a small number of specific, precise locations. At `radius = 5000`, the same track shows most of the range as "revisited" at least a few times, since a 5 km circle around any point captures a large share of the whole home range — the signal of a few specific important sites gets diluted into a broader "well-used area" pattern. This is the same radius-selection trade-off as choosing a bandwidth for a kernel density home range (Day 3): too small and you see only noise; too large and you lose the specific pattern you were looking for.
+
+### 2.2 Revisit counts and residence time
+
+```{r revisit_hist}
+tibble(revisits = sotua_500$revisits) %>%
+  ggplot(aes(x = revisits)) +
+  geom_histogram(binwidth = 1, fill = "steelblue", color = "white") +
+  labs(x = "Number of revisits (radius = 500 m)", y = "Number of fixes") +
+  theme_minimal()
+```
+
+`revisitStats` (available because `verbose = TRUE` is the default) gives one row per visit, with entrance/exit times, time spent inside the radius per visit, and time since the previous visit:
+
+```{r revisit_stats}
+head(sotua_500$revisitStats)
+```
+
+```{r mean_residence}
+mean(sotua_500$residenceTime, na.rm = TRUE)
+```
+
+> **Interpretation:** Most fixes show modest revisit counts with a smooth decline — consistent with ordinary ranging movement, where slow travel relative to the 1–3 hour fix interval naturally brings the animal back near recently-visited ground. The sharp, isolated spikes in the histogram (well above the smooth background) are the more informative signal: each spike is a cluster of fixes near one physical location that gets revisited an unusually high, consistent number of times across the whole track — a plausible core site (e.g. a resting area or water point), rather than incidental slow movement. Mean residence time is a *cumulative* total across every visit over Sotua's whole tracked history, not a per-visit duration — it mostly sets the overall scale for comparison; the more diagnostic step is checking which specific locations sit well above that average, which the histogram's spikes point to directly.
+
+### 2.3 Shortcut: calling `getRecursions()` directly on a `move2` object
+
+Since `recurse` ships a native `move2` method, you can skip building `WB_df` by hand for a quick look — as long as the object satisfies the ordering/cleaving requirements noted above (trivially true here, since we're filtering to one individual):
+
+```{r move2_shortcut}
+sotua_mv2 <- WB_utm %>% filter(individual_local_identifier == "Sotua")
+
+sotua_500_mv2 <- getRecursions(sotua_mv2, radius = 500, timeunits = "hours")
+
+mean(sotua_500_mv2$revisits)
+```
+
+This gives the same result as the manual `WB_df` route above, since `getRecursions.move2()` builds its internal `data.frame(x=, y=, t=, id=)` in the correct order and type automatically. The manual route is still worth knowing, though — it generalizes to other packages that expect a plain trajectory data frame rather than a `move2` object specifically.
+
+---
+
+## 3. Scaling to multiple individuals
+
+The same `radius = 500` analysis, run per individual, gives a population-level summary of how strongly each individual shows site fidelity (this will take a while to run):
+
+```{r multi_ind}
+recursion_summary <- WB_df %>%
+  split(.$id) %>%
+  purrr::map(~ getRecursions(.x, radius = 500, timeunits = "hours")) %>%
+  purrr::imap_dfr(~ tibble(id = .y,
+                            mean_revisits = mean(.x$revisits),
+                            mean_residence_h = mean(.x$residenceTime, na.rm = TRUE)))
+
+recursion_summary
+```
+
+> **Note:** `getRecursions()` computes a full pairwise distance matrix internally, so runtime grows quickly with track length. Running this across every individual's full multi-year track may take a while — for a first look, consider subsetting to a single season or year per individual, or pre-specifying a smaller number of candidate locations with `getRecursionsAtLocations()` instead of recomputing revisits at every single fix.
+
+Plotting `mean_revisits` against `mean_residence_h` gives a single population-level view of where each individual sits on both axes of site fidelity at once:
+
+```{r multi_ind_plot}
+recursion_summary %>%
+  ggplot(aes(x = mean_revisits, y = mean_residence_h)) +
+  geom_point(color = "steelblue", size = 2) +
+  geom_text(aes(label = id), size = 3, vjust = -0.7, check_overlap = TRUE) +
+  labs(x = "Mean revisits (radius = 500 m)", y = "Mean residence time (hours)") +
+  theme_minimal()
+```
+
+> **Discussion:** Individuals in the upper right — high mean revisits *and* long mean residence time at a small radius — are the ones showing the strongest site fidelity in the population-level sense, worth following up with a map of exactly *where* those revisited locations are, and what's there (a known waterhole? high-quality forage patch? something in the fence/settlement layout from Module 1?). Individuals in the lower left show little repeat use of any specific location at this radius — not necessarily "no site fidelity" outright, but worth checking at a different radius (Section 2's `radius = 5000` comparison) before concluding that.
+
+---
+
+## 4. Beyond this module
+
+`recurse` also supports specifying locations of interest directly (`getRecursionsAtLocations()`, if you already know where a waterhole or den is) and calculating revisits within an arbitrary convex polygon (`getRecursionsInPolygon()`, e.g. a protected area boundary). Both are useful once a question moves from "does this individual show site fidelity at all" to "how much time does it spend at this *specific* place."
+
+**Further reading:**
+
+- Bracis, C., Bildstein, K. L., & Mueller, T. (2018). Revisitation analysis uncovers spatio-temporal patterns in animal movement data. *Ecography*, 41(11), 1801–1811. https://doi.org/10.1111/ecog.03618
+- Switzer, P. V. (1993). Site fidelity in predictable and unpredictable habitats. *Evolutionary Ecology*, 7(6), 533–555. https://doi.org/10.1007/BF01237820
+- Morrison, T. A., Merkle, J. A., Hopcraft, J. G. C., Aikens, E. O., Beck, J. L., Boone, R. B., Courtemanch, A. B., et al. (2021). Drivers of site fidelity in ungulates. *Journal of Animal Ecology*, 90(4), 955–966. https://doi.org/10.1111/1365-2656.13425
+
+---
+
+## Practice: Apply to your own data (if relevant to your work)
+
+1. **Pick a radius informed by a real question** — a known or suspected site type (den, nest, waterhole, lek) if you have one, or start with a couple of very different radii and compare, as in Section 2.
+2. **Run `getRecursions()`** on one or more individuals and map the result with `plot()`.
+3. **Look at `revisitStats`** for your highest-revisit locations — do the entrance/exit times cluster in a way that's ecologically meaningful (e.g. same time of day, same season)?
+4. **Think about which of your research questions** are really about revisitation to specific places, rather than range size or overall movement strategy — those are the ones this tool, rather than Day 3's or Module 2's, is built for.
+
+---
+
+## Key functions reference
+
+| Function | Package | Purpose |
+|---|---|---|
+| `getRecursions()` | `recurse` | Compute revisitation metrics (revisit count, residence time, time since last visit) for every point in a trajectory |
+| `getRecursionsAtLocations()` | `recurse` | Compute revisitation metrics for a pre-specified set of locations, rather than every trajectory point |
+| `getRecursionsInPolygon()` | `recurse` | Compute revisits and residence time within a single convex polygon |
+| `plot.recurse()` | `recurse` | Map a trajectory colored by revisit count |
+| `st_transform()` | `sf` | Reproject spatial data to a projected (metric) CRS |
+
+---
+
+*Next: **[CTMM] Periodic movement patterns** — continuing the theme of whole-track behavioral signatures, this module moves from discrete revisitation counts to continuous-time models of periodicity in movement.*

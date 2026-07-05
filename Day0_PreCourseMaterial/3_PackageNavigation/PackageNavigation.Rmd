@@ -1,0 +1,319 @@
+---
+title: "Navigating R Packages for Movement Ecology"
+subtitle: "Day 0 — Pre-Course Material"
+author: "Animal Movement Analyses for Ecologists | SYSU Shenzhen"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    theme: flatly
+    highlight: tango
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = FALSE, message = FALSE, warning = FALSE)
+```
+
+<a href="https://github.com/Animal-Movements/China_2026.git" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(10deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+---
+
+## Learning Objectives
+
+By the end of this document you will be able to:
+
+1. Explain, in one sentence each, what every package used in this workshop is *for*
+2. Identify the core data object each package expects, and the minimum columns/structure needed to build it
+3. Convert a plain trajectory data frame into any of these packages' native objects
+4. Know which day/module in this workshop introduces each package properly, so this document can act as a map rather than a substitute for those modules
+
+**This is a reference document, not a tutorial.** None of the code below needs to run — every chunk is illustrative (`eval = FALSE`), and most use a small made-up example rather than the workshop's real wildebeest data. The goal is orientation: when you sit down with a new package, or come back to an old one, this is where you check "what does this thing actually need from me?"
+
+---
+
+## 0. Why so many packages, and the baseline we'll use
+
+Movement ecology packages mostly don't disagree about *what* movement data is — a location, a time, an individual identity. They differ in what **object** they wrap that information in, and what that object assumes about your data (regular vs. irregular sampling, projected vs. geographic coordinates, one individual vs. many at once). Most confusion in practice comes from those structural differences, not from the underlying ecology.
+
+To make those differences concrete, every section below starts from the same **baseline**: a plain tibble with four columns — `id`, `x`, `y`, `t` — the minimum information any movement dataset needs.
+
+```{r baseline}
+library(tidyverse)
+
+baseline <- tibble(
+  id = c("Sotua", "Sotua", "Sotua", "Kikaya", "Kikaya"),
+  x  = c(280000, 280120, 280265, 305010, 305200),
+  y  = c(9808391, 9808500, 9808610, 9795000, 9795150),
+  t  = as.POSIXct(c("2010-10-19 03:00:00", "2010-10-19 06:00:00", "2010-10-19 09:00:00",
+                    "2010-10-19 03:00:00", "2010-10-19 06:00:00"), tz = "UTC")
+)
+baseline
+```
+
+In practice you'll rarely build this by hand — real data usually arrives as a `move2` object straight from Movebank (Day 1) — but starting from this stripped-down shape makes it easy to see exactly what each package adds, requires, or removes.
+
+One thing worth flagging up front, since it's easy to miss and caused real debugging pain while building this workshop's materials: **column order and object class can matter as much as column names.** Most packages below match columns by name and are forgiving about whether you hand them a `tibble` or a base `data.frame`. A couple are not — they read columns by position, or behave differently for a tibble than a base data.frame. Those cases are flagged explicitly where they come up (see `recurse`, Section 4).
+
+---
+
+## 1. Quick-reference table
+
+| Package | Purpose | Core object | Minimum input | Introduced |
+|---|---|---|---|---|
+| `move2` | Movebank import, event/track data management | `move2` (sf-based tibble) | x/y or lon/lat, timestamp, track ID | Day 1 |
+| `sf` | Spatial vector geometry | `sf` / `sfc` | coordinates + CRS | Day 1 (underlies everything) |
+| `amt` | Tracks, step metrics, movement traits, home range, RSF/SSF | `track_xyt` | x, y, t, id (plain columns) | Day 1–4, 6 |
+| `ctmm` | Continuous-time movement models, AKDE, encounter analysis | `telemetry` | Movebank-style columns, **geographic** lon/lat | Day 2–4, 6 |
+| `adehabitatLT` / `adehabitatHR` | Legacy discrete trajectory/home-range tools | `ltraj` / `estUD` | similar to `amt` | Background only — largely superseded |
+| `BaBA` | Barrier behaviour classification | none (plain `sf` points) | `sf` points with `Animal.ID`, `date` | Day 4 |
+| `recurse` | Site fidelity / revisitation analysis | none (plain data.frame or `move2`) | **exactly** 4 columns, in order x, y, t, id | Day 4 |
+| `momentuHMM` | Hidden Markov models of behavioral state | `momentuHMMData` | fairly regular x, y, t, id | Day 5 |
+| `terra` | Local raster environmental data | `SpatRaster` / `SpatVector` | a raster file + point locations | Day 5 |
+| `rgee` | Cloud-based environmental data (Google Earth Engine) | `ee$Image` / `ee$ImageCollection` | GEE account + point locations | Day 5 |
+| `mapview`, `leaflet` | Interactive maps | — | any `sf` object | Day 1+ |
+| `gganimate`, `moveVis` | Animated trajectories | — | `track_xyt` / `move2` | Day 1 |
+| `gt`, `RColorBrewer`, `gridExtra` | Tables and plot formatting | — | — | throughout |
+
+---
+
+## 2. Data import & spatial backbone
+
+### `move2`
+
+**What it's for:** the standard interface to Movebank, and the spatial data class most other packages in this workshop either read from or convert through. An event-level table (one row per GPS fix) with track-level metadata (deployment info, sex, tag model, etc.) stored separately and accessible via `mt_track_data()`.
+
+**Core object:** a `move2` object — an `sf` tibble under the hood, so it carries a `geometry` list-column and everything that comes with being `sf`-classed (see the `sf` gotcha below).
+
+**Minimum input:** a coordinate (lon/lat or x/y), a timestamp, and a track/individual ID column.
+
+```{r move2_convert}
+library(move2)
+
+mv2 <- mt_as_move2(baseline,
+                    coords = c("x", "y"),
+                    time_column = "t",
+                    track_id_column = "id",
+                    crs = "EPSG:4326")
+```
+
+**Used in:** Day 1 (import, cleaning, trajectory visualization) and as the entry point loaded at the start of nearly every later module.
+
+### `sf`
+
+**What it's for:** general spatial vector geometry — points, lines, polygons — and the geometry engine underneath `move2`, much of `amt`, `BaBA`'s barrier layers, and the vector side of `terra`/`rgee`.
+
+**Core object:** `sf` (a data frame with a geometry list-column) / `sfc` (just the geometry).
+
+**Minimum input:** coordinates and a coordinate reference system (CRS).
+
+```{r sf_convert}
+library(sf)
+
+baseline_sf <- st_as_sf(baseline, coords = c("x", "y"), crs = "EPSG:4326")
+```
+
+> If you need a truly plain data frame converting from sf with no geometry riding along, use `sf::st_drop_geometry()`.
+
+---
+
+## 3. Trajectories & movement metrics
+
+### `amt`
+
+**What it's for:** a main analytical package of this workshop (especially for discrete analysis) — building tracks, resampling to a consistent interval, step-level metrics (step length, turning angle, speed), movement traits (displacement, NSD, home range), and (Day 6) resource/step-selection functions.
+
+**Core object:** `track_xyt` — a tibble subclass with `x_`, `y_`, `t_` columns (one row per fix), which functions like `steps_by_burst()` extend with step-level columns (`sl_`, `ta_`, `dt_`).
+
+**Minimum input:** plain `x`, `y`, `t` columns, plus an `id` if you have multiple individuals. `amt` does **not** take an `sf`/`move2` object directly — you extract coordinates from the geometry first.
+
+```{r amt_convert}
+library(amt)
+
+trk <- make_track(baseline, x, y, t, id = id, crs = "EPSG:4326")
+```
+
+From a real `move2` object, the extraction step looks like this (the pattern used throughout Days 1–4):
+
+```{r amt_from_move2}
+mv2_df <- mv2 %>%
+  mutate(x = sf::st_coordinates(.)[, 1], y = sf::st_coordinates(.)[, 2]) %>%
+  sf::st_drop_geometry() %>%
+  as_tibble() %>%
+  transmute(id = mt_track_id(.), x, y, t = mt_time(.))
+
+trk <- make_track(mv2_df, x, y, t, id = id, crs = "EPSG:4326")
+```
+
+**Used in:** Day 1 Module 3 onward; the primary tool for Days 2–4.
+
+### `ctmm`
+
+**What it's for:** continuous-time movement models. Unlike `amt`'s discrete methods, `ctmm` explicitly models the autocorrelation in modern high-frequency GPS data rather than assuming fixes are independent — used here for autocorrelated home range (AKDE), occurrence vs. range distributions, effective sample sizes, and encounter/interaction analysis.
+
+**Core object:** `telemetry` — one object per individual (a list of `telemetry` objects if your input covers several), built via `as.telemetry()`.
+
+**Minimum input:** `as.telemetry()` expects **Movebank-standard column names** — `individual.local.identifier` (or `tag.local.identifier`), `timestamp`, `location.long`, `location.lat` — imported from a Movebank CSV, a data frame with those exact names, or a `Move` object (the older `move` package's class, not `move2`).
+
+```{r ctmm_convert}
+library(ctmm)
+
+baseline_mb <- baseline %>%
+  rename(individual.local.identifier = id, timestamp = t) %>%
+  mutate(location.long = x, location.lat = y)   # must be geographic lon/lat, see note below
+
+teleml <- as.telemetry(baseline_mb)
+```
+
+> **Data requirement worth flagging explicitly, since it's the opposite of most other packages here:** `ctmm` expects **geographic (longitude/latitude)** coordinates on the way in — it handles projection internally — whereas `amt`, `BaBA`, `recurse`, and `terra` extraction all expect a **projected, metric** CRS (e.g. UTM) on the way in. Mixing these up (feeding `ctmm` a UTM x/y pair labeled as lon/lat, or vice versa) will not necessarily throw an error — it can just silently produce nonsense.
+
+**Used in:** Day 2 Modules 3–4, Day 3 Module 2, Day 4 Modules 3–4 (all colleague-taught), and Day 6 (see the closing note below).
+
+### `adehabitatLT` / `adehabitatHR` — legacy
+
+Before `amt` and `ctmm`, `adehabitatLT` (trajectories, `ltraj` objects) and `adehabitatHR` (home range, `estUD` objects) were the standard discrete-method toolkit, and you will still encounter both in older papers and scripts. They are not taught as their own module this year; `amt` and `ctmm` cover the same ground with a more modern interface and, in `ctmm`'s case, an autocorrelation-aware alternative these packages don't have. If you need to read an old `ltraj` object, `amt::as_track()`-style bridging functions and direct data-frame extraction (the same baseline shown throughout this document) are the practical path in.
+
+---
+
+## 4. Behavior-specific analyses
+
+### `BaBA`
+
+**What it's for:** classifying an individual's behavioral response (quick cross, bounce, back-and-forth, trace, trapped, average movement) when it encounters a linear barrier like a fence or road.
+
+**Core object:** none of its own — it operates on a plain `sf` **POINT** object with two specific required column names, `Animal.ID` and `date`, plus a separate barrier `sf` layer (lines or polygons) in a matching CRS.
+
+```{r baba_convert}
+library(BaBA)
+
+baseline_baba <- baseline %>%
+  rename(Animal.ID = id, date = t) %>%
+  sf::st_as_sf(coords = c("x", "y"), crs = "EPSG:32737")   # projected CRS, matching your barrier layer
+```
+
+**Used in:** Day 4 Module 1.
+
+### `recurse`
+
+**What it's for:** site fidelity and revisitation — how often, and for how long, an individual returns to the same specific location, independent of overall range size or migratory strategy.
+
+**Core object:** none of its own — a plain data frame, or a `move2` object directly.
+
+**Minimum input, and the sharpest data-requirement gotcha in this whole document:** `getRecursions()`'s data-frame method reads columns **by position, not name**, in the exact order **x, y, t, id**, and needs **exactly 4 columns** — confirmed by reading its source directly while debugging this workshop's own Day 4 module. It's also sensitive to object class: for a `tibble`, single-bracket subsetting (`x[,1]`) returns a one-column tibble (a list), not a plain vector, which breaks the function outright with an opaque `Not compatible with requested type: [type=list; target=double]` error — the fix is to build the input with base `data.frame()`, not `tibble()`.
+
+```{r recurse_convert}
+library(recurse)
+
+baseline_recurse <- data.frame(
+  x  = baseline$x,
+  y  = baseline$y,
+  t  = baseline$t,
+  id = baseline$id
+)
+```
+
+Alternatively, `recurse` also has a native `move2` method, which builds this same correctly-ordered, correctly-typed data frame internally — convenient, but it requires `move2::mt_is_time_ordered()` and `move2::mt_is_track_id_cleaved()` to both be `TRUE` on your input object first.
+
+**Used in:** Day 4, site fidelity and revisitation module.
+
+### `momentuHMM`
+
+**What it's for:** hidden Markov models that classify an individual's behavioral state (e.g. resting, foraging, transiting) from sequences of step length and turning angle — or from accelerometer data.
+
+**Core object:** `momentuHMMData`, built via `prepData()`.
+
+**Minimum input:** a data frame with an `ID` column and coordinate columns (`coordNames`, default `c("x", "y")`) at a fairly regular sampling interval — unlike NSD (Day 4 Module 2), step length and turning angle need comparable time intervals between fixes to be meaningful, so this typically starts from a `track_resample()`-ed `amt` track rather than the raw duty-cycled fixes.
+
+```{r momentuhmm_convert}
+library(momentuHMM)
+
+baseline_hmm <- prepData(baseline, coordNames = c("x", "y"), type = "UTM")
+```
+
+This section will be filled in properly once the Day 5 module is built — treat the above as a placeholder shape, not a tested workflow.
+
+---
+
+## 5. Environmental data extraction
+
+The workflow here replaces two things from older course materials: the legacy `raster`/`rgdal`/`sp`/`rgeos` stack (all now archived/retired from CRAN, superseded by `terra` and `sf`), and manually downloading each environmental layer through a web portal (e.g. NASA AppEEARS) one variable at a time. Instead of introducing every raster layer individually, this section covers the two general-purpose extraction tools — get comfortable with these, and any specific layer (NDVI, land cover, elevation, precipitation, ...) becomes a matter of pointing them at the right source.
+
+### `terra`
+
+**What it's for:** reading, manipulating, and extracting values from **local** raster files at animal locations.
+
+**Core object:** `SpatRaster` (one or many layers) and `SpatVector` (terra's own vector class, though it interoperates with `sf`).
+
+**Minimum input:** a raster file (e.g. GeoTIFF) and a set of point locations — `sf` points work directly.
+
+```{r terra_convert}
+library(terra)
+
+r <- rast("elevation.tif")
+pts <- st_as_sf(baseline, coords = c("x", "y"), crs = "EPSG:32737")
+
+extracted <- extract(r, pts)
+baseline$elevation <- extracted$elevation
+```
+
+**Used in:** Day 5.
+
+### `rgee`
+
+**What it's for:** programmatic access to Google Earth Engine (GEE) — the same kinds of layers you'd otherwise hand-download through AppEEARS (MODIS NDVI, land cover, SRTM elevation, climate data, and much more), but pulled directly into R without a manual browser upload/download cycle.
+
+**Core object:** `ee$Image` / `ee$ImageCollection` (server-side Earth Engine objects, accessed through `reticulate`), extracted into ordinary R objects via `ee_extract()`.
+
+**Minimum input:** a registered Google Earth Engine account and a working Python environment (`ee_Initialize()`, once per session), plus point locations as an `sf` object.
+
+```{r rgee_convert}
+library(rgee)
+ee_Initialize(project = "your-gee-project-id")
+
+pts <- st_as_sf(baseline, coords = c("x", "y"), crs = "EPSG:4326")   # GEE expects geographic coordinates
+pts_ee <- sf_as_ee(pts)
+
+ndvi <- ee$ImageCollection("MODIS/061/MOD13Q1")$select("NDVI")
+extracted <- ee_extract(x = ndvi, y = pts_ee, sf = TRUE)
+```
+
+> **caveat:** Google Earth Engine requires authenticating against Google's servers. `rgee` is included here because, potential access issues from China aside, it remains the most efficient way to pull environmental data at scale for research use.
+
+**Used in:** Day 5.
+
+---
+
+## 6. Visualization utilities
+
+These don't introduce a new data object of their own — they consume whatever `sf`/`move2`/`track_xyt` object you already have — so they get a compact table rather than individual sections.
+
+| Package | Purpose |
+|---|---|
+| `mapview` | Quick, interactive spatial maps — the fastest way to eyeball a track or a set of points against a layer |
+| `leaflet` | Interactive maps with more manual control than `mapview` (used in Day 3's home range module) |
+| `gganimate` | Animate a `ggplot2` plot through time — quick, dependency-light trajectory animation, no basemap |
+| `moveVis` | Basemap-integrated trajectory animation, built on `move2` |
+| `gt` | Presentation-ready summary tables |
+| `RColorBrewer` | Color palettes for categorical plots (e.g. BaBA's behavior types) |
+| `gridExtra` | Arrange multiple `ggplot2` panels together |
+
+---
+
+## 7. A general checklist for converting into *any* package
+
+Sections 2–5 show one working path into each package, but none of those paths are the only way there, and treating them as a fixed pipeline (baseline → sf → amt → ...) would overstate how rigid this actually is. Most of these packages just need certain plain columns pulled out of whatever object you currently have, however you get there. What's actually worth carrying with you — including to packages this document doesn't cover — is a short set of questions:
+
+1. **What plain columns can I pull out of what I already have?** Almost everything reduces to `id`, `x`/`y` (or `lon`/`lat`), `t` — whether that's extracted from a `move2` object's geometry, a CSV, or another package's track object.
+2. **Geographic or projected coordinates?** The single most common source of silent (not error-throwing) bugs in this workshop. `ctmm` wants geographic lon/lat; `amt`, `BaBA`, `recurse`, and raster extraction with `terra` all want a projected, metric CRS.
+3. **Exact column names, column order, or object class?** Where the sharp, loud-failure gotchas live — `recurse`'s positional x/y/t/id ordering and its base-`data.frame`-vs-`tibble` sensitivity, `ctmm`'s Movebank-style names, `BaBA`'s `Animal.ID`/`date`.
+4. **One row per fix, or one row per individual?** Event-level tables (`move2`, `amt`, `recurse`, `BaBA`) vs. one-object-per-individual structures (`ctmm`'s `telemetry`).
+5. **Does the package ship its own constructor?** `make_track()`, `mt_as_move2()`, `as.telemetry()`, `st_as_sf()`, `prepData()` — building through the package's own function is almost always safer than assembling its internal structure by hand.
+
+Asking these five questions of a package you've never touched before will usually get you further than looking for a diagram that already has your answer on it.
+
+---
+
+## Where to go next
+
+This document is meant to be read once, before Day 1. For the real, worked version of any package above — actual code, actual wildebeest data, actual ecological interpretation — see the day/module listed in the Quick-reference table (Section 1).
