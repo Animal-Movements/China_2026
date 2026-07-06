@@ -7,7 +7,7 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 rm(list=ls())
 
 # You may need to install these packages first
-# install.packages(c("move2", "tidyverse", "lubridate", "sf", "mapview", "units"))
+# install.packages(c("move2", "tidyverse", "lubridate", "sf", "mapview", "units", "gt"))
 
 library(move2)       # Movebank interface and the move2 spatial data class
 library(tidyverse)   # Data wrangling and visualization (dplyr, ggplot2, etc.)
@@ -15,6 +15,7 @@ library(lubridate)   # Working with timestamps and timezones
 library(sf)          # Spatial vector data (move2 is built on sf)
 library(mapview)     # Quick interactive maps
 library(units)       # Provides support for measurement units
+library(gt)          # Makes presentation-ready display tables
 
 
 ## ----Set UTM Zone---------------------------------------------------------------------------------------------------------------------------
@@ -22,9 +23,8 @@ library(units)       # Provides support for measurement units
 tz_utc <- "UTC"
 tz_local <- "Africa/Nairobi"  # East Africa Time (EAT = UTC+3)
 
-# Set UTM
+# Set Coordinate System
 latlong_crs <- "EPSG:4326"   # WGS84 geographic — standard for GPS and Movebank
-utm_crs <- "EPSG:32737"  # UTM Zone 37S — metric, appropriate for Athi-Kaputiei, Kenya
 
 
 ## ----Credentials, eval=FALSE----------------------------------------------------------------------------------------------------------------
@@ -71,14 +71,14 @@ load("./Data/wildebeest_data.rdata")
 ## # sum(is.na(WB.csv$timestamp))
 ## 
 ## # Convert to move2 object
-## WB.csv <- mt_as_move2(WB.csv,
+## WB.csv <- mt_as_move2(WB.csv, # Note that I am overwriting the original WB.csv file
 ##                       coords = c("longitude", "latitude"),  # column names for x, y
 ##                       crs = latlong_crs,
 ##                       time_column = "timestamp",
 ##                       track_id_column  = "individual_local_identifier"
 ##                       )
 ## 
-## # Note, the reference information was not imported, although it is provided in the Data directory (wildebeest_ref.csv).  If imported, the dataframe would need to be joined to the original by a common field.  This could be easily accomplished using the `left_join()` function on a shared field (e.g., ID).
+## # Note, the reference information was not imported, although it is provided in the Data directory (Data/wildebeest_ref.csv).  If imported, the dataframe would need to be joined to the original by a common field.  This could be easily accomplished using the `left_join()` function on a shared field (e.g., ID).
 
 
 ## ----Mv2 Functions--------------------------------------------------------------------------------------------------------------------------
@@ -105,7 +105,8 @@ range(mt_time(WB.mv2), na.rm = TRUE)
 
 
 ## ----track_data-----------------------------------------------------------------------------------------------------------------------------
-# Individual-level metadata (deployment information) and use the function glimpse() to provide a brief summary
+# mt_track_data() returns a data.frame contianing the track attribute data
+# glimpse() can then be used to provide a brief summary (a transposed version of print())
 track_info <- mt_track_data(WB.mv2)
 glimpse(track_info)
 
@@ -123,10 +124,10 @@ glimpse(WB.mv2) # Get a quick view of each column
 ## ----individual_summary---------------------------------------------------------------------------------------------------------------------
 wb.Summary <- WB.mv2 %>%
   as_tibble() %>%
-  summarise(n_fixes = n(), 
-            first_fix = min(timestamp, na.rm = TRUE), 
-            last_fix = max(timestamp, na.rm = TRUE), 
-            duration_d = round(as.numeric(difftime(max(timestamp, na.rm = TRUE),
+  summarise(Locations = n(), 
+            Start = min(timestamp, na.rm = TRUE), 
+            End = max(timestamp, na.rm = TRUE), 
+            Duration = round(as.numeric(difftime(max(timestamp, na.rm = TRUE),
                                                    min(timestamp, na.rm = TRUE),
                                                    units = "days")), digits = 1),
             .by = individual_local_identifier) %>%
@@ -135,6 +136,41 @@ wb.Summary <- WB.mv2 %>%
 # Print Results
 wb.Summary
 
+# Now make a prettier table and output the file 
+gt_gnu <- wb.Summary %>% 
+  
+  # initialize gt table
+  gt() %>%
+  
+  # Make the table easier to read with alternating grey bars
+  opt_row_striping() %>%
+  
+  # Add title and subtitle, pulling date of creation
+  tab_header(
+    title = "White-bearded Wildebeest in Kenya: Tracking Data Summary",
+    subtitle = paste0("Created: ",Sys.Date())) %>%
+  
+  # Easy preset date formatting
+  fmt_date(
+    columns = c(Start, End),
+    date_style = 8) %>%
+  
+  # Change the column labels for the table
+  cols_label(individual_local_identifier = "Wildebeest ID",
+             Locations = "Total points",
+             Start = "First location",
+             End = "Last location",
+             Duration = "Tracking period (days)") %>%
+  
+  # Center text inside columns
+  cols_align(align = "center") 
+
+# Print result
+gt_gnu
+
+# Save as html table to send to the project manager, or a shiny app
+gtsave(gt_gnu, filename = "Output/summary_gnu.html")
+
 
 ## ----sampling_interval----------------------------------------------------------------------------------------------------------------------
 # mt_time_lags() returns the time difference to the NEXT location for each row in the dataset
@@ -142,13 +178,16 @@ time_lags <- WB.mv2 %>%
   arrange(individual_local_identifier, timestamp) %>%
   mutate(dt_hours = mt_time_lags(.) %>% # A function to retrieve the interval duration between locations, defaults to minutes
            set_units("hours") %>%  # convert to hours
-           as.numeric()) %>%
+           as.numeric()) %>% # Make the field numeric
   as_tibble()
 
-# The last time lag of each individual track will always be NA, so the total NA should be equal to the number of individuals and needs to be removed for calculations
-sum(is.na(time_lags$dt_hours)) 
+# Notice the "dt_hours" column
+head(time_lags)
 
-# Use filter to remove NA values
+# The last time lag of each individual track will always be NA, so the total NA should be equal to the number of individuals
+sum(is.na(time_lags$dt_hours))  == n_distinct(time_lags$individual_local_identifier)
+
+# Use filter to remove these NA values
 time_lags <- time_lags %>%
   filter(!is.na(dt_hours))
 
@@ -161,14 +200,14 @@ time_lags %>%
   summarise(
     median_interval_h = round(median(dt_hours), 2),
     min_interval_h = round(min(dt_hours), 2),
-    max_interval_h = round(max(dt_hours), 2),
-    pct_irregular = round(mean(abs(dt_hours - target_interval_h) > 0.1) * 100, 1),
+    max_interval_h = round(max(dt_hours), 2), 
+    pct_irregular = round(mean(abs(dt_hours - target_interval_h) > 0.1) * 100, 1), # Calculate the percent irregular from the median value calculated
     .by = individual_local_identifier
   )
 
 # Graph the interval distribution for one individual
 time_lags %>%
-  filter(individual_local_identifier == first(individual_local_identifier), # Could change this to a different individual
+  filter(individual_local_identifier == first(individual_local_identifier), # Could change this to a different individual or create a loop to print result for every individual
          dt_hours < 12) %>%
   ggplot(aes(x = dt_hours)) +
   geom_histogram(binwidth = 0.25, fill = "steelblue", color = "white") +
@@ -180,10 +219,10 @@ time_lags %>%
 
 
 ## ----interval_by_hour-----------------------------------------------------------------------------------------------------------------------
-# Tag each interval by the local hour of day of the fix that starts it, and
-# check whether short (~1h) vs. long (~3h) intervals separate by time of day.
+# Pull out the hour of the timestamp using the hour() function, converting the result to local time.
+# Check to see if (~1h) vs. long (~3h) intervals separate by time of day.
 time_lags <- time_lags %>%
-  mutate(hour_local = hour(with_tz(timestamp, tz_local)))
+  mutate(hour_local = hour(with_tz(timestamp, tz_local))) 
 
 time_lags %>%
   filter(dt_hours < 6) %>%
@@ -213,13 +252,14 @@ cat(nrow(long_gaps), "gaps longer than", gap_threshold_h, "hours, across",
 
 # Bin gap *resolutions* (gap_end) by week: a spike in the number of distinct individuals resolving a long gap in the same week is the signature of a synchronized, fleet-wide event rather than independent tag failures.
 synchronized_gaps <- long_gaps %>%
-  mutate(resume_week = floor_date(gap_end, "week")) %>%
+  mutate(resume_week = floor_date(gap_end, "week")) %>% # Floor_date rounds down to the nearest boundary of the time unit
   group_by(resume_week) %>%
   summarise(n_individuals_affected = n_distinct(individual_local_identifier),
             n_gaps = n(), .groups = "drop") %>%
   arrange(desc(n_individuals_affected))
 
-synchronized_gaps %>% slice_head(n = 5)
+# Display the first 6 rows
+head(synchronized_gaps)
 
 
 ## ----outage_window--------------------------------------------------------------------------------------------------------------------------
@@ -249,7 +289,7 @@ p <- WB.mv2 %>%
   ggplot(aes(x = date, y = individual_local_identifier, fill = n))
 
 # Create a rectangular to place on the graph if a synchronized outage window occurred
-if (!is.na(outage_start)) {
+if (!is.na(outage_start)) { # Only include if a system-wide outage occurred (if outage_start is null, do nothing)
   p <- p +
     annotate("rect",
              xmin = as_date(outage_start), xmax = as_date(outage_end),
@@ -265,12 +305,12 @@ p +
        subtitle = if (!is.na(outage_start)) "Shaded band = candidate synchronized outage" else NULL,
        x = NULL, y = NULL) +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) #tilt the labels on the axis
 
 
 ## ----quick_map------------------------------------------------------------------------------------------------------------------------------
-# Convert to sf
-WB.sf <- sf::st_as_sf(as.data.frame(WB.mv2))
+# Convert to sf object
+WB.sf <- st_as_sf(as.data.frame(WB.mv2))
 
 # Create graph, plotting a subset of the data for speed
 WB.sf %>%
@@ -281,7 +321,7 @@ WB.sf %>%
           alpha = 0.7)
 
 
-## ----Save, eval=F---------------------------------------------------------------------------------------------------------------------------
-## save(WB.mv2, file = "Data/WB_raw.rdata")
-## cat("Saved WB.mv2 —", n_distinct(mt_track_id(WB.mv2)), "animals,", nrow(WB.mv2), "fixes\n")
+## ----Save, eval=T---------------------------------------------------------------------------------------------------------------------------
+save(WB.mv2, WB.sf, file = "Data/WB_raw.rdata")
+cat("Saved WB.mv2 —", n_distinct(mt_track_id(WB.mv2)), "animals,", nrow(WB.mv2), "fixes\n")
 

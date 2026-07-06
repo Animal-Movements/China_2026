@@ -30,22 +30,24 @@ By the end of this module you will be able to:
 4. Identify and remove duplicate or invalid fixes
 5. Quantify how each QC step changes the size and composition of your dataset
 
-**Packages used:** `move2`, `tidyverse`, `lubridate`, `sf`, `gt`, `mapview`
+**Packages used:** `move2`, `tidyverse`, `lubridate`, `sf`, `gt`, `mapview`, `patchwork`
 
-# Ecological context
+# Introduction
 
-A GPS fix is an estimate, not a fact. Every location carries some amount of error and that error is rarely random or harmless: a handful of bad fixes can inflate steplengths into biologically impossible "teleports", bias a home range estimate outward, or manufacture an apparent "fast directed movement" behavioral state that never happened. For wide-ranging grazers like wildebeest moving across open, fenced, and increasingly developed landscapes, these artifacts can directly mislead conservation conclusions. For example, overestimating how often animals cross a fence line or inflate the size of a population's range can mislead conclusions.
+A GPS fix is an estimate, not a fact. Every location carries some amount of error. That error is rarely random or harmless. A handful of bad fixes can inflate steplengths into biologically impossible "teleports", bias a home range estimate outward, or manufacture an apparent "fast directed movement" behavioral state that never happened. For wide-ranging grazers like wildebeest moving across open, fenced, and increasingly developed landscapes, these artifacts can directly mislead conservation conclusions. 
 
-The wildebeest dataset we downloaded in Module 1 pooled data across several wildebeest populations in Kenya. Before we can say anything about *this* population's movement, we need to: (1) isolate the right subset of animals and time window, and (2) remove fixes that don't meet a minimum precision standard. This module does both, and gives you a reusable template for QC-ing your own tracking data.
+The wildebeest dataset we downloaded in Module 1 pooled data across several wildebeest populations in Kenya. Before we can say anything about *this* population's movement, we need to: (1) isolate the right subset of animals and time window, and (2) remove fixes that don't meet a minimum precision standard. This dataset does both, providing a reusable template for QC-ing your own tracking data.
 
 ---
 
 ## 1. Setup
-
-### 1.1 Load packages
+As a first step, we will import the necessary packages to conduct our analysis. 
 
 ```{r packages}
-# install.packages(c("move2", "tidyverse", "lubridate", "sf", "gt", "mapview"))
+# Clear R's memory
+rm(list=ls())
+
+# install.packages(c("move2", "tidyverse", "lubridate", "sf", "gt", "mapview", "patchwork"))
 
 library(move2)       # move2 spatial data class and helpers
 library(tidyverse)   # Data wrangling and visualization
@@ -53,17 +55,20 @@ library(lubridate)   # Timestamps
 library(sf)          # Spatial vector data
 library(gt)          # Formatted summary tables
 library(mapview)     # Quick interactive maps
+library(patchwork)   # Plot composer
 ```
 
-### 1.2 Load the raw data from Module 1
+### 1.2 Import
+Load the raw data from Module 1.
 
 ```{r load}
 load("Data/WB_raw.rdata")   # loads WB.mv2, saved at the end of Module 1
 
+# Text summary of import
 cat("Starting point:", n_distinct(mt_track_id(WB.mv2)), "animals,", nrow(WB.mv2), "fixes\n")
 ```
-
-We will track how these two numbers change after every QC step, so initialize a small log:
+## 2. Explore track-level metadata
+We will be making changes to the original dataset since we can always re-load the dataset from the `.rdata` file. As a result, we should track how our new dataset changes at every QC step.  Here, we initialize a small log to track the changes.
 
 ```{r qc_log_init}
 qc_log <- tibble(
@@ -73,16 +78,14 @@ qc_log <- tibble(
 )
 ```
 
----
-
-## 2. Explore track-level metadata
-
 Some attributes — sex, study site, deployment start/end — describe an *individual*, not a single GPS fix. In `move2`, these live in the track metadata, separate from the event (fix-level) data.
 
 ```{r track_meta}
 track_meta <- mt_track_data(WB.mv2)
 glimpse(track_meta)
 ```
+Wildebeest included in this dataset were tracked across three study areas (Athi-Kaputiei Plains, Amboseli Basin, and the Masai Mara Ecosystem
+). Prior to analysis, we will first subset these data and work only from animals tracked across the Athi-Kaputiei Plains.
 
 ```{r study_sites}
 # How many study sites are mixed into this Movebank study?
@@ -96,20 +99,17 @@ track_meta %>%
 A quick map colored by study site makes the problem (and the fix) obvious:
 
 ```{r map_by_site}
-WB.sf_all <- sf::st_as_sf(as.data.frame(WB.mv2)) %>%
+WB.sf_all <- st_as_sf(as.data.frame(WB.mv2)) %>% # Here, we are making the data spatial, as we did in the previous exercise
   mutate(study_site = track_meta$study_site[match(individual_local_identifier,
-                                                    track_meta$individual_local_identifier)])
+                                                  track_meta$individual_local_identifier)]) # Can you guess what the function "match()" does?
 
 WB.sf_all %>%
   slice_sample(n = 3000) %>%
   mapview(zcol = "study_site", layer.name = "Study site", cex = 2, alpha = 0.7)
 ```
 
----
-
 ## 3. Subset to study area and deployment window
-
-We restrict to (a) the Athi-Kaputiei Plains study site and (b) each animal's actual deployment window (removing any pre-deployment test fixes or post-retrieval fixes).
+Restrict that dataset to (a) the Athi-Kaputiei Plains and (b) each animal's actual deployment window (removing any pre-deployment test fixes or post-retrieval fixes).
 
 ```{r subset_site_deploy}
 # Build per-track lookup vectors from the track metadata
@@ -120,6 +120,7 @@ on_lookup   <- setNames(track_meta$deploy_on_timestamp,
 off_lookup  <- setNames(track_meta$deploy_off_timestamp,
                          as.character(track_meta$individual_local_identifier))
 
+# Filter records based on our lookup tables
 WB.mv2 <- WB.mv2 %>%
   filter(
     site_lookup[as.character(individual_local_identifier)] == "Athi-Kaputiei Plains",
@@ -130,7 +131,7 @@ WB.mv2 <- WB.mv2 %>%
 cat("After filter:", n_distinct(mt_track_id(WB.mv2)), "animals,", nrow(WB.mv2), "fixes\n")
 print(table(mt_track_data(WB.mv2)$study_site))   # expect: only Athi-Kaputiei Plains
 ```
-
+Update the QC log:
 ```{r qc_log_1}
 qc_log <- qc_log %>%
   add_row(step      = "1. Subset to study site + deployment window",
@@ -140,33 +141,34 @@ qc_log <- qc_log %>%
 
 > **Note:** `site_lookup[individual_local_identifier]` works because `individual_local_identifier` is duplicated onto every fix (event-level), while the lookup vector has one entry per animal (track-level). Indexing a named vector by a character vector returns one matched value per row — no join required.
 
----
-
 ## 4. Quality-filter by GPS precision (DOP × fix type)
-
 **Dilution of precision (DOP)** quantifies how much satellite geometry inflates positional error at the moment of a fix — lower is better. A **3D fix** (with an altitude solution) is generally more reliable than a **2D fix** at the same DOP value, so we apply a stricter threshold to 2D fixes.
 
-A common rule of thumb (and the one we use here): keep 3D fixes with DOP < 10, and 2D fixes with DOP < 5. But the actual cut-off is highly dependent on your specific case. Sometimes all fixes can be useful even if we know they have high DOP.  
+A common rule of thumb (and the one we use here) is to keep 3D fixes with DOP < 10 and 2D fixes with DOP < 5. The actual cut-off is highly dependent on your specific case. Sometimes all fixes can be useful even if we know they have high DOP.  
 
 > **Behind the scenes:** `move2` automatically attaches a measurement unit (via the `units` package) to many sensor columns, based on the official Movebank attribute dictionary. `gps_dop` is dimensionless, but still arrives tagged as a `units` object rather than a plain number — which breaks `ggplot2` histograms unless `library(units)` is attached. Since DOP has no real physical unit, we simply drop the units class below and treat it as an ordinary number.
 
 ```{r units_fix}
-WB.mv2 <- WB.mv2 %>% mutate(gps_dop = as.numeric(gps_dop))
+WB.mv2 <- WB.mv2 %>% 
+  mutate(gps_dop = as.numeric(gps_dop))
 ```
 
+### 4.1 DOP Summary
+Create a summary of the DOPs included in the dataset. How many points exist for each fix type and what does the DOP distribution look like?
 ```{r dop_explore}
-# How many fixes of each type, and what does the DOP distribution look like?
+# Create a tibble with the count of each raw gps fix
 WB.mv2 %>%
   as_tibble() %>%
   count(gps_fix_type_raw)
 ```
 
+Create a histogram of the graph of GPS fix quality 
 ```{r dop_before}
 dop_before <- WB.mv2 %>%
   as_tibble() %>%
   filter(!is.na(gps_dop), gps_fix_type_raw %in% c("2D", "3D"))
 
-ggplot(dop_before, aes(x = gps_dop)) +
+plot.raw <- ggplot(dop_before, aes(x = gps_dop)) +
   geom_histogram(bins = 30, fill = "steelblue", color = "white") +
   geom_vline(data = tibble(gps_fix_type_raw = c("2D", "3D"), thresh = c(5, 10)),
              aes(xintercept = thresh), color = "firebrick", linetype = "dashed") +
@@ -175,7 +177,13 @@ ggplot(dop_before, aes(x = gps_dop)) +
        subtitle = "Red line = common threshold (2D: DOP < 5, 3D: DOP < 10)",
        x = "DOP", y = "Count") +
   theme_minimal()
+
+# Print to view the plot
+#plot.raw
 ```
+
+### 4.2 DOP Filter
+Filter out data points that meet our criteria, removed 3D fixes with a DOP > 10 and 2D fies with a DOP > 5. This allows us to be more restrictive with the poorer quality data.
 
 ```{r dop_filter}
 # Note: fixes with a missing DOP value, or a fix type other than "2D"/"3D",
@@ -189,8 +197,10 @@ WB.mv2 <- WB.mv2 %>%
 cat("After DOP/fix-type filter:", n_distinct(mt_track_id(WB.mv2)), "animals,", nrow(WB.mv2), "fixes\n")
 ```
 
+Create a histogram of the data points after filtering has been completed. 
+
 ```{r dop_after}
-WB.mv2 %>%
+plot.filt <- WB.mv2 %>%
   as_tibble() %>%
   ggplot(aes(x = gps_dop)) +
   geom_histogram(bins = 30, fill = "darkgreen", color = "white") +
@@ -198,8 +208,13 @@ WB.mv2 %>%
   labs(title = "GPS DOP by fix type — after filtering",
        x = "DOP", y = "Count") +
   theme_minimal()
+
+# Plot results with plot.raw to see results together
+# Use the patchwork package (| for side by side, \ for stacked)
+plot.raw / plot.filt
 ```
 
+Update the QC log:
 ```{r qc_log_2}
 qc_log <- qc_log %>%
   add_row(step      = "2. GPS precision filter (DOP × fix type)",
@@ -207,21 +222,21 @@ qc_log <- qc_log %>%
            n_animals = n_distinct(mt_track_id(WB.mv2)))
 ```
 
-> **Heads up for your own data:** Not every tag manufacturer reports DOP and fix type the same way (or at all). e-obs and some solar tags report a different precision metric or none; some vendors give HDOP/VDOP separately rather than a single DOP. Check your tag manufacturer's documentation for what quality fields are available, and adapt the filter accordingly.
-
----
+> **Heads up for your own data:** Not every tag manufacturer reports DOP and fix type the same way (or at all). E-obs and some solar tags report a different precision metric or none. Some vendors give HDOP/VDOP separately rather than a single DOP. Check your tag manufacturer's documentation for what quality fields are available, and adapt the filter accordingly.
 
 ## 5. Remove duplicates and invalid fixes
+Removal of points from a dataset should be done with extreme caution. Here, we demonstrate how potential erroneous data points could be removed before conducting more formal analyses.
 
 ```{r dedup}
+# How many rows exist in the datast?
 n_before_dedup <- nrow(WB.mv2)
 
 WB.mv2 <- WB.mv2 %>%
   # Drop exact duplicate animal-timestamp combinations
   distinct(individual_local_identifier, timestamp, .keep_all = TRUE) %>%
   # Drop missing or (0,0) coordinates
-  mutate(.lon = sf::st_coordinates(.)[, 1],
-         .lat = sf::st_coordinates(.)[, 2]) %>%
+  mutate(.lon = st_coordinates(.)[, 1],
+         .lat = st_coordinates(.)[, 2]) %>%
   filter(!is.na(.lon), !is.na(.lat), !(.lon == 0 & .lat == 0)) %>%
   select(-.lon, -.lat) %>%
   # Re-establish track + time order (required by many move2/amt functions downstream)
@@ -230,6 +245,7 @@ WB.mv2 <- WB.mv2 %>%
 cat("Removed", n_before_dedup - nrow(WB.mv2), "duplicate/invalid fixes\n")
 ```
 
+Update the QC log:
 ```{r qc_log_3}
 qc_log <- qc_log %>%
   add_row(step      = "3. Remove duplicates + invalid coordinates",
@@ -237,9 +253,8 @@ qc_log <- qc_log %>%
            n_animals = n_distinct(mt_track_id(WB.mv2)))
 ```
 
----
-
 ## 6. Quantify the cumulative effect of QC
+Now let's view our QC log to evaluate where large changes in the size of the dataset occurred. 
 
 ```{r qc_summary}
 qc_log <- qc_log %>%
@@ -261,35 +276,33 @@ qc_log %>%
   cols_align(align = "center", columns = c(n_fixes, n_animals, pct_of_raw))
 ```
 
-> **Discussion:** Which step removed the most data — the site/deployment subset, or the DOP filter? Is that what you expected? In your own dataset, which QC step do you think will matter most, and why?
-
----
+> **Discussion:** Which step removed the most data — the site/deployment subset, or the DOP filter? Is that what you expected? In your own dataset, which QC step do you think will matter most and why?
 
 ## 7. Confirm the cleaned dataset
-
+Now let's look at our final dataset, using a simple color ramp to view each animal.  We can do this very quickly with `mapview`.
 ```{r quick_map_clean}
-WB.sf_clean <- sf::st_as_sf(as.data.frame(WB.mv2))
+WB.sf_clean <- st_as_sf(as.data.frame(WB.mv2))
 
 WB.sf_clean %>%
   slice_sample(n = 2000) %>%
   mapview(zcol = "individual_local_identifier", layer.name = "Individual", cex = 2, alpha = 0.7)
 ```
 
-All points should now fall within the Athi-Kaputiei Plains, with no obvious outliers. If you see anything unexpected, go back and re-examine the QC steps above before moving on.
+All points now fall within the Athi-Kaputiei Plains, with no obvious outliers. If you see anything unexpected, go back and re-examine the QC steps above before moving on.
 
----
 
 ## 8. Save output for Module 3
+Save your output for further analyses.
 
 ```{r save}
 save(WB.mv2, file = "Data/WB_clean.rdata")
 cat("Saved cleaned WB.mv2 —", n_distinct(mt_track_id(WB.mv2)), "animals,", nrow(WB.mv2), "fixes\n")
 ```
 
-## Exercise: 
+# Exercise: 
 Now run the same QC workflow on your own dataset.
 
-1. **Inspect your track metadata** with `mt_track_data()`. Does it include the fields you need to subset (study site, deployment dates, sex)? If a field is missing, where else might that information live (a separate reference sheet, metadata you recorded yourself)?
+1. **Inspect your track metadata** with `mt_track_data()`. Does it include the fields you need to subset (study site, deployment dates, sex)? If a field is missing, where else might that information be located (a separate reference sheet, metadata you recorded yourself)?
 2. **Check what precision metric your tags report.** Look for DOP, HDOP, fix type, or a manufacturer-specific quality field. If your tags don't report precision at all, what other QC steps (speed filters, spatial outlier checks) might substitute?
 3. **Run the duplicate/invalid-coordinate check** — this step is universal regardless of tag type.
 4. **Build your own QC accounting table.** How much data survives each step? Is that consistent with what you'd expect given your species and study design?
