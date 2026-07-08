@@ -35,9 +35,7 @@ By the end of this module you will be able to:
 
 ## Background
 
-[INSERT BACKGROUND ON RANGE VS OCCURRENCE]
-
-https://doi.org/10.1101/2022.09.29.509951
+When researching animal behavior and movement ecology, describing spatial-temporal patterns of space use is fundamental. We often characterize space use through home-range estimation. A home range is the area repeatedly used throughout an animal’s lifetime for all its normal behaviors and activities, excluding occasional exploratory excursions. However, before we can estimate a home range, it is important to understand what a utilization distribution is, and how to distinguish between [occurrence distributions and range distributions](https://doi.org/10.1101/2022.09.29.509951).
 
 ## Data Preparation
 
@@ -62,7 +60,7 @@ load("Data/cilla.rda")
 
 ## Utilization Distributions
 
-[INSERT INTRO ABOUT UTILIZATION DISTRIBUTIONS]
+A utilization distribution (UD) represents an animal’s probability of space use throughout an area. Traditionally, occurrence distributions built with Brownian motion models (Brownian Bridge movement model) were used to model an animal's space use, however, these do not describe an animal's home range. More recently, range distributions have been used to map individual and population "home" ranges. So how do these two types of "utilization" distributions compare?
 
 > What is the **occurrence distribution**?
 >
@@ -95,28 +93,39 @@ FITS[["BM anisotropic"]] <- ctmm.fit(DATA, ctmm(tau = Inf))
 ## fractal/infinite movement path (most appropriate for coarser data)
 ## doesn't stay w/in HR (diffuses forever), no more appropriate if not necessarily range resident
 
-# you can't compare stationary (IID,OU,OUF) and conditionally stationary (BM,IOU) models with likelihood
+```
+
+**NOTE:** We *cannot* use likelihood to directly compare stationary (range-resident: IID, OU, OUF) and conditionally stationary (non-resident: BM, IOU) models. However, we *can* compare performance within each set of models. We can also check how each model fits our empirical variogram.
+
+```{r occurrence2}
+
+# Cannot compare stationary and conditionally stationary models with likelihood
 summary(FITS)
 # but you can compare within
 summary(FITS[c("BM", "BM anisotropic")])
 
-SVF <- variogram(DATA,CI="Gauss")
+SVF <- variogram(DATA, CI = "Gauss")  # fit variogram
 
-# again, the selected model looks okay
+# Again, the selected model looks okay (within CIs)
 plot(SVF, FITS[[1]])
-plot(SVF, FITS[[1]], frac = 0.01)
+plot(SVF, FITS[[1]], frac = 0.01)  # zoomed in
 
-# the Brownian motion model looks...
+# However, the Brownian motion model looks...
+plot(SVF, FITS$BM)
 plot(SVF, FITS$BM, frac = 0.01)
-# why? zoom in (doesn't asymptote, keeps diffusing infinitely, and no initial quadratic (not ballistic))
 
-# conventional (non-dynamic) Brownian bridge (not the selected model)
+```
+
+Why does the Brownian motion model fit so poorly? Zoom in. The BM movement process does not asymptote; it keeps diffusing infinitely, so it should not be used to model range resident animal tracks. There is no initial quadratic curvature (not ballistic motion). Now, we will use the BM and selected OUF anisotropic models to estimate occurrence distributions. The `occurrence` function in `ctmm` can build occurrence distibutions in a continuous-time manner, using a geostatistical interpolation process called "Kriging" (Cressie, 1993; [Fleming et al., 2016](doi:10.1890/15-1607.1)). Generally, Kriging is used to interpolate between known values at specific locations in space. In the case of an occurrence distribution, we are interpolating from distributions of predictions of buffalo occurrence. We average these distributions together to get an occurrence distribution. The kriged BM occurrence distribution is known as a Brownian Bridge (BB). Here, we will compare this BB to an occurrence distribution generated from the selected OUF anisotropic model.
+
+```{r occurrence3}
+
+# Conventional (non-dynamic) Brownian bridge (not the selected model)
 BB <- occurrence(DATA, FITS$BM)
 
 # occurrence distribution - using the selected model
-OD <- occurrence(DATA, FITS[[1]])  # interpolating from distributions of predictions of buffalo occurrence (average distributions tog to get occurrence distribution)
-# predicts well for finely sampled data (negatively biased, biases too small for HR)
-# still better than the BM model
+OD <- occurrence(DATA, FITS[[1]])  
+## Negatively biased, biases too small for HR, but still better than the BM model
 
 # Let's visualize the two occurrence distributions
 par(mfrow = c(1,2))  # arrange plots into a 1x2 grid (row of 2)
@@ -132,12 +141,16 @@ plot(OD, col.level = NA, ext = EXT, main = "OUF Krige")
 
 ```
 
+While the occurrence distribution predicts well for finely sampled data, it is negatively biased (biases too small for home ranges). However, with the Kriging process incorporated, it performs better than the base BM model.
+
 ### Range Distribution
+
+Now, we will compare the kriged occurrence distribution to a range distribution, which we reccommend for home-range estimation. This uses the `akde` function for autocorrelated kernel density estimation (AKDE). This will be further explained in Module 3: AKDE, Home Range Meta-Analysis, Population Ranges. The key point for this module is that the `akde` function can be fit to the telemetry data with the best-fit movement model to produce a range distribution that should better capture the potential space use of a range-resident animal. Assuming that the animal maintains these behaviors, this range distribution would be representative of its home range.
 
 ```{r range, fig.height = 8, fig.width = 8}
 
-# range distribution - using the selected model
-RD <- akde(DATA, FITS[[1]])  # HR
+# Range distribution
+RD <- akde(DATA, FITS[[1]])  # using the selected model
 
 # Let's visually compare the data and 3 distributions
 par(mfrow = c(2,2))  # arrange plots into a 2x2 grid
@@ -147,7 +160,7 @@ EXT <- extent(list(DATA, OD, RD))  # make extent the largest of the diff distrib
 plot(DATA, ext = EXT, main = "Raw Location Points")
 
 # Plot BM occurrence distribution (BB)
-## Assumes buffalo moves randomly btwn any 2 points (biases small, only good for super coarse data)
+## Assumes buffalo moves randomly between any 2 points (biases small, only good for coarse data)
 plot(BB, col.level = NA, ext = EXT, main = "BM Krige (BB)")  
 
 # plot OUF occurrence distribution
@@ -165,15 +178,23 @@ plot(RD, col.level = NA, col.grid = NA, ext = EXT, main = "OUF AKDE")
 # Overlay them (`add = TRUE` plots on top of previous)
 par(mfrow = c(1,1))  # return to single plot grid
 plot(RD, col.level = NA, col.grid = NA, ext = EXT, col.UD = "blue")  # OUF range
-plot(OD, col.level = NA, ext = EXT, col.UD = "green3", add = TRUE)  # OUF occurrence
 plot(BB, col.level = NA, ext = EXT, col.UD = "red", add = TRUE)  # BM occurrence (BB)
+plot(OD, col.level = NA, ext = EXT, col.UD = "green3", add = TRUE)  # OUF occurrence
 title("Overlayed Distributions")
 
 ```
 
+The OUF occurrence distribution (<span style="color: green;">green</span>) hugs the tracking data so tightly that it essentially follows the exact paths taken by the buffalo. The BB (<span style="color: red;">red</span>) has greater uncertainty, so this distribution appears similar to the OUF occurrence distribution, with slightly wider (more uncertain) areas. The range distribution (<span style="color: blue;">blue</span>) covers an entire area of predicted space use, which aims to encompass past, present, and future movement, under the same behaviors.
+
 ## Sampling Dependency
 
+To understand how occurrence distributions differ from range distributions, and better illustrate why range distributions are better suited to describe home ranges, let's conduct a basic test for how biologically realistic each distribution is for home-range estimation. We can do so using a sensitivity analysis to see how each type of utilization distribution is affected by data collection/sampling parameters (non-biological artifacts of study design and constraints). The more sensitive the distribution is to the sampling interval and duration, the more sampling dependency the distribution has. Ideally, we would want the estimated home range to be robust (not sensitive) to sampling, because the space that animals use in real life remains the same regardless of whether we are able to capture it in our sampling protocol or not. In other words, we do not want our method for range estimation to change depending on how frequently (sampling interval) or how long (sampling duration) we track their locations.
+
+Note that, for home-range estimation, sampling duration is a more difficult logistical constraint to address *post-hoc*, however there are ways to determine if your sample size is sufficient to estimate individual and population ranges, given the sampling duration (see [Silva et al., 2023](https://doi.org/10.1111/2041-210X.14153), and [Silva et al., 2026](https://doi.org/10.1002/ece3.73755)).
+
 ### Sampling Interval
+
+Let's first test how sensitive each distribution is to sampling interval. As we did with the sensitivity analysis for speed estimation, we will coarsen the data by removing every other timestamp, such that we lose half the data, while still maintaining about the same sampling duration. We will iterate this process until the OUF occurrence distribution and range distribution look about the same. Let's start with 2-hour sampling.
 
 ```{r sampling_freq}
 
@@ -181,77 +202,156 @@ title("Overlayed Distributions")
 SUB <- DATA
 
 # Remove every other time
-SUB <- SUB[as.logical(1:nrow(SUB)%%2),]  # 2-hr sampling, 4-hr, etc.: as it coarsens, they will begin to look similar and closer to normal distr. (but they aren't the same)
+SUB <- SUB[as.logical(1:nrow(SUB)%%2),]  # 2-hr sampling
 
+# Fit occurrence and range distributions
 RD <- akde(SUB, FITS[[1]])
 OD <- occurrence(SUB, FITS[[1]])
 
-par(mfrow = c(1,2))
+par(mfrow = c(1,2))  # plot both side-by-side
 
-plot(RD, col.level = NA, col.grid = NA, ext = EXT)  # range distr doesn't really change as data coarsens
+plot(RD, col.level = NA, col.grid = NA, ext = EXT)  # range distribution
 title("Range distribution")
-plot(OD, col.level = NA, ext = EXT)  # occurrence distr. becomes increasingly uncertain as data coarsens (sampled at larger time intervals)
+plot(OD, col.level = NA, ext = EXT)  # occurrence distribution
 title("Occurrence distribution")
 
 ```
+
+4-hour sampling...
 
 ```{r sampling_freq2}
 
 # Remove every other time
 SUB <- SUB[as.logical(1:nrow(SUB)%%2),]  # 2-hr sampling, 4-hr, etc.: as it coarsens, they will begin to look similar and closer to normal distr. (but they aren't the same)
 
+# Fit occurrence and range distributions
 RD <- akde(SUB, FITS[[1]])
 OD <- occurrence(SUB, FITS[[1]])
 
-par(mfrow = c(1,2))
+par(mfrow = c(1,2))  # plot both side-by-side
 
-plot(RD, col.level = NA, col.grid = NA, ext = EXT)  # range distr doesn't really change as data coarsens
+plot(RD, col.level = NA, col.grid = NA, ext = EXT)  # range distribution
 title("Range distribution")
-plot(OD, col.level = NA, ext = EXT)  # occurrence distr. becomes increasingly uncertain as data coarsens (sampled at larger time intervals)
+plot(OD, col.level = NA, ext = EXT)  # occurrence distribution
 title("Occurrence distribution")
 
 ```
+
+8-hour sampling...
 
 ```{r sampling_freq3}
 
 # Remove every other time
 SUB <- SUB[as.logical(1:nrow(SUB)%%2),]  # 2-hr sampling, 4-hr, etc.: as it coarsens, they will begin to look similar and closer to normal distr. (but they aren't the same)
 
+# Fit occurrence and range distributions
 RD <- akde(SUB, FITS[[1]])
 OD <- occurrence(SUB, FITS[[1]])
 
-par(mfrow = c(1,2))
+par(mfrow = c(1,2))  # plot both side-by-side
 
-plot(RD, col.level = NA, col.grid = NA, ext = EXT)  # range distr doesn't really change as data coarsens
+plot(RD, col.level = NA, col.grid = NA, ext = EXT)  # range distribution
 title("Range distribution")
-plot(OD, col.level = NA, ext = EXT)  # occurrence distr. becomes increasingly uncertain as data coarsens (sampled at larger time intervals)
+plot(OD, col.level = NA, ext = EXT)  # occurrence distribution
 title("Occurrence distribution")
 
 ```
+
+16-hour sampling...
 
 ```{r sampling_freq4}
 
 # Remove every other time
 SUB <- SUB[as.logical(1:nrow(SUB)%%2),]  # 2-hr sampling, 4-hr, etc.: as it coarsens, they will begin to look similar and closer to normal distr. (but they aren't the same)
 
+# Fit occurrence and range distributions
 RD <- akde(SUB, FITS[[1]])
 OD <- occurrence(SUB, FITS[[1]])
 
-par(mfrow = c(1,2))
+par(mfrow = c(1,2))  # plot both side-by-side
 
-plot(RD, col.level = NA, col.grid = NA, ext = EXT)  # range distr doesn't really change as data coarsens
+plot(RD, col.level = NA, col.grid = NA, ext = EXT)  # range distribution
 title("Range distribution")
-plot(OD, col.level = NA, ext = EXT)  # occurrence distr. becomes increasingly uncertain as data coarsens (sampled at larger time intervals)
+plot(OD, col.level = NA, ext = EXT)  # occurrence distribution
 title("Occurrence distribution")
 
-# repeat the above until they look similar
-# how much data when they look similar?
+```
+
+32-hour sampling...
+
+```{r sampling_freq5}
+
+# Remove every other time
+SUB <- SUB[as.logical(1:nrow(SUB)%%2),]  # 2-hr sampling, 4-hr, etc.: as it coarsens, they will begin to look similar and closer to normal distr. (but they aren't the same)
+
+# Fit occurrence and range distributions
+RD <- akde(SUB, FITS[[1]])
+OD <- occurrence(SUB, FITS[[1]])
+
+par(mfrow = c(1,2))  # plot both side-by-side
+
+plot(RD, col.level = NA, col.grid = NA, ext = EXT)  # range distribution
+title("Range distribution")
+plot(OD, col.level = NA, ext = EXT)  # occurrence distribution
+title("Occurrence distribution")
+
+```
+
+64-hour sampling...
+
+```{r sampling_freq6}
+
+# Remove every other time
+SUB <- SUB[as.logical(1:nrow(SUB)%%2),]  # 2-hr sampling, 4-hr, etc.: as it coarsens, they will begin to look similar and closer to normal distr. (but they aren't the same)
+
+# Fit occurrence and range distributions
+RD <- akde(SUB, FITS[[1]])
+OD <- occurrence(SUB, FITS[[1]])
+
+par(mfrow = c(1,2))  # plot both side-by-side
+
+plot(RD, col.level = NA, col.grid = NA, ext = EXT)  # range distribution
+title("Range distribution")
+plot(OD, col.level = NA, ext = EXT)  # occurrence distribution
+title("Occurrence distribution")
+
+```
+
+128-hour sampling...
+
+```{r sampling_freq7}
+
+# Remove every other time
+SUB <- SUB[as.logical(1:nrow(SUB)%%2),]  # 2-hr sampling, 4-hr, etc.: as it coarsens, they will begin to look similar and closer to normal distr. (but they aren't the same)
+
+# Fit occurrence and range distributions
+RD <- akde(SUB, FITS[[1]])
+OD <- occurrence(SUB, FITS[[1]])
+
+par(mfrow = c(1,2))  # plot both side-by-side
+
+plot(RD, col.level = NA, col.grid = NA, ext = EXT)  # range distribution
+title("Range distribution")
+plot(OD, col.level = NA, ext = EXT)  # occurrence distribution
+title("Occurrence distribution")
+
+```
+
+As the data coarsens, the distributions will begin to look similar, but they are not the same. The range distribution does not change substantially as the data coarsens, while the occurrence distribution becomes increasingly uncertain as the data coarsens (sampled at larger time intervals). So how much do we need to thin our data for the distributions to look similar?
+
+```{r samping_freq8}
+
+# Original number of sampled locations
 nrow(DATA)
+
+# Number of locations after thinning
 nrow(SUB)
 
 ```
 
 ### Sampling Duration
+
+Next, let's test the sensitivity of each type of distribution to sampling duration. We will remove the second half of the data each iteration to effectively shorten the amount of time the buffalo was tracked for. We start with half (1/2) as much data.
 
 ```{r sampling_duration}
 
@@ -261,76 +361,88 @@ SUB <- DATA
 # Remove the second half of the data
 SUB <- SUB[1:round(nrow(SUB)/2),]  # cutting data in half
 
+# Fit occurrence and range distribution
 RD <- akde(SUB, FITS[[1]])
 OD <- occurrence(SUB, FITS[[1]])
 
-par(mfrow = c(1,2))
+par(mfrow = c(1,2))  # plot both side-by-side
 
-plot(RD, col.level = NA, col.grid = NA, ext = EXT)  # range distr doesn't change much but will become less detailed (until closer to Gaussian w/ high uncertainty)
+plot(RD, col.level = NA, col.grid = NA, ext = EXT)  # range distribution
 title("Range distribution")
-plot(OD, col.level = NA, ext = EXT)  # will lose more and more of the distribution until it's a single point
+plot(OD, col.level = NA, ext = EXT)  # occurrence distribution
 title("Occurrence distribution")
 
 ```
+
+A quarter (1/4) of the original data...
 
 ```{r sampling_duration2}
 
 # Remove the second half of the data
 SUB <- SUB[1:round(nrow(SUB)/2),]  # cutting data in half
 
+# Fit occurrence and range distribution
 RD <- akde(SUB, FITS[[1]])
 OD <- occurrence(SUB, FITS[[1]])
 
-par(mfrow = c(1,2))
+par(mfrow = c(1,2))  # plot both side-by-side
 
-plot(RD, col.level = NA, col.grid = NA, ext = EXT)  # range distr doesn't change much but will become less detailed (until closer to Gaussian w/ high uncertainty)
+plot(RD, col.level = NA, col.grid = NA, ext = EXT)  # range distribution
 title("Range distribution")
-plot(OD, col.level = NA, ext = EXT)  # will lose more and more of the distribution until it's a single point
+plot(OD, col.level = NA, ext = EXT)  # occurrence distribution
 title("Occurrence distribution")
 
 ```
+
+An eighth (1/8) of the original data...
 
 ```{r sampling_duration3}
 
 # Remove the second half of the data
 SUB <- SUB[1:round(nrow(SUB)/2),]  # cutting data in half
 
+# Fit occurrence and range distribution
 RD <- akde(SUB, FITS[[1]])
 OD <- occurrence(SUB, FITS[[1]])
 
-par(mfrow = c(1,2))
+par(mfrow = c(1,2))  # plot both side-by-side
 
-plot(RD, col.level = NA, col.grid = NA, ext = EXT)  # range distr doesn't change much but will become less detailed (until closer to Gaussian w/ high uncertainty)
+plot(RD, col.level = NA, col.grid = NA, ext = EXT)  # range distribution
 title("Range distribution")
-plot(OD, col.level = NA, ext = EXT)  # will lose more and more of the distribution until it's a single point
+plot(OD, col.level = NA, ext = EXT)  # occurrence distribution
 title("Occurrence distribution")
 
 ```
+
+A sixteenth (1/16) of the original data...
 
 ```{r sampling_duration4}
 
 # Remove the second half of the data
 SUB <- SUB[1:round(nrow(SUB)/2),]  # cutting data in half
 
+# Fit occurrence and range distribution
 RD <- akde(SUB, FITS[[1]])
 OD <- occurrence(SUB, FITS[[1]])
 
-par(mfrow = c(1,2))
+par(mfrow = c(1,2))  # plot both side-by-side
 
-plot(RD, col.level = NA, col.grid = NA, ext = EXT)  # range distr doesn't change much but will become less detailed (until closer to Gaussian w/ high uncertainty)
+plot(RD, col.level = NA, col.grid = NA, ext = EXT)  # range distribution
 title("Range distribution")
-plot(OD, col.level = NA, ext = EXT)  # will lose more and more of the distribution until it's a single point
+plot(OD, col.level = NA, ext = EXT)  # occurrence distribution
 title("Occurrence distribution")
 
 ```
 
+Here, the range distribution does not change much, but it will become less detailed as the data is truncated, until it resembles a Gaussian distribution with high uncertainty. We will lose more and more of the occurrence distribution until it is only a single point.
+
 ## Final Take-Home Concepts
 
-**Range area** = predicted space use, given the same behaviors (biological)
-
-**Occurrence area** = uncertainty (sampling dependent and limited to the sampling period)
-
-**_Neither estimate the amount of space used during the sampling period!_**
+> **Range area** = predicted space use, given the same behaviors (biological)
+> 
+> **Occurrence area** = uncertainty (sampling dependent and limited to the sampling period)
+> 
+> **_Neither estimate the amount of space used during the sampling period!_**
 
 ---
 
