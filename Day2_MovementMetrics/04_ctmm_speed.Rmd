@@ -98,7 +98,7 @@ For the sake of time, we will demonstrate speed estimation on only the first wee
 ```{r ctmm.select3}
 
 # For the sake of time, we will demonstrate only on the first week of data
-DATA <- DATA[DATA$t <= DATA$t[1] + 1%#%'week',]  # subset to first week
+DATA <- DATA[DATA$t <= DATA$t[1] + 1 %#% 'week',]  # subset to first week
 
 # Plot without errors (easier to see the location points)
 plot(DATA, col = color(DATA, by = 'time'),  # color by time

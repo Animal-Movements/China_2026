@@ -34,67 +34,83 @@ By the end of this module you will be able to:
 
 ## Background
 
-What is an "effective sample size" (ESS)?
-also called "degrees of freedom" (DOF)
-Example: consider the standard error of the IID mean estimate from Statistics 101:
-S.E. = S.D./sqrt(n)
-S.E. = the standard error (uncertainty) of the mean estimate
-S.D. = the standard deviation of the process itself
-n    = the nominal sample size (the actual number of data points)
-With larger 'n', the standard error (uncertainty) is smaller 
-But with autocorrelated data, this exact relationship does not hold
-Given S.E., then inverting the relationship S.E. = S.D./sqrt(N)
-to get N = S.D.^2/S.E.^2 then 'N' is the "effective sample size"
-N is a relative measure of the certainty
-For IID data, N=n. The effective sample size is the nominal sample size
-For autocorrelatd data, N<n. The effective sample size is less than the nominal sample size
-If you had N IID data points, then you would get the same quality estimate
+When working with our data, it is important to distinguish between the **absolute sample size** ($n$) and **effective sample size** (ESS; $N_{ESS}$). If small sample sizes are not accounted for, our results from home-range and speed estimation can be heavily biased.
+
+> What is an **absolute sample size**?
+>
+> *Answer:* In terms of telemetry data, this is the total number of tracked locations. 
+>
+> The absolute sample size is the product of the sampling duration (how long the animal was tracked for) and the sampling frequency (how often locations were recorded). This is can be calculated as: $$n=\frac{\text{sampling duration}}{\text{sampling interval}}=\frac{T}{\Delta t}$$
+
+> What is an **effective sample size**?
+>
+> *Answer:* This is the number of independent locations that would produce the same quality home range (or speed) estimate as the absolute sample size. This is also known as the "degrees of freedom" (DOF).
+>
+> In other words, this represents the amount of actual information content present in our data. Because the ESS relates to the different autocorrelation timescales (i.e., position autocorrelation, $\tau_p$, and velocity autocorrelation, $\tau_v$), the ESS is different for home range estimation ($N_{\text{area}}$) and speed estimation ($N_{\text{speed}}$). The home-range area ESS can be roughly estimated as: $$N_{\text{area}}=\frac{\text{sampling duration}}{\text{average home range crossing time, position autocorrelation}}=\frac{T}{\tau_p}$$
+
+For independent data, the ESS is the same as the absolute sample size ($n=N_{ESS}$), however, if the data is autocorrelated, each new data point does not give completely new and independent information, so ESS is less than the absolute sample size ($n>N_{ESS}$. In the case of range resident animals, the ESS often is much smaller than the amount of data we collect, especially for home-range estimation ($n\gg N_{ESS}$).
+
+For example, consider the standard error of the IID mean estimate from Statistics 101:
+$$S.E. = \frac{S.D.}{\sqrt{n}}$$
+where, 
+
+|            S.E. = the standard error (uncertainty) of the mean estimate
+|            S.D. = the standard deviation of the process itself
+|            n = the nominal (or absolute) sample size (the actual number of data points)
+
+<br>
+With larger '$n$', the standard error (uncertainty) is smaller, but with autocorrelated data, this exact relationship does not hold.
+Given S.E., we can invert the relationship with the effective sample size, $$S.E. = \frac{S.D.}{\sqrt{N_{ESS}}}$$ to get '$N_{ESS}$' as the "effective sample size" $$N_{ESS} = \frac{S.D.^2}{S.E.^2}$$ which can be used as a relative measure of the certainty. If we had $N_{ESS}$ IID data points, then we would get the same quality estimate as we would with the absolute sample size, $n$.
 
 ## Data Preparation
 
-Here, we will use tracking data from GPS-collared Mongolian gazelles (*Procapra gutturosa*). 
+Here, we will use tracking data from GPS-collared Mongolian gazelles (*Procapra gutturosa*). The exact locations of these animals is protected, so we will work only with their time-stamped $(x,y)$ relative locations in kilometers.
 
 ### Import and Visualize Data
 
-```{r data_import}
+```{r data_import, warning = FALSE}
 
+# Load ctmm package
 library(ctmm)
 
-# load gazelle data
+# Import gazelle data
 data(gazelle)
 
-# select 18th gazelle
+# Select the 18th gazelle individual
 DATA <- gazelle[[18]]
 
-COL <- color(DATA, by = 'time')
+# Summarize the data
+summary(DATA)  # longitude and latitude not publicly shared
+
+# Let's visualize this individual's tracks
+COL <- color(DATA, by = 'time')  # color location points by time
 plot(DATA, col = COL)
-## seasonal nomadic range crossing time
-## weak site fidelity
-## this particular indiv crosses range 2-3 times
+
+plot(DATA, col = COL, error = FALSE,  # can be hard to see points if error = TRUE
+     pch = 16, cex = 0.6)  # solid fill data points
 
 ```
 
+Typically Mongolian gazelles exhibit a seasonal nomadic range crossing time with weak site fidelity. This particular individual crosses its range 2-3 times during the study period of ~1 year.
+
 ### Model Selection
 
-```{r ctmm.select}
+Once again, we will select the continuous-time movement model with the best fit parameters and optimized autocorrelation timescales. And since this may take some time, we have already run this, so the saved results can be loaded. There will be warnings about there being no longitude or latitude values, but this is expected for this data, so we can ignore those warnings.
 
-# guestimate model parameters
-GUESS <- ctmm.guess(DATA,interactive=FALSE)
+```{r ctmm.select, eval = FALSE}
 
-# select best model
-FIT <- ctmm.select(DATA,GUESS,trace=3)
-# save("FIT",file="gazelle.rda")
-load("Day3_HomeRange/Data/gazelle.rda")
+# Guestimate model parameters
+GUESS <- ctmm.guess(DATA, interactive = FALSE)
 
-# summarize data
-summary(DATA)
-# note the sampling period
+# Select best model
+FIT <- ctmm.select(DATA, GUESS, trace = 3)
+save(FIT, file = "Data/gazelle.rda")
 
-# summarize model
-summary(FIT)
-# note the effective sample sizes (DOF for mean and area)
-## central location and size of area
-## here, approx. 2 effective data points for continuous time, but ~372 for RSF/SSFs
+```
+
+```{r ctmm.select2}
+
+load("Data/gazelle.rda")  # load saved model selection results
 
 ```
 
@@ -102,46 +118,101 @@ summary(FIT)
 
 ```{r ESS}
 
+# Note the sampling period
+summary(DATA)[3]  # ~1 year
+
+# Absolute sample size
+nrow(DATA)
+
+# Summarize model
+summary(FIT)  # OUF anisotropic selected
+## Note the effective sample sizes (DOF[mean] and DOF[area])
+## DOF[mean] = central location ESS
+## DOF[area] = size of area ESS
+
+```
+
+Take note of the sampling period and interval of the data. Here, the absolute sample size of location points is 866. However, the ESS for estimating the central location of the individual (DOF[mean]) is ~2.1 and the ESS for the home range area (DOF[area]) is ~2.4 location points. Therefore, there are approximately 2 effective data points for continuous-time estimation, but ~372 (note the DOF[diffusion] for habitat selection (RSFs/SSFs, *more to come*).
+
+```{r ESS2}
+
 # SI units converter
-help("%#%")
-1 %#% 'hr'
+1 %#% 'hr'  # how many seconds in an hour
 
-# approximate effective sample size
-(12.22181 %#% "month") / (5.741925 %#% "month")  # period of data/HR estimation (should be about the # of HR crossings)
+# Approximate effective sample size
+## period of data / HR estimation autocorrelation (should be about the # of HR crossings)
+(12.22181 %#% "month") / (5.741925 %#% "month")  # N_area = T / tau_p
 
-# compare to estimate
+# Compare to estimate
 summary(FIT)$DOF
 ## high bias (only 2 effective data points)
 
+```
+
+```{r ESS3, eval = FALSE}
+
 # ctmm.fit/ctmm.select help file
 help("ctmm.fit")
-# note the methods argument
-# default is not max likelihood ML, need specific min effective sample sizes to work properly
-
-
-############################
-# For a target bias of O(5%)
-# ctmm.fit method="ML" requires DOF[area] >= 20 points       (CONVENTIONAL)
-# ctmm.fit method="pHREML" requires DOF[area] >= 4-5 points  (DEFAULT)
-# ctmm.boot method="pHREML" requires DOF[area] >= 2-3 points (SLOW)
-# but in all cases DOF[area] is an estimate
+## Note the "methods" argument
+## Default method is not maximum likelihood (ML), 
+### need specific minimum effective sample sizes to work properly
 
 ```
+
+For a target bias of O(5%), we would need an ESS of at least 2-20, depending on the model fitting method used:
+
+| Function | Method | Required DOF[area] | Notes |
+|:---|:---|:---|:---|
+| `ctmm.fit` | `method = "ML"` | DOF[area] >= **20** points | (CONVENTIONAL) |
+| `ctmm.fit` | `method = "pHREML"` | DOF[area] >= **4-5** points | (DEFAULT) |
+| `ctmm.boot` | `method = "pHREML"` | DOF[area] >= **2-3** points | (SLOW) |
+
+...but in all cases DOF[area] is an estimate.
 
 ## Bootstrapping
 
-```{r bootstrap}
+If we have very small effective sample sizes, we can use parametric bootstrapping (`ctmm.boot`) to improve our point estimates and confidence intervals. This process simulates independent "samples" of the data based on parameter estimates from the sampling distribution and can be used to reduce underestimation from other methods like maximum likelihood (ML) and perturbative home range estimation, such as pHREML ([Fleming et al., 2019](doi:10.1111/2041-210X.13270)). Because bootstrapping is simulation-based, refitting as many times, as needed to reach the threshold, this process can be much slower and computationally expensive than other methods, so we only recommend using `ctmm.boot` in cases where the ESS is very small.
+
+```{r bootstrap, eval = FALSE}
 
 help("ctmm.boot")
 
-# this will take a while
-BOOT <- ctmm.boot(DATA,FIT,cores=-1)
-## will take a long time (fitting as many times needed to reach threshold)
-
-# discuss daily, weekly, monthly, seasonal home-range estimates
-## timescale of estimates depends on specific species/pop and sampling
+# This will take a long time if running on full data
+BOOT <- ctmm.boot(DATA, FIT, cores = -1)
+## fitting as many times as needed to reach threshold
 
 ```
+
+<!-- For the sake of time, let's cut this data down to to the first 1/4 of the original data. -->
+
+<!-- ```{r bootstrap2, warning = FALSE} -->
+
+<!-- SUB <- DATA[DATA$t <= DATA$t[1] + 1 %#% 'month',]  # subset to about the first month -->
+<!-- summary(SUB) -->
+
+<!-- ``` -->
+
+<!-- ```{r bootstrap3, eval = FALSE} -->
+
+<!-- # Refit models to data subset -->
+<!-- guess <- ctmm.guess(data = SUB, interactive = FALSE) -->
+<!-- fit <- ctmm.select(data = SUB, CTMM = guess, trace = 3) -->
+
+<!-- BOOT <- ctmm.boot(SUB, fit, cores = -1) -->
+<!-- save(BOOT, file = "Data/gazelle_bootstrap.rda") -->
+
+<!-- ``` -->
+
+<!-- ```{r bootstrap4} -->
+
+<!-- load("Data/gazelle_bootstrap.rda")  # load saved bootstrap results -->
+
+<!-- summary(BOOT) -->
+
+<!-- ``` -->
+
+<!-- discuss daily, weekly, monthly, seasonal home-range estimates -->
+<!-- timescale of estimates depends on specific species/pop and sampling -->
 
 ---
 
