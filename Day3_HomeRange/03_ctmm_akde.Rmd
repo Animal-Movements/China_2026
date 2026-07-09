@@ -36,21 +36,269 @@ By the end of this module you will be able to:
 
 ## Background
 
+[INSERT INTRO TO HOME RANGES]
+
 ## Data Preparation
+
+We will use our data on 6 GPS-tracked African buffalo (*Syncerus caffer*) to demonstrate continuous-time home-range estimation, first using the single individual, Pepper, to estimate an individual home range, then with all 6 buffalo for home range meta-analysis and population range estimation.
 
 ### Import and Visualize Data
 
+```{r import_data}
+
+# Load ctmm package
+library(ctmm)
+
+```
+
+The main function we will be working with for range estimation is `akde` for autocorrelated kernel density estimator (AKDE), which is a kernel density estimation (KDE) method with a debiasing adjustment, as it is conditioned on the selected autocorrelation model. KDE is nonparametric, so we are estimating without assuming a known model and its parameters. By default, KDE puts equal weights on all points; however, for AKDE, the weights are optimized, such that less weight is given to over-sampled points and more weight is given to under-sampled points. Additionally, if you have tracked multiple individuals and wish to estimate a population-wide range, you may use the `pkde` function (*more to come*).
+
+KDE also requires the bandwidth (smoothing parameter) to be optimized, which is performed via the `bandwidth` function called internally to the `akde` function. The bandwidth determines the spread of the kernels that are placed. Note that we do not set the bandwidth; this is a parameter that is optimized using a Gaussian optimization function, given the data and movement model. We can, however, set boundaries by including raster files, if the kernels spill over into areas where the animal cannot go (e.g., a fish on land).
+
+```{r import_data2, eval = FALSE}
+
+help("akde") # main function and new `pkde()` function for population-wide data
+## less weight on over-sampled points and more weight on under-sampled points 
+## (number of weights (optimization parameters) = number of data points)
+
+help("bandwidth")  # bandwidth = spread of kernels
+
+```
+
+As before, let's follow the data preparation and visualization process for a single buffalo, Pepper.
+
+```{r import_data3}
+
+# Load buffalo data
+data(buffalo)
+projection(buffalo) <- median(buffalo)  # center projection on median of locations
+
+names(buffalo)
+
+# Here we will work with Pepper
+DATA <- buffalo$Pepper
+
+COL <- color(DATA, by = "time")  # color location points by time
+plot(DATA, col = COL, main = "Pepper")
+
+# This dataset has problems
+dt.plot(DATA)  # diagnose sampling schedule
+## time intervals in data sorted by size, most of the sampling intervals are 2 hours, some greater, some around 1 hour
+
+```
+
+We can check the sampling schedule for irregularities using the `dt.plot` function, which plots the intervals at which data was recorded in a sorted index. Based on this plot, we can diagnose whether the data was recorded under a consistent, desired sampling regime (e.g., recorded once every hour), in which case we would see a flat line, or if there are potential periods that were over-sampled relative to others. Here, we can see that Pepper's sampling schedule did not follow a consistent 1-hour interval. In fact, much of her data was collected at a 2-hour interval, while some was collected at even greater time intervals. This is because Pepper's collar malfunctioned part-way through the study. Irregular sampling is one of the issues that can be accounted for under the continuous-time modeling framework.
+
 ### Model Selection
+
+Here, we will select the best autocorrelation movement model to Pepper's data, as well as fit an IID model that assumes independent data points to compare the AKDE to the regular KDE. Note that you want the best model for each individual, even if that differs by individual. Different movement behaviors and sampling schedules will reveal different autocorrelation structures in the data.
+
+```{r ctmm.select, eval = FALSE}
+
+# Selected autocorrelation model
+GUESS <- ctmm.guess(DATA, interactive = FALSE)
+FIT <- ctmm.select(DATA, GUESS, trace = 3)
+save(FIT, file = "Data/pepper.rda")
+
+```
+
+```{r ctmm.select2}
+
+# Load saved model selection results
+load("Data/pepper.rda")
+
+summary(FIT)
+## velocity autocorrelation ~ 30-40 mins
+## position autocorrelation ~ 7-24 days
+
+# Analogous IID model
+IID <- ctmm.fit(DATA)
+
+summary(IID)
+
+```
 
 ## Home Range Estimation
 
 ### AKDE
 
+An AKDE conditioned on an IID model is equivalent to a regular KDE, as it does not consider autocorrelation.
+
+```{r akde}
+
+# regular KDE
+KDE <- akde(DATA, IID)  # with IID model
+## Anisotropic kernel
+## We wouldn't want symmetric kernels here (want elongated kernels)
+
+# default AKDE
+AKDE <- akde(DATA, FIT)  # with selected autocorrelation model (OUF anisotropic)
+
+# Plot the home range
+plot(DATA, AKDE, main = "AKDE")
+summary(AKDE)
+# Larger point estimates and can see grid much more (scale + orientation of bandwidth)
+# interpret like a histogram
+## larger CIs due to lower effective sample size
+
+```
+
 ### Weighted AKDE (wAKDE)
+
+```{r wakde}
+
+# Optimally weighted AKDE
+wAKDE <- akde(DATA, FIT, weights = TRUE)
+# you only need this with irregular sampling (i.e. Pepper's collar malfunction for sampling times) - can be slow
+# unweighted AKDE places too much density on oversampled times
+
+# Pepper's optimal weights
+plot(DATA$timestamp, wAKDE$weights, 
+     xlab = "time", ylab = "weight", main = "Optimal Weights")
+
+plot(DATA$timestamp, wAKDE$weights, ylim = c(0,0.005),
+     , xlab = "time", ylab = "weight", main = "Optimal Weights")
+## more weight ascribed to 2 hour data
+## if there are large gaps in the weights of data, the higher weighted/more unique datapoints are more valuable
+
+# matching extent for plotting
+EXT <- extent(list(KDE, AKDE, wAKDE))  # useful to determine tiles for sensing data
+
+plot(DATA, KDE, ext = EXT, main = "KDE")
+# note CIs, grid, etc...
+summary(KDE) ## RE: IID model
+## can't see the CIs due to high assumed certainty from high effective sample size (area in DOF)
+
+plot(DATA, AKDE, ext = EXT, main = "AKDE")
+summary(AKDE)
+# Larger point estimates and can see grid much more (scale + orientation of bandwidth)
+# interpret like a histogram
+## larger CIs due to lower effective sample size
+
+plot(DATA, wAKDE, ext = EXT, main = "optimally weighted AKDE")
+summary(wAKDE)
+## Note diff shape for akde: 1-hour data further up (less weight), more weight on the 2-hour sampling lower down
+## more representative visualization of movement data instead of sampling data
+
+```
+
+### Over-Smoothing Bias Correction
+
+```{r osakde}
+
+# Over-smoothing bias
+osAKDE <- akde(DATA, FIT, weights = TRUE, debias = FALSE) 
+## no over-smoothing bias correction (Gaussian reference function akde over-smooths)
+
+plot(DATA, osAKDE, ext = EXT, main = "uncorrected wAKDE")
+## makes CIs too big
+
+```
 
 ## Home Range Meta-Analysis
 
+```{r meta, eval = FALSE}
+
+help("meta")
+help('meta', package = "ctmm")
+## meta-analysis: hierarchical model that propagates indiv parameters into population-wide and conducts model selection
+
+# Model selection for each buffalo
+FITS <- list()
+for(i in 1:length(buffalo))
+{
+  GUESS <- ctmm.guess(buffalo[[i]], interactive = FALSE)
+  FITS[[i]] <- ctmm.select(buffalo[[i]], GUESS, trace = 3)
+}
+names(FITS) <- names(buffalo)
+save(FITS, file = "Data/buffalo.rda")
+
+# calculate AKDES on a consistent grid
+AKDES <- akde(buffalo, FITS, weights = TRUE)
+save(AKDES, file = "Data/buffalo_akdes.rda")
+
+```
+
+```{r meta2}
+
+# Load in saved model selection results
+load("Data/buffalo.rda")
+
+# Load in saved AKDE results
+load("Data/buffalo_akdes.rda")
+
+# color to be spatially distinct
+COL <- color(AKDES, by = 'individual')
+## indivs closer together spatially, have more distinct colours
+
+# plot AKDEs
+plot(AKDES, col.UD = COL, col.level = COL, col.grid = NA, level = NA, main = "African buffalo AKDEs")
+
+# Mean buffalo HR "the old way"
+AREA <- vector("numeric", length = length(AKDES))
+for(i in 1:length(AKDES))
+{ AREA[i] <- summary(AKDES[[i]], units = FALSE)$CI[2] } # turn off units when making tables (units will be diff)
+AREA
+mean(AREA) # mean
+sqrt(var(AREA)/length(AREA)) # SE
+
+# meta-analysis of buffalo home-range areas
+meta(AKDES, col = c(COL,'black'), sort = TRUE)
+# model selection: Dirac-delta > inverse-Gaussian for pop-level parameters
+### -- here Dirac-delta singular (no variance), can't estimate st.dev/mean (can if turning of model selection, but not selected feature)
+## Forest plot
+## indiv HR estimates (a lot of uncertainty), will overestimate variance (can't distinguish sampling error from statistical error)
+## hierarchical meta-analysis model that better estimates mean (standard is normal mean, normal variance, but here we don't use that)
+
+# force inverse-Gaussian population distribution
+meta(AKDES, plot = FALSE, IC = NA)
+# since CoV isn't a selected feature, its underestimated here
+
+# comparing sub-groups (north vs south don't look significantly different)
+BUFFALO <- list(South = AKDES[1:3], North = AKDES[4:6])
+META <- meta(BUFFALO)
+
+META
+META['South/','/North',]  # ratio of mean southern HR to mean northern HR
+# not significantly diff (CIs overlap)
+
+# more general meta-analytic regressions
+help("Log") ## log-transform to make estimates more normal for `metafor`
+# then you can use the 'metafor' R package
+Log(FITS, variable = "speed")
+
+```
+
 ## Population Range Estimation
+
+```{r pkde, eval = FALSE}
+
+# this is a straight mean of the individual densities that doesn't model population variance
+help("mean.UD")
+# note the 'sample' argument for correct CIs
+# Ex. want to average summer and winter ranges or have indiv that switches btwn nests (estimate separately then average)
+
+```
+
+```{r pkde2}
+
+# straight mean - for a population of 6 buffalo
+MEAN <- mean(AKDES, sample = FALSE)
+
+plot(buffalo, MEAN, col = COL, main = "Mean African buffalo AKDE")
+
+# this is a population kernel density estimate (paper coming)
+help("pkde")  # population KDE: bandwidth optimization after choosing hierarchical model
+
+PKDE <- pkde(buffalo, AKDES, trace = FALSE)  # runs mean on fitted movement models (meta-analysis hierarchical model)
+## does model selection across many parameters due to all the parameters for each indiv
+## tests which correlations btwn parameters can be supported (outputs delta AIC)
+
+plot(buffalo, PKDE, col = COL, main = "African buffalo PKDE")
+## much larger and much more uncertain due to low sampling (but at least doesn't bias too small)
+## other methods tend to estimate too small or look at saturation curves of crude pop range estimate
+
+```
 
 ---
 
@@ -60,6 +308,7 @@ By the end of this module you will be able to:
 |:---|:---|:---|
 | `akde()` | `ctmm` | Calculate a range distribution based on autocorrelated kernel density estimation (AKDE) | 
 | `meta()` | `ctmm` | Estimate population-level mean parameters from individual movement models and estimates (meta-analysis) |
+| `mean.UD()` or `mean()` | `ctmm` | Average movement models and utilization distributions (occurrence or range) |
 | `pkde()` | `ctmm` | Calculate a population-level range distribution based on autocorrelated kernel density estimation (PKDE) |
 
 ---

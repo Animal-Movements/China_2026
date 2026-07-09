@@ -301,7 +301,7 @@ meta(SPEEDS, sort = TRUE)  # mean = population mean of mean speeds
 
 ```
 
-In the meta-analysis above, the model selection is performed with 2 models: inverse-Gaussian and Dirac-$\delta$, with the inverse-Gaussian being the selected model (lower AICc). The average of mean speeds across buffalo is about 12.3 km/day, highlighted in bold with its 95% CI on the output figure. This figure is a tree plot <!-- CHECK THIS --> that compares the mean speed estimates of each individual and 95% CI bars, as well as the meta-analysis mean.
+In the meta-analysis above, the model selection is performed with 2 models: inverse-Gaussian and Dirac-$\delta$, with the inverse-Gaussian being the selected model (lower AICc). The average of mean speeds across buffalo is about 12.3 km/day, highlighted in bold with its 95% CI on the output figure. This figure is a forest plot that compares the mean speed estimates of each individual and 95% CI bars, as well as the meta-analysis mean.
 
 ## Instantaneous Speeds
 
