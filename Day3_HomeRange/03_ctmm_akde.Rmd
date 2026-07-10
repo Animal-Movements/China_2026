@@ -36,7 +36,9 @@ By the end of this module you will be able to:
 
 ## Background
 
-[INSERT INTRO TO HOME RANGES]
+A **home range** is the area repeatedly used throughout an animal’s lifetime for all its normal behaviors and activities, excluding occasional exploratory excursions. A home range should encompass the space needed for past, present, and future movement, under the same range resident behaviors. Home-range estimation is often a key step to formulating or amending conservation policy as it can map out important habitat areas and resources used by animals during significant portions of their lifetimes. While the concept of a home range may seem straightforward, many different methods have been developed in attempt to quantify individual home ranges from animal tracking data. 
+
+It is also important to note that not all animals exhibit range residency, and some may switch between range resident and transient or transitory behaviors (e.g., migrating between seasonal ranges, or dispersing to settle away from their natal range). Although this transitory movement may be an integral behavior, it is best modeled separately from range resident behaviors, as it generally does not constitute part of an individual's home range. Thus, it is important to ensure that we define an animal's home range and estimate it in a systematic manner. This module will walk through the standard workflow for range estimation under the continuous-time framework, where we will model individual home ranges, extract mean parameter estimates via meta-analyses of home ranges, and estimate population ranges.
 
 ## Data Preparation
 
@@ -51,7 +53,7 @@ library(ctmm)
 
 ```
 
-The main function we will be working with for range estimation is `akde` for autocorrelated kernel density estimator (AKDE), which is a kernel density estimation (KDE) method with a debiasing adjustment, as it is conditioned on the selected autocorrelation model. KDE is nonparametric, so we are estimating without assuming a known model and its parameters. By default, KDE puts equal weights on all points; however, for AKDE, the weights are optimized, such that less weight is given to over-sampled points and more weight is given to under-sampled points. Additionally, if you have tracked multiple individuals and wish to estimate a population-wide range, you may use the `pkde` function (*more to come*).
+The main function we will be working with for range estimation is `akde` for **autocorrelated kernel density estimator (AKDE)**, which is a *kernel density estimation (KDE)* method with a debiasing adjustment, as it is conditioned on the selected autocorrelation model. KDE is nonparametric, so we are estimating without assuming a known model and its parameters. By default, KDE puts equal weights on all points; however, for AKDE, the weights are optimized, such that less weight is given to over-sampled points and more weight is given to under-sampled points. Additionally, if you have tracked multiple individuals and wish to estimate a population-wide range, you may use the `pkde` function (*more to come*).
 
 KDE also requires the bandwidth (smoothing parameter, $h$) to be optimized, which is performed via the `bandwidth` function called internally to the `akde` function. The bandwidth determines the spread of the kernels that are placed. Note that we do not set the bandwidth, because there is no true value of $h$ that best characterizes an animal. This is a parameter that is optimized using a Gaussian optimization function, given the data and movement model. We can, however, set boundaries by including raster files, if the kernels spill over into areas where the animal cannot go (e.g., a fish on land).
 
