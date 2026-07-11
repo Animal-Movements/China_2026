@@ -20,6 +20,8 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 
 <a href="https://github.com/Animal-Movements/China_2026.git" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
 
+---
+
 # Learning Objectives
 
 By the end of this module you will be able to:
@@ -67,6 +69,9 @@ load("Data/WB_raw.rdata")   # loads WB.mv2, saved at the end of Module 1
 # Text summary of import
 cat("Starting point:", n_distinct(mt_track_id(WB.mv2)), "animals,", nrow(WB.mv2), "fixes\n")
 ```
+
+---
+
 ## 2. Explore track-level metadata
 We will be making changes to the original dataset since we can always re-load the dataset from the `.rdata` file. As a result, we should track how our new dataset changes at every QC step.  Here, we initialize a small log to track the changes.
 
@@ -108,6 +113,8 @@ WB.sf_all %>%
   mapview(zcol = "study_site", layer.name = "Study site", cex = 2, alpha = 0.7)
 ```
 
+---
+
 ## 3. Subset to study area and deployment window
 Restrict that dataset to (a) the Athi-Kaputiei Plains and (b) each animal's actual deployment window (removing any pre-deployment test fixes or post-retrieval fixes).
 
@@ -140,6 +147,8 @@ qc_log <- qc_log %>%
 ```
 
 > **Note:** `site_lookup[individual_local_identifier]` works because `individual_local_identifier` is duplicated onto every fix (event-level), while the lookup vector has one entry per animal (track-level). Indexing a named vector by a character vector returns one matched value per row — no join required.
+
+---
 
 ## 4. Quality-filter by GPS precision (DOP × fix type)
 **Dilution of precision (DOP)** quantifies how much satellite geometry inflates positional error at the moment of a fix — lower is better. A **3D fix** (with an altitude solution) is generally more reliable than a **2D fix** at the same DOP value, so we apply a stricter threshold to 2D fixes.
@@ -224,6 +233,8 @@ qc_log <- qc_log %>%
 
 > **Heads up for your own data:** Not every tag manufacturer reports DOP and fix type the same way (or at all). E-obs and some solar tags report a different precision metric or none. Some vendors give HDOP/VDOP separately rather than a single DOP. Check your tag manufacturer's documentation for what quality fields are available, and adapt the filter accordingly.
 
+---
+
 ## 5. Remove duplicates and invalid fixes
 Removal of points from a dataset should be done with extreme caution. Here, we demonstrate how potential erroneous data points could be removed before conducting more formal analyses.
 
@@ -253,6 +264,8 @@ qc_log <- qc_log %>%
            n_animals = n_distinct(mt_track_id(WB.mv2)))
 ```
 
+---
+
 ## 6. Quantify the cumulative effect of QC
 Now let's view our QC log to evaluate where large changes in the size of the dataset occurred. 
 
@@ -278,6 +291,8 @@ qc_log %>%
 
 > **Discussion:** Which step removed the most data — the site/deployment subset, or the DOP filter? Is that what you expected? In your own dataset, which QC step do you think will matter most and why?
 
+---
+
 ## 7. Confirm the cleaned dataset
 Now let's look at our final dataset, using a simple color ramp to view each animal.  We can do this very quickly with `mapview`.
 ```{r quick_map_clean}
@@ -290,6 +305,7 @@ WB.sf_clean %>%
 
 All points now fall within the Athi-Kaputiei Plains, with no obvious outliers. If you see anything unexpected, go back and re-examine the QC steps above before moving on.
 
+---
 
 ## 8. Save output for Module 3
 Save your output for further analyses.
@@ -298,6 +314,8 @@ Save your output for further analyses.
 save(WB.mv2, file = "Data/WB_clean.rdata")
 cat("Saved cleaned WB.mv2 —", n_distinct(mt_track_id(WB.mv2)), "animals,", nrow(WB.mv2), "fixes\n")
 ```
+
+---
 
 # Exercise: 
 Now run the same QC workflow on your own dataset.
