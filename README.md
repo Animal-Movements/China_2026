@@ -7,6 +7,16 @@ Introductory lectures and code from a course on analyzing animal movement data t
 ## Overview
 
 ## Key Topics
+1. Data Import & Cleaning: Step-by-step instructions on how to import animal movement data from Movebank or a standealone .csv file, with steps to take to clean your data and assess the qualify of the data prior to analysis. Create a trajectory from the imported points and create a dynamic animationn.
+2. Movement Metrics: Summarize the movements a discrete set of steps, analyzing step length, turning angle, speed.  Learn to calculate other movement traits, such as net displacement, intensity of use, and diurnality that are commonly calculated by movement ecologists.
+3. Continuous Time Movement Modeling (CTMM): Learn how to incorporate the autocorrelation structure of your data into analyses by using a semi-variogram approach.  Compare CTMM-based metrics with discrete-time metrics.
+4. Homerange: Learn the history of home range estimation, calculating simple models like Minimum Convex Polygons (MCP) & Kernel Density Estimation (KDE). Understand the assumptions and biases of home range methods.  Calculate an Autocorrelated Kernel Density Estimate (AKDE) for your species of interest, inclusive of a population home range.
+5. BaBA, NSD, Recurse
+6. Periodic Movements, Trajectory/Path Simulation
+7. Earth Observation: Learn how to integrate earth observation data with animal point locations. 
+8. Behavior: Fitting Hidden Markove Models with GPS and accelerometer data data
+9. Error: Accounting for location error in GPS positions.
+10. Resource Selection: Conduct habitat analyses.
 
 ## Instructors
 **Jared Stabach**, Research Ecologist & Head - Conservation Technology & Innovation, *Smithsonian's National Zoo & Conservation Biology Institute*
