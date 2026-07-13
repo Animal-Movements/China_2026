@@ -1,5 +1,5 @@
 ---
-title: 'M5: Path Reconstruction & Simulations'
+title: 'M4: Accounting for Location Error'
 author: "Animal Movement Analyses for Ecologists | SYSU Shenzhen, July 2026"
 date: "`r Sys.Date()`"
 output: 
@@ -25,9 +25,10 @@ knitr::opts_chunk$set(echo = TRUE)
 
 By the end of this module you will be able to:
 
-1. Make conditional predictions for animal locations based on the telemetry data and selected movement model, to get the most-likely-path taken by an individual.
-2. Simulate paths from a defined movement model and sampling schedule, conditional on data (if provided).
-3. Include parameter uncertainty in simulations by simulating a movement model from the sampling distribution of a defined movement model, conditional on data (if provided).
+1. Fit an error model to calibration data and incorporate the error estimates into the telemetry data.
+2. Assess the fit of the error model, by checking the residuals.
+3. Include error estimates from the calibrated data into movement analyses.
+4. Identify outliers in the data that are consistent or inconsistent with the error model.
 
 **Packages used:** `ctmm`
 
@@ -44,11 +45,15 @@ By the end of this module you will be able to:
 
 | Function | Package | Purpose | 
 |:---|:---|:---|
-| `predict.ctmm()` or `predict()` | `ctmm` | Predict animal locations from a continuous-time movement model | 
-| `simulate()` | `ctmm` | Simulate animal locations and tracks from a continuous-time movement model (and conditioned on data, if provided) |
-| `emulate()` | `ctmm` | Generate random model-fit statistics from the sampling distribution of a continuous-time movement model and given sampling schedule |
+| `uere.fit()` | `ctmm` | Fit error parameters to GPS calibration data to estimate the root-mean-square User Equivalent Range Error (UERE) of a GPS device | 
+| `uere()` or `uere()<-` | `ctmm` | Assign the UERE error model to telemetry data |
+| `ctmm()` | `ctmm` | Fit a hypothetical movement model by specifying the model parameters; only used in this case to specify `error = TRUE` for the error model to be incorporated in the `ctmm.guess` function |
+| `outlie()` | `ctmm` | Detect outliers in telemetry data, informed by an error model, by highlighting potential speed and distance outlier (or anomalous) points |
 
 ---
 
-_Next: **Day 5 — Behavior Analysis Part 2** — We will continue our exploration of movement behaviors through behavioral classification with Hidden Markov Models (HMM). We will also walk through how remote sensing data can be incorporated into our analyses, including how to account for issues remotely-sensed data, such as GPS location error._
+_Next: **Day 6 — Habitat Selection** — We will examine the habitat preferences (or avoidances) of individuals through habitat selection analysis with resource selection functions (RSFs) and step-selection functions (SSFs)._
+
+
+
 
