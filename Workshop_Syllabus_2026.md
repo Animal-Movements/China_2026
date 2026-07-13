@@ -99,9 +99,7 @@ Please complete the following **before arriving**:
 -   **M1: Introduction to R** — data types, functions, tidyverse, and ggplot2. Work through this carefully if you are relatively new to R; the workshop coding sessions will move at a moderate pace.
 -   **M2: Introduction to Data Management in R** — data wrangling, joins, and tidy data principles
 -   **M3: Movement package navigation** — data object types, minimum data requirements, and conversions across the full package ecosystem used this week (`move2`, `sf`, `amt`, `ctmm`, `BaBA`, `recurse`, `momentuHMM`, `terra`, `rgee`), plus legacy tools like `adehabitatLT` you may encounter in older papers/scripts
--   Assigned readings (see course GitHub repo)
--   **Movebank data upload guide** — step-by-step instructions for uploading your data and setting permissions (see Item 1 above)
--   **Foundational readings in movement ecology** - familiarize yourself with foundamental concepts in movement ecology.
+-   **Recommended readings** -  familiarize yourself with fundamental concepts and methods in movement ecology.
 
 ------------------------------------------------------------------------
 
@@ -162,7 +160,7 @@ Please complete the following **before arriving**:
 | Time | Module |
 |----|----|
 | 9:00–9:30 | Lecture: intro to remote sensing |
-| 9:30–10:00 | M1: Environmental annotation — raster extraction & GEE intro (`terra`, `amt`) |
+| 9:30–10:00 | M1: Environmental annotation — raster extraction & GEE intro (`terra`, `sf`, `rgee`) |
 | 10:15–11:00 | M2: Hidden Markov Models with GPS data (`momentuHMM`) |
 | 11:15–12:30 | M3: Hidden Markov Models with accelerometer data (`momentuHMM`) |
 | PM | Mini lecture on location error (tentative) + M4: Accounting for Location Error (`ctmm`) |
