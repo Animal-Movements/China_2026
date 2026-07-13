@@ -556,7 +556,9 @@ Degrees of freedom (DOF): Effective sample size (ESS)
   * Note the smaller effective sample size -- only ~18 data points due to autocorrelation.
 * **Diffusion (DOF[diffusion], $N_{\text{diffusion}}$):** ESS data points we have to estimate the diffusion.
 * **Speed (DOF[speed], $N_{\text{speed}}$):** ESS data points we have to estimate the root-mean squared speed.
+
 Estimates (est) and Confidence Intervals (CIs):
+
 * **Area:** Gaussian area, this represents the estimated # home-range crossings (and its lower and upper CI bounds).
 * **Speed:** Gaussian RMS (root-mean squared) speed. 
   * Note the narrow CIs (quick-and-dirty estimate).
