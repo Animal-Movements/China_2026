@@ -1,6 +1,6 @@
 ---
-title: 'M5: Path Reconstruction & Simulations'
-subtitle: "Day 4 — Behavior Analysis Part 1"
+title: 'M2: ctmm-Based Habitat Selection: Integrated Resource Selection Functions and iRSF-AKDE'
+subtitle: "Day 6 — Habitat Selection"
 author: "Animal Movement Analyses for Ecologists | SYSU Shenzhen, July 2026"
 date: "`r Sys.Date()`"
 output: 
@@ -26,9 +26,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 By the end of this module you will be able to:
 
-1. Make conditional predictions for animal locations based on the telemetry data and selected movement model, to get the most-likely-path taken by an individual.
-2. Simulate paths from a defined movement model and sampling schedule, conditional on data (if provided).
-3. Include parameter uncertainty in simulations by simulating a movement model from the sampling distribution of a defined movement model, conditional on data (if provided).
+1. 
 
 **Packages used:** `ctmm`
 
@@ -39,17 +37,17 @@ By the end of this module you will be able to:
 ## Data Preparation
 
 
+
 ---
 
 ## Key functions reference
 
 | Function | Package | Purpose | 
 |:---|:---|:---|
-| `predict.ctmm()` or `predict()` | `ctmm` | Predict animal locations from a continuous-time movement model | 
-| `simulate()` | `ctmm` | Simulate animal locations and tracks from a continuous-time movement model (and conditioned on data, if provided) |
-| `emulate()` | `ctmm` | Generate random model-fit statistics from the sampling distribution of a continuous-time movement model and given sampling schedule |
+| `rsf.fit()` | `ctmm` | Fit integrated resource selection functions (iRSF) with autocorrelation-adjusted weights on the RSF likelihood function | 
+| `rsf.select()` | `ctmm` | Fit iRSFs with model selection across covariate terms provided in the formula |
+| `agde()` | `ctmm` | Calculate an autocorrelated Gaussian and RSF home-range area |
+| `suitability()` | `ctmm` | Calculate a suitability raster from an RSF (`rsf.fit` output) that can be used as a background raster for `plot.telemetry` |
 
 ---
-
-_Next: **Day 5 — Behavior Analysis Part 2** — We will continue our exploration of movement behaviors through behavioral classification with Hidden Markov Models (HMM). We will also walk through how remote sensing data can be incorporated into our analyses, including how to account for issues remotely-sensed data, such as GPS location error._
 

@@ -1,5 +1,6 @@
 ---
 title: "M4-b: Encounter/Interaction Analysis"
+subtitle: "Day 4 — Behavior Analysis Part 1"
 author: "Animal Movement Analyses for Ecologists | SYSU Shenzhen, July 2026"
 date: "`r Sys.Date()`"
 output: 

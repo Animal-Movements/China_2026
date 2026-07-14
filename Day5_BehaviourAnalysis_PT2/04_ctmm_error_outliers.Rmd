@@ -1,5 +1,6 @@
 ---
 title: 'M4: Accounting for Location Error'
+subtitle: "Day 5 — Behavior Analysis Part 2"
 author: "Animal Movement Analyses for Ecologists | SYSU Shenzhen, July 2026"
 date: "`r Sys.Date()`"
 output: 

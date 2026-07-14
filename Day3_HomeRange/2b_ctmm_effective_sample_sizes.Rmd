@@ -1,5 +1,6 @@
 ---
 title: "M2-b: Effective Sample Sizes"
+subtitle: "Day 3 — Home Range Estimation"
 author: "Animal Movement Analyses for Ecologists | SYSU Shenzhen, July 2026"
 date: "`r Sys.Date()`"
 output: 
