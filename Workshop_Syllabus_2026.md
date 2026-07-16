@@ -170,7 +170,7 @@ Please complete the following **before arriving**:
 | Time | Module |
 |----|----|
 | 9:00–9:45 | Q&A + mini lecture: habitat selection |
-| 10:00–11:00 | M1: Resource & step selection functions (`amt`; pre-annotated dataset) |
-| 11:15–12:30 | M2: CTMM-based habitat selection — iRSFs & RSF+AKDE (`ctmm`) |
+| 10:00–11:00 | M1: CTMM-based habitat selection — iRSFs & RSF+AKDE (`ctmm`) |
+| 11:15–12:30 | M2: Resource & step selection functions (`amt`; pre-annotated dataset) |
 
 Time window assignments are tentative and will remain flexible based on everyday's progress. Time not otherwise committed each day is reserved for Own Data Practice — applying that day's methods to your own tracking dataset, with instructors available to help. Day 3 is the exception: the field trip and back-to-back afternoon modules leave no dedicated practice block that day.
