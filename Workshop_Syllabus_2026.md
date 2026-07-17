@@ -141,7 +141,7 @@ Please complete the following **before arriving**:
 | AM | **Field trip** |
 | 1:00–1:30 | Q&A + mini lecture: home range |
 | 1:30–2:00 | M1: Discrete home range — MCP & KDE & home range comparison (`amt`) |
-| 2:15–3:00 | M2-a: Occurrence vs. range distributions & M2-b: effective sample sizes (`ctmm`) |
+| 2:15–3:00 | M2-a: Occurrence vs. range distributions & M2-b: Effective sample sizes (`ctmm`) |
 | 3:15–4:15 | M3: AKDE, Home Range Meta-Analysis, Population Ranges (`ctmm`) |
 
 #### Day 4 — Behaviour Analysis (Jul 31)
@@ -152,8 +152,8 @@ Please complete the following **before arriving**:
 | 9:30–10:00 | M1: Barrier behaviour analysis (`BaBA`) |
 | 10:00–10:30 | M2: Migration/seasonal movement pattern (`amt`) |
 | 10:30–11:00 | M3: Site fidelity and revisitation (`recurse`) |
-| 11:15–12:30 | M4: Periodic movement patterns (`ctmm`) |
-| 1:30–2:15 PM | M5: Trajectory/path simulation & encounter/interaction analysis (`ctmm`) |
+| 11:15–12:30 | M4-a: Periodic movement patterns (`ctmm`) & M4-b: Encounter/interaction analysis (`ctmm`) |
+| 1:30–2:15 PM | M5: Path reconstruction & simulations (`ctmm`) |
 
 #### Day 5 — Remote Sensing + HMM (Aug 1)
 
@@ -170,7 +170,7 @@ Please complete the following **before arriving**:
 | Time | Module |
 |----|----|
 | 9:00–9:45 | Q&A + mini lecture: habitat selection |
-| 10:00–11:00 | M1: Resource & step selection functions (`amt`; pre-annotated dataset) |
-| 11:15–12:30 | M2: CTMM-based habitat selection — iRSFs & RSF+AKDE (`ctmm`) |
+| 10:00–11:00 | M1: CTMM-based habitat selection — iRSFs & RSF+AKDE (`ctmm`) |
+| 11:15–12:30 | M2: Resource & step selection functions (`amt`; pre-annotated dataset) |
 
 Time window assignments are tentative and will remain flexible based on everyday's progress. Time not otherwise committed each day is reserved for Own Data Practice — applying that day's methods to your own tracking dataset, with instructors available to help. Day 3 is the exception: the field trip and back-to-back afternoon modules leave no dedicated practice block that day.

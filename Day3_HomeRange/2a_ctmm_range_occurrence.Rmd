@@ -1,5 +1,6 @@
 ---
 title: 'M2-a: Occurrence vs. Range Distributions'
+subtitle: "Day 3 — Home Range Estimation"
 author: "Animal Movement Analyses for Ecologists | SYSU Shenzhen, July 2026"
 date: "`r Sys.Date()`"
 output: 

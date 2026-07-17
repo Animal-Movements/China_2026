@@ -1,0 +1,364 @@
+---
+title: 'M4: Accounting for Location Error'
+subtitle: "Day 5 — Behavior Analysis Part 2"
+author: "Animal Movement Analyses for Ecologists | SYSU Shenzhen, July 2026"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    toc_collapse: true
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+*Created: 2026-07-13* | *Last updated: `r Sys.Date()`*
+
+<a href="https://github.com/Animal-Movements/China_2026.git" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+---
+
+## Learning Objectives
+
+By the end of this module you will be able to:
+
+1. Fit an error model to calibration data and incorporate the error estimates into the telemetry data.
+2. Assess the fit of the error model, by checking the residuals.
+3. Include error estimates from the calibrated data into movement analyses.
+4. Identify outliers in the data that are consistent or inconsistent with the error model.
+
+**Packages used:** `ctmm`
+
+---
+
+## Background
+
+## Data Preparation
+
+```{r import_data}
+
+# load ctmm library
+library(ctmm)
+
+# load turtle data
+data(turtle)
+# or as.telemetry on the turtle data filename
+
+# turtle datasets
+names(turtle)
+# first two are calibration data - not turtles
+
+# second look at columns
+head(turtle[[1]])
+# HDOP: horizontal dilution or precision -- proportional to RMS error (location error w/ location class)
+# location class: 3D (or 2D) -- generally doesn't matter (calculated on same scale), but some companies use diff algorithms for 2D vs 3D
+## HDOP: want proportionality constant close to 1
+
+```
+
+## Fitting an Error Model to Calibration Data
+
+```{r uere.fit, eval = FALSE}
+
+## Assuming all of the information is good
+
+help("uere.fit")  # user equivalent range error 
+
+```
+
+```{r uere.fit2}
+
+# fit error parameters to calibration data (informs error model)
+UERE <- uere.fit(turtle[1:2])
+# do not run uere.fit on tracking data (using calibration data, not moving turtles)
+
+# estimated error model parameters
+summary(UERE)
+## 3D fixes have ~7 at HDOP 1
+## 2D fixes have ~ 30 at HDOP 1 (diff scales)
+
+# apply error model to data
+uere(turtle) <- UERE
+
+head(turtle$F231)
+
+plot(turtle$F231)  # error circles at each tracked location accounting for calibration data
+
+## If we aren't sure about the error data:
+## QUESTION 1: Are the HDOP and location class values informative?
+data(turtle)
+
+# make a list to store error models
+UERES <- list()
+
+# first attempt: let's use everything
+UERES$all <- uere.fit(turtle[1:2])
+# do not run uere.fit on tracking data
+
+# summarize error model
+summary(UERES$all)
+
+# second attempt: let's drop the location class information
+# copy of calibration data
+test <- turtle[1:2]
+# delete location class column
+test[[1]]$class <- NULL
+test[[2]]$class <- NULL
+uere(test) <- NULL
+# store error-model fit (HDOP only)
+UERES$HDOP <- uere.fit(test)
+
+# summarize error model
+summary(UERES$HDOP)  # removing location class data (only HDOP), ~10.6 m error
+
+# third attempt: let's further drop the HDOP values
+# delete HDOP column
+test[[1]]$HDOP <- NULL
+test[[2]]$HDOP <- NULL
+# store error-model fit
+UERES$nada <- uere.fit(test)
+
+# summarize error model
+summary(UERES$nada)  # removing HDOP as well (large location error estimate)
+
+# compare error-models
+summary(UERES)  # AICc selects model w/ all, but all have poor Z^2 values because HDOP values aren't great
+# AICc: super-fancy AIC values
+# reduced Z-squared statistic (goodness of fit for trends)
+# compare to reduced chi-squared statistic (1 = good regression, <1 = suspicious, too good, >1 = bad)
+
+```
+
+```{r uere.fit3}
+
+## QUESTION 2: Are these GPS tags identical? (heterogeneity of GPS tags)
+
+# create a list to store individualized error models
+indiv <- list()
+
+# calculate individual UEREs
+indiv[[1]] <- uere.fit(turtle[[1]])
+indiv[[2]] <- uere.fit(turtle[[2]])
+
+# compare calibration parameters
+summary(UERES$all) # joint model
+## ~7m error for 3D, ~30m for 2D
+summary(indiv[[1]]) # but pretty similar if fit separately
+summary(indiv[[2]])
+
+# store with joint models
+UERES$indiv <- indiv
+
+# compare to joint models
+summary(UERES)
+# Don't trust AICc here, because it will likely just pick the more complex model (doesn't actually improve much over indiv)
+
+```
+
+## Checking Error Model Fit
+
+```{r assign_error}
+
+#############
+# ERROR CALIBRATION
+#############
+
+# calibrate turtle data with best error model
+uere(turtle) <- UERES$all  # assign error model to be the error of dataset
+
+# error columns now in data
+head(turtle[[1]])
+# also now includes a per-time error estimate (error circle)
+plot(turtle[[1]]) # see error in indiv turtle movement (most of the variation is explained by error)
+
+```
+
+```{r residuals}
+
+#############
+# ERROR-MODEL RESIDUALS
+#############
+
+# calculate residuals of calibration data w.r.t best error model
+RES <- lapply(turtle[1:2],residuals)
+# plot residuals
+plot(RES)  # residuals in red (st.dev of null model, w/ 95% CI)
+## bad error models would give heavy tail distr
+
+# calculate residuals of calibration data w.r.t. worst error model
+uere(test) <- UERES$nada  # homoskedastic error model
+
+RES2 <- lapply(test,residuals)
+plot(RES2)
+
+```
+
+## Error-Informed Movement Analysis
+
+```{r outlie}
+
+# turtle data again
+names(turtle)
+
+# take female turtle 231
+DATA <- turtle$F231
+
+# plot data
+plot(DATA)
+
+help('outlie')  # function to help pick out outliers (using error-informed statistics)
+
+# look for outliers
+OUT <- outlie(DATA)  # side effect plot (blue segment = highest speed, used to determine outliers)
+
+plot(OUT)
+# you may get other useful information here
+head(OUT)
+
+# biological decision to reject all speeds > 5 cm/s for this species (wood turtle)
+MAX <- 5 %#% 'cm/s'
+?'%#%' # convenient units function
+MAX # 5 cm/s in SI units
+# alternatively
+MAX <- 0.05 # in meters/second
+
+# good location estimates
+GOOD <- OUT$speed < 0.05 # biological threshold for this species (wood turtle)
+# threshold speed for turtle (can remove data above that speed, because those are unreasonable outliers)
+# always check errors and outliers just in case because sometimes there's unclear delineation of threshold
+## or GPS signals could bounce around, which affects path lengths (gives larger errors than expected)
+
+# take only good location estimates
+DATA <- DATA[GOOD,]
+
+# re-check
+plot(DATA)
+OUT <- outlie(DATA)
+# Note now all the points are similarly distanced from median and multiple quickest movement speeds
+## data looks more reasonable
+plot(OUT)
+
+```
+
+```{r ctmm.guess_error}
+
+# create guesstimate interactively
+ctmm.guess(DATA)
+# * check the error box (turns error on, not on by default because it's slow)
+
+# create guesstimate non-interactively
+GUESS <- ctmm.guess(DATA,CTMM=ctmm(error=TRUE),interactive=FALSE)
+# new argument CTMM, which can contain extra parameters,
+# here error=TRUE
+
+# fit models
+FITS <- ctmm.select(DATA,GUESS,verbose=TRUE,trace=3,cores=-1)
+# verbose=TRUE returns all candidate models
+# I've already run this code for you
+# save(FITS,file="Data/turtle.rda")
+load("Data/turtle.rda")
+
+# look at all models
+summary(FITS)
+## location error model turned on
+
+# look at best model
+summary(FITS[[1]])
+## updated error parameter estimates (still similar to what was fed in)
+
+# compare to prior model
+summary(uere(DATA))
+
+# compare to movement model without error model 
+GUESS <- FITS[[1]]
+GUESS$error <- FALSE
+FIT.NE <- ctmm.fit(DATA,GUESS,trace=2)  # fits quickly w/out error model turned on
+
+summary(FITS[[1]])$CI  # with error model ( also allows comparison btwn two datasets/studies using diff GPS tags)
+summary(FIT.NE)$CI  # without error model (larger HR estimate due to all variation being explained by movement)
+## bigger movement rates too, some jittering of data should be explained by location error, 
+## but w/out error model, it's all being explained by animal movement
+
+## Smoothing data for other packages (not ctmm)
+
+help('predict', package="ctmm")
+
+SMOOTH <- predict(DATA,FITS[[1]])  # smoothed data to update, removes some error because it feeds in the movement model
+
+plot(DATA)
+plot(SMOOTH)  # updated estimated of turtle locations (uses error ellipses, not circles)
+
+SIM <- simulate(DATA,FITS[[1]])  # simulate based on movement + error model
+plot(SIM)
+
+```
+
+## No Calibration Data? Supply a Prior
+
+```{r prior}
+
+## IF YOU DIDN'T HAVE CALIBRATION DATA, SUPPLY A PRIOR
+
+# load un-calibrated datas
+data(turtle)
+
+# will need to match the class structure (2D,3D here)
+summary(uere(turtle))  # guesses for error (10m)
+
+# supply point estimates (assign numbers to error)
+# 20-meter 2D error at HDOP=1
+# 10-meter 3D error at HDOP=1
+uere(turtle) <- c(20,10)
+
+# extract calibration object
+PRIOR <- uere(turtle)
+# the default uncertainty when assigning numerical error is zero
+summary(PRIOR)
+PRIOR$DOF
+
+# set DOF for wide credible intervals
+PRIOR$DOF[] <- 2  # Bayesian: error is worth 2 data points
+summary(PRIOR)  # data calibrated w/ prior (much more uncertainty due to few data points)
+
+# assign prior to data
+uere(turtle) <- PRIOR
+
+# automated guesstimate for calibrated data
+GUESS <- ctmm.guess(turtle[[3]],CTMM=ctmm(error=TRUE),interactive=FALSE)
+FIT.PRIOR <- ctmm.select(turtle[[3]],GUESS,trace=3,cores=-1)
+# this will take a while, but comes out consistent
+# save(FIT.PRIOR,file="Day5_BehaviourAnalysis_PT2/Data/turtle-prior.rda")
+load("Day5_BehaviourAnalysis_PT2/Data/turtle-prior.rda")
+
+summary(FIT.PRIOR)  # using prior and updating it
+
+# compare update to prior
+summary(PRIOR)
+## further updated due to larger DOF (bigger sample size)
+## but be cautious (better than nothing but not a substitute for actual calibration data)
+## may just get same prior back regardless of updates (best you'll get, because this is a last resort to adding an error model)
+
+```
+
+---
+
+## Key functions reference
+
+| Function | Package | Purpose | 
+|:---|:---|:---|
+| `uere.fit()` | `ctmm` | Fit error parameters to GPS calibration data to estimate the root-mean-square User Equivalent Range Error (UERE) of a GPS device | 
+| `uere()` or `uere()<-` | `ctmm` | Assign the UERE error model to telemetry data |
+| `ctmm()` | `ctmm` | Fit a hypothetical movement model by specifying the model parameters; only used in this case to specify `error = TRUE` for the error model to be incorporated in the `ctmm.guess` function |
+| `outlie()` | `ctmm` | Detect outliers in telemetry data, informed by an error model, by highlighting potential speed and distance outlier (or anomalous) points |
+
+---
+
+_Next: **Day 6 — Habitat Selection** — We will examine the habitat preferences (or avoidances) of individuals through habitat selection analysis with resource selection functions (RSFs) and step-selection functions (SSFs)._
+
+
+
+

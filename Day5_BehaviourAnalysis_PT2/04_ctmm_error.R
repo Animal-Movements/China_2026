@@ -106,7 +106,7 @@ summary(UERES)  # AICc selects model w/ all, but all have poor Z^2 values becaus
 # reduced Z-squared statistic (goodness of fit for trends)
 # compare to reduced chi-squared statistic (1 = good regression, <1 = suspicious, too good, >1 = bad)
 
-## PROBLEM 2: Are these GPS tags identical? (heterogeneity of GPS tags)
+## QUESTION 2: Are these GPS tags identical? (heterogeneity of GPS tags)
 
 # create a list to store individualized error models
 indiv <- list()
