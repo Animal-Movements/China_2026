@@ -10,7 +10,7 @@ output:
 **Dates:** 27 July – 2 August 2026\
 **Location:** School of Ecology, Sun Yat-sen University, Shenzhen, PRC\
 **Language of instruction:** English\
-**Class size:** 25–30 participants
+**Class size:** 32 participants
 
 ------------------------------------------------------------------------
 

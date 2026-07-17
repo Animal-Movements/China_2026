@@ -1,0 +1,539 @@
+---
+title: "M2: Resource & Step Selection Functions with amt"
+subtitle: "Day 6 — Habitat Selection"
+author: "Animal Movement Analyses for Ecologists | SYSU Shenzhen"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    theme: flatly
+    highlight: tango
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+<a href="https://github.com/Animal-Movements/China_2026.git" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(10deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+---
+
+## Learning Objectives
+
+By the end of this module you will be able to:
+
+1. Recognize the RSF you fit in M1 with `ctmm::rsf.fit()` as one implementation of a general concept, and see that same concept implemented with `amt`'s discrete-time toolkit — a different computational approach, not a different question.
+2. Fit and interpret a single-individual RSF with `amt::fit_rsf()`, including relative selection strength (RSS) and a predicted habitat-suitability map, then scale it to a population two ways — fitting per individual with the same `amt` tools (two-stage) and pooling everyone into a mixed-effects (GLMM) model.
+3. Explain why a step selection function (SSF) operates at a different scale than an RSF, and match example ecological questions to the scale that can actually answer them.
+4. Fit a population-level SSF with `amt::random_steps()` and `amt::fit_clogit()` across multiple individuals at once, correctly accounting for each individual's own choice sets, and compare its results against the RSF fit in Section 2.
+
+**Packages used:** `amt`, `tidyverse`, `terra`, `sf`, `lme4` (new this module — add to your install list if you haven't already)
+
+---
+
+## Ecological context: two scales of the same question
+
+RSF and SSF both ask why an animal is where it is, but they answer it at different points along Johnson's (1980) hierarchy of selection orders. An **RSF** contrasts *used* locations against *available* locations drawn from some fixed spatial domain — usually the individual's home range (Section 2 uses `hr_mcp()`, which you already know from Day 3). Every available point is treated as equally reachable at every point in time; the model never looks at the path connecting one fix to the next. That is a strong assumption, but it is a reasonable approximation at the scale of "where does this animal spend its life," and it is computationally simple.
+
+An **SSF** works at a finer grain (Fortin et al. 2005, *Ecology* 86:1320–1330; Thurfjell et al. 2014, *Movement Ecology* 2:4). The unit of analysis is the step itself — the straight-line move from one fix to the next — and "available" is redefined as the set of steps the animal *could plausibly have taken* from its actual current location, given its own empirical step-length and turning-angle distributions. Because availability is now anchored to where the animal actually was, an SSF is directly informed by the movement process rather than just its endpoints.
+
+Neither approach is "more correct," and neither is causal: both are observational, telling you what covariates predict where an animal was, not what would happen if the landscape changed. An SSF's finer scale avoids some confounds an RSF can't (Section 2.3's fence-attraction problem, for instance), but conditioning on realized movement doesn't turn correlation into experiment. This module fits both to the same wildebeest data so you can see the mechanics — and the differences in what comes out — side by side.
+
+Both sections use the landscape covariates built for Stabach et al. (2016, *Ecosphere* 7(8):e01428)'s original RSF analysis of this population: an anthropogenic risk index, and distance to fences, primary roads, secondary roads, rivers, water points, and woody vegetation. These map onto specific, testable hypotheses about what constrains wildebeest space use in a fenced, human-dominated rangeland — fences and roads as barriers or risk, water and woody cover as resources with a predation-risk trade-off.
+
+**RSF with `ctmm` VS `amt`:** They are different computational routes to the same conceptual model, not different questions. `ctmm::rsf.fit()` models selection in continuous time, using a fitted movement model (AKDE) to weight each observation for autocorrelation instead of discarding data to approximate independence. The `amt` workflow below is the more traditional discrete-time route: thin/resample the data to a comparable-step interval, treat each fix as independent (which is often a huge assumption), and fit ordinary (or mixed-effects) logistic regression. The two typically agree in direction on well-supported covariates but can diverge in effect size and precision, especially with irregular or strongly autocorrelated sampling (Alston, Fleming et al. 2023, *Methods Ecol. Evol.* 14:643–654). 
+
+> For more on interpreting habitat-selection model output generally, see Fieberg et al. (2021, *J. Anim. Ecol.* 90:1027–1043) and Northrup et al. (2022, *J. Anim. Ecol.* 91:1233–1248).
+
+---
+
+## 1. Setup
+
+### 1.1 Load packages
+
+```{r packages}
+# install.packages(c("amt", "tidyverse", "terra", "sf", "lme4"))
+
+library(amt)         # Tracks, RSF/SSF, home ranges
+library(tidyverse)   # Data wrangling and visualization
+library(terra)       # Raster covariates
+library(sf)          # Vector boundary
+library(lme4)        # Mixed-effects (GLMM) RSF
+```
+
+### 1.2 Rebuild `trk_all`
+
+Rebuild the multi-individual track from the cleaned `move2` data.
+
+```{r load_track}
+load("../Day1_IntroMovementEcology/Data/WB_clean.rdata")   # loads WB.mv2
+
+latlong_crs <- "EPSG:4326"
+utm_crs     <- "EPSG:32737"   # UTM Zone 37S — used in Day 1-3
+
+WB_df <- WB.mv2 %>%
+  mutate(x = sf::st_coordinates(.)[, 1],
+         y = sf::st_coordinates(.)[, 2]) %>%
+  as_tibble() %>%
+  transmute(id = individual_local_identifier, x, y, t = timestamp) %>%
+  arrange(id, t)
+
+trk_all <- make_track(WB_df, x, y, t, id = id, crs = latlong_crs)
+trk_all <- transform_coords(trk_all, utm_crs)
+```
+
+### 1.3 Load the landscape covariates
+
+The raster stack below was built for the Stabach et al. (2016) RSF analysis of this same population and is projected to an Africa-specific Albers Equal Area projection — not the UTM projection `trk_all` currently uses. As in Day 5, the fix is to reproject the *points* to match the raster, not the other way around.
+
+```{r load_raster}
+rsf_stack <- terra::rast("Data/ak_raster_stack.tif")
+athi_bound <- st_read("Data/Athi.shp", quiet = TRUE)
+
+names(rsf_stack)
+# anth_risk    - anthropogenic risk index, human population density   (expect: positive -> avoidance)
+# fence_dist   - distance to mapped fences (m)                        (expect: positive -> avoidance; a barrier/risk feature)
+# prirds_dist  - distance to primary/paved roads (m)                  (expect: positive -> avoidance; disturbance/collision risk)
+# secrds_dist  - distance to secondary/unpaved roads (m)               (expect: null-to-mild avoidance)
+# river_dist   - distance to permanent rivers (m)                     (expect: negative -> attraction; water resource, esp. dry season)
+# waterpts_dist- distance to mapped water wells (m)                    (expect: negative -> attraction; stronger in dry season)
+# woody_dist   - distance to woody vegetation (m)                      (expect: positive -> avoidance; predation risk)
+
+aea_crs <- terra::crs(rsf_stack)
+trk_all_aea <- transform_coords(trk_all, aea_crs)
+
+plot(rsf_stack$anth_risk, main = "Anthropogenic risk")
+```
+
+> **Note:** a negative coefficient for a *distance* covariate means selection *for* being close to that feature (use decreases as distance increases); a positive coefficient means avoidance. Keep this the right way around when you interpret Sections 2.3–2.4 and 4.4.
+
+> **A note before we fit anything:** the "expect" comments above are realistic *a-priori* hypotheses — avoid barriers and risk, seek out resources — not certainties. When Section 2.3's results don't match one of them, the right response is to generate alternative explanations for what could produce that pattern, not to relabel the surprising sign as "the animal must actually prefer this."
+
+---
+
+## 2. Resource Selection Function (RSF): a review, now with `amt`
+
+### 2.1 Thinning for independence, then defining availability
+
+We'll demonstrate on a single individual first: **Sotua**.
+
+```{r one_trk}
+one_trk <- trk_all_aea %>% filter(id == "Sotua")   # full temporal resolution - reused as-is in Section 4
+```
+
+RSF analyses assume statistical independence between the locations used to fit the model (Fieberg et al. 2010, *Ecography* 33:565–567) — but GPS fixes taken close together in time rarely qualify, since an animal's position an hour from now is highly predictable from its position now. Fitting directly on this dataset's raw 1h-day/3h-night rate (Day 1–2) risks pseudoreplication: treating correlated observations as independent ones, inflating apparent confidence without adding real information.
+
+The rigorous fix is to estimate the position/velocity autocorrelation timescale (e.g. from a fitted `ctmm` model, as in this morning's M1) and resample beyond where it decays to a few percent (Fieberg et al. 2021). As a simpler stand-in here, we resample to one fix per day — coarse enough to avoid strong autocorrelation for a wide-ranging ungulate, while keeping a usable sample. This is a reasonable default for this dataset, not a universal rule; for your own data, the autocorrelation-timescale route is the defensible way to pick a specific interval.
+
+```{r thinning}
+trk_all_thin <- trk_all_aea %>%
+  nest(data = -id) %>%
+  mutate(data = map(data, ~ track_resample(.x, rate = hours(24), tolerance = hours(4)))) %>%
+  unnest(data)
+
+one_trk_thin <- trk_all_thin %>% filter(id == "Sotua")
+
+nrow(one_trk)        # before thinning
+nrow(one_trk_thin)   # after thinning to ~1 fix/day
+```
+
+The core assumption of an RSF's *availability* domain (a separate assumption from the independence one above) is that "available" means anywhere within some defined spatial domain — most commonly the individual's own home range. You already built an MCP for Sotua in Day 3; we use the same function here, at the 100% isopleth, purely to define the availability boundary (not as a home-range estimate in its own right). From here on, everything is built on the *thinned* track, `one_trk_thin`, not the raw `one_trk`.
+
+```{r availability_domain}
+hr <- hr_mcp(one_trk_thin, levels = 1)
+```
+
+`amt::random_points()` then draws points within that boundary and tags them `case_ = FALSE`, while attaching the thinned real fixes as `case_ = TRUE` via the `presence` argument. We'll use 50 available points per used location — Section 2.6 shows why that's a reasonable choice, once you've seen what the resulting model looks like.
+
+```{r random_points}
+set.seed(533)
+avail_pts <- random_points(hr, n = nrow(one_trk_thin) * 50, type = "random", presence = one_trk_thin)
+
+table(avail_pts$case_)
+
+plot1 <- avail_pts %>%
+  arrange(case_) %>%
+  ggplot(aes(x = x_, y = y_)) +
+  geom_point(aes(color = case_), alpha = 0.2) +
+  scale_color_manual(values = c("FALSE" = "grey70", "TRUE" = "red"))
+plot1
+```
+
+### 2.2 Extracting covariates and checking collinearity
+
+```{r extract_covariates}
+avail_pts <- avail_pts %>% extract_covariates(rsf_stack)
+head(avail_pts)
+```
+
+Correlated predictors inflate coefficient variance and make individual effects hard to interpret — a problem for inference (our goal here), even though it wouldn't matter if we only cared about prediction.
+
+```{r collinearity}
+cor(as.data.frame(avail_pts)[, c("anth_risk", "fence_dist", "prirds_dist",
+                                  "secrds_dist", "river_dist",
+                                  "waterpts_dist", "woody_dist")]) %>%
+  round(2)
+```
+
+Fence distance and water-point distance are correlated at 0.78 — still above the conventional 0.7 threshold for concern, and too high to include together. We keep `fence_dist` (more directly tied to the fence-barrier question this workshop keeps returning to) and drop `waterpts_dist`. No other pair comes close: the next-highest is secondary-road distance and woody distance at 0.53, comfortably under the threshold, so there's no statistical reason to exclude `woody_dist` from the model. We leave it out of the main model below mainly to keep the worked example to five covariates — it's a reasonable addition to try on your own.
+
+> Want a formal multi-predictor collinearity check instead of pairwise correlations? `car::vif()` gives the Variance Inflation Factor across all predictors simultaneously — useful once you have more than 4-5 candidate covariates.
+
+### 2.3 Fitting a single-individual RSF with `fit_rsf()`
+
+An RSF is, underneath, an ordinary logistic regression of `case_` (used = 1, available = 0) on the covariates at each point:
+
+$$\text{logit}\big(\Pr(\text{used})\big) = \log\!\left(\frac{\Pr(\text{used})}{1-\Pr(\text{used})}\right) = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \cdots + \beta_n x_n$$
+
+`amt::fit_rsf()` fits exactly this model — it's a wrapper around `glm(..., family = binomial(link = "logit"))` that returns an object `log_rss()` and the rest of `amt`'s RSF tooling know how to work with directly.
+
+```{r fit_rsf}
+m_rsf <- avail_pts %>%
+  fit_rsf(case_ ~ scale(anth_risk) + scale(fence_dist) + scale(prirds_dist) +
+            scale(secrds_dist) + scale(river_dist))
+summary(m_rsf)
+```
+
+```{r fit_rsf_equiv_glm, eval=FALSE}
+# Reference only. fit_rsf() is a wrapper - this line produces numerically
+# identical coefficients, standard errors, and p-values to the model above:
+m_rsf_glm <- glm(case_ ~ scale(anth_risk) + scale(fence_dist) + scale(prirds_dist) +
+                    scale(secrds_dist) + scale(river_dist),
+                  family = binomial(link = "logit"), data = avail_pts)
+```
+
+**Reading the output.** Thinning to ~1 fix/day cut the fit down to 18,972 rows (from a quarter-million) — still plenty for a stable model, and every covariate remains significant at p < 0.001 with the same sign as the pre-thinning fit (magnitudes just shrank, consistent with the earlier fit's significance being partly pseudoreplication). Only anthropogenic risk matches its a-priori hypothesis outright; the other four are worth pausing on rather than reading off at face value.
+
+- **Anthropogenic risk** (β = −0.71): avoidance, as expected, and the second-largest effect in the model.
+- **Fence distance** (β = −0.56): the model says *attraction* — the opposite of the avoidance we hypothesized for a barrier/risk feature. Before concluding Sotua prefers fences, consider what else could produce this: fences in this landscape block historic movement routes (Stabach et al. 2016 — this dataset's own paper), so animals may accumulate near them not by choice but because the fence constrains where they can go. A static RSF can't tell these apart; Section 4 revisits this once we have step-scale data.
+- **Primary road distance** (β = −0.27): also the opposite of the hypothesized avoidance, though the smallest effect in the model. Hold the same caution as for fences.
+- **Secondary road distance** (β = −1.06): the largest effect in the model — again attraction where we hypothesized little-to-no effect, and the same pattern held in the pre-thinning fit, so it isn't just an autocorrelation artifact. "Secondary road" as mapped may co-locate with other unmeasured features (settlements, livestock tracks); worth the same caution again.
+- **River distance** (β = +0.20): the model says avoidance, opposite the hypothesized attraction to water. One alternative to "she avoids rivers": river distance correlates with woody-vegetation distance in this landscape (Section 2.2), so this could partly reflect predation-risk avoidance in riparian cover rather than the river itself — or a real accessibility constraint keeping her from water she'd otherwise use. This is one individual over one time window regardless; Section 2.7's population-level model lets you check how general the pattern is.
+
+### 2.4 Relative selection strength and the response curve
+
+Exponentiating the coefficients converts them from the log-odds scale to **relative selection strength (RSS)** — how much more (or less) likely a location is to be used per one-*SD* increase in a scaled predictor:
+
+$$w(\mathbf{x}) = \exp(\beta_1 x_1 + \beta_2 x_2 + \cdots + \beta_n x_n)$$
+
+```{r rsf_rss}
+exp(coef(m_rsf))
+```
+
+`amt::log_rss()` does the same conversion more flexibly — across a *range* of one covariate while holding the others at their mean, which is what you actually want for a response plot.
+
+```{r rsf_log_rss}
+newdata  <- data.frame(anth_risk = seq(min(avail_pts$anth_risk), max(avail_pts$anth_risk), length.out = 100),
+                        fence_dist = mean(avail_pts$fence_dist), prirds_dist = mean(avail_pts$prirds_dist),
+                        secrds_dist = mean(avail_pts$secrds_dist), river_dist = mean(avail_pts$river_dist))
+refdata  <- data.frame(anth_risk = mean(avail_pts$anth_risk), fence_dist = mean(avail_pts$fence_dist),
+                        prirds_dist = mean(avail_pts$prirds_dist), secrds_dist = mean(avail_pts$secrds_dist),
+                        river_dist = mean(avail_pts$river_dist))
+
+rss_risk <- log_rss(object = m_rsf, x1 = newdata, x2 = refdata, ci = "se")
+
+ggplot(rss_risk$df, aes(anth_risk_x1, exp(log_rss))) +
+  geom_ribbon(aes(ymin = exp(lwr), ymax = exp(upr)), alpha = 0.2) +
+  geom_line(linewidth = 1) +
+  geom_hline(yintercept = 1, linetype = "dashed", color = "gray30") +
+  labs(x = "Anthropogenic risk", y = "RSS vs. mean risk") +
+  theme_bw()
+```
+
+> Setting `ci = "se"` adds Wald-type confidence bounds (via the delta method) as `lwr`/`upr` columns on the log-RSS scale, exponentiated here just like `log_rss` itself for the ribbon. If your installed `amt` version names those columns differently, run `str(rss_risk$df)` once to check before plotting.
+
+**Interpreting the curve.** The dashed line at 1.0 marks Sotua's *average* risk exposure — the curve shows how much more or less likely she is to be present at a given risk level relative to that average, and the shaded ribbon is the uncertainty (narrower near the average where most points sit, wider toward the extremes). Beyond sign and size, watch the curve's *shape*: a gradual decline across the whole range implies a mild, evenly-spread preference, while a sharp drop that flattens out implies an effect concentrated at one end of the gradient.
+
+### 2.5 Mapping predicted relative selection
+
+A fitted RSF is more than a table of coefficients: because the model gives us a coefficient for every covariate, and we have those same covariates as rasters across the whole study area, we can apply the fitted relationship to every raster cell and extrapolate a continuous prediction of relative habitat suitability across the entire landscape — not just at the points we happened to sample. This is often the most directly usable output of an RSF for management or conservation purposes: a map.
+
+Note that the map shows where the fitted model predicts elevated use, which isn't the same as where habitat is good for the animal. For example, Section 2.3 flagged this gap directly for fence and road distance — if elevated predicted use near a barrier reflects entrapment rather than preference, then high values on this map mean 'where she's constrained to be,' not 'where she'd choose to be if she could go anywhere.' Treat high values as a hypothesis about relative use worth field-checking, not a suitability verdict, especially near mapped barriers.
+
+```{r rsf_prediction_map}
+coeff <- coef(m_rsf)
+
+scale_layer <- function(layer, values) (layer - mean(values)) / sd(values)
+anth_s  <- scale_layer(rsf_stack$anth_risk,   avail_pts$anth_risk)
+fence_s <- scale_layer(rsf_stack$fence_dist,  avail_pts$fence_dist)
+pri_s   <- scale_layer(rsf_stack$prirds_dist, avail_pts$prirds_dist)
+sec_s   <- scale_layer(rsf_stack$secrds_dist, avail_pts$secrds_dist)
+riv_s   <- scale_layer(rsf_stack$river_dist,  avail_pts$river_dist)
+
+lin_pred <- coeff[[2]]*anth_s + coeff[[3]]*fence_s + coeff[[4]]*pri_s +
+            coeff[[5]]*sec_s + coeff[[6]]*riv_s
+pred <- exp(lin_pred) / (1 + exp(lin_pred))
+pred <- mask(pred, athi_bound)
+
+plot(pred, main = "Predicted relative selection - Sotua")
+```
+
+> **Discussion:** this map reflects one individual's coefficients. Would you expect it to generalize to the rest of the population? That's exactly the question Section 2.7 addresses.
+
+### 2.6 How many available points do we need?
+
+Now that you've seen what a single-individual model with 50 available points per used point looks like, it's worth confirming that 50 wasn't an arbitrary choice. More available points give more stable coefficient estimates, up to a point of diminishing returns — Northrup et al. (2013, *Ecography* 36:598–609) found this stabilization typically occurs well below the extreme ratios sometimes used in practice. The box plot below shows what that stabilization looks like for this dataset (pre-computed — the simulation loop itself takes several minutes to run and isn't necessary to run live to see the pattern).
+
+```{r sensitivity_code, eval=FALSE}
+# Reference only - not run in class. Loops over 1/5/20/50/100 available points
+# per used point, refitting a GLM 20 times at each level to see how much the
+# coefficients still move around.
+n_frac <- c(1, 5, 20, 50, 100)
+n_pts  <- nrow(one_trk_thin) * n_frac
+n_rep  <- 20
+
+wb_sim <- tibble(n_pts = rep(n_pts, n_rep), frac = rep(n_frac, n_rep)) %>%
+  mutate(result = map(n_pts, ~ one_trk_thin %>%
+      random_points(n = .x) %>%
+      extract_covariates(rsf_stack) %>%
+      mutate(across(anth_risk:woody_dist, scale)) %>%
+      glm(case_ ~ anth_risk + fence_dist + prirds_dist + secrds_dist +
+            river_dist + waterpts_dist + woody_dist,
+          data = ., family = binomial) %>%
+      broom::tidy()))
+```
+
+```{r sensitivity_plot}
+wb_sim <- read_rds("Data/nt.sim.rds")
+
+wb_sim %>%
+  unnest(cols = result) %>%
+  mutate(term = recode(term,
+    "(Intercept)" = "Intercept", anth_risk = "Anthropogenic risk",
+    woody_dist = "Woody distance", fence_dist = "Fence distance",
+    prirds_dist = "Pri. road distance", river_dist = "River distance",
+    secrds_dist = "Sec. road distance", waterpts_dist = "Water point distance")) %>%
+  ggplot(aes(factor(frac), estimate)) +
+  geom_boxplot() + geom_jitter(alpha = 0.2) +
+  facet_wrap(~ term, scale = "free") +
+  labs(x = "Available points per used location", y = "Estimate") +
+  theme_light()
+```
+
+Coefficients settle down well before 50 points per used location — our choice above is comfortably conservative.
+
+### 2.7 From one individual to a population: two approaches
+
+Sotua's coefficients above are hers alone. Two things can make a single individual's model a poor representation for the population: **ecologically**, one animal's history, home-range placement relative to fences and roads, and the specific season it was tracked in are not necessarily representative of every other individual; **statistically**, treating multiple individuals' points as if they were all independent observations from one animal — or fitting a separate model per animal and eyeballing whether they agree — both mismanage the fact that points from the same individual are correlated with each other in ways points from different individuals aren't.
+
+There are two standard ways to get from "one individual's model" to "a population-level answer" (Fieberg et al. 2021 compare both directly): **(a)** fit the exact same `fit_rsf()` model separately to each individual — the "two-stage" approach — and summarize the resulting set of individual coefficients; or **(b)** pool everyone's points into one mixed-effects model with a random effect for individual. Everything about the availability-sampling and covariate-extraction workflow below is identical to Sections 2.1–2.2 — only what happens with multiple individuals' worth of it differs.
+
+#### Two-stage: `fit_rsf()` per individual
+
+We repeat the same availability-sampling + extraction workflow for every individual, using the `nest()`/`map()`/`unnest()` pattern from Day 2–3 rather than the `lapply()`-based approach you may see in older scripts — but now we also fit the model itself inside the same nested pipeline, once per individual.
+
+```{r two_stage_fit}
+extract_coefs <- function(fit) {
+  summary(fit)$coefficients %>%
+    as.data.frame() %>%
+    rownames_to_column("term")
+}
+
+set.seed(533)
+rsf_two_stage <- trk_all_thin %>%
+  nest(data = -id) %>%
+  mutate(hr    = map(data, ~ hr_mcp(.x, levels = 1)),
+         avail = map2(hr, data, ~ random_points(.x, n = nrow(.y) * 50,
+                                                 type = "random", presence = .y)),
+         avail = map(avail, ~ extract_covariates(.x, rsf_stack)),
+         fit   = map(avail, ~ fit_rsf(.x, case_ ~ scale(anth_risk) + scale(fence_dist) +
+                                          scale(prirds_dist) + scale(secrds_dist) + scale(river_dist))),
+         coefs = map(fit, extract_coefs))
+
+ind_coefs <- rsf_two_stage %>% select(id, coefs) %>% unnest(coefs)
+ind_coefs
+```
+
+Summarizing across individuals gives a population-level mean and its uncertainty, in the spirit of a simple meta-analysis:
+
+```{r two_stage_summary}
+ind_coefs %>%
+  filter(term != "(Intercept)") %>%
+  group_by(term) %>%
+  summarize(mean_estimate = mean(Estimate),
+            se_across_individuals = sd(Estimate) / sqrt(n()),
+            n_individuals = n(), .groups = "drop")
+```
+
+```{r two_stage_plot}
+ggplot(ind_coefs %>% filter(term != "(Intercept)"), aes(x = term, y = Estimate)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter(width = 0.15, alpha = 0.6) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray40") +
+  coord_flip() + theme_classic() +
+  labs(x = NULL, y = "Log-odds coefficient (per individual)",
+       title = "Two-stage: individual RSF coefficients")
+```
+
+Each point in the plot above is one individual's own coefficient — this is the most direct way to *see* between-individual variation, since nothing has been pooled or shrunk yet.
+
+#### Mixed-effects: `glmer()`
+
+The alternative is a single model: keep the same RSF formula, but let each individual have its own random intercept (and optionally random slopes) rather than fitting each one separately.
+
+```{r glmm_prep}
+set.seed(533)
+rsf_pts <- trk_all_thin %>%
+  nest(data = -id) %>%
+  mutate(hr    = map(data, ~ hr_mcp(.x, levels = 1)),
+         avail = map2(hr, data, ~ random_points(.x, n = nrow(.y) * 50,
+                                                 type = "random", presence = .y))) %>%
+  select(id, avail) %>%
+  unnest(avail) %>%
+  extract_covariates(rsf_stack)
+```
+
+```{r glmm_fit, cache=TRUE}
+m_rsf_glmm <- glmer(case_ ~ scale(anth_risk) + scale(fence_dist) + scale(prirds_dist) +
+                       scale(secrds_dist) + scale(river_dist) + (1 | id),
+                     family = binomial, data = rsf_pts)
+summary(m_rsf_glmm)
+```
+
+> **Note:** we used a random *intercept* only. We could also let every slope vary by individual — a reasonable next step once you're comfortable with the intercept-only version, but it multiplies the number of estimated parameters and fitting time considerably, so we leave it as an extension for your own data rather than the default here.
+
+```{r glmm_coef_plot}
+fx <- summary(m_rsf_glmm)$coefficients %>%
+  as.data.frame() %>%
+  rownames_to_column("term") %>%
+  filter(term != "(Intercept)") %>%
+  mutate(lower = Estimate - 1.96 * `Std. Error`,
+         upper = Estimate + 1.96 * `Std. Error`)
+
+ggplot(fx, aes(x = term, y = Estimate)) +
+  geom_pointrange(aes(ymin = lower, ymax = upper)) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray40") +
+  coord_flip() + theme_classic() +
+  labs(x = NULL, y = "Log-odds coefficient (population-level)")
+```
+
+#### Comparing the two
+
+Both approaches should broadly agree on sign and rough magnitude if there's a real population-level effect. Where they differ: the mixed-effects model applies *partial pooling* — a noisy or data-poor individual's estimate gets pulled toward the population average, usually narrowing the CIs relative to the two-stage approach's per-individual SEs. The two-stage approach is simpler to run and explain, and makes no assumption about the distribution of between-individual variation, but treats every individual as equally informative regardless of sample size, with no formal way to borrow strength across them. Fieberg et al. (2021) discuss this trade-off in detail.
+
+---
+
+## 3. From points to paths: why a Step Selection Function?
+
+We already covered the conceptual difference at the top of this module — different scales, different definitions of "available." The one piece not yet made concrete: Section 2's availability domain (the home range boundary) never changes across the whole analysis, but an animal standing at a particular point right now cannot actually reach the far side of its home range in the next 3 hours. An SSF is built around exactly that constraint — instead of *used point* vs. *available point within the home range*, we compare *the observed step* against *alternative steps from the same starting point*, with turn angles and step lengths redrawn from the population's own empirical movement distributions. "Available" becomes local and time-anchored, not global and static.
+
+### 3.1 Which scale answers which question?
+
+| Question | Better answered by | Why |
+|----|----|----|
+| "What characterizes suitable habitat across this population's range?" (Stabach et al. 2016 — this dataset's own paper) | RSF | Home-range-scale question; doesn't require knowing the movement path |
+| "Where should a corridor or protected-area boundary go?" (Northrup et al. 2022, review) | RSF | Static, landscape-scale planning question |
+| "Do elk avoid areas close to wolves and roads in their immediate movement decisions, beyond what their home-range placement alone would suggest?" (Fortin et al. 2005 — the classic worked example) | SSF | Requires the step-to-step movement context; an RSF alone cannot separate this from home-range placement |
+| "Does a fence or river change an animal's moment-to-moment path, or just its overall range?" | SSF (with a barrier-crossing covariate, Section 4.6) | Needs the actual step, not just endpoints |
+| "How does an animal trade off forage quality against predation risk along its path?" (Avgar et al. 2016, *Methods Ecol. Evol.* 7:619–630) | SSF | Movement-kernel and habitat selection are estimated jointly |
+
+---
+
+## 4. Step Selection Function (SSF)
+
+Rather than build up a single-individual SSF first, we go straight to a multi-individual version here — you've already seen the single-individual-then-scale progression in Section 2, and the mechanics per individual are the same either way.
+
+### 4.1 From track to steps (recall from Day 2 Module 1)
+
+Recall from Day 2 M1: `track_resample()` selects which consecutive fixes count as a comparable step at a chosen nominal rate, tagging runs of usable fixes as `burst_`; `steps_by_burst()` then computes step length (`sl_`), turning angle (`ta_`), and time step (`dt_`) within each burst. We use the same 3-hour rate as Day 2 M1 Section 2.3, so day and night steps stay directly comparable — applied to every individual via the same `nest()`/`map()` pattern used throughout Section 2.
+
+> **Note:** we stay nested through 4.1–4.3 below and only `unnest()` once, at the end of 4.3 — `extract_covariates(..., where = "both")` needs the data still in per-individual form to work correctly.
+
+```{r ssf_steps}
+steps_all <- trk_all_aea %>%
+  nest(data = -id) %>%
+  mutate(data = map(data, ~ .x %>%                       # stays nested
+                       track_resample(rate = hours(3), tolerance = minutes(30)) %>%
+                       filter_min_n_burst(3) %>%
+                       steps_by_burst()))
+```
+
+### 4.2 Generating random steps
+
+`amt::random_steps()` is the SSF equivalent of `random_points()`. For every observed step it draws `n_control` alternative steps sharing the same start location, with turn angles and step lengths sampled from distributions (von Mises and gamma, by default) fit to *that individual's own* observed steps — which is why we call it once per individual (nested), rather than once on the pooled data: pooling first would fit one shared movement kernel averaged across every animal, blurring real between-individual differences in how far and how sharply they typically move.
+
+```{r random_steps}
+set.seed(1)
+steps_all <- steps_all %>%
+  mutate(data = map(data, ~ random_steps(.x, n_control = 15)))   # stays nested
+```
+
+### 4.3 Extracting covariates at both ends of the step
+
+For an SSF we extract covariates at *both* the start and the end of each step (`where = "both"`), not just one point. The condition at the step's end is what drives habitat selection; the condition at the start is available if you want to model how it modifies movement itself (not used here, but this is the hook for interaction terms like "turn more sharply near a fence"). Unlike Section 2's `extract_covariates()` (which worked fine on a plain, already-unnested tibble of points), this one needs the nested `steps_xyt` structure — so it runs inside the same `map()`, and we unnest only after it's done.
+
+```{r ssf_extract}
+ssf_all <- steps_all %>%
+  mutate(data = map(data, ~ extract_covariates(.x, rsf_stack, where = "both"))) %>%
+  unnest(data) %>%
+  mutate(cos_ta = cos(ta_), log_sl = log(sl_)) %>%
+  filter(complete.cases(.))
+
+table(ssf_all$case_)
+```
+
+### 4.4 Fitting the step selection function
+
+`amt::fit_clogit()` wraps `survival::clogit()` — a conditional logistic regression matched within each step's own choice set. With one individual, `strata(step_id_)` is enough, because every `step_id_` is unique. With multiple individuals, `step_id_` numbering restarts for each animal — so the stratum has to be the *combination* of individual and step, `strata(id, step_id_)`, or steps from different individuals that happen to share a step number would be incorrectly pooled into the same choice set.
+
+```{r fit_ssf}
+m_ssf_all <- ssf_all %>%
+  fit_clogit(case_ ~ anth_risk_end + fence_dist_end + prirds_dist_end +
+               secrds_dist_end + river_dist_end + cos_ta + log_sl +
+               strata(id, step_id_))
+summary(m_ssf_all)
+```
+
+**Reading the output.** This model pools 761,711 rows (47,606 real steps, each matched against 15 alternatives) across every individual — far more data than any single-individual fit, so even very small effects reach significance here. That makes the effect sizes (not just the stars) the thing to focus on, same as in the RSF.
+
+- **Anthropogenic risk** (β = −0.0246, exp(coef) = 0.976, p < 0.001): significant and negative, agreeing in direction with the RSF (β = −0.71) — but the effect is far smaller at the step scale. Risk still matters, just much less dramatically than it appeared to at the home-range scale.
+- **Fence distance** (p = 0.195): not significant. The sharpest contrast with the RSF, where fence distance was a strong, significant effect (β = −0.56). This pattern is consistent with fences shaping *where an individual's home range sits* rather than its moment-to-moment steps once it's already there.
+- **Primary road distance** (exp(coef) ≈ 1.0000, p < 0.001): technically significant, but the effect size is negligible — and the sign has flipped relative to the RSF (weak attraction there, essentially-zero-but-technically-avoidance here). With three-quarters of a million rows, "significant" and "meaningful" are clearly different things; this is the sharpest illustration of that in the whole module.
+- **Secondary road distance** (p = 0.530): not significant — the single largest effect in the RSF (β = −1.06) disappears almost entirely at the step scale, echoing the fence-distance pattern above.
+- **River distance** (p = 0.086): borderline, not significant at the conventional 0.05 threshold — a much weaker, less certain signal than the RSF's clear effect (β = +0.20).
+- **`cos_ta`** (β = −0.167, p < 0.001) and **`log_sl`** (p = 0.194): these describe the movement kernel, not habitat. The significant, negative `cos_ta` means individuals turn *more* than the fitted "random" control steps would predict — real steps show more directional change than a naive movement kernel alone would generate. The non-significant `log_sl` means, once habitat is accounted for, real step lengths don't systematically deviate from the fitted gamma distribution.
+
+Two of five landscape covariates that mattered at the RSF scale (fence and secondary-road distance) drop out almost entirely at the step scale — illustrating why "the same covariates, different scale" is not just a rhetorical point (Section 3). But don't read the fence's non-significance here as "the fence doesn't matter": this model only compares steps toward vs. away from the fence on average — it says nothing about behavior right at the fence line. An animal repeatedly approaching and retreating from a barrier it can't cross (a bounce or trace pattern, in Day 4's BaBA terminology) would generate many fixes near the fence — feeding the RSF's apparent attraction — without that pattern contradicting the fence as a real deterrent to crossing. Both models remain observational here, the same caution as Section 2.3: neither can, on its own, distinguish "the fence changes behavior" from "behavior happens to cluster near the fence." BaBA's bounce/trace/trapped/cross classifications, built directly on the trajectory relative to the barrier, are the tool suited to that distinction (Day 4) — this SSF is a complementary check, not a resolution. Model discrimination is modest overall (concordance = 0.542), typical for this kind of model, even though the overall likelihood-ratio test is highly significant (888.4 on 7 df, p < 2×10⁻¹⁶). Compare signs and magnitudes against the RSF (Section 2.7) as you would for a single individual — do the same covariates that mattered at the home-range scale still show up at the step scale?
+
+The rigorous fix for the pooling problem is a *mixed* conditional logistic model — a per-individual random effect on top of the same `fit_clogit()`-style formula. `amt`/`survival` don't fit that directly; the standard approach (Muff, Signer & Fieberg 2020, *J. Anim. Ecol.* 89:80–92) fits it via `glmmTMB`, using a Poisson-regression trick with each stratum's intercept variance fixed at a large constant. That's beyond what we have time for today, but it's the reference to reach for once naive pooling isn't good enough for your own analysis.
+
+### 4.5 Where this goes next (not covered today)
+
+An SSF is also the foundation for a richer set of tools we don't have time for today, worth knowing exist:
+
+- **Mixed conditional logistic models** for properly accounting for between-individual variation, rather than the naive pooling used above (Muff, Signer & Fieberg 2020, *J. Anim. Ecol.* 89:80–92 — cited in 4.4).
+- **Simulating space use from a fitted SSF** (`amt::redistribution_kernel()` + `amt::simulate_path()`) — turns a fitted iSSF into a mechanistic simulator of an animal's future movement, and from there into range-distribution maps (Signer et al. 2024, *Methods Ecol. Evol.* 15:43–50).
+- **Barrier-aware SSFs** — adding a covariate for whether a step crosses a fence or river lets you estimate the barrier's effect directly within the same `fit_clogit()` framework.
+- **Checking residual autocorrelation** — successive steps within a burst are not fully independent even after conditioning on strata; Forester et al. (2009, *Ecology* 90:3554–3565) give a diagnostic and correction.
+
+---
+
+## Key Functions
+
+| Function | Package | Purpose |
+|----|----|----|
+| `track_resample()` | `amt` | Thin fixes to a coarser, less-autocorrelated interval before fitting an RSF (Section 2.1) — same function as Day 2 M1, different purpose than Section 4.1's use |
+| `hr_mcp()` | `amt` | Define an RSF's availability domain (recall from Day 3) |
+| `random_points()` | `amt` | Draw available points within a home-range boundary for an RSF |
+| `fit_rsf()` | `amt` | Fit an RSF (wraps `glm(..., family = binomial)`); fit per individual + summarized for the two-stage population approach |
+| `random_steps()` | `amt` | Draw alternative steps from each step's own start location for an SSF; call once per individual so each gets its own movement kernel |
+| `extract_covariates()` | `amt` | Extract raster values at points (`where = "both"` for step start + end) |
+| `glmer(..., family = binomial)` | `lme4` | Fit a population-level (mixed-effects) RSF |
+| `fit_clogit()` | `amt` | Fit a conditional logistic regression (SSF), wrapping `survival::clogit()`; use `strata(id, step_id_)` with multiple individuals |
+| `log_rss()` | `amt` | Convert coefficients to relative selection strength across a covariate range |
+| `track_resample()` / `steps_by_burst()` | `amt` | Build the step table an SSF needs (recall from Day 2 M1) |
+
+---
+
+## Practice
+
+1. Apply this workflow — availability sampling or steps, covariate extraction, model fitting — to your own tracking data, with whatever landscape covariates are relevant to your system.
+2. For your own species: which covariates would you expect to matter more at the RSF (home-range) scale versus the SSF (step) scale, and why?
+
+---
+
+## Wrap-up
+
+This concludes the core RSF/SSF content for Day 6. Remaining time today is Own Data Practice — apply today's workflow (RSF review, then SSF) to your own tracking data, with instructors available to help.
