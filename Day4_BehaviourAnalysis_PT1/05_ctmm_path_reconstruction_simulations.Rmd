@@ -36,8 +36,295 @@ By the end of this module you will be able to:
 
 ## Background
 
+[INSERT BACKGROUND ON WHAT CAN BE GAINED FROM PATH RECONSTRUCTION AND SIMULATIONS]
+
 ## Data Preparation
 
+### Import and Visualize Data
+
+```{r import_data}
+
+# Load ctmm package
+library(ctmm)
+
+# Load buffalo data from package
+data(buffalo)
+projection(buffalo) <- median(buffalo)  # center projection on median
+
+names(buffalo)
+
+# Let's look at Cilla
+DATA <- buffalo$Cilla
+plot(DATA, col = color(DATA, by = "time"))
+
+```
+
+### Model Selection
+
+```{r ctmm.select, eval = FALSE}
+
+# Autocorrelation model selection
+GUESS <- ctmm.guess(DATA, interactive = FALSE)
+FIT <- ctmm.select(DATA, GUESS, trace = 3)
+save(FIT, file = "Data/cilla.rda")
+
+```
+
+```{r ctmm.select}
+
+# I've already run this
+load("Data/cilla.rda")
+
+```
+
+## Predicting from the Model
+
+```{r predict}
+
+# Take the first 10 locations (first 10 hrs)
+SUB <- DATA[1:10,]
+
+# Plot subset
+plot(SUB)
+
+```
+
+```{r predict2, eval = FALSE}
+
+# If working with this amount of data, you might consider alternative ICs
+## in particular IC="LOOCV"
+help("ctmm.select")
+## Just sub-setting for purposes of visualization and speed
+
+```
+
+```{r predict3}
+
+# Convenient conversion function (help("%#%"))
+1 %#% 'hr'
+
+# Make an array of times over the same period, but 5 min apart
+SEQ <- seq(from=SUB$t[1],to=SUB$t[10],by=5 %#% 'min')
+
+```
+
+```{r predict4, eval = FALSE}
+
+help('predict.ctmm')  # makes conditional preds based on movement and location data
+
+```
+
+```{r predict5}
+
+# Predict locations at those times
+PRED <- predict(SUB, FIT, t = SEQ)  # predict for every 5 mins
+## can allow smoothing for better location estimates (for when data points have greater or lesser uncertainty)
+
+# Plot predictions & data
+plot(list(PRED, SUB), col = c('blue','red'))
+## uncertainty ellipses (more certain near data points, but also depends on how long to next point)
+
+```
+
+## Simulating Animal Movement
+
+### Generic Simulations
+
+Simulations can be used to guide study design, by defining model parameters for species of interest.
+
+```{r simulate_gen}
+
+# Position autocorrelation timescale (range crossing time)
+tau_p <- 1 %#% 'day'
+
+# Velocity autocorrelation timescale (directional persistence)
+tau_v <- 1 %#% 'min'
+
+# Spatial variance
+## Note the same as the 95% HR area
+## 95% HR area = -2*log(0.05)*pi*sig
+sig <- 1 %#% 'kilometers^2'
+
+
+# Specify an OUF model for simulation
+MODEL <- ctmm(tau = c(tau_p, tau_v), isotropic = TRUE, sigma = sig)
+
+# Define the sampling duration/schedule
+t <- seq(0,1 %#% 'month', 1 %#% 'hr')
+
+# Simulate from the defined model and sampling schedule
+SIM <- simulate(MODEL, t = t)
+
+# Fit the movement models
+GUESS <- ctmm.guess(SIM, interactive = FALSE)
+
+FITS <- ctmm.select(SIM, GUESS, cores = -1)
+
+# Summary of the fit (NOTE the DOFs)
+summary(FITS)
+
+# Define the sampling duration/schedule
+t <- seq(0,4 %#% 'days', 5 %#% 'min')
+
+# Simulate from the defined model and sampling schedule
+SIM <- simulate(MODEL, t = t)
+
+# Fit the movement models
+GUESS <-  ctmm.guess(SIM, interactive = FALSE)
+FITS <- ctmm.select(SIM, GUESS)
+
+# Summary of the fit (NOTE the DOFs)
+summary(FITS)
+
+# Home range estimate
+HR <- akde(SIM, FITS)
+
+# Visualise the results
+plot(SIM, UD = HR)
+
+```
+
+### Conditional Simulations
+
+Simulations conditioned on a fitted movement model (here, African buffalo data)
+
+```{r simulate, eval = FALSE}
+
+help('simulate.ctmm')  # simulate things freely or conditional on data
+
+```
+
+```{r simulate2}
+
+# 1 minute sequence
+SEQ <- seq(from = SUB$t[1], to = SUB$t[10], by = 1 %#% 'min')
+
+# Simulate locations at those time
+SIM <- simulate(SUB, FIT, t = SEQ)  # simulate path for every min
+
+# Plot conditional simulation & data
+plot(list(SIM, SUB), col = c('blue','red'), type = c('l','p'))
+
+SIM2 <- simulate(SUB, FIT, t = SEQ)
+
+# Plot conditional simulation & data
+plot(list(SIM, SIM2, SUB), col = c('blue','orange','red'), type = c('l','l','p'))
+## some variation in simulated trajectories based on the data
+## variance would match up with the error ellipses
+
+```
+
+```{r emulate, eval = FALSE}
+
+# That is only trajectory uncertainty
+## can also include parameter uncertainty
+help('emulate')  # simulating movement model itself from posterior of estimate of movement model (for when model is unknown)
+
+```
+
+```{r emulate2}
+
+# Include parameter uncertainty
+SIM3 <- simulate(SUB, emulate(FIT, fast = T), t = SEQ)  
+## emulate(FIT) for sample movement model to approximate unknown movement model
+
+plot(list(SIM, SIM2, SIM3, SUB), 
+     col = c('blue','orange','black','red'), type = c('l','l','l','p'))
+
+```
+
+## Coati Case Study
+
+### Data preparation
+
+```{r coati}
+
+# Load in the dataset from ctmm
+data("coati")
+summary(coati)
+
+projection(coati) <- median(coati)
+
+# Subset to single individual
+DATA <- coati[[1]]
+
+# Visualise the data
+plot(DATA)
+
+```
+
+### Model Selection
+
+```{r coati2}
+
+# Generate the variogram
+vg <- variogram(DATA)
+
+GUESS <- ctmm.guess(DATA, variogram = vg, interactive = FALSE)
+
+# Visually inspect the fit
+plot(vg, GUESS)
+
+# Fit the models
+FIT <- ctmm.select(data = DATA, CTMM = GUESS, cores = -1, trace = 3)
+
+# Summary of the fit
+summary(FIT)
+
+```
+
+### Simulating Paths
+
+```{r coati3}
+
+# Simulate from the fitted model, with the original sampling times
+SIM <- simulate(FIT, t = DATA$t)
+
+# Visualise the results
+plot(list(DATA, SIM), col = c("red", "blue"))
+
+# Draw model parameters from the sampling distribution of the fitted model
+FIT2 <- emulate(FIT, fast = TRUE)
+
+```
+
+We can generate many simulations to see potential paths taken under the same movement behaviors and conditions.
+
+```{r coati4}
+
+# Simulate from the model
+SIM2 <- simulate(FIT2, t = DATA$t)
+
+# Visualise the results
+plot(list(DATA, SIM, SIM2), col = c("red", "blue", "grey30"))
+
+# Fill in the gaps 
+SIM3 <- simulate(DATA, CTMM = FIT, dt = 60)
+
+# Visualise the results
+plot(list(DATA, SIM3), type = c("p", "l"), col = c("red", "blue"))
+
+```
+
+### Predict the Most-Likely Path
+
+```{r coati5}
+
+# Generate the most likely path (conditioned off of the fitted model)
+MLP <- predict(DATA, FIT, dt = 60)
+
+plot(DATA)
+plot(MLP, error = FALSE, type = "l", col = "blue", add = TRUE)
+
+# Export the simulations to work with other packages
+SIM_EXPORT <- simulate(DATA, CTMM = FIT, complete = TRUE)
+
+EXPORT <- SpatialPoints.telemetry(SIM_EXPORT)
+
+class(EXPORT)
+plot(EXPORT)
+
+```
 
 ---
 
