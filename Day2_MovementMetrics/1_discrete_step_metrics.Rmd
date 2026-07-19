@@ -2,7 +2,6 @@
 title: "M1: Discrete Step Metrics"
 subtitle: "Day 2 — Movement Metrics"
 author: "Animal Movement Analyses for Ecologists | SYSU Shenzhen"
-date: '`r format(Sys.time(), "%d %B %Y")`'
 output:
   html_document:
     toc: true
@@ -22,7 +21,7 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 
 ---
 
-# Learning Objectives
+## Learning Objectives
 
 By the end of this module you will be able to:
 
@@ -34,15 +33,15 @@ By the end of this module you will be able to:
 
 ---
 
-# Introduction
+## Ecological context: what step-based metrics reveal
 
-Step length, turning angle, and speed are the most basic movement metrics we can extract from GPS data—the displacement and directional change between one fix and the next. They may seem like a modest starting point, but nearly every higher‑level analysis depends on them. Speed distributions help separate resting from traveling bouts; turning‑angle patterns distinguish directed movement from area‑restricted search; and both feed directly into the behavioral‑state models (HMMs) we’ll build on Day 5.
+Step length, turning angle, and speed are the most basic movement metrics we can extract from GPS data—the displacement and directional change between one fix and the next. They may seem like a modest starting point, but nearly every higher‑level analysis depends on them. Speed distributions help separate resting from traveling bouts; turning‑angle patterns distinguish directed movement from area‑restricted search; and both feed directly into behavioral‑state models (HMMs), covered in a later module.
 
 Even at this basic level, these metrics often carry ecological information. A sustained sequence of long, straight steps can indicate directed travel along a fence line or road, where movement is constrained by the landscape rather than driven by foraging. Similar patterns may also signal migratory transit. In contrast, short steps with high turning angles typically cluster in areas where animals are settled, foraging, or engaged in localized “ranging” movements outside a migration period.
 
 Getting clean step‑based metrics requires comparing steps that span the *same* time interval. A step length calculated across a 20‑minute gap and one calculated across a 6‑hour gap are not measuring the same underlying process, and mixing them without accounting for the difference will distort every downstream metric — including the speed and turning‑angle distributions above. Section 2 walks through how to choose a consistent interval for the discrete, step‑based calculations used in this module.
 
-That said, not all movement analyses require regular sampling intervals. Continuous‑time movement models — covered later today in Modules 3–4 — are designed specifically to use irregular fix intervals, treating the gaps between fixes as informative rather than a nuisance. The discrete step‑metric approach here is one useful lens, but not the only one.
+That said, not all movement analyses require regular sampling intervals. Continuous‑time movement models — covered in a companion module on continuous-time movement modeling — are designed specifically to use irregular fix intervals, treating the gaps between fixes as informative rather than a nuisance. The discrete step‑metric approach here is one useful lens, but not the only one.
 
 ---
 
@@ -65,10 +64,10 @@ library(units)       # Explicit unit conversions
 ```
 
 ### 1.1 Reload/Recalculate `trk_all`
-Yesterday, in Day 1 Module 3, we built a multi-individual `amt` track from the cleaned `move2` data and reprojected it to a metric CRS — then set it aside for today. `trk_all` itself wasn't saved to disk (only the cleaned `move2` object was), so as a reminder, here's the exact code that built it:
+In the previous module, we built a multi-individual `amt` track from the cleaned `move2` data and reprojected it to a metric CRS — then set it aside for now. `trk_all` itself wasn't saved to disk (only the cleaned `move2` object was), so as a reminder, here's the exact code that built it:
 
 ```{r load}
-load("../Day1_IntroMovementEcology/Data/WB_clean.rdata")  # loads WB.mv2, saved at the end of Day 1 Module 2
+load("Data/WB_clean.rdata")  # loads WB.mv2, the cleaned wildebeest track data
 
 latlong_crs <- "EPSG:4326"   # WGS84 geographic — what move2/Movebank gives us
 utm_crs     <- "EPSG:32737"  # UTM Zone 37S — metric, appropriate for Athi-Kaputiei, Kenya
@@ -86,19 +85,19 @@ WB_df <- WB.mv2 %>%
             t = timestamp) %>%
   arrange(id, t)
 
-trk_all <- make_track(WB_df, x, y, t, id = id, crs = latlong_crs)
+trk_all <- make_track(WB_df, x, y, t, id = id, crs = latlong_crs, lon = x, lat = y)
 trk_all <- transform_coords(trk_all, utm_crs)
 
 class(trk_all)        # track_xyt, track_xy, tbl_df, tbl, data.frame
 n_distinct(trk_all$id) # number of individuals
 ```
 
-> **Note:** `trk_all` holds every individual in one tibble, with `id` as an ordinary column. The `amt` functions in Section 2 and 3 each operate on a single individual's track at a time, so we'll repeat the `nest(data = -id)` / `map()` / `unnest()` pattern previewed yesterday throughout this module — Section 2.1 walks through what each piece actually does.
+> **Note:** `trk_all` holds every individual in one tibble, with `id` as an ordinary column. The `amt` functions in Section 2 and 3 each operate on a single individual's track at a time, so we'll repeat the `nest(data = -id)` / `map()` / `unnest()` pattern previewed earlier throughout this module — Section 2.1 walks through what each piece actually does.
 
 ---
 
 ## 2. Sampling design and choosing comparable steps
-Before we run any `amt` function across all wildebeest, we need a way to apply a function that's written for *one* track to every individual in `trk_all` at once. That's what the `nest()` / `map()` / `unnest()` pattern (previewed yesterday) is for, and since we'll lean on it for the rest of this module, it's worth pausing on what each piece actually does:
+Before we run any `amt` function across all wildebeest, we need a way to apply a function that's written for *one* track to every individual in `trk_all` at once. That's what the `nest()` / `map()` / `unnest()` pattern (previewed earlier) is for, and since we'll lean on it for the rest of this module, it's worth pausing on what each piece actually does:
 
 - **`nest(data = -id)`** collapses `trk_all` from "one row per fix" into "one row per individual." Every column except `id` gets folded into a single list-column called `data` — so each row holds, in effect, one individual's entire track as its own self-contained tibble. Run the chunk below and click on a `data` entry in the viewer to see this directly.
 - **`map(data, FUN)`** then applies a function (`FUN`) to each of those per-individual tibbles in turn, one at a time, and collects the results back into a new list-column. This is the part that does the actual "scale from one individual to all" work — `FUN` itself (e.g., `summarize_sampling_rate()` below) only ever has to know how to handle a single track.
@@ -121,7 +120,7 @@ sampling_rates <- trk_nested %>%
 sampling_rates
 ```
 
-> **What this shows for this dataset:** `summarize_sampling_rate()` returns the distribution (min, median, mean, max, etc.) of the time gap between consecutive fixes for one individual. For these collars, that distribution isn't a single number — as established in Day 1 Module 1, they're programmed with two different fix rates by design: hourly during the day and every three hours at night to save battery without sacrificing resolution during the period of greatest activity. The mix of ~1-hour and ~3-hour gaps you see above isn't a sign of anything wrong; it's the deliberate sampling schedule showing up in the data.
+> **What this shows for this dataset:** `summarize_sampling_rate()` returns the distribution (min, median, mean, max, etc.) of the time gap between consecutive fixes for one individual. For these collars, that distribution isn't a single number — they're programmed with two different fix rates by design: hourly during the day and every three hours at night to save battery without sacrificing resolution during the period of greatest activity. The mix of ~1-hour and ~3-hour gaps you see above isn't a sign of anything wrong; it's the deliberate sampling schedule showing up in the data.
 
 > More broadly, this kind of unevenness is the normal condition of GPS tracking data, not the exception. Duty-cycled collars, missed fixes, and satellite-visibility gaps all produce a mix of intervals in almost any real deployment. In Section 2.2, we'll work through how to determine which consecutive fixes should count as one comparable step.
 
@@ -154,6 +153,14 @@ head(trk_resampled_3h)
 ```
 
 > **Note:** Same function, coarser target `rate` — `track_resample()` looks for the fix nearest each 3-hour mark within `tolerance` and keeps that one. There's no universally "correct" choice between this and the hourly version in 2.2. The hourly version resolves fine-scale daytime behavior at the cost of treating night steps as a separate, shorter regime. This 3-hour version provides an "apples-to-apples" step length across the full cycle at the cost of discarding daytime fixes that were collected at a higher resolution. The rest of this module continues with the hourly (`trk_resampled`) version, since Section 3's goal is to demonstrate the step-metric workflow at the finer of the two resolutions — substitute `trk_resampled_3h` in Section 3 if whole-cycle comparability matters more for your question.
+
+This same regular 3-hour dataset is useful well beyond this module — anything downstream that wants one comparable time interval across the full day/night cycle can reuse it directly rather than re-deriving it from scratch. We save it here once so later modules can just load it:
+
+```{r save_3h}
+save(trk_resampled_3h, file = "Data/WB_3h_resampled.rdata")
+```
+
+> **For later modules:** `load("Data/WB_3h_resampled.rdata")` restores `trk_resampled_3h` exactly as built above — a `track_xyt` tibble, one row per fix, resampled to the nearest fix within 30 minutes of each 3-hour mark, with a `burst_` column marking runs of consecutive usable fixes. It's in the same projected CRS as `trk_all` above (UTM Zone 37S); reproject with `transform_coords()` if a module needs a different one. Copy this file into any other day's `Data/` folder that needs it, the same way `WB_clean.rdata` is copied around.
 
 ---
 
@@ -242,7 +249,7 @@ wb_steps %>%
 ---
 
 ## 4. Quick look: the same basics directly from `move2`
-`amt`'s track/step machinery is the most flexible route to these metrics — it's what supports the resampling control above and the windowed home-range/trait calculations in Module 2. But for a fast look at step length, speed, and turning angle, `move2` computes them directly on the cleaned `move2` object, no track conversion required:
+`amt`'s track/step machinery is the most flexible route to these metrics — it's what supports the resampling control above and the windowed home-range/trait calculations covered in a later module. But for a fast look at step length, speed, and turning angle, `move2` computes them directly on the cleaned `move2` object, no track conversion required:
 
 ```{r move2_speed}
 WB_metric <- WB.mv2 %>%
@@ -270,11 +277,11 @@ WB_angles %>%
 
 > **Note:** `move2`'s angle functions currently only work on geographic (lon/lat) coordinates — reproject to `EPSG:4326` before calling them, and back to a metric CRS for anything distance-based (move2 package documentation, `mt_azimuth()` reference).
 
-> **Why two routes to the same numbers?** `move2`'s `mt_*()` functions are vectorized across the whole multi-individual object directly — no `nest()`/`map()` needed, because they're track-ID-aware internally. That's simpler when all you want is step length, speed, or turning angle. `amt`'s track/step framework takes more setup, but that setup is what buys you controlled resampling (Section 2), and the burst- and window-aware metrics — displacement, intensity of use, home ranges — that Module 2 and Day 3 build on. Use whichever matches what you actually need.
+> **Why two routes to the same numbers?** `move2`'s `mt_*()` functions are vectorized across the whole multi-individual object directly — no `nest()`/`map()` needed, because they're track-ID-aware internally. That's simpler when all you want is step length, speed, or turning angle. `amt`'s track/step framework takes more setup, but that setup is what buys you controlled resampling (Section 2), and the burst- and window-aware metrics — displacement, intensity of use, home ranges — that later modules build on. Use whichever matches what you actually need.
 
 ---
 
-# Exercise: Apply to your own data
+## Practice: Apply to your own data
 Please do the following:
 
 1. **Check the sampling rate** for 2–3 individuals in your own dataset with `summarize_sampling_rate()`. Is it one consistent rate or does the sampling rate change similar to the wildebeest day/night schedule?
@@ -287,7 +294,7 @@ Please do the following:
 - Does your species/dataset have a known duty cycle (e.g., different day vs. night fix rates, or a schedule change partway through deployment)? If so, treat the sampling rate as part of the sampling design to work with, not noise to remove.
 - Are there individuals with unusually short bursts after resampling — a sign of poor satellite visibility or frequent missed fixes, as opposed to a designed schedule?
 - Do your step-length or speed distributions have a long right tail. If yes, what's producing this tail?
-- Do your research question(s) require a regular interval, or would an irregularity-aware approach (e.g., continuous-time movement models, Modules 3–4) fit better?
+- Do your research question(s) require a regular interval, or would an irregularity-aware approach (e.g., continuous-time movement models, covered in a related module) fit better?
 
 ---
 
@@ -303,7 +310,8 @@ Please do the following:
 | `mt_speed()` | `move2` | Step speed directly on a `move2` object |
 | `mt_turnangle()` | `move2` | Relative turning angle between consecutive segments (geographic CRS only) |
 | `mt_azimuth()` | `move2` | Heading/azimuth of each segment (geographic CRS only) |
+| `save()` / `load()` | `base` | Export the 3-hour resampled track to `Data/` so later modules can reuse it instead of recomputing it |
 
 ---
 
-*Next: **Module 2 — Summary Movement Traits** — having quantified step-by-step movement, we zoom out to individual-level summary traits over longer windows: displacement, maximum displacement, intensity of use, and diurnality — the same set of metrics used by the MoveTraits database to compare movement behavior across species.*
+*Next: **Module 2 — Summary Movement Traits** — having quantified step-by-step movement, we zoom out to individual-level summary traits over longer windows: displacement, maximum displacement, and diurnality — part of the same set of metrics used by the MoveTraits database to compare movement behavior across species.*

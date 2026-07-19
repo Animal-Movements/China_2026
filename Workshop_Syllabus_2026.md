@@ -91,7 +91,7 @@ Please complete the following **before arriving**:
 ### 2. R and RStudio
 
 -   Install the latest versions of [R](https://cran.r-project.org/) and [RStudio](https://posit.co/download/rstudio-desktop/)
--   Install the following R packages before arriving (installation instructions are in the pre-course materials): `move2`, `amt`, `tidyverse`, `sf`, `terra`, `momentuHMM`, `BaBA`, `recurse`, `ctmm`, `lubridate`, `mapview`
+-   Install the following R packages before arriving (installation instructions are in the pre-course materials): `move2`, `amt`, `tidyverse`, `sf`, `terra`, `momentuHMM`, `BaBA`, `recurse`, `ctmm`, `lme4`, `lubridate`, `mapview`
 -   _If you're already comfortable with R and expect to work with large-scale environmental datasets_, also install `rgee` (R interface to Google Earth Engine) and complete its authentication setup before arriving. Earth Engine access can be unreliable from mainland China without a VPN, so this is worth testing well ahead of the course rather than on the day.
 
 ### 3. Pre-course modules (complete before arriving)
@@ -119,7 +119,8 @@ Please complete the following **before arriving**:
 
 | Time | Module |
 |----|----|
-| 9:00–10:00 | Mini lecture: why animal movement & course overview (15 min) + key concepts (30 min) |
+| 9:00–9:15 | Mini lecture: why animal movement & course overview (15 min) |
+| 9:15–9:45 | Mini lecture: key concepts (30 min) |
 | 10:15–11:00 | M1: Data import & Movebank (`move2`) |
 | 11:15–12:00 | M2: Data cleaning & QC (`move2`) |
 | 1:30–2:15 PM | M3: Trajectory creation & visualization (`amt`) |
@@ -130,7 +131,7 @@ Please complete the following **before arriving**:
 |----|----|
 | 9:00–9:30 | Q&A + mini lecture: movement metrics & why they're useful (MoveTraits) |
 | 9:30–10:00 | M1: Discrete step metrics — step length, turning angle, speed (`amt`) |
-| 10:15–11:00 | M2: Summary movement traits — displacement, max displacement, intensity of use, diurnality (`amt`; MoveTraits) |
+| 10:15–11:00 | M2: Summary movement traits — displacement, max displacement, diurnality (`amt`; MoveTraits) |
 | 11:15–12:30 | M3: Introduction to CTMM — autocorrelation models & variogram (`ctmm`) |
 | 1:30–2:15 PM | M4: ctmm-based metrics — speed & distance estimation (`ctmm`) |
 
@@ -148,10 +149,10 @@ Please complete the following **before arriving**:
 
 | Time | Module |
 |----|----|
-| 9:00–9:30 | Q&A + mini lecture: behavior |
-| 9:30–10:00 | M1: Barrier behaviour analysis (`BaBA`) |
-| 10:00–10:30 | M2: Migration/seasonal movement pattern (`amt`) |
-| 10:30–11:00 | M3: Site fidelity and revisitation (`recurse`) |
+| 9:00–9:15 | Q&A |
+| 9:15–9:50 | M1: Barrier behaviour analysis (`BaBA`) |
+| 9:50–10:25 | M2: Migration pattern classification with NSD (`amt`) |
+| 10:25–11:00 | M3: Site fidelity and revisitation (`recurse`) |
 | 11:15–12:30 | M4-a: Periodic movement patterns (`ctmm`) & M4-b: Encounter/interaction analysis (`ctmm`) |
 | 1:30–2:15 PM | M5: Path reconstruction & simulations (`ctmm`) |
 
@@ -160,17 +161,17 @@ Please complete the following **before arriving**:
 | Time | Module |
 |----|----|
 | 9:00–9:30 | Lecture: intro to remote sensing |
-| 9:30–10:00 | M1: Environmental annotation — raster extraction & GEE intro (`terra`, `sf`, `rgee`) |
-| 10:15–11:00 | M2: Hidden Markov Models with GPS data (`momentuHMM`) |
-| 11:15–12:30 | M3: Hidden Markov Models with accelerometer data (`momentuHMM`) |
-| PM | Mini lecture on location error (tentative) + M4: Accounting for Location Error (`ctmm`) |
+| 9:30–10:30 | M1: Environmental annotation — raster extraction & GEE intro (`terra`, `sf`, `rgee`) |
+| 10:45–11:45 | M2: Hidden Markov Models with GPS data (`momentuHMM`) |
+| 11:45–12:30 | M3: Hidden Markov Models with accelerometer data (`momentuHMM`) |
+| PM | Mini lecture on location error + M4: Accounting for Location Error (`ctmm`) |
 
 #### Day 6 — Habitat Selection (Aug 2)
 
 | Time | Module |
 |----|----|
 | 9:00–9:45 | Q&A + mini lecture: habitat selection |
-| 10:00–11:00 | M1: CTMM-based habitat selection — iRSFs & RSF+AKDE (`ctmm`) |
-| 11:15–12:30 | M2: Resource & step selection functions (`amt`; pre-annotated dataset) |
+| 9:45–11:00 | M1: CTMM-based habitat selection — iRSFs & RSF+AKDE (`ctmm`) |
+| 11:15–12:30 | Mini lecture on SSF + M2: Resource & step selection functions (`amt`; pre-annotated dataset) |
 
 Time window assignments are tentative and will remain flexible based on everyday's progress. Time not otherwise committed each day is reserved for Own Data Practice — applying that day's methods to your own tracking dataset, with instructors available to help. Day 3 is the exception: the field trip and back-to-back afternoon modules leave no dedicated practice block that day.

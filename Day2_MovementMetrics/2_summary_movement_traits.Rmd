@@ -35,7 +35,7 @@ By the end of this module you will be able to:
 
 ## Ecological context: why movement traits?
 
-Trait-based ecology has traditionally leaned on static "proxy" traits — body size, diet category, clutch size — measured once and treated as fixed properties of a species. Biologging breaks that constraint: a GPS collar gives you the same individual's behavior measured repeatedly, for months or years, which means movement itself can be treated as a trait rather than just a method for studying one. This is the core argument behind **MoveTraits** (Beumer et al. 2026, *Ecology Letters* 29:e70297; database and code at [github.com/annescharf/MoveTraitsDatabase](https://github.com/annescharf/MoveTraitsDatabase)), which compiled five movement traits — displacement, maximum displacement, range size, intensity of use, and diurnality — for 6,351 individuals across 55 mammal and 108 bird species from Movebank and the Tucker et al. (2023, *Science*) dataset. Today's module covers two of those five directly — displacement and maximum displacement — plus diurnality, which MoveTraits also includes. The other two, intensity of use and range size, both depend on a minimum convex polygon (MCP) home range estimate; we hold them for Day 3, once `hr_mcp()` and home-range estimation are introduced properly rather than used as an unexplained building block here.
+Trait-based ecology has traditionally leaned on static "proxy" traits — body size, diet category, clutch size — measured once and treated as fixed properties of a species. Biologging breaks that constraint: a GPS collar gives you the same individual's behavior measured repeatedly, for months or years, which means movement itself can be treated as a trait rather than just a method for studying one. This is the core argument behind **MoveTraits** (Beumer et al. 2026, *Ecology Letters* 29:e70297; database and code at [github.com/annescharf/MoveTraitsDatabase](https://github.com/annescharf/MoveTraitsDatabase)), which compiled five movement traits — displacement, maximum displacement, range size, intensity of use, and diurnality — for 6,351 individuals across 55 mammal and 108 bird species from Movebank and the Tucker et al. (2023, *Science*) dataset. Today's module covers two of those five directly — displacement and maximum displacement — plus diurnality, which MoveTraits also includes. The other two, intensity of use and range size, both depend on a minimum convex polygon (MCP) home range estimate; we hold them for a later module, once `hr_mcp()` and home-range estimation are introduced properly rather than used as an unexplained building block here.
 
 Movement traits qualify as *functional* traits because they shape fitness directly — how an animal acquires resources, avoids risk, and disperses — and because individual movement decisions aggregate into ecosystem-level processes: seed dispersal, nutrient transport, and disease spread all depend on how far and how often animals move. The repeated-measurement angle adds something static traits cannot: because movement is *labile* (it can change within an individual's lifetime, even within a season), tracking it repeatedly lets you separate **between-individual variation** (which animals consistently move more or less than others — a population's adaptive capacity) from **within-individual variation** (how much a given animal's movement shifts with season, age, or environmental change — its plasticity, or acclimation potential). For the Athi-Kaputiei wildebeest, that distinction matters directly: an individual's displacement or diurnality might shift in response to a new fence, a road, or encroaching settlement, and that within-individual shift is exactly the kind of signal a single snapshot trait value may not reveal.
 
@@ -59,10 +59,10 @@ library(suncalc)     # Sunrise/sunset times, for diurnality
 
 ### 1.2 Rebuild `trk_all`
 
-As in Module 1, we rebuild the multi-individual track from the cleaned `move2` data rather than relying on anything saved from a previous module. This time we also keep each fix's original geographic coordinates as `lon`/`lat` columns alongside the reprojected `x_`/`y_` — Section 3's diurnality calculation needs real longitude/latitude to look up sunrise and sunset, while everything else in this module needs metric distances.
+As before, we rebuild the multi-individual track from the cleaned `move2` data rather than relying on anything saved from a previous module. This time we also keep each fix's original geographic coordinates as `lon`/`lat` columns alongside the reprojected `x_`/`y_` — Section 3's diurnality calculation needs real longitude/latitude to look up sunrise and sunset, while everything else in this module needs metric distances.
 
 ```{r load}
-load("../Day1_IntroMovementData/Data/WB_clean.rdata")   # loads WB.mv2
+load("Data/WB_clean.rdata")   # loads WB.mv2, the cleaned wildebeest track data
 
 latlong_crs <- "EPSG:4326"
 utm_crs     <- "EPSG:32737"
@@ -89,7 +89,7 @@ trk_nested
 
 ## 2. Displacement
 
-**Displacement** at a given time scale is just the consecutive step length over that interval — MoveTraits reports it at 1-hour and 24-hour scales; here we calculate it daily, the same idea applied to this dataset's native fix structure. Because displacement uses each calendar day's first and last fix directly — it doesn't split the day into "day" and "night" steps the way diurnality does in Section 4 — this dataset's day/night duty cycle (Day 1 Module 1; Day 2 Module 1 Section 2.1) doesn't bias it the same way; no special resampling is needed here.
+**Displacement** at a given time scale is just the consecutive step length over that interval — MoveTraits reports it at 1-hour and 24-hour scales; here we calculate it daily, the same idea applied to this dataset's native fix structure. Because displacement uses each calendar day's first and last fix directly — it doesn't split the day into "day" and "night" steps the way diurnality does in Section 4 — this dataset's day/night duty cycle (roughly hourly fixes by day, every 3 hours at night) doesn't bias it the same way; no special resampling is needed here.
 
 ```{r calc_disp_fn}
 calc_disp <- function(track_df, time_unit = c("day", "week")) {
@@ -119,7 +119,7 @@ wb_daily_disp <- wb_daily_disp_raw %>%
 wb_daily_disp
 ```
 
-> **Note:** "Displacement" here means the straight-line distance between the *first* and *last* fix within each window — not the cumulative distance traveled. An animal that wanders a large loop and ends up back near where it started has a *small* displacement despite having moved a lot, which is exactly the kind of contrast that motivates pairing displacement with intensity of use and home range on Day 3.
+> **Note:** "Displacement" here means the straight-line distance between the *first* and *last* fix within each window — not the cumulative distance traveled. An animal that wanders a large loop and ends up back near where it started has a *small* displacement despite having moved a lot, which is exactly the kind of contrast that motivates pairing displacement with intensity of use and home range once home-range estimation is introduced.
 
 ```{r plot_daily_disp}
 wb_daily_disp_raw %>%
@@ -209,15 +209,20 @@ $$DI = \frac{(AD/DD) - (AN/DN)}{(AD/DD) + (AN/DN)}$$
 
 where $AD$/$AN$ are the summed step distances during day/night fixes and $DD$/$DN$ are the counts of day/night fixes. $DI$ ranges from $-1$ (entirely nocturnal) to $+1$ (entirely diurnal), with values near 0 indicating crepuscular or cathemeral (active at all hours) behavior.
 
-> **A sampling-rate subtlety specific to this trait.** Displacement and maximum displacement above use raw fixes directly and never split day from night, so this dataset's two-rate duty cycle — roughly hourly fixes by day, every 3 hours at night (Day 1 Module 1; Day 2 Module 1 Section 2.1) — doesn't bias them. Diurnality is different: it explicitly compares day-time and night-time step distances, which makes it sensitive to *how* we resample before computing those steps. If we resampled to the daytime's 1-hour rate — the way Day 2 Module 1's main step-metric workflow does — almost every night-to-night gap (≈3 hours) would exceed the tolerance around that 1-hour target and start a new single-fix burst, and `steps_by_burst()` can't compute a step within a burst of length 1. Night would end up contributing almost no steps to $AN$/$DN$ at all, and the index would come out artificially close to $+1$ regardless of the animal's real activity pattern — a resampling artifact, not biology. To keep day and night on equal footing, we instead resample to the night's native 3-hour rate, the same alternative demonstrated in Day 2 Module 1 Section 2.3, so a step of the same nominal duration gets computed on both sides of the day/night split.
+> **A sampling-rate subtlety specific to this trait.** Displacement and maximum displacement above use raw fixes directly and never split day from night, so this dataset's two-rate duty cycle — roughly hourly fixes by day, every 3 hours at night — doesn't bias them. Diurnality is different: it explicitly compares day-time and night-time step distances, which makes it sensitive to *how* we resample before computing those steps. If we resampled to the daytime's 1-hour rate — the resolution best suited to daytime movement specifically — almost every night-to-night gap (≈3 hours) would exceed the tolerance around that 1-hour target and start a new single-fix burst, and `steps_by_burst()` can't compute a step within a burst of length 1. Night would end up contributing almost no steps to $AN$/$DN$ at all, and the index would come out artificially close to $+1$ regardless of the animal's real activity pattern — a resampling artifact, not biology. To keep day and night on equal footing, we instead resample to the night's native 3-hour rate — the coarser, whole-cycle-comparable alternative — so a step of the same nominal duration gets computed on both sides of the day/night split.
+
+Rather than resample separately here, we reuse the shared 3-hour dataset already built and exported in Module 1 (Section 2.3) — same `rate`/`tolerance`, so it's exactly the dataset the paragraph above describes:
+
+```{r load_3h}
+load("Data/WB_3h_resampled.rdata")  # loads trk_resampled_3h
+```
 
 ### 4.1 Classifying fixes as day or night
 
 `suncalc::getSunlightTimes()` returns sunrise/sunset for a given date and location — exactly what we need to classify each fix using its own timestamp, longitude, and latitude:
 
 ```{r one_individual_sun}
-one_trk <- trk_all %>% filter(id == "Sotua")
-one_resampled <- track_resample(one_trk, rate = hours(3), tolerance = minutes(30))
+one_resampled <- trk_resampled_3h %>% filter(id == "Sotua")
 
 sun_times <- suncalc::getSunlightTimes(
   data = data.frame(date = as.Date(one_resampled$t_),
@@ -258,8 +263,7 @@ We join each step to the day/night label of its *starting* fix (`t1_`), then sum
 ### 4.3 Scaling to all individuals
 
 ```{r calc_diurnality_fn}
-calc_diurnality_one <- function(trk_one) {
-  trk_rs   <- track_resample(trk_one, rate = hours(3), tolerance = minutes(30))
+calc_diurnality_one <- function(trk_rs) {
   steps_rs <- steps_by_burst(trk_rs)
 
   sun <- suncalc::getSunlightTimes(
@@ -280,13 +284,16 @@ calc_diurnality_one <- function(trk_one) {
                          ((dist_sum_day / n_fix_day) + (dist_sum_night / n_fix_night)))
 }
 
-wb_diurnality <- trk_nested %>%
+wb_diurnality <- trk_resampled_3h %>%
+  nest(data = -id) %>%
   mutate(di = map(data, calc_diurnality_one)) %>%
   select(id, di) %>%
   unnest(di)
 
 wb_diurnality
 ```
+
+> **Note:** `calc_diurnality_one()` now takes an already-resampled track (`trk_rs`) rather than resampling internally — it operates on `trk_resampled_3h`, the shared dataset loaded above, instead of recomputing its own 3-hour resample per individual.
 
 ```{r plot_diurnality}
 wb_diurnality %>%
@@ -300,7 +307,7 @@ wb_diurnality %>%
        x = NULL, y = "Diurnality index (DI)")
 ```
 
-> **Discussion:** Wildebeest are grazers and predominantly diurnal, so most individuals here should land closer to $+1$ than $-1$. An individual with a notably lower or even negative $DI$ is worth a second look — among other explanations, increased nocturnal movement near roads or settlements is a documented predator-avoidance response in some ungulates, which would tie this trait directly back into the fences/roads/connectivity framing from Module 1.
+> **Discussion:** Wildebeest are grazers and predominantly diurnal, so most individuals here should land closer to $+1$ than $-1$. An individual with a notably lower or even negative $DI$ is worth a second look — among other explanations, increased nocturnal movement near roads or settlements is a documented predator-avoidance response in some ungulates, which would tie this trait directly back into the fences/roads/connectivity framing for this landscape.
 
 This simplified version covers the core logic; the published MoveTraits pipeline additionally handles edge cases like polar locations where `getSunlightTimes()` can return `NA` (no real sunrise/sunset that day) — not a concern at this study's latitude, but worth knowing if you adapt this to a different system.
 
@@ -308,7 +315,7 @@ This simplified version covers the core logic; the published MoveTraits pipeline
 
 ## 5. Individual differences: do these traits group wildebeest into movement profiles?
 
-Sections 2–4 looked at one trait at a time. Trait-based comparisons get more interesting when you ask whether individuals that are similar on one trait also tend to be similar on the others — that is, whether the wildebeest in this dataset fall into a small number of recognizable movement profiles rather than varying independently on every axis. This is a simplified version of last year's clustering approach, applied to the three traits this module covers.
+Sections 2–4 looked at one trait at a time. Trait-based comparisons get more interesting when you ask whether individuals that are similar on one trait also tend to be similar on the others — that is, whether the wildebeest in this dataset fall into a small number of recognizable movement profiles rather than varying independently on every axis. This is a simplified clustering approach, applied to the three traits this module covers.
 
 ### 5.1 Building a trait matrix
 
@@ -412,4 +419,4 @@ metrics_df %>%
 
 ---
 
-*Next: **Module 3 — Introduction to CTMM** — having quantified discrete-time movement, summary traits, and asked whether individuals cluster into movement profiles, we move to continuous-time movement models as a different framework for characterizing space use and movement. Intensity of use and range size — the two MoveTraits traits not covered here — return on Day 3, once MCP and KDE home-range estimation are introduced.*
+*Next: **Module 3 — Introduction to CTMM** — having quantified discrete-time movement, summary traits, and asked whether individuals cluster into movement profiles, we move to continuous-time movement models as a different framework for characterizing space use and movement. Intensity of use and range size — the two MoveTraits traits not covered here — return in a later module, once MCP and KDE home-range estimation are introduced.*

@@ -1,5 +1,5 @@
 ---
-title: 'M2: ctmm-Based Habitat Selection: Integrated Resource Selection Functions and iRSF-AKDE'
+title: 'M1: ctmm-Based Habitat Selection: Integrated Resource Selection Functions and iRSF-AKDE'
 subtitle: "Day 6 — Habitat Selection"
 author: "Animal Movement Analyses for Ecologists | SYSU Shenzhen, July 2026"
 date: "`r Sys.Date()`"

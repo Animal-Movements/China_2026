@@ -360,7 +360,7 @@ display: none;
 <strong>Location:</strong> School of Ecology, Sun Yat-sen University,
 Shenzhen, PRC<br />
 <strong>Language of instruction:</strong> English<br />
-<strong>Class size:</strong> 25–30 participants</p>
+<strong>Class size:</strong> 32 participants</p>
 <hr />
 </div>
 <div id="instructors" class="section level2">
@@ -510,8 +510,8 @@ found here</a>.</li>
 instructions are in the pre-course materials): <code>move2</code>,
 <code>amt</code>, <code>tidyverse</code>, <code>sf</code>,
 <code>terra</code>, <code>momentuHMM</code>, <code>BaBA</code>,
-<code>recurse</code>, <code>ctmm</code>, <code>lubridate</code>,
-<code>mapview</code></li>
+<code>recurse</code>, <code>ctmm</code>, <code>lme4</code>,
+<code>lubridate</code>, <code>mapview</code></li>
 <li><em>If you’re already comfortable with R and expect to work with
 large-scale environmental datasets</em>, also install <code>rgee</code>
 (R interface to Google Earth Engine) and complete its authentication
@@ -594,19 +594,23 @@ group formation</td>
 </thead>
 <tbody>
 <tr class="odd">
-<td>9:00–10:00</td>
-<td>Mini lecture: why animal movement &amp; course overview (15 min) +
-key concepts (30 min)</td>
+<td>9:00–9:15</td>
+<td>Mini lecture: why animal movement &amp; course overview (15
+min)</td>
 </tr>
 <tr class="even">
+<td>9:15–9:45</td>
+<td>Mini lecture: key concepts (30 min)</td>
+</tr>
+<tr class="odd">
 <td>10:15–11:00</td>
 <td>M1: Data import &amp; Movebank (<code>move2</code>)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>11:15–12:00</td>
 <td>M2: Data cleaning &amp; QC (<code>move2</code>)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>1:30–2:15 PM</td>
 <td>M3: Trajectory creation &amp; visualization (<code>amt</code>)</td>
 </tr>
@@ -640,7 +644,7 @@ key concepts (30 min)</td>
 <tr class="odd">
 <td>10:15–11:00</td>
 <td>M2: Summary movement traits — displacement, max displacement,
-intensity of use, diurnality (<code>amt</code>; MoveTraits)</td>
+diurnality (<code>amt</code>; MoveTraits)</td>
 </tr>
 <tr class="even">
 <td>11:15–12:30</td>
@@ -710,19 +714,20 @@ sample sizes (<code>ctmm</code>)</td>
 </thead>
 <tbody>
 <tr class="odd">
-<td>9:00–9:30</td>
-<td>Q&amp;A + mini lecture: behavior</td>
+<td>9:00–9:15</td>
+<td>Q&amp;A</td>
 </tr>
 <tr class="even">
-<td>9:30–10:00</td>
+<td>9:15–9:50</td>
 <td>M1: Barrier behaviour analysis (<code>BaBA</code>)</td>
 </tr>
 <tr class="odd">
-<td>10:00–10:30</td>
-<td>M2: Migration/seasonal movement pattern (<code>amt</code>)</td>
+<td>9:50–10:25</td>
+<td>M2: Migration pattern classification with NSD
+(<code>amt</code>)</td>
 </tr>
 <tr class="even">
-<td>10:30–11:00</td>
+<td>10:25–11:00</td>
 <td>M3: Site fidelity and revisitation (<code>recurse</code>)</td>
 </tr>
 <tr class="odd">
@@ -756,24 +761,24 @@ Encounter/interaction analysis (<code>ctmm</code>)</td>
 <td>Lecture: intro to remote sensing</td>
 </tr>
 <tr class="even">
-<td>9:30–10:00</td>
+<td>9:30–10:30</td>
 <td>M1: Environmental annotation — raster extraction &amp; GEE intro
 (<code>terra</code>, <code>sf</code>, <code>rgee</code>)</td>
 </tr>
 <tr class="odd">
-<td>10:15–11:00</td>
+<td>10:45–11:45</td>
 <td>M2: Hidden Markov Models with GPS data
 (<code>momentuHMM</code>)</td>
 </tr>
 <tr class="even">
-<td>11:15–12:30</td>
+<td>11:45–12:30</td>
 <td>M3: Hidden Markov Models with accelerometer data
 (<code>momentuHMM</code>)</td>
 </tr>
 <tr class="odd">
 <td>PM</td>
-<td>Mini lecture on location error (tentative) + M4: Accounting for
-Location Error (<code>ctmm</code>)</td>
+<td>Mini lecture on location error + M4: Accounting for Location Error
+(<code>ctmm</code>)</td>
 </tr>
 </tbody>
 </table>
@@ -797,14 +802,14 @@ Location Error (<code>ctmm</code>)</td>
 <td>Q&amp;A + mini lecture: habitat selection</td>
 </tr>
 <tr class="even">
-<td>10:00–11:00</td>
+<td>9:45–11:00</td>
 <td>M1: CTMM-based habitat selection — iRSFs &amp; RSF+AKDE
 (<code>ctmm</code>)</td>
 </tr>
 <tr class="odd">
 <td>11:15–12:30</td>
-<td>M2: Resource &amp; step selection functions (<code>amt</code>;
-pre-annotated dataset)</td>
+<td>Mini lecture on SSF + M2: Resource &amp; step selection functions
+(<code>amt</code>; pre-annotated dataset)</td>
 </tr>
 </tbody>
 </table>
