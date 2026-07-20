@@ -2,7 +2,6 @@
 title: "M1: Data Import"
 subtitle: "Day 1 — Introduction to Movement Ecology"
 author: "Animal Movement Analyses for Ecologists | SYSU Shenzhen"
-date: '`r format(Sys.time(), "%d %B %Y")`'
 output:
   html_document:
     toc: true

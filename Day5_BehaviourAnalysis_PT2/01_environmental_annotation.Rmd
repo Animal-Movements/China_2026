@@ -24,8 +24,7 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 
 By the end of this module you will be able to:
 
-1. Explain why environmental covariates — not movement alone — are usually what turn a "where" into a "why" in movement ecology, and how this module's output feeds directly into Day 6's habitat selection models.
-2. Compare three routes for annotating GPS locations with environmental data — pre-downloaded raster + local extraction (`terra`), Movebank's server-side Env-DATA annotation service, and cloud-based extraction via Google Earth Engine (`rgee`) — and judge which fits a given project's scale, budget, and connectivity constraints.
+1. Compare three routes for annotating GPS locations with environmental data — pre-downloaded raster + local extraction (`terra`), Movebank's server-side Env-DATA annotation service, and cloud-based extraction via Google Earth Engine (`rgee`) — and judge which fits a given project's scale, budget, and connectivity constraints.
 3. Extract elevation, land cover, and a time-matched NDVI value onto GPS locations using `terra`, including mosaicking adjoining raster tiles and matching a 16-day composite product to each fix's nearest available date.
 4. Visualize an annotated movement dataset to see how a landscape variable varies across a track.
 
@@ -35,7 +34,7 @@ By the end of this module you will be able to:
 
 ## Ecological context: why annotate locations with environmental data?
 
-A GPS fix tells you *where* an animal was and *when*. It does not, by itself, tell you *why* it was there. Almost every question that goes beyond describing movement — habitat selection, migration triggers, forage tracking, disturbance avoidance — requires joining each location (or each available "background" location) to the environmental conditions at that place and time. For a partially migratory, fence-constrained population like the Athi-Kaputiei wildebeest, whether an individual is standing in grassland or scrubland, at what elevation, and how green the vegetation was that week are exactly the variables that later distinguish a resource-tracking movement from a fence-forced detour. This module builds the annotated dataset that Day 6's resource and step-selection functions will consume directly — annotation is a prerequisite for habitat selection, not a separate topic.
+A GPS fix tells you *where* an animal was and *when*. It does not, by itself, tell you *why* it was there. Almost every question that goes beyond describing movement — habitat selection, migration triggers, forage tracking, disturbance avoidance — requires joining each location (or each available "background" location) to the environmental conditions at that place and time. For a partially migratory, fence-constrained population like the Athi-Kaputiei wildebeest, whether an individual is standing in grassland or scrubland, at what elevation, and how green the vegetation was that week are exactly the variables that later distinguish a resource-tracking movement from a fence-forced detour. This module builds the annotated dataset that the following resource- and step-selection-function module will consume directly — annotation is a prerequisite for habitat selection, not a separate topic.
 
 NDVI in particular has been used for decades as a remotely-sensed proxy for forage quantity/quality in exactly this kind of open rangeland system (Pettorelli et al. 2005, *Trends in Ecology & Evolution* 20(9):503–510), and land cover and terrain jointly describe the physical template — vegetation type and topography — that constrains where movement is even possible.
 
@@ -64,16 +63,16 @@ library(mapview)    # Quick interactive maps
 
 ### 1.2 Rebuild the point data
 
-As in Days 2–4, we rebuild from the cleaned `move2` object rather than depending on anything saved from a previous module.
+As before, we rebuild from the cleaned `move2` object rather than depending on anything saved from a previous module.
 
 ```{r load_data}
-load("../Day1_IntroMovementEcology/Data/WB_clean.rdata")   # loads WB.mv2
+load("Data/WB_clean.rdata")   # loads WB.mv2, the cleaned wildebeest track data
 
 WB_sf <- st_as_sf(as.data.frame(WB.mv2))
 st_crs(WB_sf)$epsg   # 4326 - Movebank's native geographic CRS
 ```
 
-> **Note:** Every raster layer we use below (SRTM elevation, MODIS land cover, MODIS NDVI) is also delivered in geographic WGS84. That means we can extract directly, in the native CRS, with no reprojection step — unlike the projected-CRS workflow used for home-range or step-metric work earlier in the week, where a metric (UTM) CRS was essential. Always check: extraction just needs *matching* CRSs, not necessarily a projected one.
+> **Note:** Every raster layer we use below (SRTM elevation, MODIS land cover, MODIS NDVI) is also delivered in geographic WGS84. That means we can extract directly, in the native CRS, with no reprojection step — unlike the projected-CRS workflow used for home-range or step-metric work in earlier modules, where a metric (UTM) CRS was essential. Always check: extraction just needs *matching* CRSs, not necessarily a projected one.
 
 For the worked examples below we'll focus on a single individual, **Sotua**, and extract to the full population only for the closing visualization.
 
@@ -305,7 +304,7 @@ Google Earth Engine (GEE) hosts a petabyte-scale, continuously updated catalog o
 # install.packages("rgee")
 library(rgee)
 
-# As of 2024, Earth Engine requires an explicit Google Cloud project ID -
+# Earth Engine requires an explicit Google Cloud project ID -
 # create/select one at https://console.cloud.google.com and enable the
 # Earth Engine API on it first.
 ee_Authenticate()

@@ -27,7 +27,6 @@ By the end of this module you will be able to:
 1. Explain what Barrier Behaviour Analysis (BaBA) classifies, and why combining a few simple movement metrics (step length, turning angle, encounter duration) lets you infer a more complex behavioral response to a barrier
 2. Run `BaBA()` on a set of animal tracks and a linear barrier layer, and interpret its six behavior classifications (quick cross, average movement, bounce, back-and-forth, trace, trapped)
 3. Tune BaBA's key parameters — buffer distance (`d`) and encounter-duration thresholds (`b_time`, `p_time`) — against a known ecological context, and recognize when a parameter choice is producing an artifact rather than a real behavioral signal
-4. Explain why the same method needs different parameter values across two structurally different fenced landscapes
 
 **Packages used:** `BaBA`, `sf`, `mapview`, `move2`, `tidyverse`, `RColorBrewer`, `gridExtra`
 
@@ -35,9 +34,9 @@ By the end of this module you will be able to:
 
 ## Ecological context: why study barrier behavior?
 
-Linear infrastructure — fences, roads — can act as significant barriers to terrestrial animal movement. **Barrier Behaviour Analysis** (BaBA; Xu et al. 2021, *Journal of Applied Ecology* 58(4):690–698) was developed to identify distinct behavioral responses an animal exhibits when it encounters one of these features. It's built on exactly the kind of discrete movement metrics covered on Day 2 — step length, turning angle, and movement duration — and is a good illustration of how simple descriptors, combined and applied to a spatial context (here, proximity to a barrier), can be used to infer a more complex movement phenomenon. By detecting these behaviors at the level of individual encounter events rather than treating "there's a fence here" as a single yes/no barrier judgment, BaBA lets conservation practitioners prioritize which specific fence or road segments are most disruptive to movement.
+Linear infrastructure — fences, roads — can act as significant barriers to terrestrial animal movement. **Barrier Behaviour Analysis** (BaBA; Xu et al. 2021, *Journal of Applied Ecology* 58(4):690–698) was developed to identify distinct behavioral responses an animal exhibits when it encounters one of these features. It's built on exactly the kind of discrete movement metrics covered in earlier modules — step length, turning angle, movement straightness, and movement duration — and is a good illustration of how simple descriptors, combined and applied to a spatial context (here, proximity to a barrier), can be used to infer a more complex movement phenomenon. Yet, also because `BaBA` relies on step length, we need to use tracking data with *roughly regular temporal interval*. 
 
-This module applies BaBA to two structurally different fragmented landscapes. In Wyoming, USA, pronghorn (*Antilocapra americana*) encounter fences that mark grazing allotments — typically long, continuous, and built to a standard woven-wire spec that pronghorn (fast runners but poor jumpers) often cannot cross. In Kenya, the Athi-Kaputiei wildebeest — the same population used throughout this workshop — encounter fences that cluster around roads and human settlements: shorter, denser, and more discontinuous, reflecting Nairobi's expanding peri-urban edge (Stabach et al. 2022, *Frontiers in Ecology and Evolution* 10:846171). The same method, applied to two genuinely different fence structures, needs genuinely different parameter choices — that contrast is the main methodological lesson of this module, alongside the behavior classifications themselves.
+This module applies BaBA to two structurally different fragmented landscapes. In Wyoming, USA, pronghorn (_Antilocapra americana_) encounter fences that mark grazing allotments — typically long, continuous, and built to a standard woven-wire spec that pronghorn (fast runners but poor jumpers) often cannot cross. In Kenya, the Athi-Kaputiei wildebeest — the same population used throughout this workshop — encounter fences that cluster around roads and human settlements: shorter, denser, and more discontinuous, reflecting Nairobi's expanding peri-urban edge (Stabach et al. 2022, *Frontiers in Ecology and Evolution* 10:846171). The same method, applied to two genuinely different fence structures, needs genuinely different parameter choices — that contrast is the main methodological lesson of this module, alongside the behavior classifications themselves.
 
 ---
 
@@ -78,6 +77,7 @@ library(gridExtra)     # Arranging multiple ggplot panels
 <figure style="text-align: center;">
 ![Barrier behaviour categories classified by Barrier Behaviour Analysis.](./Figures/BABA.jpg)
 </figure>
+
 
 When a fence does not form a significant barrier to movement, animals may show *(1)* quick cross or *(2)* average movement. Otherwise, movement is altered by the fence and the animal may show *(3)* bounce, *(4)* back-and-forth, *(5)* trace, or get *(6)* trapped. The shaded band around the fence line marks the buffer used to flag fence-encounter fixes (orange dots), which are then classified into one of these six behaviors; blue dots are fixes outside the buffer.
 
@@ -158,7 +158,7 @@ mapView(results_prong$encounters, zcol = "eventTYPE",
   mapView(fences, color = "grey", layer.name = "Fencelines")
 ```
 
-> **Discussion:** What information can you read off this map that a simple "barrier present / absent" classification couldn't give you? Look at where each behavior type clusters along the fence line rather than just at the overall mix of behaviors — how might that spatial pattern translate into a concrete conservation recommendation (e.g., where to prioritize a wildlife-friendly fence retrofit)?
+> **Discussion:** Look at where each behavior type clusters along the fence line rather than just at the overall mix of behaviors — how might that spatial pattern translate into a concrete conservation recommendation (e.g., where to prioritize a wildlife-friendly fence retrofit)?
 
 ---
 
@@ -170,13 +170,13 @@ mapView(results_prong$encounters, zcol = "eventTYPE",
 # read fence lines
 fence.kenya <- st_read("./Data/Fencelines2010_UTM37S.gpkg")
 
-# load data and drop unreliable (missing-coordinate) locations
-WB <- read_rds("./Data/wildebeest_3hr_adehabitat.rds") %>%
-  as_tibble() %>%
-  rename(Animal.ID = animal_id) %>%
-  mutate(Animal.ID = factor(Animal.ID)) %>%   # BaBA requires an "Animal.ID" column and a "date" timestamp column
-  drop_na(x, y) %>%
-  st_as_sf(., coords = c("x", "y"), crs = st_crs(32737))
+# load the 3h regular data 
+load("Data/WB_3h_resampled.rdata")
+WB <- trk_resampled_3h %>%
+  rename(Animal.ID = id,
+         date = t_) %>%   # BaBA requires an "Animal.ID" column and a "date" timestamp column
+  #drop_na(x, y) %>% 
+  st_as_sf(., coords = c("x_", "y_"), crs = st_crs(32737))
 
 head(WB)
 ```
@@ -190,11 +190,13 @@ st_crs(WB) == st_crs(fence.kenya)
 ### 4.2 Visualize movement and fences
 
 ```{r wb_viz}
-WB.lines <- WB %>%
-  mt_as_move2(., time_column = "date", track_id_column = "id") %>%
-  mt_track_lines()
 
-mapView(WB.lines, zcol = "id", layer.name = "Wildebeest", cex = 1) +
+WB.lines <- WB %>%
+  group_by(Animal.ID) %>%
+  dplyr::summarise(do_union = FALSE) %>%
+  sf::st_cast("LINESTRING")
+
+mapView(WB.lines, zcol = "Animal.ID", layer.name = "Wildebeest", cex = 1) +
   mapView(fence.kenya, color = "grey", layer.name = "Fencelines")
 ```
 

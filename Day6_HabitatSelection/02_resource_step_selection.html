@@ -2854,10 +2854,11 @@ Shenzhen</h4>
 <h2>Learning Objectives</h2>
 <p>By the end of this module you will be able to:</p>
 <ol style="list-style-type: decimal">
-<li>Recognize the RSF you fit in M1 with <code>ctmm::rsf.fit()</code> as
-one implementation of a general concept, and see that same concept
-implemented with <code>amt</code>’s discrete-time toolkit — a different
-computational approach, not a different question.</li>
+<li>Recognize the RSF fit with <code>ctmm::rsf.fit()</code>’s
+continuous-time approach as one implementation of a general concept, and
+see that same concept implemented with <code>amt</code>’s discrete-time
+toolkit — a different computational approach, not a different
+question.</li>
 <li>Fit and interpret a single-individual RSF with
 <code>amt::fit_rsf()</code>, including relative selection strength (RSS)
 and a predicted habitat-suitability map, then scale it to a population
@@ -2884,12 +2885,11 @@ at different points along Johnson’s (1980) hierarchy of selection
 orders. An <strong>RSF</strong> contrasts <em>used</em> locations
 against <em>available</em> locations drawn from some fixed spatial
 domain — usually the individual’s home range (Section 2 uses
-<code>hr_mcp()</code>, which you already know from Day 3). Every
-available point is treated as equally reachable at every point in time;
-the model never looks at the path connecting one fix to the next. That
-is a strong assumption, but it is a reasonable approximation at the
-scale of “where does this animal spend its life,” and it is
-computationally simple.</p>
+<code>hr_mcp()</code>). Every available point is treated as equally
+reachable at every point in time; the model never looks at the path
+connecting one fix to the next. That is a strong assumption, but it is a
+reasonable approximation at the scale of “where does this animal spend
+its life,” and it is computationally simple.</p>
 <p>An <strong>SSF</strong> works at a finer grain (Fortin et al. 2005,
 <em>Ecology</em> 86:1320–1330; Thurfjell et al. 2014, <em>Movement
 Ecology</em> 2:4). The unit of analysis is the step itself — the
@@ -2951,10 +2951,10 @@ Northrup et al. (2022, <em>J. Anim. Ecol.</em> 91:1233–1248).</p>
 <h3>1.2 Rebuild <code>trk_all</code></h3>
 <p>Rebuild the multi-individual track from the cleaned
 <code>move2</code> data.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">load</span>(<span class="st">&quot;../Day1_IntroMovementEcology/Data/WB_clean.rdata&quot;</span>)   <span class="co"># loads WB.mv2</span></span>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">load</span>(<span class="st">&quot;Data/WB_clean.rdata&quot;</span>)   <span class="co"># loads WB.mv2, the cleaned wildebeest track data</span></span>
 <span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a></span>
 <span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>latlong_crs <span class="ot">&lt;-</span> <span class="st">&quot;EPSG:4326&quot;</span></span>
-<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>utm_crs     <span class="ot">&lt;-</span> <span class="st">&quot;EPSG:32737&quot;</span>   <span class="co"># UTM Zone 37S — used in Day 1-3</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>utm_crs     <span class="ot">&lt;-</span> <span class="st">&quot;EPSG:32737&quot;</span>   <span class="co"># UTM Zone 37S — the projected CRS used throughout this workshop</span></span>
 <span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a></span>
 <span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>WB_df <span class="ot">&lt;-</span> WB.mv2 <span class="sc">%&gt;%</span></span>
 <span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">x =</span> sf<span class="sc">::</span><span class="fu">st_coordinates</span>(.)[, <span class="dv">1</span>],</span>
@@ -2971,9 +2971,9 @@ Northrup et al. (2022, <em>J. Anim. Ecol.</em> 91:1233–1248).</p>
 <p>The raster stack below was built for the Stabach et al. (2016) RSF
 analysis of this same population and is projected to an Africa-specific
 Albers Equal Area projection — not the UTM projection
-<code>trk_all</code> currently uses. As in Day 5, the fix is to
-reproject the <em>points</em> to match the raster, not the other way
-around.</p>
+<code>trk_all</code> currently uses. As with other raster-covariate
+work, the fix is to reproject the <em>points</em> to match the raster,
+not the other way around.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>rsf_stack <span class="ot">&lt;-</span> terra<span class="sc">::</span><span class="fu">rast</span>(<span class="st">&quot;Data/ak_raster_stack.tif&quot;</span>)</span>
 <span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>athi_bound <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">&quot;Data/Athi.shp&quot;</span>, <span class="at">quiet =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a></span>
@@ -3018,24 +3018,24 @@ surprising sign as “the animal must actually prefer this.”</p>
 <h3>2.1 Thinning for independence, then defining availability</h3>
 <p>We’ll demonstrate on a single individual first:
 <strong>Sotua</strong>.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>one_trk <span class="ot">&lt;-</span> trk_all_aea <span class="sc">%&gt;%</span> <span class="fu">filter</span>(id <span class="sc">==</span> <span class="st">&quot;Sotua&quot;</span>)   <span class="co"># full temporal resolution - reused as-is in Section 4</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>one_trk <span class="ot">&lt;-</span> trk_all_aea <span class="sc">%&gt;%</span> <span class="fu">filter</span>(id <span class="sc">==</span> <span class="st">&quot;Sotua&quot;</span>)   <span class="co"># full temporal resolution, for the RSF demo below</span></span></code></pre></div>
 <p>RSF analyses assume statistical independence between the locations
 used to fit the model (Fieberg et al. 2010, <em>Ecography</em>
 33:565–567) — but GPS fixes taken close together in time rarely qualify,
 since an animal’s position an hour from now is highly predictable from
 its position now. Fitting directly on this dataset’s raw 1h-day/3h-night
-rate (Day 1–2) risks pseudoreplication: treating correlated observations
-as independent ones, inflating apparent confidence without adding real
+rate risks pseudoreplication: treating correlated observations as
+independent ones, inflating apparent confidence without adding real
 information.</p>
 <p>The rigorous fix is to estimate the position/velocity autocorrelation
-timescale (e.g. from a fitted <code>ctmm</code> model, as in this
-morning’s M1) and resample beyond where it decays to a few percent
-(Fieberg et al. 2021). As a simpler stand-in here, we resample to one
-fix per day — coarse enough to avoid strong autocorrelation for a
-wide-ranging ungulate, while keeping a usable sample. This is a
-reasonable default for this dataset, not a universal rule; for your own
-data, the autocorrelation-timescale route is the defensible way to pick
-a specific interval.</p>
+timescale (e.g. from a fitted <code>ctmm</code> movement model) and
+resample beyond where it decays to a few percent (Fieberg et al. 2021).
+As a simpler stand-in here, we resample to one fix per day — coarse
+enough to avoid strong autocorrelation for a wide-ranging ungulate,
+while keeping a usable sample. This is a reasonable default for this
+dataset, not a universal rule; for your own data, the
+autocorrelation-timescale route is the defensible way to pick a specific
+interval.</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>trk_all_thin <span class="ot">&lt;-</span> trk_all_aea <span class="sc">%&gt;%</span></span>
 <span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>  <span class="fu">nest</span>(<span class="at">data =</span> <span class="sc">-</span>id) <span class="sc">%&gt;%</span></span>
 <span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">data =</span> <span class="fu">map</span>(data, <span class="sc">~</span> <span class="fu">track_resample</span>(.x, <span class="at">rate =</span> <span class="fu">hours</span>(<span class="dv">24</span>), <span class="at">tolerance =</span> <span class="fu">hours</span>(<span class="dv">4</span>)))) <span class="sc">%&gt;%</span></span>
@@ -3050,11 +3050,12 @@ a specific interval.</p>
 <p>The core assumption of an RSF’s <em>availability</em> domain (a
 separate assumption from the independence one above) is that “available”
 means anywhere within some defined spatial domain — most commonly the
-individual’s own home range. You already built an MCP for Sotua in Day
-3; we use the same function here, at the 100% isopleth, purely to define
-the availability boundary (not as a home-range estimate in its own
-right). From here on, everything is built on the <em>thinned</em> track,
-<code>one_trk_thin</code>, not the raw <code>one_trk</code>.</p>
+individual’s own home range. An MCP for Sotua was already built earlier
+using <code>hr_mcp()</code>; we use the same function here, at the 100%
+isopleth, purely to define the availability boundary (not as a
+home-range estimate in its own right). From here on, everything is built
+on the <em>thinned</em> track, <code>one_trk_thin</code>, not the raw
+<code>one_trk</code>.</p>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>hr <span class="ot">&lt;-</span> <span class="fu">hr_mcp</span>(one_trk_thin, <span class="at">levels =</span> <span class="dv">1</span>)</span></code></pre></div>
 <p><code>amt::random_points()</code> then draws points within that
 boundary and tags them <code>case_ = FALSE</code>, while attaching the
@@ -3113,7 +3114,7 @@ prediction.</p>
 <p>Fence distance and water-point distance are correlated at 0.78 —
 still above the conventional 0.7 threshold for concern, and too high to
 include together. We keep <code>fence_dist</code> (more directly tied to
-the fence-barrier question this workshop keeps returning to) and drop
+the fence-barrier question central to this dataset) and drop
 <code>waterpts_dist</code>. No other pair comes close: the next-highest
 is secondary-road distance and woody distance at 0.53, comfortably under
 the threshold, so there’s no statistical reason to exclude
@@ -3370,11 +3371,12 @@ only what happens with multiple individuals’ worth of it differs.</p>
 <div id="two-stage-fit_rsf-per-individual" class="section level4">
 <h4>Two-stage: <code>fit_rsf()</code> per individual</h4>
 <p>We repeat the same availability-sampling + extraction workflow for
-every individual, using the
+every individual, using the same
 <code>nest()</code>/<code>map()</code>/<code>unnest()</code> pattern
-from Day 2–3 rather than the <code>lapply()</code>-based approach you
-may see in older scripts — but now we also fit the model itself inside
-the same nested pipeline, once per individual.</p>
+used throughout this workshop rather than the
+<code>lapply()</code>-based approach you may see in older scripts — but
+now we also fit the model itself inside the same nested pipeline, once
+per individual.</p>
 <div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" tabindex="-1"></a>extract_coefs <span class="ot">&lt;-</span> <span class="cf">function</span>(fit) {</span>
 <span id="cb27-2"><a href="#cb27-2" tabindex="-1"></a>  <span class="fu">summary</span>(fit)<span class="sc">$</span>coefficients <span class="sc">%&gt;%</span></span>
 <span id="cb27-3"><a href="#cb27-3" tabindex="-1"></a>    <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
@@ -3593,16 +3595,18 @@ along its path?” (Avgar et al. 2016, <em>Methods Ecol. Evol.</em>
 a multi-individual version here — you’ve already seen the
 single-individual-then-scale progression in Section 2, and the mechanics
 per individual are the same either way.</p>
-<div id="from-track-to-steps-recall-from-day-2-module-1" class="section level3">
-<h3>4.1 From track to steps (recall from Day 2 Module 1)</h3>
-<p>Recall from Day 2 M1: <code>track_resample()</code> selects which
-consecutive fixes count as a comparable step at a chosen nominal rate,
-tagging runs of usable fixes as <code>burst_</code>;
-<code>steps_by_burst()</code> then computes step length
-(<code>sl_</code>), turning angle (<code>ta_</code>), and time step
-(<code>dt_</code>) within each burst. We use the same 3-hour rate as Day
-2 M1 Section 2.3, so day and night steps stay directly comparable —
-applied to every individual via the same
+<div id="from-track-to-steps" class="section level3">
+<h3>4.1 From track to steps</h3>
+<p>An SSF needs steps built at one comparable rate across the day/night
+duty cycle, so we reuse the shared 3-hour-resampled dataset exported
+earlier in the workshop rather than resampling again here — same
+<code>rate</code>/<code>tolerance</code>, already tagged with
+<code>burst_</code> for runs of usable fixes. We just reproject it into
+this module’s <code>aea_crs</code> (<code>transform_coords()</code> only
+changes coordinates, not which fixes were selected), then
+<code>steps_by_burst()</code> computes step length (<code>sl_</code>),
+turning angle (<code>ta_</code>), and time step (<code>dt_</code>)
+within each burst — applied to every individual via the same
 <code>nest()</code>/<code>map()</code> pattern used throughout Section
 2.</p>
 <blockquote>
@@ -3611,12 +3615,14 @@ applied to every individual via the same
 <code>extract_covariates(..., where = &quot;both&quot;)</code> needs the data
 still in per-individual form to work correctly.</p>
 </blockquote>
-<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" tabindex="-1"></a>steps_all <span class="ot">&lt;-</span> trk_all_aea <span class="sc">%&gt;%</span></span>
-<span id="cb34-2"><a href="#cb34-2" tabindex="-1"></a>  <span class="fu">nest</span>(<span class="at">data =</span> <span class="sc">-</span>id) <span class="sc">%&gt;%</span></span>
-<span id="cb34-3"><a href="#cb34-3" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">data =</span> <span class="fu">map</span>(data, <span class="sc">~</span> .x <span class="sc">%&gt;%</span>                       <span class="co"># stays nested</span></span>
-<span id="cb34-4"><a href="#cb34-4" tabindex="-1"></a>                       <span class="fu">track_resample</span>(<span class="at">rate =</span> <span class="fu">hours</span>(<span class="dv">3</span>), <span class="at">tolerance =</span> <span class="fu">minutes</span>(<span class="dv">30</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb34-5"><a href="#cb34-5" tabindex="-1"></a>                       <span class="fu">filter_min_n_burst</span>(<span class="dv">3</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb34-6"><a href="#cb34-6" tabindex="-1"></a>                       <span class="fu">steps_by_burst</span>()))</span></code></pre></div>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" tabindex="-1"></a><span class="fu">load</span>(<span class="st">&quot;Data/WB_3h_resampled.rdata&quot;</span>)  <span class="co"># loads trk_resampled_3h (same 3h resample used in Day 2)</span></span>
+<span id="cb34-2"><a href="#cb34-2" tabindex="-1"></a></span>
+<span id="cb34-3"><a href="#cb34-3" tabindex="-1"></a>steps_all <span class="ot">&lt;-</span> trk_resampled_3h <span class="sc">%&gt;%</span></span>
+<span id="cb34-4"><a href="#cb34-4" tabindex="-1"></a>  <span class="fu">transform_coords</span>(aea_crs) <span class="sc">%&gt;%</span></span>
+<span id="cb34-5"><a href="#cb34-5" tabindex="-1"></a>  <span class="fu">nest</span>(<span class="at">data =</span> <span class="sc">-</span>id) <span class="sc">%&gt;%</span></span>
+<span id="cb34-6"><a href="#cb34-6" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">data =</span> <span class="fu">map</span>(data, <span class="sc">~</span> .x <span class="sc">%&gt;%</span>                       <span class="co"># stays nested</span></span>
+<span id="cb34-7"><a href="#cb34-7" tabindex="-1"></a>                       <span class="fu">filter_min_n_burst</span>(<span class="dv">3</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb34-8"><a href="#cb34-8" tabindex="-1"></a>                       <span class="fu">steps_by_burst</span>()))</span></code></pre></div>
 </div>
 <div id="generating-random-steps" class="section level3">
 <h3>4.2 Generating random steps</h3>
@@ -3752,21 +3758,21 @@ non-significance here as “the fence doesn’t matter”: this model only
 compares steps toward vs. away from the fence on average — it says
 nothing about behavior right at the fence line. An animal repeatedly
 approaching and retreating from a barrier it can’t cross (a bounce or
-trace pattern, in Day 4’s BaBA terminology) would generate many fixes
-near the fence — feeding the RSF’s apparent attraction — without that
-pattern contradicting the fence as a real deterrent to crossing. Both
-models remain observational here, the same caution as Section 2.3:
-neither can, on its own, distinguish “the fence changes behavior” from
-“behavior happens to cluster near the fence.” BaBA’s
-bounce/trace/trapped/cross classifications, built directly on the
-trajectory relative to the barrier, are the tool suited to that
-distinction (Day 4) — this SSF is a complementary check, not a
-resolution. Model discrimination is modest overall (concordance =
-0.542), typical for this kind of model, even though the overall
-likelihood-ratio test is highly significant (888.4 on 7 df, p &lt;
-2×10⁻¹⁶). Compare signs and magnitudes against the RSF (Section 2.7) as
-you would for a single individual — do the same covariates that mattered
-at the home-range scale still show up at the step scale?</p>
+trace pattern, in BaBA’s terminology) would generate many fixes near the
+fence — feeding the RSF’s apparent attraction — without that pattern
+contradicting the fence as a real deterrent to crossing. Both models
+remain observational here, the same caution as Section 2.3: neither can,
+on its own, distinguish “the fence changes behavior” from “behavior
+happens to cluster near the fence.” BaBA’s bounce/trace/trapped/cross
+classifications, built directly on the trajectory relative to the
+barrier, are the tool suited to that distinction — this SSF is a
+complementary check, not a resolution. Model discrimination is modest
+overall (concordance = 0.542), typical for this kind of model, even
+though the overall likelihood-ratio test is highly significant (888.4 on
+7 df, p &lt; 2×10⁻¹⁶). Compare signs and magnitudes against the RSF
+(Section 2.7) as you would for a single individual — do the same
+covariates that mattered at the home-range scale still show up at the
+step scale?</p>
 <p>The rigorous fix for the pooling problem is a <em>mixed</em>
 conditional logistic model — a per-individual random effect on top of
 the same <code>fit_clogit()</code>-style formula.
@@ -3804,8 +3810,8 @@ diagnostic and correction.</li>
 <hr />
 </div>
 </div>
-<div id="key-functions" class="section level2">
-<h2>Key Functions</h2>
+<div id="key-functions-reference" class="section level2">
+<h2>Key functions reference</h2>
 <table>
 <colgroup>
 <col width="33%" />
@@ -3824,13 +3830,12 @@ diagnostic and correction.</li>
 <td><code>track_resample()</code></td>
 <td><code>amt</code></td>
 <td>Thin fixes to a coarser, less-autocorrelated interval before fitting
-an RSF (Section 2.1) — same function as Day 2 M1, different purpose than
-Section 4.1’s use</td>
+an RSF (Section 2.1)</td>
 </tr>
 <tr class="even">
 <td><code>hr_mcp()</code></td>
 <td><code>amt</code></td>
-<td>Define an RSF’s availability domain (recall from Day 3)</td>
+<td>Define an RSF’s availability domain</td>
 </tr>
 <tr class="odd">
 <td><code>random_points()</code></td>
@@ -3874,16 +3879,17 @@ with multiple individuals</td>
 covariate range</td>
 </tr>
 <tr class="even">
-<td><code>track_resample()</code> / <code>steps_by_burst()</code></td>
-<td><code>amt</code></td>
-<td>Build the step table an SSF needs (recall from Day 2 M1)</td>
+<td><code>load()</code> / <code>steps_by_burst()</code></td>
+<td><code>base</code> / <code>amt</code></td>
+<td>Reuse the shared 3-hour-resampled dataset (Section 4.1) and build
+the step table an SSF needs</td>
 </tr>
 </tbody>
 </table>
 <hr />
 </div>
-<div id="practice" class="section level2">
-<h2>Practice</h2>
+<div id="practice-apply-to-your-own-data-if-relevant-to-your-work" class="section level2">
+<h2>Practice: Apply to your own data (if relevant to your work)</h2>
 <ol style="list-style-type: decimal">
 <li>Apply this workflow — availability sampling or steps, covariate
 extraction, model fitting — to your own tracking data, with whatever
@@ -3896,9 +3902,9 @@ why?</li>
 </div>
 <div id="wrap-up" class="section level2">
 <h2>Wrap-up</h2>
-<p>This concludes the core RSF/SSF content for Day 6. Remaining time
-today is Own Data Practice — apply today’s workflow (RSF review, then
-SSF) to your own tracking data, with instructors available to help.</p>
+<p>This concludes the core RSF/SSF content. Remaining time is reserved
+for Own Data Practice — apply this workflow (RSF review, then SSF) to
+your own tracking data, with instructors available to help.</p>
 </div>
 
 

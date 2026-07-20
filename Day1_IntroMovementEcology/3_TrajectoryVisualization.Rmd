@@ -2,7 +2,6 @@
 title: "M3: Trajectory Creation & Visualization"
 subtitle: "Day 1 — Introduction to Movement Ecology"
 author: "Animal Movement Analyses for Ecologists | SYSU Shenzhen"
-date: '`r format(Sys.time(), "%d %B %Y")`'
 output:
   html_document:
     toc: true
@@ -36,9 +35,9 @@ By the end of this module you will be able to:
 
 ## Ecological context
 
-A cleaned table of GPS fixes is still just a point cloud. Connecting those points into trajectories — ordered, individual-specific paths through space and time — is what lets us see things a point cloud hides: repeated-use corridors, a fence line an animal travels along but never crosses, or a shift in range that coincides with the start of the rains. For the Athi-Kaputiei wildebeest, navigating a landscape of fences, roads, and expanding settlement at Nairobi's edge, this distinction is not academic — whether an animal's path tracks *along* a barrier or threads *through* a gap has direct implications for connectivity and where conservation interventions should focus.
+A cleaned table of GPS fixes is still just a list of points. Connecting those points into trajectories — ordered, individual-specific paths through space and time — is what lets us see animal movement paths. For the Athi-Kaputiei wildebeest, navigating a landscape of fences, roads, and expanding settlement at Nairobi's edge, trajectory visualization can tell us whether an animal's path tracks *along* a barrier or threads *through* a gap has direct implications for connectivity and where conservation interventions should focus. A clear interactive map, or a short animation of a herd moving across a season, often does more to engage land-use planners, park managers, or pastoralist communities than a table of movement statistics ever will.
 
-Trajectories are also how this kind of analysis gets communicated beyond a methods paper. A clear interactive map, or a short animation of a herd moving across a season, often does more to engage land-use planners, park managers, or pastoralist communities than a table of movement statistics ever will. Today we focus on exactly that: turning cleaned point data into trajectories with `sf`, and into animations with `gganimate` and `moveVis`, for spatial accuracy and communication. We'll set up the `amt` track we need for this, too — but the quantitative movement metrics it produces (step length, turning angle, speed) are tomorrow's topic, on Day 2.
+In this module we will turn cleaned point data into trajectories and into animations with `gganimate` and `moveVis`. We'll set up the `amt` track we need for this, too — but the quantitative movement metrics it produces (step length, turning angle, speed) are the topic of the next module.
 
 ---
 
@@ -78,7 +77,7 @@ utm_crs     <- "EPSG:32737"  # UTM Zone 37S — metric, appropriate for Athi-Kap
 
 ## 2. Building a multi-individual `amt` track
 
-`amt` is built around the `track_xy`/`track_xyt` classes — lightweight tibbles with standardized `x_`, `y_`, `t_` columns plus an `id` column when there's more than one individual. We need to hand it plain columns, not a `move2`/`sf` object, so the first step is extracting coordinates out of `WB.mv2`'s point geometry.
+`amt` is built around the `track_xy`/`track_xyt` classes — lightweight tibbles with standardized `x_`, `y_`, `t_` columns plus an `id` column when there's more than one individual. We need to hand it plain dataframe, not a `move2`/`sf` object, so the first step is extracting coordinates out of `WB.mv2`'s point geometry.
 
 ### 2.1 From `move2` geometry to plain x/y/t/id columns
 
@@ -101,23 +100,23 @@ head(WB_df)
 trk_all <- make_track(WB_df, x, y, t, id = id, crs = latlong_crs)
 
 class(trk_all)     # track_xyt, track_xy, tbl_df, tbl, data.frame
-has_crs(trk_all)   # TRUE — crs was set at creation
 head(trk_all)
 ```
 
-> **Note:** `trk_all` holds *all* individuals in one tibble — `id` is just a column, not a grouping the class enforces. Several `amt` functions we'll use on Day 2 (e.g., `summarize_sampling_rate()`, `track_resample()`) operate on a single track at a time and need to be applied per individual via `nest()`/`map()`/`unnest()` — the same pattern used throughout `amt`'s own documentation for multi-animal data.
+> **Note:** `trk_all` holds *all* individuals in one tibble. Several `amt` functions used later for movement-metric analysis (e.g., `summarize_sampling_rate()`, `track_resample()`) operate on a single individual track at a time and need to be applied per individual via `nest()`/`map()`/`unnest()` — the same pattern used throughout `amt`'s own documentation for multi-animal data.
 
 ### 2.3 Reproject to a metric CRS
 
 ```{r reproject}
 trk_all <- transform_coords(trk_all, utm_crs)
 
-st_crs(trk_all)$epsg   # 32737
+head(trk_all)
+plot(trk_all)
 ```
 
-> **Why now?** Step lengths, speeds, and home-range areas all need distances in meters, not degrees of latitude/longitude. `transform_coords()` wraps `sf::st_transform()` and requires the track's CRS to already be set — which is exactly what `make_track(..., crs = latlong_crs)` did above.
+You can see that the values of x_ and y_ have been updated, due to the reprojection to UTM. 
 
-> **Looking ahead:** `trk_all` is now a ready-to-use, projected `amt` track for all individuals. On Day 2, we'll pick it back up to check each animal's empirical sampling rate, resample to regular bursts, and compute step length / turning angle as movement metrics. For the rest of today, we focus on visualizing the raw trajectories themselves.
+> **Looking ahead:** `trk_all` is now a ready-to-use, projected `amt` track for all individuals. However, it is still by nature a point dataframe (hence the base `plot` function still generates points). In the next module, we'll pick it back up to check each animal's empirical sampling rate, resample to regular bursts, and compute step length / turning angle as movement metrics. For now, we focus on visualizing the raw trajectories themselves.
 
 ---
 
@@ -160,7 +159,7 @@ mapview(WB.lines, zcol = "individual_local_identifier", layer.name = "Trajectori
 
 ### 3.3 (Optional) Overlay a shapefile
 
-Any polygon shapefile — a protected-area boundary, a fence network, a land-cover layer — can be laid under or over your trajectories the same way. We use a protected-area boundary purely as one example; this repository doesn't ship that particular shapefile, but if you have one for your own study system, the pattern from last year's materials applies directly:
+Any polygon shapefile — a protected-area boundary, a fence network, a land-cover layer — can be laid under or over your trajectories the same way. We use a protected-area boundary purely as one example; this repository doesn't ship that particular shapefile, but if you have one for your own study system, the same pattern applies directly:
 
 ```{r nnp_overlay, eval=FALSE}
 # Read in your boundary (reproject to match your trajectories' CRS):
@@ -177,16 +176,16 @@ Any polygon shapefile — a protected-area boundary, a fence network, a land-cov
 
 ### 4.1 Why animate?
 
-An animation makes spatial *and* temporal pattern visible at once in a way a static map cannot — a herd moving together, an individual peeling off, a synchronized response to rainfall. It's a communication tool, not an analysis: an animation doesn't replace the quantitative step-length/turning-angle metrics we'll compute on Day 2, but it's often the fastest way to get a non-specialist audience to see the same pattern those metrics describe.
+An animation makes spatial *and* temporal pattern visible at once in a way a static map cannot — a herd moving together, an individual peeling off, a synchronized response to rainfall. It's a communication tool as it's often the fastest way to get a non-specialist audience to see the same pattern those metrics describe.
 
 We'll build the same demo two ways, because the two tools trade off differently:
 
 - **`gganimate`** (Pedersen & Robinson) animates any `ggplot2` plot through time. General-purpose, no spatial-data dependencies, no internet connection needed — good for a fast first look.
 - **`moveVis`** (Schwalb-Willmann et al. 2020, *Methods in Ecology and Evolution* 11:664–669, doi:10.1111/2041-210X.13374) is purpose-built for animating `move2` tracks and can overlay a real basemap (OpenStreetMap tiles by default) underneath the moving points — closer to a presentation- or publication-ready figure, at the cost of an internet connection and slower rendering. For a system where fences, roads, and the edge of Nairobi's built-up area shape where animals can move, that landscape context is often worth it.
 
-**A caveat on `moveVis`, and how we work around it:** its `align_move()` step — which puts every individual on the same time grid before animating, a required input to `frames_spatial()` — has two confirmed bugs as of mid-2026, both found while building this module. First, it errors on `move2` objects carrying unused track-ID factor levels ([16EAGLE/moveVis#131](https://github.com/16EAGLE/moveVis/issues/131) — open). Second: its internal normalized-distance calculation divides elapsed time (correctly computed in seconds via `difftime(..., units = "secs")`) by `diff(range(timestamps), units = "s")` — base R's `diff()` has no `units` argument, so that `units = "s"` is silently dropped, and for any track spanning more than a day the denominator comes out in days, not seconds. The interpolation fraction then blows up far outside the [0,1] range `s2_interpolate_normalized()` expects, which clamps it to an endpoint — every individual's "interpolated" position collapses onto its own last recorded fix instead of moving between fixes (confirmed by source inspection and reproduced empirically on this dataset; neither bug reported upstream as of this writing).
+**A caveat on `moveVis`, and how we work around it:** its `align_move()` step — which puts every individual on the same time grid before animating, a required input to `frames_spatial()` — has a couple of bugs that show up on data like ours. You don't need to know the details to use this module: we've rewritten a corrected version of the function so it works correctly on this dataset, and Section 4.5 below shows you how to load and use it in place of the original.
 
-Rather than drop the package over two fixable bugs, Section 4.5 below sources a **locally patched drop-in replacement for `align_move()`** — identical to the released version except for the two fixes above — and feeds its corrected output into the real, unmodified `frames_spatial()` + `animate_frames()`. Patching around a known bug in a dependency, with a clear citation and a minimal diff, pending an upstream fix, is itself a useful applied skill — most ecologists writing analysis pipelines hit a bug in a niche package eventually.
+Rather than drop the package over two fixable bugs, Section 4.5 sources this **locally patched drop-in replacement for `align_move()`** — identical to the released version except for the fixes — and feeds its corrected output into the real, unmodified `frames_spatial()` + `animate_frames()`. 
 
 ### 4.2 Subsetting for a tractable demo
 
@@ -229,14 +228,12 @@ anim <- ggplot(WB_demo_df, aes(x = x, y = y, color = id)) +
   labs(title = "Wildebeest movement — {format(frame_time, '%Y-%m-%d %H:%M')}",
        x = "Longitude", y = "Latitude") +
   theme_minimal() +
-  transition_time(t) +
-  shadow_wake(wake_length = 0.2, size = TRUE)
+  transition_time(t) + # maps `t` onto animation frames and linearly interpolates each individual's position between consecutive real fixes. Effective for visualization but not robust enough for analyses
+  shadow_wake(wake_length = 0.2, size = TRUE) # leaves each point a short fading trail so direction of travel is easy to read.
 
 animate(anim, nframes = 100, fps = 10, width = 800, height = 600,
         renderer = gifski_renderer())   # preview
 ```
-
-`transition_time()` maps `t` onto animation frames and linearly interpolates each individual's position between consecutive real fixes — at this regional scale that's visually indistinguishable from a geodesic interpolation, which is exactly the kind of approximation that's fine for a communication tool but wouldn't be for an actual movement-metric calculation. `shadow_wake()` leaves each point a short fading trail so direction of travel is easy to read.
 
 ### 4.4 `gganimate`: save the animation
 
@@ -250,7 +247,7 @@ Next: the same demo window, animated with `moveVis` and a real basemap underneat
 
 ### 4.5 A locally patched `align_move()`
 
-`align_move()` is the step that puts every individual on the same time grid before animating — a required input to `frames_spatial()`. `R/align_move_fixed.R` is a drop-in replacement for it: same inputs, same output, both bugs from 4.1 fixed, built from only exported `move2`/`sf`/`s2`/`units` functions (no internal `moveVis:::` calls). You don't need to read the script to use it — `source()` it once, then call `align_move_fixed()` exactly like you would `align_move()`.
+`align_move()` is the step that puts every individual on the same time grid before animating — a required input to `frames_spatial()`. `align_move_fixed.R` is a drop-in replacement for it: same inputs, same output, with the bugs from 4.1 fixed. You don't need to read the script to use it — `source()` it once, then call `align_move_fixed()` exactly like you would `align_move()`.
 
 ```{r source_align_move_fixed}
 # install.packages(c("moveVis", "units"))
@@ -260,7 +257,7 @@ library(units)
 source("./align_move_fixed.R")
 ```
 
-> Curious what the patch actually does? Open `R/align_move_fixed.R` — each fix is commented at the point it applies, with citations. Confirmed working on the demo subset below (2026-06-27); if you scale this up to the full dataset, rerun the sanity check in 4.6 first.
+> Curious what the patch actually does? Open `align_move_fixed.R` — each fix is commented at the point it applies. If you scale this up to the full dataset, rerun the sanity check in 4.6 first to confirm the fix still holds.
 
 ### 4.6 `moveVis`: build frames and animate
 
@@ -298,7 +295,7 @@ animate_frames(frames, out_file = "wildebeest_movement_movevis.gif", overwrite =
 
 Now build and visualize trajectories for your own dataset.
 
-1. **Build an `amt` track** with `make_track()`. Double check `has_crs()` returns `TRUE` before going further — a missing CRS will silently break `transform_coords()` and any distance-based metric we compute from it on Day 2.
+1. **Build an `amt` track** with `make_track()`. Double check `has_crs()` returns `TRUE` before going further — a missing CRS will silently break `transform_coords()` and any distance-based metric computed from it later.
 2. **Build `LINESTRING` trajectories** for 2–3 individuals and map them. Do the paths match what you'd expect given your species' ecology and your study area's landscape features?
 3. **If you have a relevant shapefile** (a boundary, fence line, land-cover layer), overlay it on your trajectory map as in Section 3.3.
 4. **(Stretch) Animate a short window** with `gganimate` and/or `moveVis` for a few individuals. What does the animation reveal that the static trajectory map doesn't, and what does the `moveVis` basemap add over the `gganimate` version?
@@ -319,7 +316,7 @@ Now build and visualize trajectories for your own dataset.
 | `transition_time()` | `gganimate` | Map a time column onto animation frames, interpolating between fixes |
 | `shadow_wake()` | `gganimate` | Leave a fading trail behind each animated point |
 | `animate()` | `gganimate` | Render a `gganimate` object to GIF/video |
-| `align_move()` | `moveVis` | Align individuals to a uniform time grid for animation (patched locally — sourced from `R/align_move_fixed.R`, see 4.5) |
+| `align_move()` | `moveVis` | Align individuals to a uniform time grid for animation (patched locally — sourced from `align_move_fixed.R`, see 4.5) |
 | `frames_spatial()` | `moveVis` | Build per-frame plots with a basemap underneath each individual's path |
 | `add_northarrow()`, `add_scalebar()`, `add_timestamps()`, `add_progress()` | `moveVis` | Layer map annotations onto `frames_spatial()` output |
 | `animate_frames()` | `moveVis` | Render a `moveVis` frames object to GIF/video |

@@ -1,6 +1,6 @@
 ---
-title: "Site Fidelity and Revisitation Analysis (`recurse`)"
-subtitle: "Day 4 — Behaviour Analysis (supplementary)"
+title: "M3: Site Fidelity and Revisitation Analysis (`recurse`)"
+subtitle: "Day 4 — Behaviour Analysis"
 author: "Animal Movement Analyses for Ecologists | SYSU Shenzhen"
 output:
   html_document:
@@ -24,10 +24,10 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 
 By the end of this module you will be able to:
 
-1. Explain what site fidelity / revisitation means ecologically, and why it is a distinct question from home range size (Day 3), whole-track movement strategy (Module 2), or a single barrier-encounter event (Module 1)
-2. Explain how `recurse::getRecursions()` quantifies revisitation using a radius-based circle around each fixed location — number of revisits, residence time, and time since last visit
+1. Explain what site fidelity / revisitation means ecologically
+2. Explain how `recurse::getRecursions()` quantifies revisitation using a radius-based circle around each fixed location
 3. Compute and visualize revisitation patterns for wildebeest individuals, and explain how the choice of radius changes which ecological question you're actually answering
-4. Identify example research questions for which a recursion analysis, rather than a home-range or barrier analysis, is the right tool
+4. Identify example research questions for which a recursion analysis is the right tool
 
 **Packages used:** `recurse`, `move2`, `sf`, `tidyverse`, `lubridate`
 
@@ -35,7 +35,7 @@ By the end of this module you will be able to:
 
 ## Ecological context: why ask about revisitation specifically?
 
-Home range (Day 3) answers "how much space does this individual use?" Movement-pattern classification (Module 2) answers "does this individual's whole track show a resident, migratory, dispersing, or nomadic strategy?" Neither answers a third, equally important question: **does this individual keep coming back to the same specific places** — a denning or calving site, a permanent waterhole, a stopover along a migration route — regardless of how big its overall range is or what category its NSD curve falls into?
+Home range estimation answers "how much space does this individual use?" Movement-pattern classification answers "does this individual's whole track show a resident, migratory, dispersing, or nomadic strategy?" Neither answers a third, equally important question: **does this individual keep coming back to the same specific places** — a denning or calving site, a permanent waterhole, a stopover along a migration route — regardless of how big its overall range is or what category its NSD curve falls into?
 
 Site fidelity — the tendency to return to a previously used location — is itself under active selection: Switzer (1993, *Evolutionary Ecology* 7:533–555) showed theoretically that fidelity should be favored when habitat quality is predictable, when the cost of switching locations is high, and when an individual is likely to survive long enough to benefit from the local knowledge that comes with reuse. For ungulates specifically, Morrison et al. (2021, *Journal of Animal Ecology* 90:955–966) found that site fidelity in migratory ungulates is shaped by a mix of individual experience, forage predictability, and predation risk, and that it varies substantially both within and across populations.
 
@@ -63,10 +63,10 @@ library(lubridate)   # Timestamps
 
 ### 1.2 Load and reproject data
 
-`getRecursions()` counts revisits by drawing a fixed-radius circle around each location, so the coordinate reference system matters: a geographic (lat/lon) CRS is not recommended, since a "radius" in degrees does not correspond to a constant distance on the ground. We reproject to the same projected UTM CRS used throughout this workshop before extracting plain x/y/t/id columns — the same preparation pattern used in Day 2 and Day 3.
+`getRecursions()` counts revisits by drawing a fixed-radius circle around each location, so the coordinate reference system matters: a geographic (lat/lon) CRS is not recommended, since a "radius" in degrees does not correspond to a constant distance on the ground. We reproject to the same projected UTM CRS used throughout this workshop before extracting plain x/y/t/id columns — the same preparation pattern used in earlier modules.
 
 ```{r load}
-load("../Day1_IntroMovementEcology/Data/WB_clean.rdata")   # loads WB.mv2
+load("Data/WB_clean.rdata")   # loads WB.mv2, the cleaned wildebeest track data
 
 utm_crs <- "EPSG:32737"   # UTM Zone 37S — projected, meters
 
@@ -104,7 +104,7 @@ sotua_500 <- getRecursions(sotua_df, radius = 500, timeunits = "hours")
 sotua_5000 <- getRecursions(sotua_df, radius = 5000, timeunits = "hours")
 ```
 
-`timeunits = "hours"` is a deliberate choice here, not just the default — Day 1 established that this dataset has a 1h(day)/3h(night) duty cycle, so residence times and revisit intervals expressed in hours are directly comparable to that known sampling structure.
+`timeunits = "hours"` is a deliberate choice here, not just the default — this dataset has a known 1h(day)/3h(night) duty cycle, so residence times and revisit intervals expressed in hours are directly comparable to that known sampling structure.
 
 ### 2.1 Visualizing revisits spatially
 
@@ -118,7 +118,7 @@ plot(sotua_500, sotua_df, legendPos = c(min(sotua_df$x), max(sotua_df$y)))
 plot(sotua_5000, sotua_df, legendPos = c(min(sotua_df$x), max(sotua_df$y)))
 ```
 
-> **Discussion:** Compare the two maps. At `radius = 500`, high-revisit points should stand out as a small number of specific, precise locations. At `radius = 5000`, the same track shows most of the range as "revisited" at least a few times, since a 5 km circle around any point captures a large share of the whole home range — the signal of a few specific important sites gets diluted into a broader "well-used area" pattern. This is the same radius-selection trade-off as choosing a bandwidth for a kernel density home range (Day 3): too small and you see only noise; too large and you lose the specific pattern you were looking for.
+> **Discussion:** Compare the two maps. At `radius = 500`, high-revisit points should stand out as a small number of specific, precise locations. At `radius = 5000`, the same track shows larger area of the range as "revisited" at least a few times, since a 5 km circle around any point captures a large share of the whole home range — the signal of a few specific important sites gets diluted into a broader "well-used area" pattern. This is the same radius-selection trade-off as choosing a bandwidth for a kernel density home range: too small and you see only noise; too large and you lose the specific pattern you were looking for.
 
 ### 2.2 Revisit counts and residence time
 
@@ -151,7 +151,7 @@ sotua_mv2 <- WB_utm %>% filter(individual_local_identifier == "Sotua")
 
 sotua_500_mv2 <- getRecursions(sotua_mv2, radius = 500, timeunits = "hours")
 
-mean(sotua_500_mv2$revisits)
+mean(sotua_500$residenceTime)
 ```
 
 This gives the same result as the manual `WB_df` route above, since `getRecursions.move2()` builds its internal `data.frame(x=, y=, t=, id=)` in the correct order and type automatically. The manual route is still worth knowing, though — it generalizes to other packages that expect a plain trajectory data frame rather than a `move2` object specifically.
@@ -186,7 +186,7 @@ recursion_summary %>%
   theme_minimal()
 ```
 
-> **Discussion:** Individuals in the upper right — high mean revisits *and* long mean residence time at a small radius — are the ones showing the strongest site fidelity in the population-level sense, worth following up with a map of exactly *where* those revisited locations are, and what's there (a known waterhole? high-quality forage patch? something in the fence/settlement layout from Module 1?). Individuals in the lower left show little repeat use of any specific location at this radius — not necessarily "no site fidelity" outright, but worth checking at a different radius (Section 2's `radius = 5000` comparison) before concluding that.
+> **Discussion:** Individuals in the upper right — high mean revisits *and* long mean residence time at a small radius — are the ones showing the strongest site fidelity in the population, worth following up with a map of exactly *where* those revisited locations are, and what's there (a known waterhole? high-quality forage patch? something in the surrounding fence/settlement layout?). Individuals in the lower left show little repeat use of any specific location at this radius — not necessarily "no site fidelity" outright, but worth checking at a different radius (Section 2's `radius = 5000` comparison) before concluding that.
 
 ---
 
@@ -207,7 +207,6 @@ recursion_summary %>%
 1. **Pick a radius informed by a real question** — a known or suspected site type (den, nest, waterhole, lek) if you have one, or start with a couple of very different radii and compare, as in Section 2.
 2. **Run `getRecursions()`** on one or more individuals and map the result with `plot()`.
 3. **Look at `revisitStats`** for your highest-revisit locations — do the entrance/exit times cluster in a way that's ecologically meaningful (e.g. same time of day, same season)?
-4. **Think about which of your research questions** are really about revisitation to specific places, rather than range size or overall movement strategy — those are the ones this tool, rather than Day 3's or Module 2's, is built for.
 
 ---
 

@@ -37,7 +37,7 @@ By the end of this module you will be able to:
 
 This module works at an individual's entire track, asking a much broader question — is this animal migratory, resident, dispersing to a new area, or moving without any consistent long-term pattern at all?
 
-That question matters for the Athi-Kaputiei wildebeest population used throughout this workshop. Like many ungulate populations at the edge of a still-connected rangeland system, Athi-Kaputiei wildebeest are not uniformly migratory: individuals can vary in whether, and how far, they move between wet- and dry-season ranges, and that variation is itself an important signal of how much connectivity the surrounding land-use mosaic still allows (Stabach et al. 2022, *Frontiers in Ecology and Evolution* 10:846171). A single fitted home range (Day 3) or a single barrier-encounter classification (Module 1) cannot tell you this — you need a metric that summarizes the whole trajectory's shape over time.
+That question matters for the Athi-Kaputiei wildebeest population used throughout this workshop. Like many ungulate populations at the edge of a still-connected rangeland system, Athi-Kaputiei wildebeest are not uniformly migratory: individuals can vary in whether, and how far, they move between wet- and dry-season ranges, and that variation is itself an important signal of how much connectivity the surrounding land-use mosaic still allows (Stabach et al. 2022, *Frontiers in Ecology and Evolution* 10:846171). A single home-range estimate or a single barrier-encounter classification cannot tell you this — you need a metric that summarizes the whole trajectory's shape over time.
 
 **Net-squared displacement (NSD)** is the classic tool for exactly this. Bunnefeld et al. (2011, *Journal of Animal Ecology* 80:466–476) formalized how five canonical NSD curve shapes map onto five broad movement strategies — resident, disperser, migrant, mixed migrant, and nomad — turning a purely descriptive metric into a classification framework. 
 
@@ -60,10 +60,10 @@ library(slider)       # Time-based (not row-based) rolling window smoothing
 
 ### 1.2 Rebuild `trk_all`
 
-As in Day 2 and Day 3, we rebuild the multi-individual track from the cleaned `move2` data rather than relying on anything saved from a previous module.
+As before, we rebuild the multi-individual track from the cleaned `move2` data rather than relying on anything saved from a previous module.
 
 ```{r load}
-load("../Day1_IntroMovementEcology/Data/WB_clean.rdata")   # loads WB.mv2
+load("Data/WB_clean.rdata")   # loads WB.mv2, the cleaned wildebeest track data
 
 latlong_crs <- "EPSG:4326"   # WGS84 geographic — what move2/Movebank gives us
 utm_crs     <- "EPSG:32737"  # UTM Zone 37S — metric, needed for distances in meters
@@ -86,7 +86,7 @@ trk_nested
 
 ## 2. What net-squared displacement measures
 
-NSD is the squared straight-line distance between each fix and a single **reference point — almost always the individual's very first recorded fix** — plotted against time. It is a *whole-track* metric: unlike the maximum-displacement trait from Day 2 Module 2 (the largest pairwise distance between *any two* fixes inside a rolling window), NSD always measures distance from one fixed origin, for the entire deployment.
+NSD is the squared straight-line distance between each fix and a single **reference point — almost always the individual's very first recorded fix** — plotted against time. Sometimes you need to hand pick which point should be the reference point if the first point does not make sense. It is a *whole-track* metric (often an annual track as the unit): unlike the maximum-displacement trait covered in an earlier module (the largest pairwise distance between *any two* fixes inside a rolling window), NSD always measures distance from one fixed origin, for the entire deployment.
 
 That distinction matters for interpretation:
 
@@ -94,7 +94,7 @@ That distinction matters for interpretation:
 - A track that moves away and comes back produces an NSD curve that rises and falls back down (a round trip — migration).
 - A track that never moves far from its start produces an NSD curve that stays low and flat (residency).
 
-Unlike the step-length, turning-angle, and speed metrics from Day 2 — which assume a fairly consistent time interval between fixes to be comparable — NSD does **not** require a regularly sampled or resampled track. It is simply squared distance from a fixed reference point at whatever times fixes happen to have been recorded, so it can be computed directly on the raw track without any `track_resample()` step first.
+Unlike the step-length, turning-angle, and speed metrics covered earlier — which assume a fairly consistent time interval between fixes to be comparable — NSD does **not** require a regularly sampled or resampled track. It is simply squared distance from a fixed reference point at whatever times fixes happen to have been recorded, so it can be computed directly on the raw track without any `track_resample()` step first.
 
 `amt::add_nsd()` computes this directly on a `track_xyt`:
 
@@ -139,7 +139,7 @@ trk_nsd <- trk_nsd %>%
 year(trk_nsd$t_common) <- 2000   # lubridate: remap to a common calendar year for overlay; 2000 chosen because it's a leap year, so `Feb 29` in any year maps safely
 ```
 
-Fix-to-fix NSD is noisy, partly from GPS error and partly from the known 1h(day)/3h(night) duty cycle established in Day 1 — a run of dense day fixes and a run of sparse night fixes will jitter the raw curve even with no real behavioral change. A 7-day rolling mean, computed over actual elapsed time rather than a fixed number of rows (so it isn't biased by the uneven fix rate), removes that fine-scale noise while preserving the monthly-to-seasonal signal relevant to migration classification:
+Fix-to-fix NSD is noisy, partly from GPS error and partly from this dataset's known 1h(day)/3h(night) duty cycle — a run of dense day fixes and a run of sparse night fixes will jitter the raw curve even with no real behavioral change. A 7-day rolling mean, computed over actual elapsed time rather than a fixed number of rows (so it isn't biased by the uneven fix rate), removes that fine-scale noise while preserving the monthly-to-seasonal signal relevant to migration classification:
 
 ```{r nsd_smooth}
 trk_nsd <- trk_nsd %>%

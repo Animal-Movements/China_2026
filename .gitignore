@@ -2,3 +2,12 @@
 .Rhistory
 .RData
 .Ruserdata
+.DS_Store
+
+# Legacy archival material, kept local-only (not pushed to GitHub)
+Archive/2024_RSF/
+Archive/2025_1_Day1_DataCleaning/
+Archive/2025_3_Day4_HMMs/
+Archive/Day1_IntroMovementData/
+Archive/FDU-Remote-sensing/
+Archive/PKU-Movement-Ecology-Workshophop-main/

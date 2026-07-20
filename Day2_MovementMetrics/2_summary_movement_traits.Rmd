@@ -24,8 +24,7 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 
 By the end of this module you will be able to:
 
-1. Explain why movement-derived quantities are increasingly treated as *functional traits* in trait-based ecology, and why repeated measurement over time matters for that argument
-2. Calculate displacement and maximum displacement over daily, monthly, and yearly windows
+1. Calculate displacement and maximum displacement over daily, monthly, and yearly windows
 3. Calculate a diurnality index from day- and night-time step distances and sunrise/sunset times, choosing a resampling rate that keeps day and night fairly comparable, and interpret the index's sign and magnitude
 4. Visualize individual differences across these traits, and use simple clustering to ask whether individuals group into similar movement profiles
 
@@ -35,11 +34,9 @@ By the end of this module you will be able to:
 
 ## Ecological context: why movement traits?
 
-Trait-based ecology has traditionally leaned on static "proxy" traits — body size, diet category, clutch size — measured once and treated as fixed properties of a species. Biologging breaks that constraint: a GPS collar gives you the same individual's behavior measured repeatedly, for months or years, which means movement itself can be treated as a trait rather than just a method for studying one. This is the core argument behind **MoveTraits** (Beumer et al. 2026, *Ecology Letters* 29:e70297; database and code at [github.com/annescharf/MoveTraitsDatabase](https://github.com/annescharf/MoveTraitsDatabase)), which compiled five movement traits — displacement, maximum displacement, range size, intensity of use, and diurnality — for 6,351 individuals across 55 mammal and 108 bird species from Movebank and the Tucker et al. (2023, *Science*) dataset. Today's module covers two of those five directly — displacement and maximum displacement — plus diurnality, which MoveTraits also includes. The other two, intensity of use and range size, both depend on a minimum convex polygon (MCP) home range estimate; we hold them for a later module, once `hr_mcp()` and home-range estimation are introduced properly rather than used as an unexplained building block here.
+Trait-based ecology has traditionally leaned on static "proxy" traits — body size, diet category, clutch size — measured once and treated as fixed properties of a species. Biologging breaks that constraint: a GPS collar gives you the same individual's behavior measured repeatedly as movement metrics, for a given time window (months or years), which means movement itself can be treated as a trait. This is the core argument behind **MoveTraits** (Beumer et al. 2026, *Ecology Letters* 29:e70297; database and code at [github.com/annescharf/MoveTraitsDatabase](https://github.com/annescharf/MoveTraitsDatabase)), which compiled five movement traits — displacement, maximum displacement, range size, intensity of use, and diurnality — for 6,351 individuals across 55 mammal and 108 bird species from Movebank and the Tucker et al. (2023, *Science*) dataset. Today's module covers three of those five directly — displacement, maximum displacement, and diurnality. The other two, intensity of use and range size, both depend on a home range metric, minimum convex polygon (MCP) home range estimate; we hold them for a later module.
 
 Movement traits qualify as *functional* traits because they shape fitness directly — how an animal acquires resources, avoids risk, and disperses — and because individual movement decisions aggregate into ecosystem-level processes: seed dispersal, nutrient transport, and disease spread all depend on how far and how often animals move. The repeated-measurement angle adds something static traits cannot: because movement is *labile* (it can change within an individual's lifetime, even within a season), tracking it repeatedly lets you separate **between-individual variation** (which animals consistently move more or less than others — a population's adaptive capacity) from **within-individual variation** (how much a given animal's movement shifts with season, age, or environmental change — its plasticity, or acclimation potential). For the Athi-Kaputiei wildebeest, that distinction matters directly: an individual's displacement or diurnality might shift in response to a new fence, a road, or encroaching settlement, and that within-individual shift is exactly the kind of signal a single snapshot trait value may not reveal.
-
-Because these traits are fundamentally about how individuals differ from (or resemble) one another, this module doesn't stop at one trait value per individual. Sections 2–4 each visualize that trait's spread across individuals directly, and Section 5 asks the most direct version of the between-individual question: based on these trait values alone, do the wildebeest in this dataset fall into recognizable movement profiles?
 
 ---
 
@@ -89,7 +86,7 @@ trk_nested
 
 ## 2. Displacement
 
-**Displacement** at a given time scale is just the consecutive step length over that interval — MoveTraits reports it at 1-hour and 24-hour scales; here we calculate it daily, the same idea applied to this dataset's native fix structure. Because displacement uses each calendar day's first and last fix directly — it doesn't split the day into "day" and "night" steps the way diurnality does in Section 4 — this dataset's day/night duty cycle (roughly hourly fixes by day, every 3 hours at night) doesn't bias it the same way; no special resampling is needed here.
+**Displacement** at a given time scale is just the consecutive step length over that interval — MoveTraits reports it at 1-hour and 24-hour scales; here we calculate it daily. Because displacement uses each calendar day's first and last fix directly — it doesn't split the day into "day" and "night" steps the way diurnality does, this dataset's day/night sampling cycle (roughly hourly fixes by day, every 3 hours at night) doesn't bias it the same way; no special resampling is needed here.
 
 ```{r calc_disp_fn}
 calc_disp <- function(track_df, time_unit = c("day", "week")) {
@@ -135,7 +132,7 @@ wb_daily_disp_raw %>%
 
 ## 3. Maximum displacement
 
-**Maximum displacement** is a different quantity: the largest distance between *any two* fixes inside a window — the "diameter" of that window's point cloud — not the start-to-end distance, and not `amt`'s net-squared-displacement (`add_nsd()`/`nsd_`, which tracks squared distance from the very first fix of the *entire* track). MoveTraits computes this at 24-hour, 7-day, and 12-month windows; we calculate monthly and yearly versions here. Like displacement above, this uses all fixes within a window regardless of when they were collected, so the day/night duty cycle doesn't bias it the way it would a metric that compares day-time and night-time movement directly.
+**Maximum displacement** is a different quantity: the largest distance between *any two* fixes inside a window. MoveTraits computes this at 24-hour, 7-day, and 12-month windows; we calculate monthly and yearly versions here. Like displacement above, this uses all fixes within a window regardless of when they were collected, so the day/night duty cycle doesn't bias it the way it would a metric that compares day-time and night-time movement directly.
 
 ```{r calc_max_disp_fn}
 calc_max_disp <- function(track_df, time_unit = c("month", "year")) {
@@ -197,7 +194,7 @@ wb_monthly_max_disp_raw %>%
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-> **Discussion:** With month on the x-axis, a spike in an individual's line points straight to *when* an unusually large excursion happened, rather than needing to dig that out of a distribution. Compare the timing of any spike here to that individual's daily displacement (Section 2) over the same months — a sustained step-up in daily displacement alongside a spike here suggests a directed long-distance move, while a spike here with little change in daily displacement points instead to a single large loop within an otherwise normal month. Gaps in a line mark months with fewer than two fixes for that individual, where a maximum pairwise distance can't be computed.
+> **Discussion:** With month on the x-axis, a spike in an individual's line points straight to *when* an unusually large excursion happened. Looking at this figure, what ca you learn about these animals' seasonal movement?
 
 ---
 
@@ -315,7 +312,7 @@ This simplified version covers the core logic; the published MoveTraits pipeline
 
 ## 5. Individual differences: do these traits group wildebeest into movement profiles?
 
-Sections 2–4 looked at one trait at a time. Trait-based comparisons get more interesting when you ask whether individuals that are similar on one trait also tend to be similar on the others — that is, whether the wildebeest in this dataset fall into a small number of recognizable movement profiles rather than varying independently on every axis. This is a simplified clustering approach, applied to the three traits this module covers.
+Sections 2–4 looked at one trait at a time. Trait-based comparisons get more interesting when you ask whether individuals that are similar on one trait also tend to be similar on the others. For example, do nocturnal animals move longer distances? Are certain animals behave more similarly to each other? Here we show a simplified clustering approach, applied to the three traits this module covers. Note that in today's literature, below approaches are usually used for pattern exploration. 
 
 ### 5.1 Building a trait matrix
 
@@ -392,7 +389,7 @@ metrics_df %>%
 1. **Calculate daily displacement** for 2–3 individuals with `calc_disp()`, and plot the distribution by individual the way Section 2 does. How variable is it within an individual, and does that variability look seasonal?
 2. **Calculate monthly maximum displacement** with `calc_max_disp()`. Compare it to displacement (Step 1) — a large gap between the two tells you something about how the animal is moving (a big loop vs. a directed long-distance move).
 3. **(If location data plus species ecology make it relevant) compute diurnality** for your species. First check whether your own collars have a day/night duty cycle like this dataset's — if so, resample to the coarser of the two rates before computing steps, for the same reason Section 4 does here. Does the result match what's known about your species' activity pattern? If not, consider what alternative explanation might be at play (anthropogenic disturbance, predation risk, thermal stress).
-4. **Build a trait matrix and try the clustering workflow in Section 5** on your own individuals. Do meaningful groupings emerge, and if so, what might explain them?
+4. **Try the clustering workflow** on your own individuals. Do meaningful groupings emerge, and if so, what might explain them?
 
 **Useful questions to answer for your own dataset:**
 

@@ -2883,10 +2883,9 @@ not uniformly migratory: individuals can vary in whether, and how far,
 they move between wet- and dry-season ranges, and that variation is
 itself an important signal of how much connectivity the surrounding
 land-use mosaic still allows (Stabach et al. 2022, <em>Frontiers in
-Ecology and Evolution</em> 10:846171). A single fitted home range (Day
-3) or a single barrier-encounter classification (Module 1) cannot tell
-you this — you need a metric that summarizes the whole trajectory’s
-shape over time.</p>
+Ecology and Evolution</em> 10:846171). A single home-range estimate or a
+single barrier-encounter classification cannot tell you this — you need
+a metric that summarizes the whole trajectory’s shape over time.</p>
 <p><strong>Net-squared displacement (NSD)</strong> is the classic tool
 for exactly this. Bunnefeld et al. (2011, <em>Journal of Animal
 Ecology</em> 80:466–476) formalized how five canonical NSD curve shapes
@@ -2910,10 +2909,10 @@ classification framework.</p>
 </div>
 <div id="rebuild-trk_all" class="section level3">
 <h3>1.2 Rebuild <code>trk_all</code></h3>
-<p>As in Day 2 and Day 3, we rebuild the multi-individual track from the
-cleaned <code>move2</code> data rather than relying on anything saved
-from a previous module.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">load</span>(<span class="st">&quot;../Day1_IntroMovementEcology/Data/WB_clean.rdata&quot;</span>)   <span class="co"># loads WB.mv2</span></span>
+<p>As before, we rebuild the multi-individual track from the cleaned
+<code>move2</code> data rather than relying on anything saved from a
+previous module.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">load</span>(<span class="st">&quot;Data/WB_clean.rdata&quot;</span>)   <span class="co"># loads WB.mv2, the cleaned wildebeest track data</span></span>
 <span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a></span>
 <span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>latlong_crs <span class="ot">&lt;-</span> <span class="st">&quot;EPSG:4326&quot;</span>   <span class="co"># WGS84 geographic — what move2/Movebank gives us</span></span>
 <span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>utm_crs     <span class="ot">&lt;-</span> <span class="st">&quot;EPSG:32737&quot;</span>  <span class="co"># UTM Zone 37S — metric, needed for distances in meters</span></span>
@@ -2943,10 +2942,10 @@ from a previous module.</p>
 <p>NSD is the squared straight-line distance between each fix and a
 single <strong>reference point — almost always the individual’s very
 first recorded fix</strong> — plotted against time. It is a
-<em>whole-track</em> metric: unlike the maximum-displacement trait from
-Day 2 Module 2 (the largest pairwise distance between <em>any two</em>
-fixes inside a rolling window), NSD always measures distance from one
-fixed origin, for the entire deployment.</p>
+<em>whole-track</em> metric: unlike the maximum-displacement trait
+covered in an earlier module (the largest pairwise distance between
+<em>any two</em> fixes inside a rolling window), NSD always measures
+distance from one fixed origin, for the entire deployment.</p>
 <p>That distinction matters for interpretation:</p>
 <ul>
 <li>A track that moves away from its start and never returns produces an
@@ -2956,12 +2955,12 @@ rises and falls back down (a round trip — migration).</li>
 <li>A track that never moves far from its start produces an NSD curve
 that stays low and flat (residency).</li>
 </ul>
-<p>Unlike the step-length, turning-angle, and speed metrics from Day 2 —
-which assume a fairly consistent time interval between fixes to be
-comparable — NSD does <strong>not</strong> require a regularly sampled
-or resampled track. It is simply squared distance from a fixed reference
-point at whatever times fixes happen to have been recorded, so it can be
-computed directly on the raw track without any
+<p>Unlike the step-length, turning-angle, and speed metrics covered
+earlier — which assume a fairly consistent time interval between fixes
+to be comparable — NSD does <strong>not</strong> require a regularly
+sampled or resampled track. It is simply squared distance from a fixed
+reference point at whatever times fixes happen to have been recorded, so
+it can be computed directly on the raw track without any
 <code>track_resample()</code> step first.</p>
 <p><code>amt::add_nsd()</code> computes this directly on a
 <code>track_xyt</code>:</p>
@@ -3006,14 +3005,13 @@ the actual year:</p>
 <span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>         <span class="at">t_common =</span> t_)</span>
 <span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a></span>
 <span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="fu">year</span>(trk_nsd<span class="sc">$</span>t_common) <span class="ot">&lt;-</span> <span class="dv">2000</span>   <span class="co"># lubridate: remap to a common calendar year for overlay; 2000 chosen because it&#39;s a leap year, so `Feb 29` in any year maps safely</span></span></code></pre></div>
-<p>Fix-to-fix NSD is noisy, partly from GPS error and partly from the
-known 1h(day)/3h(night) duty cycle established in Day 1 — a run of dense
-day fixes and a run of sparse night fixes will jitter the raw curve even
-with no real behavioral change. A 7-day rolling mean, computed over
-actual elapsed time rather than a fixed number of rows (so it isn’t
-biased by the uneven fix rate), removes that fine-scale noise while
-preserving the monthly-to-seasonal signal relevant to migration
-classification:</p>
+<p>Fix-to-fix NSD is noisy, partly from GPS error and partly from this
+dataset’s known 1h(day)/3h(night) duty cycle — a run of dense day fixes
+and a run of sparse night fixes will jitter the raw curve even with no
+real behavioral change. A 7-day rolling mean, computed over actual
+elapsed time rather than a fixed number of rows (so it isn’t biased by
+the uneven fix rate), removes that fine-scale noise while preserving the
+monthly-to-seasonal signal relevant to migration classification:</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>trk_nsd <span class="ot">&lt;-</span> trk_nsd <span class="sc">%&gt;%</span></span>
 <span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>  <span class="fu">arrange</span>(id, t_) <span class="sc">%&gt;%</span></span>
 <span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>  <span class="fu">group_by</span>(id) <span class="sc">%&gt;%</span></span>

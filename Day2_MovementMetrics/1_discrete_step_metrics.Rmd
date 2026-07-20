@@ -41,12 +41,12 @@ Even at this basic level, these metrics often carry ecological information. A su
 
 Getting clean step‑based metrics requires comparing steps that span the *same* time interval. A step length calculated across a 20‑minute gap and one calculated across a 6‑hour gap are not measuring the same underlying process, and mixing them without accounting for the difference will distort every downstream metric — including the speed and turning‑angle distributions above. Section 2 walks through how to choose a consistent interval for the discrete, step‑based calculations used in this module.
 
-That said, not all movement analyses require regular sampling intervals. Continuous‑time movement models — covered in a companion module on continuous-time movement modeling — are designed specifically to use irregular fix intervals, treating the gaps between fixes as informative rather than a nuisance. The discrete step‑metric approach here is one useful lens, but not the only one.
+That said, not all movement analyses require regular sampling intervals. Continuous‑time movement models — covered in another module on continuous-time movement modeling — are designed specifically to use irregular fix intervals, treating the gaps between fixes as informative rather than a nuisance. 
 
 ---
 
 ## 1. Setup
-Once again, we'll start by importing the necessary packages to conduct our analysis.
+Start by importing the necessary packages to conduct our analysis.
 
 ```{r packages}
 # Clear R's memory
@@ -92,12 +92,10 @@ class(trk_all)        # track_xyt, track_xy, tbl_df, tbl, data.frame
 n_distinct(trk_all$id) # number of individuals
 ```
 
-> **Note:** `trk_all` holds every individual in one tibble, with `id` as an ordinary column. The `amt` functions in Section 2 and 3 each operate on a single individual's track at a time, so we'll repeat the `nest(data = -id)` / `map()` / `unnest()` pattern previewed earlier throughout this module — Section 2.1 walks through what each piece actually does.
-
 ---
 
 ## 2. Sampling design and choosing comparable steps
-Before we run any `amt` function across all wildebeest, we need a way to apply a function that's written for *one* track to every individual in `trk_all` at once. That's what the `nest()` / `map()` / `unnest()` pattern (previewed earlier) is for, and since we'll lean on it for the rest of this module, it's worth pausing on what each piece actually does:
+Before we run any `amt` function across all wildebeest, we need a way to apply a function that's written for *one* track to every individual in `trk_all` at once. That's what the `nest()` / `map()` / `unnest()` is for:
 
 - **`nest(data = -id)`** collapses `trk_all` from "one row per fix" into "one row per individual." Every column except `id` gets folded into a single list-column called `data` — so each row holds, in effect, one individual's entire track as its own self-contained tibble. Run the chunk below and click on a `data` entry in the viewer to see this directly.
 - **`map(data, FUN)`** then applies a function (`FUN`) to each of those per-individual tibbles in turn, one at a time, and collects the results back into a new list-column. This is the part that does the actual "scale from one individual to all" work — `FUN` itself (e.g., `summarize_sampling_rate()` below) only ever has to know how to handle a single track.
@@ -105,24 +103,23 @@ Before we run any `amt` function across all wildebeest, we need a way to apply a
 
 ```{r nest}
 trk_nested <- trk_all %>% nest(data = -id)
-trk_nested
+trk_nested # try view(trk_nested) to see the dataframe in a separate window
 ```
 
 ### 2.1 Check the sampling rate per individual
-We can then use the `map()` function to assess the sampling rate of each individual and then `unnest()` these results to a single object.
 
 ```{r sampling_rate}
 sampling_rates <- trk_nested %>%
-  mutate(rate = map(data, summarize_sampling_rate)) %>%
+  mutate(rate = map(data, summarize_sampling_rate)) %>% # noticed we used `map` function
   select(id, rate) %>%
   unnest(rate)
 
 sampling_rates
 ```
 
-> **What this shows for this dataset:** `summarize_sampling_rate()` returns the distribution (min, median, mean, max, etc.) of the time gap between consecutive fixes for one individual. For these collars, that distribution isn't a single number — they're programmed with two different fix rates by design: hourly during the day and every three hours at night to save battery without sacrificing resolution during the period of greatest activity. The mix of ~1-hour and ~3-hour gaps you see above isn't a sign of anything wrong; it's the deliberate sampling schedule showing up in the data.
+> **What this shows for this dataset:** `summarize_sampling_rate()` returns the distribution (min, median, mean, max, etc.) of the time gap between consecutive fixes for one individual. The collars deployed on the animals were programmed with two different fix rates by design: hourly during the day and every three hours at night to save battery without sacrificing resolution during the period of greatest activity. 
 
-> More broadly, this kind of unevenness is the normal condition of GPS tracking data, not the exception. Duty-cycled collars, missed fixes, and satellite-visibility gaps all produce a mix of intervals in almost any real deployment. In Section 2.2, we'll work through how to determine which consecutive fixes should count as one comparable step.
+> Even when the collared were programmed to sample locations regularly, the real data will still likely show variations in temporal intervals. Duty-cycled collars, missed fixes, and satellite-visibility gaps all produce a mix of intervals in almost any real deployment. 
 
 ### 2.2 Picking comparable steps with `track_resample()`
 Step length, turning angle, and speed are only comparable across steps if every step spans roughly the same time interval — a step computed over 1 hour and one computed over 3 hours describe different things, even though both are perfectly valid fixes from the same deliberate duty cycle. `track_resample()` doesn't repair anything; it lets us state explicitly which consecutive fixes should count as a step for the analysis at hand.
@@ -152,15 +149,13 @@ trk_resampled_3h <- trk_nested %>%
 head(trk_resampled_3h)
 ```
 
-> **Note:** Same function, coarser target `rate` — `track_resample()` looks for the fix nearest each 3-hour mark within `tolerance` and keeps that one. There's no universally "correct" choice between this and the hourly version in 2.2. The hourly version resolves fine-scale daytime behavior at the cost of treating night steps as a separate, shorter regime. This 3-hour version provides an "apples-to-apples" step length across the full cycle at the cost of discarding daytime fixes that were collected at a higher resolution. The rest of this module continues with the hourly (`trk_resampled`) version, since Section 3's goal is to demonstrate the step-metric workflow at the finer of the two resolutions — substitute `trk_resampled_3h` in Section 3 if whole-cycle comparability matters more for your question.
+> **Note:** Same function, coarser target `rate` — `track_resample()` looks for the fix nearest each 3-hour mark within `tolerance` and keeps that one. The hourly version resolves fine-scale daytime behavior at the cost of treating night steps as a separate, shorter regime. This 3-hour version provides an "apples-to-apples" step length across the full cycle at the cost of discarding daytime fixes that were collected at a higher resolution. The rest of this module continues with the hourly (`trk_resampled`) version, since Section 3's goal is to demonstrate the step-metric workflow at the finer of the two resolutions — substitute `trk_resampled_3h` in Section 3 if whole-cycle comparability matters more for your question.
 
 This same regular 3-hour dataset is useful well beyond this module — anything downstream that wants one comparable time interval across the full day/night cycle can reuse it directly rather than re-deriving it from scratch. We save it here once so later modules can just load it:
 
 ```{r save_3h}
 save(trk_resampled_3h, file = "Data/WB_3h_resampled.rdata")
 ```
-
-> **For later modules:** `load("Data/WB_3h_resampled.rdata")` restores `trk_resampled_3h` exactly as built above — a `track_xyt` tibble, one row per fix, resampled to the nearest fix within 30 minutes of each 3-hour mark, with a `burst_` column marking runs of consecutive usable fixes. It's in the same projected CRS as `trk_all` above (UTM Zone 37S); reproject with `transform_coords()` if a module needs a different one. Copy this file into any other day's `Data/` folder that needs it, the same way `WB_clean.rdata` is copied around.
 
 ---
 
@@ -188,8 +183,6 @@ one_steps <- one_steps %>%
 head(one_steps)
 ```
 
-> **Note:** `dt_` here is a base R `difftime`, so `as.numeric(dt_, units = "secs")` converts it correctly. This is *not* the same situation as `move2::mt_time_lags()`, which returns a `units`-class object (from the `units` package) — for that one, the same `as.numeric(x, units = ...)` idiom is silently ignored and leaves the value in its default unit. It's worth keeping these straight if you've used both packages on the same project.
-
 ### 3.3 Scaling to all individuals
 Now take the code above and scale it to all individuals by using the `map()` function.
 
@@ -211,7 +204,7 @@ Visualize the results of each distribution using `ggplot()`, summarizing step le
 
 ```{r plot_sl}
 wb_steps %>%
-  ggplot(aes(x = log(sl_ + 0.00001), fill = factor(id))) +
+  ggplot(aes(x = log(sl_ + 0.00001), fill = factor(id))) + 
   geom_density(alpha = 0.3) +
   theme_minimal() +
   labs(x = "log step length (m)", fill = "ID", title = "Step length distribution")
@@ -244,7 +237,7 @@ wb_steps %>%
   labs(x = "speed (m/s)", fill = "ID", title = "Speed distribution")
 ```
 
-> **Discussion:** A long right tail in step length or speed often reflects a handful of directed, fast-moving steps rather than typical movement — exactly the kind of step a fence line or a road verge can produce. Compare individuals: do some show a tighter, more concentrated turning-angle distribution (more directed movement) than others and does that line up with anything you'd expect from their sex, age, or where they range?
+> **Discussion:** A long right tail in step length or speed often reflects a handful of directed, fast-moving steps rather than typical movement. Can you see individual differences from the current figure? How could you improve the figure? 
 
 ---
 

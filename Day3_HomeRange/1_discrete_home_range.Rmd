@@ -27,7 +27,7 @@ By the end of this module you will be able to:
 1. Explain the difference between discrete (independence-assuming) and continuous-time (autocorrelation-aware) home range estimators, and why the choice matters for biased GPS data
 2. Estimate and compare home ranges for one individual using three discrete methods — MCP, LoCoH, and KDE (`amt`) — and articulate what each method assumes and what it gets wrong
 3. Scale a single-individual workflow to estimate and compare home range area across an entire population
-4. Calculate two additional MoveTraits movement traits that depend on home-range estimation — **range size** and **intensity of use** — across multiple time windows, completing the five-trait set introduced in Day 2 Module 2
+4. Calculate two additional MoveTraits movement traits that depend on home-range estimation — **range size** and **intensity of use** — across multiple time windows, completing the five-trait set introduced in an earlier module
 
 **Packages used:** `amt`, `sf`, `leaflet`, `RColorBrewer`, `tidyverse`, `lubridate`
 
@@ -35,12 +35,11 @@ By the end of this module you will be able to:
 
 ## Ecological context: why estimate home ranges, and why more than one method?
 
-A home range is the area an individual uses for its routine activities — foraging, resting, breeding — over a defined period (Burt 1943). Estimating it well matters for almost everything downstream in this workshop: it sets the spatial scale at which habitat selection (Day 6) is meaningful, it's the denominator against which space-use intensity is judged (Section 5, below), and for a partially-migratory, fence-bound population like the Athi-Kaputiei wildebeest, changes in range size and shape are one of the most direct signals that connectivity has been lost.
+A home range is the area an individual uses for its routine activities — foraging, resting, breeding — over a defined period (Burt 1943). Estimating it well matters for almost everything downstream in this workshop: it sets the spatial scale at which habitat selection is meaningful, it's the denominator against which space-use intensity is judged (Section 5, below), and for a partially-migratory, fence-bound population like the Athi-Kaputiei wildebeest, changes in range size and shape are one of the most direct signals that connectivity has been lost.
 
-**Discrete** methods — MCP, LoCoH, KDE — treat each GPS fix as an independent, identically distributed draw from the animal's space-use distribution. That assumption is convenient (these estimators are fast, simple, and easy to compare across studies) but it is also usually wrong: modern GPS data are autocorrelated, and ignoring that autocorrelation systematically biases area estimates — usually downward, since correlated fixes are functionally fewer "independent" samples than they appear (Noonan et al. 2019, *Ecological Monographs* 89(2):e01344). Walter, Onorato & Fischer (2015, *Movement Ecology* 3) is a good practical reference for the broader question this raises: there is no single best estimator, and the right choice depends on what the home range estimate will be used for. **Continuous-time** methods — autocorrelated KDE (AKDE) via `ctmm`, covered later this week — model that autocorrelation explicitly instead of assuming it away. We start with the discrete methods here because they remain the fastest route to a first look at space use, and because understanding what they assume is what makes the autocorrelation-aware alternative legible later.
+**Discrete** methods — MCP, LoCoH, KDE — treat each GPS fix as an independent, identically distributed draw from the animal's space-use distribution. That assumption is convenient (these estimators are fast, simple, and easy to compare across studies) but it is also usually wrong: modern GPS data are autocorrelated, and ignoring that autocorrelation systematically biases area estimates — usually downward, since correlated fixes are functionally fewer "independent" samples than they appear (Noonan et al. 2019, *Ecological Monographs* 89(2):e01344). Walter, Onorato & Fischer (2015, *Movement Ecology* 3) is a good practical reference for the broader question this raises: there is no single best estimator, and the right choice depends on what the home range estimate will be used for. **Continuous-time** methods — autocorrelated KDE (AKDE) via `ctmm`, covered in a later module — model that autocorrelation explicitly instead of assuming it away. Note that you can also calculate AKDE via `amt` using `hr_akde` function. However, we will first focus on the discrete methods here because they remain the fastest route to a first look at space use, and because understanding what they assume is what makes the autocorrelation-aware alternative legible later.
 
-This module also closes a loop from Day 2 Module 2. That module covered three of the five MoveTraits traits — displacement, maximum displacement, and diurnality (Beumer et al. 2026, *Ecology Letters* 29:e70297) — and deliberately held back the other two, **range size** and **intensity of use**, because both are built directly on top of a home-range estimate. Sections 4 and 5 below pick those up now that `hr_mcp()` is a tool you have rather than an unexplained black box.
-
+This module also closes a loop from an earlier module as we will also learn how to calculate two additional move traits: **range size** and **intensity of use**. 
 ---
 
 ## 1. Setup
@@ -60,10 +59,10 @@ library(lubridate)   # Timestamps, floor_date()
 
 ### 1.2 Rebuild `trk_all`
 
-As in Day 2, we rebuild the multi-individual track from the cleaned `move2` data rather than relying on anything saved from a previous module.
+As before, we rebuild the multi-individual track from the cleaned `move2` data.
 
 ```{r load}
-load("../Day1_IntroMovementData/Data/WB_clean.rdata")   # loads WB.mv2
+load("Data/WB_clean.rdata")   # loads WB.mv2, the cleaned wildebeest track data
 
 latlong_crs <- "EPSG:4326"   # WGS84 geographic — what move2/Movebank gives us
 utm_crs     <- "EPSG:32737"  # UTM Zone 37S — metric, needed for area in m^2/km^2
@@ -157,7 +156,7 @@ Different estimators can give substantially different areas and shapes for the *
 
 ## 3. Home range for multiple individuals
 
-Scaling to every individual follows the same nest → map → combine logic used for movement traits in Day 2, with one wrinkle: `hr_mcp()` returns an `sf` object, not a plain numeric column, so we can't `unnest()` it directly — we bind the list of `sf` objects together with `bind_rows()` instead.
+Scaling to every individual follows the same nest → map → combine logic used for movement traits in an earlier module, with one wrinkle: `hr_mcp()` returns an `sf` object, not a plain numeric column, so we can't `unnest()` it directly — we bind the list of `sf` objects together with `bind_rows()` instead.
 
 ```{r mcp_all_ind}
 wb_mcp_nested <- trk_nested %>%
@@ -225,7 +224,7 @@ wb_mcp_df
 
 ## 4. Range size: home range area as a repeated trait
 
-Section 3 computed one MCP area per individual, over its entire track. **Range size**, as MoveTraits defines it, is different: it's the same 95% MCP area computed repeatedly within fixed time windows (MoveTraits uses 24-hour, 7-day, 30-day, and 12-month windows), which turns a single snapshot into a repeated measurement you can summarize and compare the way Day 2 Module 2 summarized displacement and diurnality. We compute it here at monthly and yearly windows — the same two scales Day 2 Module 2 used for maximum displacement, for direct comparability.
+Section 3 computed one MCP area per individual, over its entire track. **Range size**, as MoveTraits defines it, is different: it's the same 95% MCP area computed repeatedly within fixed time windows (MoveTraits uses 24-hour, 7-day, 30-day, and 12-month windows), which turns a single snapshot into a repeated measurement you can summarize and compare the way displacement and diurnality were summarized earlier. We compute it here at monthly and yearly windows — the same two scales used earlier for maximum displacement, for direct comparability.
 
 ```{r calc_range_size_fn}
 calc_range_size <- function(track_df, time_unit = c("month", "year")) {
@@ -351,9 +350,9 @@ wb_monthly_iou_raw %>%
        x = "Month", y = "Intensity of use (path length / √area)", color = "Individual")
 ```
 
-> **Discussion:** A month with both a range-size spike (Section 4) *and* an intensity-of-use spike is consistent with a directed long-distance move — covering new ground rather than recycling familiar ground. A range-size spike with *flat or falling* intensity of use instead suggests the area simply got reclassified as larger (e.g., one outlying excursion stretched the MCP) without a corresponding increase in how thoroughly that larger area was actually traveled. For ungulates in fenced or fragmenting rangelands specifically, a sustained rise in intensity of use without a matching rise in range size can also flag restricted movement — covering more relative ground simply because the available area has shrunk, not because the animal is ranging more widely.
+> **Discussion:** Range-size and intensity of use plots can be interpreted together to provide ecological insights. For ungulates in fenced or fragmenting rangelands specifically, a sustained rise in intensity of use without a matching rise in range size can also flag restricted movement — covering more relative ground simply because the available area has shrunk, not because the animal is ranging more widely.
 
-Range size and intensity of use, together with displacement, maximum displacement, and diurnality from Day 2 Module 2, complete the five-trait set from Beumer et al. (2026). If you'd like to see whether adding these two changes how individuals cluster into movement profiles, revisit Day 2 Module 2 Section 5 and rerun the clustering with all five traits joined into one matrix — see Practice item 4 below.
+Range size and intensity of use, together with displacement, maximum displacement, and diurnality from the earlier movement-traits module, complete the five-trait set from Beumer et al. (2026). However, these are not the only five metrics that can be used as movement-trait. The database is till actively being developed with new species and new metrics likely to be added in the near future. 
 
 ---
 
@@ -362,7 +361,7 @@ Range size and intensity of use, together with displacement, maximum displacemen
 1. **Estimate MCP, LoCoH, and KDE** for one individual in your own dataset with `hr_mcp()`, `hr_locoh()`, `hr_kde()`. Do the three methods agree on area and shape, or diverge the way they did here? If they diverge a lot, what does that tell you about how clustered vs. spread out your animal's fixes are?
 2. **Scale to all individuals** using the nest → map → `bind_rows()` pattern in Section 3. Compare home range area across individuals — and consider whether tracking duration differences are confounding that comparison, the way Section 3's discussion flags.
 3. **Calculate range size and intensity of use** for your own individuals with `calc_range_size()` and `calc_path_length()`. Do individuals separate cleanly by one trait but not the other, the way the discussion in Section 5 anticipates they might?
-4. **(Optional, integrative)** Combine range size and intensity of use with displacement, maximum displacement, and diurnality from Day 2 Module 2 into one trait matrix, and rerun the clustering workflow from Day 2 Module 2 Section 5. Does adding these two traits change which individuals group together?
+4. **(Optional, integrative)** Combine range size and intensity of use with displacement, maximum displacement, and diurnality from the earlier movement-traits module into one trait matrix, and rerun that module's clustering workflow. Does adding these two traits change which individuals group together?
 
 **Useful questions to answer for your own dataset:**
 
