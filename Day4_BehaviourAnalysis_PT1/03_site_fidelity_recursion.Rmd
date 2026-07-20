@@ -120,9 +120,9 @@ plot(sotua_5000, sotua_df, legendPos = c(min(sotua_df$x), max(sotua_df$y)))
 
 > **Discussion:** Compare the two maps. At `radius = 500`, high-revisit points should stand out as a small number of specific, precise locations. At `radius = 5000`, the same track shows larger area of the range as "revisited" at least a few times, since a 5 km circle around any point captures a large share of the whole home range — the signal of a few specific important sites gets diluted into a broader "well-used area" pattern. This is the same radius-selection trade-off as choosing a bandwidth for a kernel density home range: too small and you see only noise; too large and you lose the specific pattern you were looking for.
 
-### 2.2 Revisit counts and residence time
+### 2.2 Residence time
 
-Raw fixes are ~4x denser by day (1h) than by night (3h), so a plain fix-count histogram would overweight sites revisited mostly during the day relative to sites revisited just as often at night. We weight each fix by the elapsed time it represents (gap to the next fix, capped at 6h to avoid one data-dropout fix dominating) so bar height reflects time spent at each revisit level, not sampling density:
+We weight each fix by the elapsed time it represents (gap to the next fix, capped at 6h to avoid one data-dropout fix dominating) so bar height reflects time spent at each revisit level, not sampling density:
 
 ```{r revisit_hist}
 # elapsed time each fix represents (hours); last fix per gap uses the typical gap
@@ -137,7 +137,7 @@ tibble(revisits = sotua_500$revisits, weight_h = fix_weight_h) %>%
   theme_minimal()
 ```
 
-`revisitStats` (available because `verbose = TRUE` is the default) gives one row per visit, with entrance/exit times, time spent inside the radius per visit, and time since the previous visit:
+`revisitStats` gives one row per visit, with entrance/exit times, time spent inside the radius per visit, and time since the previous visit:
 
 ```{r revisit_stats}
 head(sotua_500$revisitStats)
