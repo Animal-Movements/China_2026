@@ -122,11 +122,18 @@ plot(sotua_5000, sotua_df, legendPos = c(min(sotua_df$x), max(sotua_df$y)))
 
 ### 2.2 Revisit counts and residence time
 
+Raw fixes are ~4x denser by day (1h) than by night (3h), so a plain fix-count histogram would overweight sites revisited mostly during the day relative to sites revisited just as often at night. We weight each fix by the elapsed time it represents (gap to the next fix, capped at 6h to avoid one data-dropout fix dominating) so bar height reflects time spent at each revisit level, not sampling density:
+
 ```{r revisit_hist}
-tibble(revisits = sotua_500$revisits) %>%
-  ggplot(aes(x = revisits)) +
+# elapsed time each fix represents (hours); last fix per gap uses the typical gap
+fix_weight_h <- as.numeric(difftime(lead(sotua_df$t), sotua_df$t, units = "hours"))
+fix_weight_h[is.na(fix_weight_h)] <- median(fix_weight_h, na.rm = TRUE)
+fix_weight_h <- pmin(fix_weight_h, 6)   # cap: guards against rare multi-hour data gaps
+
+tibble(revisits = sotua_500$revisits, weight_h = fix_weight_h) %>%
+  ggplot(aes(x = revisits, weight = weight_h)) +
   geom_histogram(binwidth = 1, fill = "steelblue", color = "white") +
-  labs(x = "Number of revisits (radius = 500 m)", y = "Number of fixes") +
+  labs(x = "Number of revisits (radius = 500 m)", y = "Time at this revisit level (hours)") +
   theme_minimal()
 ```
 
@@ -140,7 +147,7 @@ head(sotua_500$revisitStats)
 mean(sotua_500$residenceTime, na.rm = TRUE)
 ```
 
-> **Interpretation:** Most fixes show modest revisit counts with a smooth decline — consistent with ordinary ranging movement, where slow travel relative to the 1–3 hour fix interval naturally brings the animal back near recently-visited ground. The sharp, isolated spikes in the histogram (well above the smooth background) are the more informative signal: each spike is a cluster of fixes near one physical location that gets revisited an unusually high, consistent number of times across the whole track — a plausible core site (e.g. a resting area or water point), rather than incidental slow movement. Mean residence time is a *cumulative* total across every visit over Sotua's whole tracked history, not a per-visit duration — it mostly sets the overall scale for comparison; the more diagnostic step is checking which specific locations sit well above that average, which the histogram's spikes point to directly.
+> **Interpretation:** Most time falls at modest revisit counts with a smooth decline — consistent with ordinary ranging movement, where slow travel relative to the 1–3 hour fix interval naturally brings the animal back near recently-visited ground. The sharp, isolated spikes in the histogram (well above the smooth background) are the more informative signal: each is a concentration of time near one physical location revisited an unusually high, consistent number of times across the whole track — a plausible core site (e.g. a resting area or water point), rather than incidental slow movement. Mean residence time is a *cumulative* total across every visit over Sotua's whole tracked history, not a per-visit duration — it mostly sets the overall scale for comparison; the more diagnostic step is checking which specific locations sit well above that average, which the histogram's spikes point to directly.
 
 ### 2.3 Shortcut: calling `getRecursions()` directly on a `move2` object
 

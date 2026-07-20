@@ -129,7 +129,7 @@ trk_nsd %>%
   theme(strip.text = element_text(size = 8))
 ```
 
-To check whether any individual's NSD pattern repeats on an annual cycle — the signature of true seasonal migration, as opposed to a one-off move — it helps to overlay different years on a common calendar axis within each individual's own panel, rather than looking at absolute time. We remap every timestamp onto a shared reference year and color by the actual year:
+To check whether any individual's NSD pattern repeats on an annual cycle — the signature of true seasonal migration, as opposed to a one-off move — it helps to overlay different individuals on a common calendar axis within each year's own panel, rather than looking at absolute time. We remap every timestamp onto a shared reference year and facet by year, coloring by individual so the same-year comparison across individuals is direct:
 
 ```{r nsd_year_prep}
 trk_nsd <- trk_nsd %>%
@@ -154,13 +154,13 @@ trk_nsd <- trk_nsd %>%
 
 ```{r nsd_by_year, fig.height=8}
 trk_nsd %>%
-  ggplot(aes(x = t_common, color = year)) +
+  ggplot(aes(x = t_common, color = id)) +
   geom_line(aes(y = net_disp_km), alpha = 0.25, linewidth = 0.25) +
   geom_line(aes(y = net_disp_km_smooth), linewidth = 0.6) +
-  facet_wrap(~id, scales = "free_y") +
+  facet_wrap(~year, scales = "free_y", nrow = 3) +
   scale_x_datetime(date_labels = "%b", date_breaks = "2 months") +
   scale_color_viridis_d() +
-  labs(x = NULL, y = "Net displacement from first fix (km)", color = "Year",
+  labs(x = NULL, y = "Net displacement from first fix (km)", color = "Individual",
        caption = "Faint lines: raw NSD. Bold lines: 7-day rolling mean.") +
   theme_minimal() +
   theme(strip.text = element_text(size = 8))
@@ -180,7 +180,7 @@ Bunnefeld et al. (2011) describe five canonical NSD curve shapes, each correspon
 | **Mixed migrant** | Similar to migrant, but with an irregular or partial round trip (e.g. an incomplete return, or migration in only some years) | Partial migration — common within populations where not every individual, or not every year, is fully migratory |
 | **Nomad** | Fluctuates continuously with no stable plateau at any point | No fixed destination or home range; movement is directionally unpredictable at the whole-track scale |
 
-> **Discussion:** Look back at the Section 3 plots — the absolute-time version for each individual's overall trajectory shape, and the year-colored, smoothed version for whether that shape repeats at the same time of year, year after year. Which individuals look closest to each canonical shape? Which are ambiguous, and does that ambiguity look like genuine mixed-migrant behavior, or could it be an artifact of the time window you're looking at (e.g. a track too short to show a full seasonal round trip)? A population showing no clean, shared seasonal signal even after smoothing is itself an ecologically meaningful result — it points toward facultative or individually variable movement rather than a strongly synchronized migration, and individual variation of exactly this kind is part of what makes partial migration ecologically interesting rather than a nuisance to average away.
+> **Discussion:** Look back at the Section 3 plots — the absolute-time version for each individual's overall trajectory shape, and the individual-colored, year-faceted version for whether that shape repeats at the same time of year, year after year, and how individuals compare within the same year. Which individuals look closest to each canonical shape? Which are ambiguous, and does that ambiguity look like genuine mixed-migrant behavior, or could it be an artifact of the time window you're looking at (e.g. a track too short to show a full seasonal round trip)? A population showing no clean, shared seasonal signal even after smoothing is itself an ecologically meaningful result — it points toward facultative or individually variable movement rather than a strongly synchronized migration, and individual variation of exactly this kind is part of what makes partial migration ecologically interesting rather than a nuisance to average away.
 
 ### A note on visual classification
 

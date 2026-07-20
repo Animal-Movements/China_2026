@@ -304,9 +304,52 @@ wb_diurnality %>%
        x = NULL, y = "Diurnality index (DI)")
 ```
 
-> **Discussion:** Wildebeest are grazers and predominantly diurnal, so most individuals here should land closer to $+1$ than $-1$. An individual with a notably lower or even negative $DI$ is worth a second look — among other explanations, increased nocturnal movement near roads or settlements is a documented predator-avoidance response in some ungulates, which would tie this trait directly back into the fences/roads/connectivity framing for this landscape.
+### 4.4 Why $DI$ is negative for every individual here
 
-This simplified version covers the core logic; the published MoveTraits pipeline additionally handles edge cases like polar locations where `getSunlightTimes()` can return `NA` (no real sunrise/sunset that day) — not a concern at this study's latitude, but worth knowing if you adapt this to a different system.
+Every individual above lands below 0. Does that mean wildebeest are nocternal? Let's break the day into finer local-time bins and check when movement actually happens:
+
+```{r hourly_activity_fn}
+calc_hourly_activity <- function(trk_rs) {
+  steps_rs <- steps_by_burst(trk_rs)
+
+  sun <- suncalc::getSunlightTimes(
+    data = data.frame(date = as.Date(trk_rs$t_), lat = trk_rs$lat, lon = trk_rs$lon),
+    keep = c("sunrise", "sunset"), tz = "UTC"
+  )
+
+  fixes <- trk_rs %>%
+    mutate(sunrise = sun$sunrise, sunset = sun$sunset,
+           daytime = if_else(t_ >= sunrise & t_ <= sunset, "day", "night"))
+
+  steps_rs %>%
+    left_join(fixes %>% select(t_, daytime), by = c("t1_" = "t_")) %>%
+    mutate(hour_bin = (hour(t1_ + hours(3)) %/% 3) * 3)  # local hour, EAT = UTC+3
+}
+
+wb_hourly <- trk_resampled_3h %>%
+  nest(data = -id) %>%
+  mutate(hourly = map(data, calc_hourly_activity)) %>%
+  select(id, hourly) %>%
+  unnest(hourly)
+
+hourly_summary <- wb_hourly %>%
+  group_by(hour_bin) %>%
+  summarise(mean_sl = mean(sl_, na.rm = TRUE),
+            pct_night = mean(daytime == "night"), .groups = "drop") %>%
+  mutate(label = if_else(pct_night > 0.5, "night", "day"))
+```
+
+```{r plot_hourly_activity}
+ggplot(hourly_summary, aes(x = hour_bin, y = mean_sl, fill = label)) +
+  geom_col(width = 2.5) +
+  scale_x_continuous(breaks = seq(0, 21, 3), labels = sprintf("%02d:00", seq(0, 21, 3))) +
+  scale_fill_manual(values = c(day = "#F4A522", night = "#264653")) +
+  theme_minimal() +
+  labs(title = "Mean step length by local time of day (all individuals pooled)",
+       x = "Local hour (EAT, UTC+3)", y = "Mean step length (m)", fill = NULL)
+```
+
+> **Discussion:** Two peaks straddle dawn (06:00–09:00) and dusk (18:00–21:00) with troughs at midday and deep night — classic crepuscular grazing, not diurnal. Sunrise/sunset each fall inside a single 3h fix window, so the whole dawn burst (the bigger of the two peaks) gets counted as "night" and the whole dusk burst as "day" — pulling $DI$ negative for everyone. In addition, anthropogenic pressure (roads, settlements, livestock) documented for this exact population (Stabach et al. 2016, *Ecosphere*) can push animals to be more active at night, consistent with disturbance-driven nocturnality shifts in mammals more broadly (Gaynor et al. 2018, *Science* 360:1232–1235). 
 
 ---
 

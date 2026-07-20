@@ -213,8 +213,8 @@ Exporting images takes a while, so the results are pre-computed:
 ```{r wb_2ind_run, eval = FALSE}
 # pick two individuals with relatively large, separated ranges
 WB.sf.2ind <- WB %>%
-  filter(id %in% c("Ntishya", "Sotua")) %>%
-  arrange(id, date)
+  filter(Animal.ID %in% c("Ntishya", "Sotua")) %>%
+  arrange(Animal.ID, date)
 
 results_WB1 <- BaBA(animal = WB.sf.2ind,
                      barrier = fence.kenya,
@@ -237,8 +237,8 @@ results_WB2 <- BaBA(animal = WB.sf.2ind,
 
 ```{r wb_2ind_load}
 WB.sf.2ind <- WB %>%
-  filter(id %in% c("Ntishya", "Sotua")) %>%
-  arrange(id, date)
+  filter(Animal.ID %in% c("Ntishya", "Sotua")) %>%
+  arrange(Animal.ID, date)
 
 results_WB1 <- read_rds("./Output/BaBA_2ind_WB1.rds")
 results_WB2 <- read_rds("./Output/BaBA_2ind_WB2.rds")
