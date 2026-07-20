@@ -36,7 +36,13 @@ By the end of this module you will be able to:
 
 ## Background
 
+It is known that animals experience periodicity in their activity levels, generally following a regular pattern of having periods of higher activity and periods of rest. However, when studying the behavioral ecology of a species, movement ecologists may also be interested in how periodic activity is expressed in repeated patterns of space use. Many territorial species, large predators in particular will regularly patrol their home ranges. Some species may return to specific feeding sites at regular intervals. These patterns may not always be directly evident when looking at our raw data or typical analyses, such as home-range estimation.
+
+In this module, we will walk through how to calculate and interpret a periodogram for movement data and the process of fitting and selecting a periodic movement model. We will revisit the topic of variograms for assessing autocorrelation (see the "Introduction to CTMM" module ["ctmm_intro.rmd"]), and how we can incorporate periodicity into our autocorrelation models.
+
 ## Data Preparation
+
+We will be using tracking data for maned wolves (*Chrysocyon brachyurus*), a large canid species native to South America. While it resembles a red fox and is commonly named a wolf, it is actually not closely related to either. This has already been prepared into a telemetry object internal to `ctmm` that can be imported into your `R` environment using the `data` function.
 
 ### Import and Visualize Data
 
@@ -64,6 +70,8 @@ plot(SVF, frac = 0.01)  # zoom in
 
 ```
 
+Remember that there are other tools available for assessing and visualizing autocorrelation in your data. Keep in mind that some provide unbiased estimates of autocorrelation, while others are biased estimators.
+
 ```{r autocorrelation, eval = FALSE}
 
 ?acf  # or help(acf)
@@ -82,7 +90,7 @@ plot(SVF, GUESS)  # inspect variogram and model guess parameters
 ## Note the fluctuations in the autocorrelation
 
 # Model selection
-FITS <- ctmm.select(DATA, GUESS, verbose = TRUE, trace = 2)  # smaller data set (faster)
+FITS <- ctmm.select(DATA, GUESS, verbose = TRUE, trace = FALSE)  # smaller data set (faster)
 ## verbose = TRUE to return all models
 
 summary(FITS)  # OUF anisotropic model selected
@@ -97,7 +105,7 @@ summary(FITS[[3]])
 
 ```
 
-# Preliminary Home-Range Estimation
+### Preliminary Home-Range Estimation
 
 `fast = FALSE` uses exact time spacing and has a computational cost as low as $O(n^2)$, including $O(n^2)$ function evaluations. With `PC="direct"` this method will produce a result that is exact to within machine precision, but with a computational cost of $O(n^3)$. `fast = FALSE, PC = 'direct'` is often the fastest method with small datasets, like here with this maned wolf.
 
@@ -112,7 +120,7 @@ UD <- akde(DATA, FITS[[1]], weights = TRUE, PC = "direct", fast = FALSE, trace =
 
 ![](Figures/akde_example_messages.png)
 
-<span style="color: gray;"> Example message output when running `akde` using bandwidth arguments `PC = "direct", fast = FALSE` for small data datasets. To see the output messages reporting convergence progress, set the trace argument to the desired amount of detail (ranging FALSE/0 to 3). The example above is for `trace = 2`. </span>
+<span style="color: gray;"> Example message output when running `akde` using bandwidth arguments `PC = "direct", fast = FALSE` for small data datasets. To see the output messages reporting convergence progress, set the trace argument to the desired amount of detail (ranging FALSE/0 to 3). The example above is for `trace = 2`. </span> </center> <br>
 
 ```{r akde2}
 
@@ -134,11 +142,17 @@ summary(UD.IID)  # underestimates home range area
 
 ## Periodogram
 
+Here, we formally introduce the Lomb-Scargle periodogram (`periodogram`), which will help us plot the data in a way that makes periodic patterns apparent. Periodograms decompose the animal location data signal <!--into a waveform of fixed frequencies -->to determine which frequency or frequencies contribute most to the signal. There is an existing vignette available for this function and several papers about [the method](https://doi.org/10.1186/s40462-016-0084-7), as well as [case studies](https://doi.org/10.1002/ecm.1260).
+
 ```{r periodogram, eval = FALSE}
 
 vignette("periodogram")
 
 ```
+
+The periodogram transforms telemetry data to be able to visualize it as the log(spectral density) as a function of the period (e.g., hourly, daily, monthly, yearly, etc.). There are various arguments in the function that can be used to adjust the algorithm for the data as needed. 
+
+There are two algorithms that can be used. Set `fast = FALSE` to revert to Scargle’s original (slower) algorithm, which involves fewer numerical approximations and is more exact (see [Scargle, 1982](doi:10.1086/160554)). The `fast = TRUE` option uses the much faster FFT-based algorithm, which is better suited for longer datasets, and if `fast = 2`, the FFT algorithm will be used while sampling a highly composite number of times to increase power (see [Péron et al., 2016](https://doi.org/10.1186/s40462-016-0084-7)). The `res.time` argument is used to increase the resolution of the temporal grid when the FFT-based algorithm is used (`fast = TRUE` or `fast = 2`). By default, `res.time = 1`, so the algorithm defaults to adequate resolution for regularly scheduled data (even sampling, while permitting gaps). However, variable sampling rates require `res.time > 1` to resolve the fine-scale spectrum correctly. For the maned wolf data, we will use Scargle's more exact algorithm, while inflating both the frequency and temporal resolution by a multiplier of 2.
 
 ```{r periodogram2}
 
@@ -146,23 +160,46 @@ vignette("periodogram")
 LSP <- periodogram(DATA, fast = FALSE, res.time = 2, res.freq = 2)
 
 # Visualize periodic patterns in autocorrelation
-plot(LSP)  # note the spike at the per day mark
+plot(LSP, max = TRUE)  # note the spike at the per day mark
+
+```
+
+The `max = TRUE` option above keeps only local maxima and often yields periodograms that are easier to interpret, especially when the resolution of the periodogram has been increased from the default. Important natural periods like the **stellar day**, **synodic month** (full moon phase cycle), and **tropical year** are labeled on the horizontal axes and given dark vertical lines in the plot. **Harmonics** of these natural periods have unlabeled tick marks on the horizontal axis and are are given lighter vertical lines in the plot. The two tick marks under a day represent the *second* and *third* harmonic of the day, or (24/2) 12 hours and (24/3) 8 hours, respectively.
+
+When interpreting the periodogram, look for peaks in the spectral density that could represent a regular pattern in the data at that respective period (x-axis). For example, if an individual patrols a part of their home range each day, we would find a peak at the "day" mark. Peaks at the harmonics of a period indicate that fine details of the periodicity are resolved by the data. To visually assess significance, peaks should be compared to the normal variation around the smooth trend of the periodogram.
+
+```{r periodogram3}
 
 # Compare with the sampling schedule
 plot(LSP, diagnostic = TRUE, max = TRUE)
 ## diagnostic = TRUE plots sampling schedule to help check for artifacts
-## max = TRUE plots the local maxima of the periodogram (use only res > 1)
+## max = TRUE plots the local maxima of the periodogram (use only for res > 1)
 
 ```
 
+> NOTE: The structure of the sampling schedule may introduce **artifacts** that appear as periodicity. To help determine whether periodogram peaks are representative of a biological process or one that is driven by sampling, we can overlay the periodogram of both and compare. 
+
+Setting `diagnostic = TRUE` overlays the sampling schedule periodogram with red symbols. If the periodogram of the sampling schedule exhibits peaks, this indicates that the corresponding peaks in the movement data could be simply caused by irregularities in the sampling schedule and not by periodicity in the movement. Here, the periodogram exhibits a clear peak for the period of one day, but this is also present in the (red) diagnostic.
+
+Be careful when comparing periodograms across individuals, especially if the aperiodic stochastic movements of these individuals are not the same. Overall, the periodograms is a great, nonparametric tool for exploring patterns in your data, but they may not be able to detect everything. If we do detect potential periodicity, we can switch to a parametric approach to model it by including a parameter for the period. This approach also allows us to model a circulatory process (stochastic component), which is often difficult to identify in the periodogram.
+
 ## Fitting a Periodic Movement Model
+
+Once we have determined that there is periodicity in the animal's movement and space use, we can incorporate this into our autocorrelation models to better fit the variogram. We will use the `ctmm` function, which can set specific parameters for the movement models, to allow a:
+
+* **Periodic-mean process:** The mean will follow an oscillatory pattern in the autocorrelation model fit to the variogram. This would represent how an animal reverts to a point that moves periodically through time. Set `mean = "periodic"`.
+  * You need to specify one or more period values that you want `ctmm` to consider (`period` argument).
+* **Circulation process:** The stochastic (random) component of periodicity that includes a rotational effect. Set `circle = TRUE`.
+
+Since our periodogram showed a peak at the 1 day mark, let's include this in the period, as well as 1 month. These parameters can then be fed into our initial guesses for parameter values through the `CTMM` argument in `ctmm.guess`.
 
 ```{r periodic_model}
 
 # Add periodic parameter to model
-PROTO <- ctmm(mean = "periodic")
+PROTO <- ctmm(mean = "periodic", period = c(24 %#% "hours", 1 %#% "month"),
+              circle = TRUE)
 GUESS <- ctmm.guess(DATA, variogram = SVF, CTMM = PROTO, interactive = FALSE)
-## Guesstimate with the added periodicity parameter
+## Guesstimate with the added periodicity and stochastic circulation parameters
 
 ```
 
@@ -189,13 +226,31 @@ load(file = "Data/wolf_periodic.rda")
 # Model selection results
 summary(PFITS)
 
+```
+
+The summary lists the tested models from best-fit to worst-fit. Note that we sort our models differently here (not just by $\Delta$AICc. For a given movement model (e.g., OUF anisotropic), the different non-stationary models (for the harmonics) are sorted by the mean square predictive error (MSPE), not AICc (information criterion). This is because likelihood-based model selection *can* badly overfit with these types of models. For sorting between the movement models (e.g., between OUF anisotropic and OU anisotropic), the information criterion (AICc) is used.
+
+```{r periodic_model4}
+
 # How do the models fit to the variogram?
 plot(SVF, CTMM = PFITS[[1]])  # best-fit model
-plot(SVF, CTMM = PFITS[[4]])  # OUF anisotropic harmonic 3 (poorer fit)
+plot(SVF, CTMM = PFITS[[9]])  # OUF anisotropic harmonic 3 1 (poorer fit)
 
 # Selected model
-summary(PFITS[[1]])  # OUF anisotropic harmonic 2
-## Periodic pattern of space use at 1 day mark (daily periodic pattern in movement)
+summary(PFITS[[1]])  # OUF anisotropic harmonic 2 1
+## Periodic pattern of space use at 1-day mark (daily periodic pattern in movement)
+
+```
+
+The selected model includes the position autocorrelation and velocity autocorrelation (OUF), anisotropy, and **2 harmonics of daily periodicity**. Given how we specified the prototype (`PROTO`), the first number after the harmonic represents the daily periodicity, while the second number represents the monthly periodicity. Therefore, "harmonic 2 1" means that this preferred model has 2 harmonics of the one-day periodicity and 1 harmonic of lunar (monthly) periodicity. 
+
+* **rotation/deviation %:** The proportion of the variance in the animal's **location** that is caused by the periodicity in the mean.
+* **rotation/speed %:** The proportion of the variance in the animal's **velocity** that is caused by the periodicity in the mean.
+* **circulation period:** The period of the stochastic circulations. On average, what is the period of time (number of months, days, or hours) the animal takes to re-pass through the same areas.
+
+<!--## IGNORE ## If there were some lunar (monthly) patterns, the harmonic would be non-zero for the second value. This matches what we saw in the periodogram. ## CHECK THE LIKELIHOOD FUNCTION: DIFF RESULTS ##-->
+
+```{r periodic_model5}
 
 # Re-fit AKDE for home range
 UD_period <- akde(DATA, PFITS[[1]], weights = TRUE, 
@@ -203,9 +258,11 @@ UD_period <- akde(DATA, PFITS[[1]], weights = TRUE,
 
 plot(DATA, CTMM = UD_period)  
 ## Fairly small difference in the home range
-## Would not have been able to notice the periodicity without the periodogram
+## Would have been hard to notice the periodicity without the periodogram
 
 ```
+
+Note that there is very little change in the home range estimate in this case. It would have been difficult to identify the daily patterns in space use without checking the periodogram, as they are not obvious in the raw tracking data. Péron et al. (2016) determined that all 8 individual maned wolves in the full data set patrol their home ranges along daily-repeated routes, a pattern that was otherwise masked by aperiodic background noise.
 
 ---
 
@@ -216,7 +273,7 @@ plot(DATA, CTMM = UD_period)
 | `variogram()` | `ctmm` | Calculate an empirical variogram from movement data | 
 | `periodogram()` | `ctmm` | Calculate the isotropic Lomb-Scargle periodogram of tracking data to visualize periodocities that result from an autocorrelated sampling schedule |
 | `plot.periodogram()` or `plot()` | `ctmm` | Visualize the Lomb-Scargle periodogram as log-spectral density over period |
-| `ctmm()` | `ctmm` | Fit a hypothetical movement model by specifying the model parameters; only used in this case to specify `mean = "periodic"` for periodicity to be accounted for in the `ctmm.guess` and `ctmm.select` |
+| `ctmm()` | `ctmm` | Fit a hypothetical movement model by specifying the model parameters; only used in this case to specify `mean = "periodic", period = c(24 %#% "hours", 1 %#% "month")` for periodicity and `circle = TRUE` for stochastic circulation to be estimated in `ctmm.guess` and `ctmm.select` |
 
 ---
 
