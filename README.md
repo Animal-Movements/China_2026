@@ -45,7 +45,7 @@ African Buffalo (*Syncerus caffer*)
 * **Getz WM, et al. (2007).** LoCoH: Nonparameteric kernel methods for constructing home ranges and utilization distributions. *PLoS ONE.* [doi:10.1371/journal.pone.0000207](https://doi.org/10.1371/journal.pone.0000207)
 * **Cross PC, et al. (2016).** Data from: Nonparameteric kernel methods for constructing home ranges and utilization distributions. *Movebank Data Repository.* [doi:10.5441/001/1.j900f88t](https://doi.org/10.5441/001/1.j900f88t)
 
-Coati (*Nasua nasua*)
+White-Nosed Coati (*Nasua narica*)
 
 * **Powell RA, et al. (2017)** Stink or swim: techniques to meet the challenges for the study and conservation of small critters that hide, swim or climb and may otherwise make themselves unpleasant. In DW Macdonald, C Newman, and LA Harrington (Eds.); *Biology and Conservation of Musteloids.* [doi:10.1093/oso/9780198759805.003.0008](https://doi.org/10.1093/oso/9780198759805.003.0008) 
 * **Kays R, and Hirsch BT. (2015).** Data from: Stink or swim: techniques to meet the challenges for the study and conservation of small critters that hide, swim or climb and may otherwise make themselves unpleasant. *Movebank Data Repository.* [doi:10.5441/001/1.41076dq1](https://doi.org/10.5441/001/1.41076dq1)
