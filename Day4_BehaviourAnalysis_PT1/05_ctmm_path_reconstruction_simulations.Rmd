@@ -36,9 +36,13 @@ By the end of this module you will be able to:
 
 ## Background
 
-[INSERT BACKGROUND ON WHAT CAN BE GAINED FROM PATH RECONSTRUCTION AND SIMULATIONS]
+Movement analyses, such as home-range estimation, speed estimation, revisitation, and integrated resource selection, are all conditional analyses that depend on models fit to our movement data. These models, like our continuous-time movement (autocorrelation) models aim to capture trends and summarize our data, such that they can be used to inform downstream analyses. With our movement models, we can interpolate to reconstruct animal paths, fill in gaps in our tracking data, and project into the future space use. Simulations conditioned on movement models have also been used to evaluate how much space an animal could have used; for example, how would an animal's movement speed or home range size compare if there were no roads restricting their movement ([Noonan et al., 2022](https://doi.org/10.1111/acv.12728);[Mercer et al., 2026](https://doi.org/10.64898/2026.01.23.701409))?
+
+In this module, we will walk through how to predict from a movement model, reconstruct a most-likely path, and generate simulations (generic and conditional) from movement models. We wrap up the module with an example case study on white-nosed coatis (*Nasua narica*) in Panama ([Kays & Hirsch, 2015](https://doi.org/10.5441/001/1.41076dq1)).
 
 ## Data Preparation
+
+To demonstrate, we will be using the African Buffalo (*Syncerus caffer*) dataset in `ctmm` for GPS-tagged buffalo in Kruger National Park, South Africa.
 
 ### Import and Visualize Data
 
@@ -70,9 +74,9 @@ save(FIT, file = "Data/cilla.rda")
 
 ```
 
-```{r ctmm.select}
+```{r ctmm.select2}
 
-# I've already run this
+# Load saved model selection results
 load("Data/cilla.rda")
 
 ```
@@ -85,14 +89,14 @@ load("Data/cilla.rda")
 SUB <- DATA[1:10,]
 
 # Plot subset
-plot(SUB)
+plot(SUB, ylim = c(-26500,-21000))
 
 ```
 
 ```{r predict2, eval = FALSE}
 
 # If working with this amount of data, you might consider alternative ICs
-## in particular IC="LOOCV"
+## in particular IC = "LOOCV"
 help("ctmm.select")
 ## Just sub-setting for purposes of visualization and speed
 
@@ -104,7 +108,7 @@ help("ctmm.select")
 1 %#% 'hr'
 
 # Make an array of times over the same period, but 5 min apart
-SEQ <- seq(from=SUB$t[1],to=SUB$t[10],by=5 %#% 'min')
+SEQ <- seq(from = SUB$t[1], to = SUB$t[10], by = 5 %#% 'min')
 
 ```
 
@@ -121,7 +125,7 @@ PRED <- predict(SUB, FIT, t = SEQ)  # predict for every 5 mins
 ## can allow smoothing for better location estimates (for when data points have greater or lesser uncertainty)
 
 # Plot predictions & data
-plot(list(PRED, SUB), col = c('blue','red'))
+plot(list(PRED, SUB), col = c('blue','red'), ylim = c(-26500,-21000))
 ## uncertainty ellipses (more certain near data points, but also depends on how long to next point)
 
 ```
@@ -157,11 +161,14 @@ SIM <- simulate(MODEL, t = t)
 
 # Fit the movement models
 GUESS <- ctmm.guess(SIM, interactive = FALSE)
-
 FITS <- ctmm.select(SIM, GUESS, cores = -1)
 
 # Summary of the fit (NOTE the DOFs)
 summary(FITS)
+
+```
+
+```{r simulate_gen2}
 
 # Define the sampling duration/schedule
 t <- seq(0,4 %#% 'days', 5 %#% 'min')
@@ -171,7 +178,19 @@ SIM <- simulate(MODEL, t = t)
 
 # Fit the movement models
 GUESS <-  ctmm.guess(SIM, interactive = FALSE)
+
+```
+
+```{r simulate_gen3, eval = FALSE}
+
 FITS <- ctmm.select(SIM, GUESS)
+save(FITS, file = "Data/generic_simulation.rda")
+
+```
+
+```{r simulate_gen4}
+
+load(file = "Data/generic_simulation.rda")  # load saved model results
 
 # Summary of the fit (NOTE the DOFs)
 summary(FITS)
@@ -179,14 +198,14 @@ summary(FITS)
 # Home range estimate
 HR <- akde(SIM, FITS)
 
-# Visualise the results
+# Visualize the results
 plot(SIM, UD = HR)
 
 ```
 
 ### Conditional Simulations
 
-Simulations conditioned on a fitted movement model (here, African buffalo data)
+Simulations conditioned on a fitted movement model (here, African buffalo data).
 
 ```{r simulate, eval = FALSE}
 
@@ -203,12 +222,14 @@ SEQ <- seq(from = SUB$t[1], to = SUB$t[10], by = 1 %#% 'min')
 SIM <- simulate(SUB, FIT, t = SEQ)  # simulate path for every min
 
 # Plot conditional simulation & data
-plot(list(SIM, SUB), col = c('blue','red'), type = c('l','p'))
+plot(list(SIM, SUB), col = c('blue','red'), type = c('l','p'), 
+     ylim = c(-26500,-21000))
 
 SIM2 <- simulate(SUB, FIT, t = SEQ)
 
 # Plot conditional simulation & data
-plot(list(SIM, SIM2, SUB), col = c('blue','orange','red'), type = c('l','l','p'))
+plot(list(SIM, SIM2, SUB), col = c('blue','orange','red'), type = c('l','l','p'), 
+     ylim = c(-26500,-21000))
 ## some variation in simulated trajectories based on the data
 ## variance would match up with the error ellipses
 
@@ -229,11 +250,14 @@ SIM3 <- simulate(SUB, emulate(FIT, fast = T), t = SEQ)
 ## emulate(FIT) for sample movement model to approximate unknown movement model
 
 plot(list(SIM, SIM2, SIM3, SUB), 
-     col = c('blue','orange','black','red'), type = c('l','l','l','p'))
+     col = c('blue','orange','black','red'), type = c('l','l','l','p'), 
+     ylim = c(-26500,-21000))
 
 ```
 
 ## Coati Case Study
+
+Let's explore how the techniques and functions above can be used to study the white-nosed coati (*Nasua narica*), a small, semi-arboreal mammal in the Musteloidea superfamily. [This dataset](https://doi.org/10.5441/001/1.41076dq1) from Kays and Hirsch (2015) comprises of 2 individual coatis, Aleja and Anna, who were tracked in Barro Colorado Island, Panama. [The behavior of musteloids often limits their observation in the wild](https://doi.org/10.1093/oso/9780198759805.003.0008), and if inhabiting forested areas, canopy cover can block the signal from tracking devices used to observe them remotely or greatly increase the location error. We will focus on Aleja to fill gaps in the data and predict the most-likely path they used.
 
 ### Data preparation
 
@@ -248,8 +272,10 @@ projection(coati) <- median(coati)
 # Subset to single individual
 DATA <- coati[[1]]
 
-# Visualise the data
-plot(DATA)
+# Visualize the data
+plot(DATA, ylim = c(-1200,1650))
+dt.plot(DATA)  # diagnose the sampling schedule
+## There are gaps in the data
 
 ```
 
@@ -257,30 +283,41 @@ plot(DATA)
 
 ```{r coati2}
 
-# Generate the variogram
+# Generate the variogram and initial parameter guesses
 vg <- variogram(DATA)
-
 GUESS <- ctmm.guess(DATA, variogram = vg, interactive = FALSE)
 
 # Visually inspect the fit
 plot(vg, GUESS)
 
-# Fit the models
-FIT <- ctmm.select(data = DATA, CTMM = GUESS, cores = -1, trace = 3)
+```
+
+```{r coati3, eval = FALSE}
+
+# Model selection
+FIT <- ctmm.select(data = DATA, CTMM = GUESS, trace = 3)
+save(FIT, file = "Data/coati_aleja.rda")
+
+```
+
+```{r coati4}
+
+# Load saved model selection results
+load(file = "Data/coati_aleja.rda")
 
 # Summary of the fit
-summary(FIT)
+summary(FIT)  # OUF anisotropic model selected
 
 ```
 
 ### Simulating Paths
 
-```{r coati3}
+```{r coati5}
 
 # Simulate from the fitted model, with the original sampling times
 SIM <- simulate(FIT, t = DATA$t)
 
-# Visualise the results
+# Visualize the results
 plot(list(DATA, SIM), col = c("red", "blue"))
 
 # Draw model parameters from the sampling distribution of the fitted model
@@ -290,39 +327,41 @@ FIT2 <- emulate(FIT, fast = TRUE)
 
 We can generate many simulations to see potential paths taken under the same movement behaviors and conditions.
 
-```{r coati4}
+```{r coati6}
 
 # Simulate from the model
 SIM2 <- simulate(FIT2, t = DATA$t)
 
-# Visualise the results
+# Visualize the results
 plot(list(DATA, SIM, SIM2), col = c("red", "blue", "grey30"))
 
 # Fill in the gaps 
 SIM3 <- simulate(DATA, CTMM = FIT, dt = 60)
 
-# Visualise the results
+# Visualize the results
 plot(list(DATA, SIM3), type = c("p", "l"), col = c("red", "blue"))
 
 ```
 
 ### Predict the Most-Likely Path
 
-```{r coati5}
+```{r coati7}
 
-# Generate the most likely path (conditioned off of the fitted model)
+# Generate the most likely path (conditioned on the fitted model)
 MLP <- predict(DATA, FIT, dt = 60)
 
-plot(DATA)
+plot(DATA, ylim = c(-1200,1650))
 plot(MLP, error = FALSE, type = "l", col = "blue", add = TRUE)
 
 # Export the simulations to work with other packages
 SIM_EXPORT <- simulate(DATA, CTMM = FIT, complete = TRUE)
 
-EXPORT <- SpatialPoints.telemetry(SIM_EXPORT)
+EXPORT <- SpatialPoints.telemetry(SIM_EXPORT)  # we can export this to other formats
 
-class(EXPORT)
-plot(EXPORT)
+class(EXPORT)  # `SpatialPoints` object for `sp` package
+
+# Different formats/object types allow us to work with our data in other packages
+mapview::mapView(EXPORT, alpha = 0.45)
 
 ```
 

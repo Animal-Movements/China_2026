@@ -28,6 +28,8 @@ FIT <- ctmm.select(coati[[1]],
                    GUESS,
                    cores = -1,
                    trace = 3)
+# save(FIT, file = "Day4_BehaviourAnalysis_PT1/Data/coati_aleja.rda")
+load(file = "Day4_BehaviourAnalysis_PT1/Data/coati_aleja.rda")
 
 
 #Summary of the fit
