@@ -69,7 +69,6 @@ Load the cleaned wildebeest dataset from the previous exercise. Before doing so,
 # We will also grab the temperature column and the sex of each animal and convert the x/y values to km (e.g., x/1000). 
 # We'll also create an hour field from the timestamp and make sex a numeric variable using the mutate() function. 
 WB.data1 <- load("Data/WB_3h_resampled.rdata")
-WB.data1b <- load("Data/WB_3h_resampled_test.rdata")
 WB.data2 <- load("Data/wildebeest_3hr_data_old.rdata")
 
 WB.data <- read_rds("Data/wildebeest_3hr_adehabitat.rds") %>%
