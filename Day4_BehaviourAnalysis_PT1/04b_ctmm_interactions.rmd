@@ -37,7 +37,17 @@ By the end of this module you will be able to:
 
 ## Background
 
+In this module, we will cover the following methods that can be used for studying interactions between individuals:
+
+* Home-range overlap
+* Encounter location distributions (conditional distribution of encounters [CDE])
+* Pairwise distances
+* Proximity ratios
+* Encounter rates
+
 ## Data Preparation
+
+For this module, we will use the African buffalo (*Syncerus caffer*) telemetry data internal to `ctmm`. We have prepared the data and performed model selection, already. We also estimated the home range (HR) of each individual buffalo, according to the workflow found in Day 3 "Module 3: AKDE, Home Range Meta-Analysis, Population Ranges" ("3_ctmm_akde.rmd"). These results were saved in R data files, which we will load in to prepare for the analyses in this model. This module involves conditional analyses and will use the `simulate` function for demonstration purposes; if interested, you may wish to look ahead at the "Conditional Simulations" subsection in "Module 5: Path Reconstruction & Simulations" for reference.
 
 ```{r import_data}
 
@@ -49,55 +59,73 @@ library(ctmm)
 data(buffalo)
 projection(buffalo) <- median(buffalo)  # center projection on median
 
+# Load in saved model selection results and HR estimates
 load("Data/buffalo.rda")  # fitted movement models (FITS)
 load("Data/buffalo_akdes.rda")  # estimated HR areas (AKDES)
 
 ```
 
-## Home Range Overlap
+## Home-Range Overlap
 
-Do individuals share the same space?
+*Do individuals share the same space?*
 
-[Winner et al. (2018)](https://doi.org/10.1111/2041-210X.13027)
+**Home-range overlap** describes the extent to which a pair of individuals share the same space. We typically quantify home-range overlap by first estimating home ranges from tracking data (i.e., `akde`) and then applying an overlap metric to the range estimates. The default overlap estimator in `ctmm` is a bias-corrected version of the Bhattacharyya coefficient (also called Bhattacharyya affinity), which measures the similarity between two probability distributions ([Bhattacharyya, 1946](https://www.jstor.org/stable/25047882)). The `overlap` function calculates the similarity between distributions as the % overlap of the probability mass functions (PMF)<!--probability density functions (PDF)?-->. By using the AKDE-estimated home ranges (HR) to calculate overlap, we are able to overcome the common challenges of differing sampling strategies and underlying movement parameters, such that we can compare across studies, sites, species, and times (see [Winner et al., 2018](https://doi.org/10.1111/2041-210X.13027).
 
 ```{r HR_overlap, eval = FALSE}
 
-help("overlap")  # overlap of distributions (measure of similarities btwn distributions as % overlap of PMF)
+help("overlap")  # overlap of distributions
 
 ```
+
+An alternative method for calculating overlap (`method = "encounter"`) uses a non-standard measure, that relates to the encounter probability of individuals (see `help(overlap)`). Both the Bhattacharyya coefficient and encounter method calculate a measure that ranges between 0 and 1, where 0 = no shared support (no overlap) and 1 = identical distributions (complete overlap). 
+
+The straight geometric overlap depends on the % range contour chosen (usually 95%) and does not consider the frequency or intensity of of space use. Because ranges tend to look more dissimilar than they are, there is a tendency for underestimation of overlap. The `overlap` function has a bias correction to account for this.
 
 ```{r HR_overlap2}
 
 # Estimate HR overlap for all pairs
-## Note: these all must have compatible resolutions and alignments
-OVER <- overlap(AKDES)  # statistical measure of overlap
-## as compared to geometric overlap that depends on the % range chosen, usually 95%, and doesn't consider freq of space use
+OVER <- overlap(AKDES)  # statistical measure of overlap with bias correction
+## Things tend to appear more dissimilar, so overlap is underestimated w/out bias correction
 
-OVER  # has bias correction (things tend to look more dissimilar than they are, so overlap estimates are lower w/out bias correction)
+```
 
-# This will generate an error because of incompatible grids (due to pixel by pixel calculation)
+To use `overlap`, all distributions (i.e., from `akde`) must have compatible resolutions and alignments (calculated on the same grid). This can be facilitated by inputting a list of telemetry objects (all individuals) and the corresponding list of best-fit models (`ctmm.fit`/`ctmm.select` results) in the `akde` function.
+
+```{r HR_overlap3, eval = FALSE}
+
+# Generate an error because of incompatible grids (due to pixel by pixel calculation)
 overlap(list(akde(buffalo$Pepper, FITS$Pepper), akde(buffalo$Queen, FITS$Pepper)))
+## Do NOT do this!
 
-# But this works because HRs are estimated simultaneously (and consistently)
-overlap(akde(list(buffalo$Pepper,buffalo$Queen), list(FITS$Pepper, FITS$Queen)))
+```
 
-# look at everything
+![](Figures/overlap_example_error.png)
+
+```{r HR_overlap4}
+
+# This works because HRs are estimated simultaneously (and consistently)
+overlap(akde(list(buffalo$Pepper, buffalo$Queen), list(FITS$Pepper, FITS$Queen)))
+## can also estimate all the AKDEs together first, then feed into overlap
+
+# All overlaps
 OVER
 
-# pairwise CIs 
+# Pairwise confidence intervals (CIs) 
 OVER$CI["Pepper","Toni",]
 OVER$CI["Queen","Toni",]
 
-# point estimates
+# Point estimates for HR overlap
 OVER$CI[,,"est"]
 
 ```
 
+> **NOTE:** Home-range overlap does not tell us if animals shared the *same space* at the *same time*. This measure does not directly inform us of whether individual animals are attracted to, or avoid, each other. To address that question, it would be better to calculate pairwise metrics, like **separation distance** and the **proximity ratio** (see "Pairwise Metrics" section below).
+
 ## Conditional Distribution of Encounters
 
-Where encounters are expected to take place (assumption that indivs are moving independently when not encountering)
+*Where encounters are expected to take place?* 
 
-[Noonan et al. (2021)](https://doi.org/10.1111/2041-210X.13597)
+Much of the research in encounter theory has focused on how animal movement relates to encounter rates (*more to come*), leaving a research gap for how animal movement relates to the locations where encounters between individuals may occur. In this section, we will calculate the **conditional distribution of encounters (CDE)** to estimate the areas where animals are likely to encounter each other (while assuming that individuals are moving independently when not encountering each other). This method describes the long-term encounter location probabilities for movement that occurs within home ranges (see [Noonan et al. (2021)](https://doi.org/10.1111/2041-210X.13597)), so that we can determine where we expect majority of encounters to take place.
 
 ```{r CDE, eval = FALSE}
 
@@ -109,63 +137,89 @@ help("cde")  # estimated area of where animals are likely to encounter each othe
 
 # Plot the data and HR estimates
 plot(buffalo[c("Pepper", "Queen")], UD = AKDES[c("Pepper", "Queen")],
-     col = c("#e76f51", "#264653"), col.DF = c("#f4a261", "#2a9d8f"), col.grid = NA)
-
+     col = c("#e76f51", "#264653"), col.UD = c("#f4a261", "#2a9d8f"), 
+     col.grid = NA, ylim = c(8000,80000))
+## orange = Pepper, green = Queen
 
 # Estimate the home range overlap
 overlap(AKDES[c("Pepper", "Queen")])
 
+# Estimate the conditional distribution of encounters (CDE) 
+## where we expect majority of encounter to take place
+CDE <- cde(AKDES[c("Pepper", "Queen")])  # can weight indivs separately
 
-# Estimate the CDE (conditional distribution of encounters, where we expect majority of encounter to takep place)
-CDE <- cde(AKDES[c("Pepper", "Queen")])  ## can weight indivs separately
-
-# Visualise the CDE
+# Visualize the CDE
 plot(buffalo[c("Pepper", "Queen")], UD = CDE,
-     col = c("#e76f51", "#264653"), col.DF = "#046C9A", col.grid = NA)
+     col = c("#e76f51", "#264653"), col.UD = "gold2", 
+     col.grid = NA, ylim = c(8000,80000))
 
 ```
+
+Note how the CDE corresponds with areas where the individual home ranges overlap.
 
 ## Pairwise Metrics
 
-### Pairwise Distance
+As mentioned above, we can use pairwise metrics to investigate whether individual animals are attracted to, or avoid, one another. There are several different functions available in `ctmm` to calculate relationships between individuals and their movement. In this section, we will discuss pairwise separation distances and proximity ratio.
 
 ```{r distance, eval = FALSE}
 
-help("proximity")  # metrics that take time into account (paper coming)
+# Metrics that take time into account (paper coming)
+help("proximity")  # ratio to determine if pairwise proximity differs from expectation
+help("distances")  # estimate pairwise separation distances
+help("difference")  # predict pairwise location differences, given data and ctmm models
+help("midpoint")  # predict the midpoints between pairwise locations
 
 ```
 
+### Pairwise Distance
+
 ```{r distance2}
+
+# Let's use Cilla and Mvubu as an example
+plot(list(buffalo$Cilla, buffalo$Mvubu), col = c("red2", "blue"))
+## red = Cilla, blue = Mvubu
 
 # Pairwise separation distances
 DISTS <- distances(buffalo[c("Cilla","Mvubu")], FITS[c("Cilla","Mvubu")])
 ## predicts distance btwn 2 indivs at given time, might have location
 
+# Visualize the separation distances
+plot(DISTS$est ~ DISTS$timestamp, type = "l", col = "#5e548e",
+     xlab = "Time", ylab = "Separation Distance (m)",
+     main = "Cilla-Mvubu Pairwise Separation Distances")
 
-# Visualise the separation distances
-plot(DISTS$est ~ DISTS$timestamp, type = "l", col = "#5e548e")
-
-# Internal plotting function (work in progress)
-ctmm:::ts.plot(DISTS)
+# Internal plotting function [IN DEVELOPMENT]
+ctmm:::ts.plot(DISTS)  # work in progress (not yet an exported function in ctmm)
 
 # What would totally independent motion look like?
+## Simulate independent motion
 cilla_sim <- simulate(FITS$Cilla, t = buffalo$Cilla$t)
 mvubu_sim <- simulate(FITS$Mvubu, t = buffalo$Mvubu$t)
 
+# Pairwise distances if independent motion
 sim_dists <- distances(list(cilla_sim, mvubu_sim), FITS[c("Cilla","Mvubu")])
 
+```
+
+```{r distance3, fig.height = 7, fig.width = 8}
+
 # Plot the data
-par(mfrow = c(2,2))
-plot(buffalo[c("Cilla", "Mvubu")], col = c("#e76f51", "#264653"),
+par(mfrow = c(2,2))  # plot in 2x2 grid
+
+## Plot real tracking data
+plot(buffalo[c("Cilla", "Mvubu")], col = c("red2", "blue"),
      main = "Empirical data")
 
-plot(list(cilla_sim, mvubu_sim), col = c("#e76f51", "#264653"),
+## Plot simulated tracked locations
+plot(list(cilla_sim, mvubu_sim), col = c("red2", "blue"),
      main = "Simulated data")
 
+## Plot empirical pairwise distances
 plot(DISTS$est ~ DISTS$timestamp, type = "l", col = "#5e548e",
      main = "Empirical distances", ylab = "Distance (m)", xlab = "Time",
      ylim = c(0,max(sim_dists$est)))
 
+## Plot simulated pairwise distances
 plot(sim_dists$est ~ sim_dists$timestamp, type = "l", col = "#5e548e",
      main = "Simulated distances", ylab = "Distance (m)", xlab = "Time",
      ylim = c(0,max(sim_dists$est)))
@@ -187,7 +241,7 @@ PROXIMITY <- proximity(buffalo[c("Cilla","Mvubu")],
 
 load("Data/buffalo_proximity.rda")  # ond statistic only works if they are moving tog or actually avoiding each
 
-PROXIMITY  ## >1 = farther apart than each other <1 closer together than expected
+PROXIMITY  # >1 = farther apart than each other <1 closer together than expected
 
 ```
 
@@ -223,10 +277,10 @@ help("encounter")  ## encounters, encounter rates/freqs
 # Empirical encounters
 DISTS$encounter <- ifelse(DISTS$est <= 100, 1, 0)
 
-#Visualize the results
+# Visualize the results
 par(mfrow = c(1,1))
-plot(DISTS$encounter ~ DISTS$timestamp)
-cdplot(as.factor(DISTS$encounter) ~ DISTS$timestamp)
+plot(DISTS$encounter ~ DISTS$timestamp)  # encounters over time
+cdplot(as.factor(DISTS$encounter) ~ DISTS$timestamp)  # conditional density plot
 
 # Empirical Encounter rate (n/day)
 n <- sum(DISTS$encounter)
@@ -243,7 +297,7 @@ for(i in 1:length(enc_rad)){
   N[i] <- sum(ifelse(DISTS$est <= enc_rad[i], 1, 0))
 }
 
-# Visualise the results
+# Visualize the results
 plot(N ~ enc_rad, col = "#5e548e", type = "l",
      ylab = "Encounters", xlab = "Encounter radius")
 
@@ -263,6 +317,7 @@ tanh(sqrt(RATES$CI["Cilla","Mvubu",]) * 1000)^2  # more reliable
 |:---|:---|:---|
 | `overlap()` | `ctmm` | Calculate the overlap between two stationary distributions using the Bhattacharyya coefficient | 
 | `cde()` | `ctmm` | Estimate the conditional location distribution of where encounters take place |
+| `distances()` | `ctmm` | Estimate separation distances between pairs of individuals, based on their telemetry data and movement models |
 | `proximity()` | `ctmm` | Estimate the proximity of two individuals at shared times from their telemetry data and movement models |
 | `encounter()` | `ctmm` | Calculate encounter statistics such as standardized encounter probabilities with confidence intervals and encounter rates |
 

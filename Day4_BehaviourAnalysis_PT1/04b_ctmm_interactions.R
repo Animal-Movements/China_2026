@@ -63,7 +63,7 @@ help("cde")  # estimated area of where animals are likely to encounter each othe
 plot(buffalo[c("Pepper", "Queen")],
      UD=AKDES[c("Pepper", "Queen")],
      col = c("#e76f51", "#264653"),
-     col.DF=c("#f4a261", "#2a9d8f"),
+     col.UD=c("#f4a261", "#2a9d8f"),
      col.grid = NA)
 
 
@@ -78,7 +78,7 @@ CDE <- cde(AKDES[c("Pepper", "Queen")])  ## can weight indivs separately
 plot(buffalo[c("Pepper", "Queen")],
      col=c("#e76f51", "#264653"),
      UD=CDE,
-     col.DF="#046C9A",
+     col.UD="#046C9A",
      col.grid = NA)
 
 
