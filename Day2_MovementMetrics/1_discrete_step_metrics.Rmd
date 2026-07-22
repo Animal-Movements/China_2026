@@ -82,10 +82,11 @@ WB_df <- WB.mv2 %>%
   as_tibble() %>%
   transmute(id = individual_local_identifier,
             x, y,
-            t = timestamp) %>%
+            t = timestamp,
+            temp = external_temperature) %>%
   arrange(id, t)
 
-trk_all <- make_track(WB_df, x, y, t, id = id, crs = latlong_crs, lon = x, lat = y)
+trk_all <- make_track(WB_df, x, y, t, temp, id = id, crs = latlong_crs, lon = x, lat = y)
 trk_all <- transform_coords(trk_all, utm_crs)
 
 class(trk_all)        # track_xyt, track_xy, tbl_df, tbl, data.frame
