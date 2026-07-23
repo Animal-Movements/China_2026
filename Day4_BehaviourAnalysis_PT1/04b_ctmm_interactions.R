@@ -143,7 +143,9 @@ help('proximity')
 
 PROXIMITY <- proximity(buffalo[c("Cilla","Mvubu")],
                        FITS[c("Cilla","Mvubu")])
-load("Day4_BehaviourAnalysis_PT1/Data/buffalo_proximity.rda")  # ond statistic only works if they are moving tog or actually avoiding each
+load("Day4_BehaviourAnalysis_PT1/Data/buffalo_proximity.rda")  
+## statistic only works if they are moving tog or actually avoiding each other
+
 PROXIMITY  ## >1 = farther apart than each other <1 closer together than expected
 
 # Proximity ratio for simulated animals
