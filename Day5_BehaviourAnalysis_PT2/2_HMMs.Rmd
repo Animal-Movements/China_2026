@@ -211,9 +211,9 @@ anglePar0 <- c(pi, 0, 1, 1)
 ### 3.2 Model Fitting
 We will now use the function `fitHMM` to fit our NULL model.  We specify the properly formatted object, define the number of states, input our starting values, and identify our steplength and turning angle distributions.  Since this is our NULL model, we assume that no covariates influence behavioral transitions between states.  We specify the NULL using standard regression formula notation (i.e., ~ 1).
 
-The model summary provides a detailed numeric output, including the mean steplength from each predicted state and the standard deviation.  We see that state 1 has a much smaller steplength (~ 285m) than state 2 (~ 702m).  For turning angle means, we see that the mean of state 2 is much closer to 0.  This would indicate continued movement in roughly the same direction (i.e., directed movement).  The mean turning angle for state 1 is closer to `pi`, indicating that the animal is moving in circles.  Since we did not test a regression equation, we only have an intercept regression coefficient. 
+The model summary provides a detailed numeric output, including the mean steplength from each predicted state and the standard deviation.  We see that state 1 has a much smaller steplength (~ 285m) than state 2 (~ 708m).  For turning angle means, we see that the mean of state 2 is much closer to 0.  This would indicate continued movement in roughly the same direction (i.e., directed movement).  The mean turning angle for state 1 is closer to `pi`, indicating that the animal is moving in circles.  Since we did not test a regression equation, we only have an intercept regression coefficient. 
 
-We are also provided with a matrix of predicted transitions, showing the average probability of transitioning from state 1 to state 2 (~2.6%) and state 2 to state 1 (~ 4.4%).  The diagonals (the probability of remaining in each state) of the transition matrix are also very high (96-97%), fitting in with what we'd expect behaviorally.  The resulting plots describe the distributions of steplengths and turning angles for our two states.  Paths are colored based on the predicted state for each animal, which is very interesting.
+We are also provided with a matrix of predicted transitions, showing the average probability of transitioning from state 1 to state 2 (~2.7%) and state 2 to state 1 (~ 4.6%).  The diagonals (the probability of remaining in each state) of the transition matrix are also very high (96-97%), fitting in with what we'd expect behaviorally.  The resulting plots describe the distributions of steplengths and turning angles for our two states.  Paths are colored based on the predicted state for each animal, which is very interesting.
 
 ```{r Fitting, message=FALSE, warning=FALSE, echo=TRUE}
 # Fit NULL model
@@ -417,9 +417,9 @@ WB.tod.3state
 ```
 
 ## 5. Model Comparison
-Now we'll use AIC to evaluate which model is best fit to the data.  Results indicate that the 2-state time of day model has the best statistical support, with next to no difference between our NULL model and the model including ambient temperature.  Other models, with more relevant predictors are likely to have greater support, but this at least provides a starting point for how to construct these types of models. 
+Now we'll use AIC to evaluate which model is best fit to the data.  Results indicate that the 2-state time of day model has the best statistical support. The temperature model has the worst statisticl support, ranking lower than our NULL model.  Other models, with more relevant predictors are likely to have greater support, but this at least provides a starting point for how to construct these types of models. 
 
-When we plot the results, we are able to investigate the steplength and turning angle distributions as we did previously.  We can also examine a plot of the trajectory, with colors coinciding with behaviors identified. We can also examine how the state probabilities change in relation to time of day.  Our results generally indicate that wildebeest transition from state 1 (resident/encamped) to state 2 (exploratory) around 14:00 and from state 2 to state 1 around 7:00 local time.  
+When we plot the results, we are able to investigate the steplength and turning angle distributions as we did previously.  We can also examine a plot of the trajectory, with colors coinciding with behaviors identified. We can also examine how the state probabilities change in relation to time of day.  Our results indicate a very early transition from state 1 (resident/encamped) to state 2 (exploratory) and then back from state 2 to state 1.  
 ```{r Model Comparison, message=FALSE, warning=FALSE, echo=TRUE}
 # Which of these two models is a better fit to the data?
 # Results indicate that the 2 state cosinor model is the best
@@ -431,8 +431,8 @@ AIC(WB.null,
 WB.tod.2state
 
 # Plot the results
-# plot(WB.tod.2state,
-#      ask = FALSE)
+plot(WB.tod.2state,
+     ask = FALSE)
 
 # Plot an individual
 plot(WB.tod.2state,
@@ -527,4 +527,4 @@ As a practical exercise, it can also be useful to collect GPS data on yourself s
 2. Spend a few hours tracking yourself, recording the precise time you sit down and rest, when you stand and walk around, and when you go for a run or ride your bike.  These represent very different behavioral states.
 3. Practice downloading the data from your phone and uploading the dataset into [R](https://cran.r-project.org/).
 4. Clean the data as appropriate to fit a hidden Markov model of your behaviors.
-5. Experiment with how the data are collected to evaluate how your ability to detect these three behaviors (restring, walking, running) changes with the resolution of your GPS track (i.e., 5-minute interval data versus 1 hour interval data).
+5. Experiment with how the data are collected to evaluate how your ability to detect these three behaviors (resting, walking, running) changes with the resolution of your GPS track (i.e., 5-minute interval versus a 1-hour temporal interval).
