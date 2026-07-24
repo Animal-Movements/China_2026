@@ -142,10 +142,23 @@ head(trk_resampled)
 If the goal is a single, consistent step length across the *whole* diel cycle rather than daytime resolution, target the night's native rate instead. This keeps roughly one fix every 3 hours and drops the extra daytime fixes in between, so every resulting step — day or night — spans the same nominal interval:
 
 ```{r resample_3h}
-trk_resampled_3h <- trk_nested %>%
-  mutate(resampled = map(data, ~ track_resample(.x, rate = hours(3), tolerance = minutes(30)))) %>%
-  select(id, resampled) %>%
-  unnest(resampled)
+# trk_resampled_3h <- trk_nested %>%
+#   mutate(resampled = map(data, ~ track_resample(.x, rate = hours(3), tolerance = minutes(15)))) %>%
+#   select(id, resampled) %>%
+#   unnest(resampled)
+
+trk_resampled_3h <- trk_nested |>
+  mutate(resampled = map(data, function(x)
+    x |> track_resample(rate = hours(3), tolerance = minutes(15)))) |> 
+  select(id, resampled) |>
+  unnest(resampled) |> 
+  # The track_resample function doesn't seem to be working properly.  Using this working around:
+  mutate(hour = hour(t_)) |> 
+  filter(hour %in% c(0,3,6,9,12,15,18,21)) |> 
+  select(!hour)
+
+# trk_resampled_3h$hour <- hour(trk_resampled_3h$t_)
+# plot(trk_resampled_3h$hour)
 
 head(trk_resampled_3h)
 ```

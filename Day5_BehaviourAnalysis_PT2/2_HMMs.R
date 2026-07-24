@@ -1,8 +1,8 @@
-## ----setup, include=FALSE----------------------------------------------
-knitr::opts_chunk$set(echo = TRUE)
+## ----setup, include=FALSE-----------------------------------------------------------------------
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 
 
-## ----Setup, message=FALSE, warning=FALSE, echo=TRUE--------------------
+## ----Setup, message=FALSE, warning=FALSE, echo=TRUE---------------------------------------------
 # Remove items from memory/clean your workspace
 rm(list=ls())
 
@@ -15,42 +15,63 @@ library(lubridate)
 library(tidyverse)
 
 
-## ----Load, message=FALSE, warning=FALSE, echo=TRUE---------------------
+## ----Load, message=FALSE, warning=FALSE, echo=TRUE----------------------------------------------
 # Read the dataset into R, selecting the necessary columns (x, y, date, id) for analyses.
-# We will also grab the temperature column and the sex of each animal and convert the x/y values to km (e.g., x/1000). 
-# We'll also create an hour field from the timestamp and make sex a numeric variable using the mutate() function. 
+# We will also grab the temperature column, convert the x/y values to km (e.g., x/1000), and create an hour field. 
+# We many also want to summarize results by the sex of each animal.  Since sex is not included in our dataset, we can join this information from a reference table that we will import.
 
-# Data load/import
-load("Data/wildebeest_3hr_data.rdata")
+# Load dataset
+load("Data/WB_3h_resampled.rdata")
 
-# Process the movement dataset.  We'll use the dataset created from adehabitat
-WB.data <- WB.move %>%
-  arrange(id, date) %>% # Not necessary here, but good practice
-  select(x,
-         y,
-         t = date,
+# Read in Reference dataset
+WB.ref <- read_csv("data/WB_ref.csv")
+
+# Here, we'll do a little cleaning of the reference dataset, join to the 3h tracking dataset, and prepare the file for further analysis.
+WB.data <- WB.ref %>%
+  #filter(study_site == "Athi-Kaputiei Plains") %>%
+  mutate(id = as.factor(as.character(individual_local_identifier)), # Make format the same as trk_resampled_3h field
+         sex = as.numeric(as.factor(sex))) %>%
+  select(
+    id,
+    sex
+  ) %>%
+  right_join( # Keep all from trk_resampled_3h
+    trk_resampled_3h,
+    by = join_by(id)
+  ) %>%
+  # Now, arrange the dataframe, manipulate the columns, and select the fields of interest
+  arrange(id, t_) %>% # Not really necessary, but always good practice to make sure the data are in correct order
+  select(x = x_,
+         y = y_,
+         t = t_,
          ID = id,
          temp,
          sex) %>% 
   mutate(hour = hour(t),
          x = x/1000, 
          y = y/1000, 
-         sex = as.numeric(sex))
+         temp = as.numeric(temp)
+         ) %>%
+  # Make the file a dataframe
+  as.data.frame()
+
+# Clean up your environment
+rm(trk_resampled_3h, WB.ref)
 
 
-## ----Create, message=FALSE, warning=FALSE, echo=TRUE-------------------
+## ----Create, message=FALSE, warning=FALSE, echo=TRUE--------------------------------------------
 # Create Object
 WB.move <- WB.data  %>% 
   prepData(type = "UTM",
            # Specify coordinate names
            coordNames = c("x","y"), # Note the order: x, y
-           covNames = c("temp", "sex", "hour"))
+           covNames = c("temp", "hour"))
 
 # What's the class of the object?
 class(WB.move)
 
 
-## ----Move Summary, message=FALSE, warning=FALSE, echo=TRUE-------------
+## ----Move Summary, message=FALSE, warning=FALSE, echo=TRUE--------------------------------------
 # Summarize the object
 summary(WB.move)
 
@@ -68,7 +89,7 @@ plot(WB.move[WB.move$ID == "Kikaya",],
      ask = FALSE)
 
 # We can also investigate the steplength and turning separately, using standard R commands
-# Note, however, the way these are writtent, they are summarizing all animals together
+# Note that these summaries are for all animals together
 # hist(WB.move$step)
 # summary(WB.move$step)
 # quantile(WB.move$step,
@@ -77,22 +98,40 @@ plot(WB.move[WB.move$ID == "Kikaya",],
 # hist(WB.move$angle)
 
 
-## ----Start, message=FALSE, warning=FALSE, echo=TRUE--------------------
+## ----Zero Mass, message=FALSE, warning=FALSE, echo=TRUE-----------------------------------------
+# Let's first determine if we have any step lengths of 0.  If yes, we need to include a zero mass parameter.  If no, setting a zeromass value is not necessary.
+# The slice_min() command allows us to view the 10 lowest values of the steplength parameter.  It's a convenient function to order by the minimum steplengths.
+slice_min(WB.move,
+          order_by = step,
+          n = 10)
+
+
+## ----Start, message=FALSE, warning=FALSE, echo=TRUE---------------------------------------------
 # Check distributions
 # hist(WB.move$step) #Looks like gamma
 # hist(WB.move$angle) #Looks pretty normal
 
 # Define Starting Values
 # ************************************
-# For Step Length (gamma distribution): c(mean1, mean2, sd1, sd2)
-stepPar0 <- c(0.1, 1, 0.1, 1)
+# For Step Length (gamma distribution): c(mean1, mean2, sd1, sd2, zeromass1, zeromass2)
+# Mean
+mu0 <- c(0.1, 1)
+
+# SD
+sigma0 <- c(0.1, 1)
+
+# Zero Mass
+zeromass0 <- c(0.1, 0.05)
+
+# Combine together
+stepPar0 <- c(mu0, sigma0, zeromass0)
 
 # For Turning Angle (von mises distribution): c(mean1, mean2, concentration1, concentration2)
 # In radians, pi, or 3.14 represents 180 degrees.
 anglePar0 <- c(pi, 0, 1, 1)
 
 
-## ----Fitting, message=FALSE, warning=FALSE, echo=TRUE------------------
+## ----Fitting, message=FALSE, warning=FALSE, echo=TRUE-------------------------------------------
 # Fit NULL model
 WB.null <- fitHMM(data = WB.move, 
                   nbStates = 2,
@@ -105,7 +144,7 @@ WB.null <- fitHMM(data = WB.move,
 WB.null
 
 
-## ----Fitting Plots, message=FALSE, warning=FALSE, echo=TRUE------------
+## ----Fitting Plots, message=FALSE, warning=FALSE, echo=TRUE-------------------------------------
 # Plot the results of the predictions.  
 # Colored states (State 1 is orange; state 2 is blue) provide the predicted state in each trajectory.  
 # Plot all animals
@@ -118,7 +157,7 @@ plot(WB.null,
      ask = FALSE)
 
 
-## ----Viterbi, message=FALSE, warning=FALSE, echo=TRUE------------------
+## ----Viterbi, message=FALSE, warning=FALSE, echo=TRUE-------------------------------------------
 # Run the algorithm on the fitted model
 WB.states <- viterbi(WB.null)
 
@@ -131,24 +170,20 @@ prop.table(table(WB.states))
 # How does this differ between individuals?
 # To answer this question, we need to combine the state assignments with the move object
 WB.v.Props <- WB.move %>% 
-  # create state column
-  mutate(state = WB.states) %>%
-  
+  mutate(state = WB.states) %>%   # create state column from WB.states (merge this with the dataframe)
   # add new column that is the total locations for each animal...used to calculate percentages
   mutate(locs = n(),
          .by = ID) %>% 
+  # summarize for each animal, and each state, the proportion of locations.  Could also use reframe() instead of summarise()
+  summarise(stateProp = n()/locs,
+          sex = unique(sex),
+          .by = c(ID, state)) %>% 
   
-  # summarize for each animal, and each state, the proportion of locations.  
-  # Using reframe, as summarize has been deprecated in latest version of dplyr
-  reframe(stateProp = n()/locs,
-            sex = unique(sex),
-            .by = c(ID, state)) %>% 
-  
-  # This reduces our data frame from the same initial size, to one with just the unique rows of information.
+  # Reduce dataset to one with just the unique rows of information.
   distinct() %>% 
   arrange(ID, state)
 
-# Graph results, color by sex to look for any potential patterns.  Just a graphical summary.
+# Graph results, color by sex to look for any potential patterns.  Just a graph summary.
 WB.v.Props %>%
   filter(state == 1) %>% 
   mutate(ID = fct_reorder(ID, 
@@ -163,8 +198,8 @@ WB.v.Props %>%
   theme_bw()
 
 # Look at Kiranto
-# plot(WB.move[WB.move$ID == "Kiranto",],
-#      ask = FALSE)
+plot(WB.move[WB.move$ID == "Kiranto",],
+     ask = FALSE)
 # Interestingly, Kiranto made some long distance movements, although most of his time was spent in state 1
 
 # How does his movement compare with Paita, for example?
@@ -173,7 +208,7 @@ WB.v.Props %>%
 # A very different movement pattern, even though the amount of time in state 1 is very similar to Kiranto.
 
 
-## ----State Probabilities, message=FALSE, warning=FALSE, echo=TRUE------
+## ----State Probabilities, message=FALSE, warning=FALSE, echo=TRUE-------------------------------
 # Calculate state probabilities
 WB.probs <- stateProbs(WB.null)
 # head(WB.probs)
@@ -206,7 +241,7 @@ WB.move %>%
 
 
 
-## ----Temp Model, message=FALSE, warning=FALSE, echo=TRUE---------------
+## ----Temp Model, message=FALSE, warning=FALSE, echo=TRUE----------------------------------------
 # Fit covariate model - temperature
 WB.temp <- fitHMM(data = WB.move, 
                   nbStates = 2, 
@@ -223,8 +258,8 @@ plotStationary(WB.temp,
                plotCI = TRUE)
 
 
-## ----Time Model, message=FALSE, warning=FALSE, echo=TRUE---------------
-# Fit time covariate model
+## ----Time Model, message=FALSE, warning=FALSE, echo=TRUE----------------------------------------
+# Fit covariate model
 WB.tod.2state <- fitHMM(data = WB.move,
                  nbStates = 2,
                  dist = list(step = "gamma", angle = "vm"),
@@ -236,31 +271,60 @@ WB.tod.2state <- fitHMM(data = WB.move,
 WB.tod.2state
 
 
-## ----Model Comparison, message=FALSE, warning=FALSE, echo=TRUE---------
-# Create a data frame with model comparison metrics
-model_comparison <- data.frame(
-  Model = c("2-state Null", "2-state Temp", "2-state time"),
-  AIC = c(AIC(WB.null), AIC(WB.temp), AIC(WB.tod.2state)))
+## ----MultiState, message=FALSE, warning=FALSE, echo=TRUE----------------------------------------
+# Starting Values - Steplengths
+# *****************************
+# For Step Length (gamma distribution): c(mean1, mean2, sd1, sd2, zeromass1, zeromass2, zeromass3)
+# Mean
+mu0 <- c(0.1, 1, 3)
 
-# Print the model comparison table
-print(model_comparison)
+# SD
+sigma0 <- c(0.1, 0.1, 0.1)
 
-# Identify the best model based on AIC
+# Zero Mass
+zeromass0 <- c(0.1, 0.05, 0.001)
+
+# Combine together
+stepPar0 <- c(mu0, sigma0, zeromass0)
+
+# Starting values - Turning angles
+# ********************************
+# For turning angle (von mises): c(mean1, mean2, mean3, conc1, conc2, conc3)
+anglePar0 <- c(pi, 0, 1.5, 1, 1, 1)
+
+# Fit model
+WB.tod.3state <- fitHMM(data = WB.move,
+                 nbStates = 3,
+                 dist = list(step = "gamma", angle = "vm"),
+                 Par0 = list(step = stepPar0, angle = anglePar0), 
+                 formula = ~ cosinor(hour, period = 24),
+                 estAngleMean = list(angle=TRUE))
+
+# Summarize
+WB.tod.3state
+
+
+## ----Model Comparison, message=FALSE, warning=FALSE, echo=TRUE----------------------------------
+# Which of these two models is a better fit to the data?
 # Results indicate that the 2 state cosinor model is the best
-best_model_aic <- model_comparison[which.min(model_comparison$AIC), "Model"]
-paste("Best model based on AIC: ", best_model_aic, "model")
+AIC(WB.null,
+    WB.temp,
+    WB.tod.2state,
+    WB.tod.3state)
+
+WB.tod.2state
 
 # Plot the results
 # plot(WB.tod.2state,
 #      ask = FALSE)
 
 # Plot an individual
-# plot(WB.tod.2state,
-#       animals = "Kiranto",
-#       ask = FALSE)
+plot(WB.tod.2state,
+      animals = "Kiranto",
+      ask = FALSE)
 
 
-## ----Applications, message=FALSE, warning=FALSE, echo=TRUE-------------
+## ----Applications, message=FALSE, warning=FALSE, echo=TRUE--------------------------------------
 # Encode the behaviors using the Viterbi algorithm
 WB.tod.states <- viterbi(WB.tod.2state)
 
