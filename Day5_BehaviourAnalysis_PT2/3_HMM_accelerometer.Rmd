@@ -23,30 +23,42 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 
 # Learning Objectives
 
+By the end of this module you will be able to:
+
+1. 
+
+**Packages used:** `momentuHMM`, `lubridate`, `tidyverse`
+
 # Introduction
   >Many thanks to Dr. Dennis Kim for assistance in developing this material
 
-This document presents the analysis of accelerometer data from maned wolves (*Chrysocyon brachyurus*) at Parque Nacional da Serra da Canastra in Brazil, kindly made available by Dr. Rosanna N. Moraes. Here, we focus on two individuals of wild maned wolves (male: ID 32866 - Juba; female: ID 32733 - Pacoca). Juba and Pacoca are a mating pair and Pacoca was pregnant when she was fitted with the accelerometer. 
+We've now learned the basics of fitting an HMM. We'll now take this one step further, incorporating data from accelerometers fitted on maned wolves (*Chrysocyon brachyurus*) in Parque Nacional da Serra da Canastra in Brazil.In these analyses, we will focus on two individuals (male: ID 32866 - Juba; female: ID 32733 - Pacoca). Juba and Pacoca are a mating pair and Pacoca was pregnant when she was fitted with the accelerometer.  Many thanks to Dr. Rosanna N. Moraes for making these data available for use. 
 
-```{r load-pacakages, results = 'hide', warning = FALSE}
-# Movement modelling package
+```{r load-pacakages, message=FALSE, warning=FALSE, echo=TRUE}
+# Remove items from memory/clean your workspace
+rm(list=ls())
+
+# You may need to install these packages first
+#install.packages('momentuHMM', 'data.tree', 'dplyr', 'tidyr', 'lubridate', ''readr', 'zoo', 'ggplot2')
+
+# Load libraries
 library(momentuHMM)
-# Data wrangling packages
 library(data.tree)
 library(dplyr)
 library(tidyr)
 library(lubridate)
 library(readr)
 library(zoo)
-# Visualization
 library(ggplot2)
 ```
 
 ## 1. Load Data
 
-First, we load the data directly from the file location. The original data were saved in .adf file format and you need to convert them to R-readabale file such as .csv format through vendoring software such as GPS Plus X. For the purposes of this demonstration, we take the summarized activity data from the raw accelerometer data from two individuals the fitted wild maned wolves: ID 32866-Juba and ID 32733-Pacoca. The accelerometer data is different than the GPS data where tracks activity patterns of the wolves at much finer temporal scales. 
+The accelerometer data used in this module are saved in a proprietary format (i.e., .adf) from the  manufacterer (Vectronics Aerospace). In order to load the data into [R](https://cran.r-project.org/), I first used the manufacturer's software to convert them to a R-readable format (i.e., .csv). 
 
-```{r load-data}
+For the purposes of this demonstration, we take the summarized activity data from the raw accelerometer from two individuals: ID 32866-Juba and ID 32733-Pacoca. Accelerometer data is different than GPS data, with activity data provided at much finer temporal scales. 
+
+```{r load-data, message=FALSE, warning=FALSE, echo=TRUE}
 # Load data 
 
 ## ID: 32733 - pacoca
@@ -56,10 +68,11 @@ act_32733 <- read.csv("data/ACT_Collar32733_20260401143616.csv")
 act_32866 <- read.csv("data/ACT_Collar32866_20260401143833.csv")
 ```
 
-# 2. Clean timestamps 
+## 2. Clean timestamps 
 
-Before looking at the time interval range, look at the raw data closely that currently the data contains separate data and time columns. We use "UTC" timezone dataset and the column 'UTC_Date' contains mm/dd/yy and 'UTC_Time' includes hh/mm/ss. Both columns are currently characters. First, let's create a correctly formatted time column.
-```{r time-conversion}
+Note that the date and time columns (UTC_Date and UTC_Time, respectively) are organized as separately.  Because these columns are "character" columns, we need to join them together and then convert them to a date/time field.
+
+```{r time-conversion, message=FALSE, warning=FALSE, echo=TRUE}
 ## currently, the data contains several date/time columns -- date and time need to combine into one column first 
 act_32733$datetime_str <- paste(act_32733$UTC_Date, act_32733$UTC_Time)
 act_32866$datetime_str <- paste(act_32866$UTC_Date, act_32866$UTC_Time)
@@ -69,71 +82,78 @@ act_32733$time <- lubridate::mdy_hms(act_32733$datetime_str, tz = "UTC")
 act_32866$time <- lubridate::mdy_hms(act_32866$datetime_str, tz = "UTC")
 ```
 
-The base time interval between observations was 5 minutes (300 secs) in this study. Make sure to check if there were missing observations, resulting in longer intervals.
-```{r diff-time}
+The base time interval between observations was 5 minutes (300 secs) in this study. We need to make sure to check if there were missing observations, resulting in longer intervals that need to be corrected.  
+
+```{r diff-time, message=FALSE, warning=FALSE, echo=TRUE}
 # Table of time intervals in data - can apply to both individuals
 plot(table(diff(act_32866$time)), xlim = c(0, 600),
      xlab = "time interval (sec)", ylab = "count")
 ```
 
-Although our data do not have issues with temporal irregularity in the data, it is always important to check and deal with temporal irregularity before fitting the HMMs. 
+Although our data do not have issues with temporal irregularity, it is always important to check and deal with temporal irregularity before fitting a HMM.  You now know how to do this, which would require a few additional steps to fill in the data with NAs so that the temporal interval was consistent.
 
-## Create a single summary activity variable
+### 2.1 Calculating ODBA
 
-Unlike GPS data, activity data do not include location information such as coordinates (e.g., Easting/Northing or latitude/longitude). Instead, activity data capture movement using proxy variables (in our data, they are labeled as 'ActivityX', 'ActivityY', and 'ActivityZ'), which measure motion along three dimensions. These values are recorded at regular intervals (e.g., every 5 minutes) and reflect how the animal is moving rather than where it is.
+Unlike GPS data, activity data do not include location information such as coordinates (e.g., Easting/Northing or latitude/longitude). Instead, activity data capture movement using proxy variables. In our data, these activity data are labeled as 'ActivityX', 'ActivityY', and 'ActivityZ', measuring motion along three dimensions (X, Y, and Z - surge, sway, and heave). These values are recorded at summarized at regular intervals (e.g., every 5 minutes) and reflect how the animal is moving rather than where it is.
 
-These three measurements are often combined into a single summary metric called **Overall Dynamic Body Acceleration (ODBA)**, which represents the overall intensity of movement and is commonly used as an indicator of activity level or energy expenditure. Let's calculate ODBA for our data.
-```{r ODBA}
+These three measurements are often combined into a single summary metric called *Overall Dynamic Body Acceleration* or *ODBA*, representing the overall intensity of movement. ODBA is commonly used as an indicator of activity or energy expenditure. Let's calculate ODBA for our data.
+
+```{r ODBA, message=FALSE, warning=FALSE, echo=TRUE}
 ## use a single summary activity variable - ODBA
 act_32733$ODBA <- rowSums(act_32733[, c("ActivityX", "ActivityY", "ActivityZ")], na.rm= TRUE)
 act_32866$ODBA <- rowSums(act_32866[, c("ActivityX", "ActivityY", "ActivityZ")], na.rm = TRUE)
 ```
 
-## Further minor data wrangling 
+### 2.2 Further data wrangling 
 
-Let's select several columns of interest for the analysis and combine individual data into one.
-```{r final-data}
+Let's select several columns of interest for the analysis and combine both animals into a single dataframe.
+
+```{r final-data, message=FALSE, warning=FALSE, echo=TRUE}
 # select the columns of interest
-pacoca <- act_32733 %>% dplyr::select(CollarID, ODBA, time, Temp...C.)
-juba <- act_32866 %>% dplyr::select(CollarID, ODBA, time, Temp...C.)
+pacoca <- act_32733 %>% 
+  select(ID = CollarID, 
+         ODBA, 
+         time, 
+         temp = Temp...C.)
 
-# change the name of the columns
-colnames(pacoca)[1] <- "ID"
-colnames(juba)[1] <- "ID"
-colnames(pacoca)[4] <- "temp"
-colnames(juba)[4] <- "temp"
+juba <- act_32866 %>% 
+  select(ID = CollarID, 
+         ODBA, 
+         time, 
+         temp = Temp...C.)
 
 # combine the datasets
 data <- rbind(pacoca, juba)
 
+# Summarize
 summary(data)
 ```
 
-# 3. The momentuHMM workflow
+## 3. The momentuHMM workflow
 
-## Data preparation
+The data are now ready to be used in [momentuHMM](https://cran.r-project.org/web/packages/momentuHMM/index.html), following a similar set of steps that we are now familiar with, inclusive of the covariate temperature.  
 
-The data are now ready to be used in momentuHMM. Note that we do not handle the location data like the GPS example. In the GPS data, we derive step lengths and turning angles from the locations. Here, we set 'coordNames' argument to NULL within the function 'prepData'. 
+### 3.1 Data preparation
 
-```{r prep-data1}
+Note that we do not handle the location data like the GPS example. With GPS data, we derive step lengths and turning angles from the locations. Here, we set the 'coordNames' argument to NULL within the function 'prepData'. 
+
+```{r prep-data1, message=FALSE, warning=FALSE, echo=TRUE}
 # Prepare data for HMM 
 data_hmm <- prepData(data, coordNames = NULL, covNames = "temp")
 ```
 
-## Model fitting 
+### 3.2 Model fitting 
+[MomentuHMM](https://cran.r-project.org/web/packages/momentuHMM/index.html) is quite flexible and can handle multiple datastreams, inclusive of GPS data for coarse-scale movements. Here, we will focus intently on the activity data only, using the function `fitHMM()` to fit models like we used previously.
 
-We can now fit a HMM, which is done with the function 'fitHMM'. In this example, we focus **only on activity data** (ODBA), although momentuHMM can also handle multiple datastreams, e.g., GPS data for coarse-scale movements.
+We are interested in two states, State 1 or *'Low Activity'* and State 2 or *'High Activity'*.  To get started, we need to specify two things: 
 
-We are interested in two states: state 1: low activity and state 2: high activity.
+1. Observation distributions - Each observed variable needs a probability distribution to define each activity state. ODBA is continuous and strictly positive (except for exact zeros), allowing us to once again use the gamma distribution. Since many zeros exist in our data, we need to use a zero-inflated gamma distribution and account for zero mass as we did in our previous analysis. 
 
-Two thing need to be specified before model fitting: 
+2. Initial parameter values - The `fitHMM()` function uses numerical optimization to find maximum likelihood estimates. The optimization requires a starting point. For a gamma distribution with zero-inflation, each state requires three parameters. As before, these are: (1) mean ($\bar{x}$) of the gamma, (2) standard deviation ($\sigman{x}$) of the gamma, and (3) probability of exact zero (i.e., zero-mass) for each state.
 
-- Observation distributions: Each observed varaiable needs a probability distribution for each state. ODBA is continuous and strictly positive (except for exact zeros), so a gamma distribution is appropriate. Note that our data contains many zero but momentuHMM allows zero-inflated gamma. 
+Please once again refer to the [moveHMM](https://cran.r-project.org/web/packages/moveHMM/index.html) guide on selecting initial parameter values, as this can be very tricky: [A short guide to choosing initial parameter values for the estimation in moveHMM](https://cran.r-project.org/web/packages/moveHMM/vignettes/moveHMM-starting-values.pdf).
 
-- Initial parameter values: 'fitHMM' function uses numerical optimization to find maximum likelihood estimates. The optimization rquires a starting point. For a gamma distriution with zero-inflation, each state requires three parameters: (1) mean of the gamma, (2) standard deviation of the gamma, and (3) probability of exact zero (i.e., zero-mass) for each state.
-
-Choosing initial parameter values are very tricky and there is some guidance for selecting initial paramter values provided in a vignette for the R package moveHMM: [A short guide to choosing initial parameter values for the estimation in moveHMM](https://cran.r-project.org/web/packages/moveHMM/vignettes/moveHMM-starting-values.pdf).
-```{r fit-hmm1}
+```{r fit-hmm1, message=FALSE, warning=FALSE, echo=TRUE}
 # Observation distributions (ODBA)
 dist <- list(ODBA = "gamma")
 
@@ -141,7 +161,8 @@ dist <- list(ODBA = "gamma")
 # Use simple rules-of-thumb based on the data:
 # - Low activity state (state 1): roughly half the mean ODBA
 # - High activity state (state 2): roughly 1.5 times the mean ODBA
-mu1 <- max(mean(data$ODBA) * 0.5, 1e-2)  # state 1: low activity
+# The 1e-2 ensures strictly positive values.  Not necessary here, but might save you some problems.
+mu1 <- max(mean(data$ODBA) * 0.5, 1e-2)  # state 1: low activity 
 mu2 <- max(mean(data$ODBA) * 1.5, 1e-2)  # state 2: high activity
 
 # Use the standard deviation of the positive observations as a guide.
@@ -161,22 +182,26 @@ Par0_2s <- list(
 )
 
 # Fit a 2-state HMM
-hmm1 <- fitHMM(data_hmm, nbStates = 2, dist = dist, Par0 = Par0_2s)
+hmm1 <- fitHMM(data_hmm, 
+               nbStates = 2, 
+               dist = dist, 
+               Par0 = Par0_2s)
 
-# Print paramter estimates 
+# Print parameter estimates 
 hmm1
 ```
 
-## Model visualization 
+### 3.3 Model visualization 
+Similar to previous exercises, we see summary statistics and regression coefficients for model output. We can also plot the estimated distributions to visualize the findings.
 
-The model is fitted, we can print the parameter estimates, as well as plot some outputs
 ```{r look-hmm1, fig.keep = 1:4}
 # Plot estimated distributions and state-coloured tracks
-plot(hmm1, breaks = 25, ask = FALSE)
+plot(hmm1, ask = FALSE)
 ```
 
-We can also estimate the most likely state sequence for a fitted model with the funection 'viterbi' algorithm. 
-```{r viterbi}
+We can also estimate the most likely state sequence for a fitted model with the 'viterbi' algorithm. 
+
+```{r viterbi, message=FALSE, warning=FALSE, echo=TRUE}
 # get most likely sequence of states 
 head(viterbi(hmm1))
 
@@ -189,25 +214,32 @@ ggplot(data_hmm, aes(x = time, y = ODBA, col = state_2st, group = ID))+
   facet_wrap(~ID)
 ```
 
-## Model formulation: covariates
+### 3.4 Model formulation: covariates
+Now, following the same structure as previously, we will include the temperature measurements collected by the tag at each time of observation. Here, we aim to answer if temperature impacts maned wolf activity patterns. To do so, we'll estimate the effect of temperature on the transition probabilities. 
 
-We have temperature measurements taken by the tag at each time of observation. How does temperature tned to affect the wolves' activity patterns? Let's estimate the effect of covariates on the transition probabilities. 
-```{r fit-hmm2}
+```{r fit-hmm2, message=FALSE, warning=FALSE, echo=TRUE}
 # Fit 2-state HMM with temperature covariate 
-hmm2 <- momentuHMM::fitHMM(data_hmm, nbStates = 2, dist = dist, Par0 = Par0_2s, formula = ~temp)
+hmm2 <- fitHMM(data_hmm, 
+               nbStates = 2, 
+               dist = dist, 
+               Par0 = Par0_2s, 
+               formula = ~ temp)
 
 # show summary of model 2 
 hmm2
 ```
 
 Let's visualizae the stationary state probabilities as functions of the temperature covariate. 
+
 ```{r look-hmm2}
 # plot stationary state probabilities as functions of temperature 
-plotStationary(hmm2, plotCI = TRUE)
+plotStationary(hmm2, 
+               plotCI = TRUE)
 ```
+
 This plot suggests that the wolves were more likely to be in state 2 (high activity) at low temperatures, and in state 1 (low activity) at high temperatures.
 
-## Model comparison 
+### 3.5 Model comparison 
 
 We can use the 'AIC' function for model selection by comparing the model without the covariate versus model with the temperature covariate. 
 ```{r AIC}
@@ -235,3 +267,7 @@ plotPR(hmm1)
 plotPR(hmm2)
 ```
 Goodness-of-fit is slightly better for the model 2. However, the model still needs to be tuned to capture more detailed features of the data. This is a good example of how it is important to do model checking before finalizing the model.  
+
+---
+
+# Exercise: Apply to your own data
