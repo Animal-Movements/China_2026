@@ -1,8 +1,8 @@
-## ----setup, include=FALSE-----------------------------------------------------------------------
+## ----setup, include=FALSE----------------------------------------------------------------
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 
 
-## ----Setup, message=FALSE, warning=FALSE, echo=TRUE---------------------------------------------
+## ----Setup, message=FALSE, warning=FALSE, echo=TRUE--------------------------------------
 # Remove items from memory/clean your workspace
 rm(list=ls())
 
@@ -15,7 +15,7 @@ library(lubridate)
 library(tidyverse)
 
 
-## ----Load, message=FALSE, warning=FALSE, echo=TRUE----------------------------------------------
+## ----Load, message=FALSE, warning=FALSE, echo=TRUE---------------------------------------
 # Read the dataset into R, selecting the necessary columns (x, y, date, id) for analyses.
 # We will also grab the temperature column, convert the x/y values to km (e.g., x/1000), and create an hour field. 
 # We many also want to summarize results by the sex of each animal.  Since sex is not included in our dataset, we can join this information from a reference table that we will import.
@@ -59,7 +59,7 @@ WB.data <- WB.ref %>%
 rm(trk_resampled_3h, WB.ref)
 
 
-## ----Create, message=FALSE, warning=FALSE, echo=TRUE--------------------------------------------
+## ----Create, message=FALSE, warning=FALSE, echo=TRUE-------------------------------------
 # Create Object
 WB.move <- WB.data  %>% 
   prepData(type = "UTM",
@@ -71,7 +71,7 @@ WB.move <- WB.data  %>%
 class(WB.move)
 
 
-## ----Move Summary, message=FALSE, warning=FALSE, echo=TRUE--------------------------------------
+## ----Move Summary, message=FALSE, warning=FALSE, echo=TRUE-------------------------------
 # Summarize the object
 summary(WB.move)
 
@@ -98,18 +98,24 @@ plot(WB.move[WB.move$ID == "Kikaya",],
 # hist(WB.move$angle)
 
 
-## ----Zero Mass, message=FALSE, warning=FALSE, echo=TRUE-----------------------------------------
+## ----Zero Mass, message=FALSE, warning=FALSE, echo=TRUE----------------------------------
 # Let's first determine if we have any step lengths of 0.  If yes, we need to include a zero mass parameter.  If no, setting a zeromass value is not necessary.
+
 # The slice_min() command allows us to view the 10 lowest values of the steplength parameter.  It's a convenient function to order by the minimum steplengths.
 slice_min(WB.move,
           order_by = step,
           n = 10)
 
+# You could also query the dataset and summarize numerically 
+whichzero <- which(WB.move$step == 0) 
+# Calculate the proportion of steps of length zero 
+(prop.0 <- length(whichzero)/nrow(WB.move))
 
-## ----Start, message=FALSE, warning=FALSE, echo=TRUE---------------------------------------------
+
+## ----Start, message=FALSE, warning=FALSE, echo=TRUE--------------------------------------
 # Check distributions
-# hist(WB.move$step) #Looks like gamma
-# hist(WB.move$angle) #Looks pretty normal
+hist(WB.move$step, xlab="Step Length") 
+hist(WB.move$angle, xlab="Turning Angle") 
 
 # Define Starting Values
 # ************************************
@@ -118,20 +124,21 @@ slice_min(WB.move,
 mu0 <- c(0.1, 1)
 
 # SD
-sigma0 <- c(0.1, 1)
+sigma0 <- c(1, 1)
 
 # Zero Mass
-zeromass0 <- c(0.1, 0.05)
+zeromass0 <- c(prop.0, prop.0)
 
 # Combine together
 stepPar0 <- c(mu0, sigma0, zeromass0)
 
 # For Turning Angle (von mises distribution): c(mean1, mean2, concentration1, concentration2)
 # In radians, pi, or 3.14 represents 180 degrees.
-anglePar0 <- c(pi, 0, 1, 1)
+# We expect the concentration to be larger when directed movement (mean = 2) occurs
+anglePar0 <- c(pi, 0, 1, 10)
 
 
-## ----Fitting, message=FALSE, warning=FALSE, echo=TRUE-------------------------------------------
+## ----Fitting, message=FALSE, warning=FALSE, echo=TRUE------------------------------------
 # Fit NULL model
 WB.null <- fitHMM(data = WB.move, 
                   nbStates = 2,
@@ -140,11 +147,11 @@ WB.null <- fitHMM(data = WB.move,
                   formula = ~ 1,
                   estAngleMean = list(angle=TRUE))
 
-# Examing the 2-state model
+# Examining the 2-state model
 WB.null
 
 
-## ----Fitting Plots, message=FALSE, warning=FALSE, echo=TRUE-------------------------------------
+## ----Fitting Plots, message=FALSE, warning=FALSE, echo=TRUE------------------------------
 # Plot the results of the predictions.  
 # Colored states (State 1 is orange; state 2 is blue) provide the predicted state in each trajectory.  
 # Plot all animals
@@ -157,7 +164,7 @@ plot(WB.null,
      ask = FALSE)
 
 
-## ----Viterbi, message=FALSE, warning=FALSE, echo=TRUE-------------------------------------------
+## ----Viterbi, message=FALSE, warning=FALSE, echo=TRUE------------------------------------
 # Run the algorithm on the fitted model
 WB.states <- viterbi(WB.null)
 
@@ -174,10 +181,10 @@ WB.v.Props <- WB.move %>%
   # add new column that is the total locations for each animal...used to calculate percentages
   mutate(locs = n(),
          .by = ID) %>% 
-  # summarize for each animal, and each state, the proportion of locations.  Could also use reframe() instead of summarise()
-  summarise(stateProp = n()/locs,
+  # summarize for each animal, and each state, the proportion of locations.  Using the reframe() command here
+  reframe(stateProp = n()/locs,
           sex = unique(sex),
-          .by = c(ID, state)) %>% 
+          .by = c(ID, state)) %>%
   
   # Reduce dataset to one with just the unique rows of information.
   distinct() %>% 
@@ -208,7 +215,7 @@ plot(WB.move[WB.move$ID == "Kiranto",],
 # A very different movement pattern, even though the amount of time in state 1 is very similar to Kiranto.
 
 
-## ----State Probabilities, message=FALSE, warning=FALSE, echo=TRUE-------------------------------
+## ----State Probabilities, message=FALSE, warning=FALSE, echo=TRUE------------------------
 # Calculate state probabilities
 WB.probs <- stateProbs(WB.null)
 # head(WB.probs)
@@ -241,7 +248,7 @@ WB.move %>%
 
 
 
-## ----Temp Model, message=FALSE, warning=FALSE, echo=TRUE----------------------------------------
+## ----Temp Model, message=FALSE, warning=FALSE, echo=TRUE---------------------------------
 # Fit covariate model - temperature
 WB.temp <- fitHMM(data = WB.move, 
                   nbStates = 2, 
@@ -258,7 +265,7 @@ plotStationary(WB.temp,
                plotCI = TRUE)
 
 
-## ----Time Model, message=FALSE, warning=FALSE, echo=TRUE----------------------------------------
+## ----Time Model, message=FALSE, warning=FALSE, echo=TRUE---------------------------------
 # Fit covariate model
 WB.tod.2state <- fitHMM(data = WB.move,
                  nbStates = 2,
@@ -271,7 +278,7 @@ WB.tod.2state <- fitHMM(data = WB.move,
 WB.tod.2state
 
 
-## ----MultiState, message=FALSE, warning=FALSE, echo=TRUE----------------------------------------
+## ----MultiState, message=FALSE, warning=FALSE, echo=TRUE---------------------------------
 # Starting Values - Steplengths
 # *****************************
 # For Step Length (gamma distribution): c(mean1, mean2, sd1, sd2, zeromass1, zeromass2, zeromass3)
@@ -279,10 +286,10 @@ WB.tod.2state
 mu0 <- c(0.1, 1, 3)
 
 # SD
-sigma0 <- c(0.1, 0.1, 0.1)
+sigma0 <- c(1, 1, 1)
 
 # Zero Mass
-zeromass0 <- c(0.1, 0.05, 0.001)
+zeromass0 <- c(prop.0, prop.0, prop.0)
 
 # Combine together
 stepPar0 <- c(mu0, sigma0, zeromass0)
@@ -290,7 +297,7 @@ stepPar0 <- c(mu0, sigma0, zeromass0)
 # Starting values - Turning angles
 # ********************************
 # For turning angle (von mises): c(mean1, mean2, mean3, conc1, conc2, conc3)
-anglePar0 <- c(pi, 0, 1.5, 1, 1, 1)
+anglePar0 <- c(pi, 0, 1.5, 1, 10, 5)
 
 # Fit model
 WB.tod.3state <- fitHMM(data = WB.move,
@@ -304,7 +311,7 @@ WB.tod.3state <- fitHMM(data = WB.move,
 WB.tod.3state
 
 
-## ----Model Comparison, message=FALSE, warning=FALSE, echo=TRUE----------------------------------
+## ----Model Comparison, message=FALSE, warning=FALSE, echo=TRUE---------------------------
 # Which of these two models is a better fit to the data?
 # Results indicate that the 2 state cosinor model is the best
 AIC(WB.null,
@@ -315,8 +322,8 @@ AIC(WB.null,
 WB.tod.2state
 
 # Plot the results
-# plot(WB.tod.2state,
-#      ask = FALSE)
+plot(WB.tod.2state,
+     ask = FALSE)
 
 # Plot an individual
 plot(WB.tod.2state,
@@ -324,7 +331,7 @@ plot(WB.tod.2state,
       ask = FALSE)
 
 
-## ----Applications, message=FALSE, warning=FALSE, echo=TRUE--------------------------------------
+## ----Applications, message=FALSE, warning=FALSE, echo=TRUE-------------------------------
 # Encode the behaviors using the Viterbi algorithm
 WB.tod.states <- viterbi(WB.tod.2state)
 

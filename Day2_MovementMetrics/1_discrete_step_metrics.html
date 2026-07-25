@@ -1729,21 +1729,34 @@ and night become directly comparable to each other.</p>
 night’s native rate instead. This keeps roughly one fix every 3 hours
 and drops the extra daytime fixes in between, so every resulting step —
 day or night — spans the same nominal interval:</p>
-<pre class="r"><code>trk_resampled_3h &lt;- trk_nested %&gt;%
-  mutate(resampled = map(data, ~ track_resample(.x, rate = hours(3), tolerance = minutes(10)))) %&gt;%
-  select(id, resampled) %&gt;%
-  unnest(resampled)
+<pre class="r"><code># trk_resampled_3h &lt;- trk_nested %&gt;%
+#   mutate(resampled = map(data, ~ track_resample(.x, rate = hours(3), tolerance = minutes(15)))) %&gt;%
+#   select(id, resampled) %&gt;%
+#   unnest(resampled)
+
+trk_resampled_3h &lt;- trk_nested |&gt;
+  mutate(resampled = map(data, function(x)
+    x |&gt; track_resample(rate = hours(3), tolerance = minutes(15)))) |&gt; 
+  select(id, resampled) |&gt;
+  unnest(resampled) |&gt; 
+  # The track_resample function doesn&#39;t seem to be working properly.  Using this working around:
+  mutate(hour = hour(t_)) |&gt; 
+  filter(hour %in% c(0,3,6,9,12,15,18,21)) |&gt; 
+  select(!hour)
+
+# trk_resampled_3h$hour &lt;- hour(trk_resampled_3h$t_)
+# plot(trk_resampled_3h$hour)
 
 head(trk_resampled_3h)</code></pre>
 <pre><code>## # A tibble: 6 × 8
 ##   id         x_       y_ t_                  temp   lon   lat burst_
 ## * &lt;fct&gt;   &lt;dbl&gt;    &lt;dbl&gt; &lt;dttm&gt;              [°C] &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;
-## 1 Sotua 260296. 9849694. 2010-10-15 13:00:00   29  36.8 -1.36      1
-## 2 Sotua 260432. 9849416. 2010-10-15 18:00:00   21  36.8 -1.36      2
-## 3 Sotua 260499. 9849319. 2010-10-15 21:00:00   18  36.8 -1.36      2
-## 4 Sotua 260365. 9849360. 2010-10-16 00:00:00   18  36.8 -1.36      2
-## 5 Sotua 260066. 9849895. 2010-10-16 03:00:00   17  36.8 -1.36      2
-## 6 Sotua 259962. 9849750. 2010-10-16 06:00:00   23  36.8 -1.36      2</code></pre>
+## 1 Sotua 260432. 9849416. 2010-10-15 18:00:00   21  36.8 -1.36      2
+## 2 Sotua 260499. 9849319. 2010-10-15 21:00:00   18  36.8 -1.36      2
+## 3 Sotua 260365. 9849360. 2010-10-16 00:00:00   18  36.8 -1.36      2
+## 4 Sotua 260066. 9849895. 2010-10-16 03:00:00   17  36.8 -1.36      2
+## 5 Sotua 259962. 9849750. 2010-10-16 06:00:00   23  36.8 -1.36      2
+## 6 Sotua 260149. 9849651. 2010-10-16 09:00:00   28  36.8 -1.36      2</code></pre>
 <blockquote>
 <p><strong>Note:</strong> Same function, coarser target
 <code>rate</code> — <code>track_resample()</code> looks for the fix
