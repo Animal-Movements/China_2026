@@ -13,7 +13,10 @@ rm(list=ls())
 library(momentuHMM)
 library(lubridate)
 library(tidyverse)
+library(adehabitatLT)
 
+# Load functions for later
+source("utility_functions.R")
 
 ## ----load-data, message=FALSE, warning=FALSE, echo=TRUE----------------------------------
 # Load data 
@@ -34,32 +37,42 @@ act_32866$datetime_str <- paste(act_32866$UTC_Date, act_32866$UTC_Time)
 act_32733$time <- lubridate::mdy_hms(act_32733$datetime_str, tz = "UTC")
 act_32866$time <- lubridate::mdy_hms(act_32866$datetime_str, tz = "UTC")
 
+## change the CollarID to ID 
+colnames(act_32733)[2] <- "ID"
+colnames(act_32866)[2] <- "ID"
 
 ## ----diff-time, message=FALSE, warning=FALSE, echo=TRUE----------------------------------
 # Table of time intervals in data - can apply to both individuals
 plot(table(diff(act_32866$time)), xlim = c(0, 600),
      xlab = "time interval (sec)", ylab = "count")
 
+# Check the large gaps in the tracks
+dt_32733 <- as.numeric(diff(act_32733$time), units = "secs")
+dt_32733[dt_32733 > 300]
+
+dt_32866 <- as.numeric(diff(act_32866$time), units = "secs")
+dt_32866[dt_32866 > 300]
+
+# Use function from utility_function.R to split data at gaps > 30 minutes
+data_split_act_32866 <- split_at_gap(data = act_32866, max_gap = 30, shortest_track = 0)
+data_split_act_32733 <- split_at_gap(data = act_32733, max_gap = 30, shortest_track = 0)
 
 ## ----ODBA, message=FALSE, warning=FALSE, echo=TRUE---------------------------------------
 ## use a single summary activity variable - ODBA
-act_32733$ODBA <- rowSums(act_32733[, c("ActivityX", "ActivityY", "ActivityZ")], na.rm= TRUE)
-act_32866$ODBA <- rowSums(act_32866[, c("ActivityX", "ActivityY", "ActivityZ")], na.rm = TRUE)
+data_split_act_32733$ODBA <-
+    rowSums(data_split_act_32733[, c("ActivityX","ActivityY","ActivityZ")])
+
+data_split_act_32866$ODBA <-
+    rowSums(data_split_act_32866[, c("ActivityX","ActivityY","ActivityZ")])
 
 
 ## ----final-data, message=FALSE, warning=FALSE, echo=TRUE---------------------------------
 # select the columns of interest
-pacoca <- act_32733 %>% 
-  select(ID = CollarID, 
-         ODBA, 
-         time, 
-         temp = Temp...C.)
+ppacoca <- data_split_act_32733 %>%
+    select(ID, ODBA, time, temp = Temp...C.)
 
-juba <- act_32866 %>% 
-  select(ID = CollarID, 
-         ODBA, 
-         time, 
-         temp = Temp...C.)
+juba <- data_split_act_32866 %>%
+    select(ID, ODBA, time, temp = Temp...C.)
 
 # combine the datasets
 data <- rbind(pacoca, juba)
