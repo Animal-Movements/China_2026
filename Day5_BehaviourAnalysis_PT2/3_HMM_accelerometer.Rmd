@@ -47,6 +47,10 @@ rm(list=ls())
 library(momentuHMM)
 library(lubridate)
 library(tidyverse)
+library(adehabitatLT)
+
+# Load functions for later
+source("utility_functions.R")
 ```
 
 ## 1. Load Data
@@ -75,9 +79,15 @@ act_32866$datetime_str <- paste(act_32866$UTC_Date, act_32866$UTC_Time)
 ## convert to POSIXct 
 act_32733$time <- lubridate::mdy_hms(act_32733$datetime_str, tz = "UTC")
 act_32866$time <- lubridate::mdy_hms(act_32866$datetime_str, tz = "UTC")
+
+## change the CollarID to ID 
+colnames(act_32733)[2] <- "ID"
+colnames(act_32866)[2] <- "ID"
 ```
 
-The base time interval between observations was 5 minutes (300 secs) in this study. We need to make sure to check if there were missing observations, resulting in longer intervals that need to be corrected.  
+# 3. Dealing with gaps in tracks
+
+The base time interval between observations was 5 minutes (300 secs) in this study. We need to make sure to check if there were missing observations, resulting in longer intervals that need to be corrected.
 
 ```{r diff-time, message=FALSE, warning=FALSE, echo=TRUE}
 # Table of time intervals in data - can apply to both individuals
@@ -85,35 +95,46 @@ plot(table(diff(act_32866$time)), xlim = c(0, 600),
      xlab = "time interval (sec)", ylab = "count")
 ```
 
-Although our data do not have issues with temporal irregularity, it is always important to check and deal with temporal irregularity before fitting a HMM.  You now know how to do this, which would require a few additional steps to fill in the data with NAs so that the temporal interval was consistent.
+There were three very large gaps in two datasets; they are breaks of days to weeks. 
+```{r identify gaps, message=FALSE, warning=FALSE, echo=TRUE}
+dt_32733 <- as.numeric(diff(act_32733$time), units = "secs")
+dt_32733[dt_32733 > 300]
 
-### 2.1 Calculating ODBA
+dt_32866 <- as.numeric(diff(act_32866$time), units = "secs")
+dt_32866[dt_32866 > 300]
+```
+Inspection of the sampling intervals showed that most observations were collected every 300 seconds (5 minutes). However, three gaps substantially exceeded the expected interval, ranging from approximately 3 to 48 days. Because these long interruptions likely represent periods when no data were collected, the tracks were split at gaps greater than 30 minutes using the split_at_gap() utility function before fitting the HMM.
+
+```{r utility gaps, message=FALSE, warning=FALSE, echo=TRUE}
+# Use function from utility_function.R to split data at gaps > 30 minutes
+data_split_act_32866 <- split_at_gap(data = act_32866, max_gap = 30, shortest_track = 0)
+data_split_act_32733 <- split_at_gap(data = act_32733, max_gap = 30, shortest_track = 0)
+```
+
+### 4. Calculating ODBA
 Unlike GPS data, activity data do not include location information such as coordinates (e.g., Easting/Northing or latitude/longitude). Instead, activity data capture movement using proxy variables. In our data, these activity data are labeled as 'ActivityX', 'ActivityY', and 'ActivityZ', measuring motion along three dimensions (X, Y, and Z - surge, sway, and heave). These values are recorded at summarized at regular intervals (e.g., every 5 minutes) and reflect how the animal is moving rather than where it is.
 
 These three measurements are often combined into a single summary metric called *Overall Dynamic Body Acceleration* or *ODBA*, representing the overall intensity of movement. ODBA is commonly used as an indicator of activity or energy expenditure. Let's calculate ODBA for our data.
 
 ```{r ODBA, message=FALSE, warning=FALSE, echo=TRUE}
 ## use a single summary activity variable - ODBA
-act_32733$ODBA <- rowSums(act_32733[, c("ActivityX", "ActivityY", "ActivityZ")], na.rm= TRUE)
-act_32866$ODBA <- rowSums(act_32866[, c("ActivityX", "ActivityY", "ActivityZ")], na.rm = TRUE)
+data_split_act_32733$ODBA <-
+    rowSums(data_split_act_32733[, c("ActivityX","ActivityY","ActivityZ")])
+
+data_split_act_32866$ODBA <-
+    rowSums(data_split_act_32866[, c("ActivityX","ActivityY","ActivityZ")])
 ```
 
-### 2.2 Further Data Wrangling 
+### 5. Further Data Wrangling 
 Let's select several columns of interest for the analysis and combine both animals into a single dataframe.
 
 ```{r final-data, message=FALSE, warning=FALSE, echo=TRUE}
 # select the columns of interest
-pacoca <- act_32733 %>% 
-  select(ID = CollarID, 
-         ODBA, 
-         time, 
-         temp = Temp...C.)
+pacoca <- data_split_act_32733 %>%
+    select(ID, ODBA, time, temp = Temp...C.)
 
-juba <- act_32866 %>% 
-  select(ID = CollarID, 
-         ODBA, 
-         time, 
-         temp = Temp...C.)
+juba <- data_split_act_32866 %>%
+    select(ID, ODBA, time, temp = Temp...C.)
 
 # combine the datasets
 data <- rbind(pacoca, juba)
@@ -122,10 +143,10 @@ data <- rbind(pacoca, juba)
 summary(data)
 ```
 
-## 3. The MomentuHMM Workflow
+## 6. The MomentuHMM Workflow
 The data are now ready to be used in [momentuHMM](https://cran.r-project.org/web/packages/momentuHMM/index.html), following a similar set of steps that we are now familiar with, inclusive of the covariate temperature.  
 
-### 3.1 Data preparation
+### 6.1 Data preparation
 Note that we do not handle the location data like the GPS example. With GPS data, we derive step lengths and turning angles from the locations. Here, we set the 'coordNames' argument to NULL within the function 'prepData'. 
 
 ```{r prep-data1, message=FALSE, warning=FALSE, echo=TRUE}
@@ -133,7 +154,7 @@ Note that we do not handle the location data like the GPS example. With GPS data
 data_hmm <- prepData(data, coordNames = NULL, covNames = "temp")
 ```
 
-### 3.2 Model Fitting 
+### 6.2 Model Fitting 
 [MomentuHMM](https://cran.r-project.org/web/packages/momentuHMM/index.html) is quite flexible and can handle multiple datastreams, inclusive of GPS data for coarse-scale movements. Here, we will focus intently on the activity data only, using the function `fitHMM()` to fit models like we used previously.
 
 We are interested in two states, State 1 or *'Low Activity'* and State 2 or *'High Activity'*.  To get started, we need to specify two things: 
@@ -182,7 +203,7 @@ hmm1 <- fitHMM(data_hmm,
 hmm1
 ```
 
-### 3.3 Model Visualization 
+### 6.3 Model Visualization 
 Similar to previous exercises, we see summary statistics and regression coefficients for model output. We can also plot the estimated distributions to visualize the findings.
 
 ```{r look-hmm1, fig.keep = 1:4}
@@ -205,7 +226,7 @@ ggplot(data_hmm, aes(x = time, y = ODBA, col = state_2st, group = ID))+
   facet_wrap(~ID)
 ```
 
-### 3.4 Model Formulation: Covariates
+### 6.4 Model Formulation: Covariates
 Now, following the same structure as previously, we will include the temperature measurements collected by the tag at each time of observation. Here, we aim to answer if temperature impacts maned wolf activity patterns. To do so, we'll estimate the effect of temperature on the transition probabilities. 
 
 ```{r fit-hmm2, message=FALSE, warning=FALSE, echo=TRUE}
@@ -230,7 +251,7 @@ plotStationary(hmm2,
 
 Thes plot suggests that the maned wolves were more likely to be in state 2 (high activity) at low temperatures and in state 1 (low activity) at high temperatures.
 
-### 3.5 Model Comparison 
+### 6.5 Model Comparison 
 We then use the function `AIC()` for model selection, comparing the model without the covariate versus model with the temperature covariate.
 
 ```{r AIC}
@@ -240,24 +261,6 @@ AIC(hmm1,
 ```
 
 These results indicate that the model (model 2) with the temperature covariate has more statistical support. 
-
-### 3.6 Model Checking
-We can further evaluate whether a model sufficiently represents the key characteristics of the data. One common method of model checking for HMM's is pseudo-residuals. When the model provides a perfect fit, these pseudo-residuals should follow a standard normal distribution. Any departure from this pattern may suggest that the model does not fully capture the data structure.
-
-The function `plotPR()` can be used to genereate three diagnostic plots for each variable:
-
-1. A time series plot 
-2. A quantile-quantile (QQ) plot comparing the residuals to a standard normal distribution 
-3. An autocorrelation function (ACF) plot. 
-
-Deviations from the diagonal line in the QQ plot signal potential lack of fit, while the ACF plot helps determine whether the model has successfully accounted for temporal dependence in the data.
-
-```{r pseudo-res}
-# plot pseudo-residuals for 2-state models 
-plotPR(hmm1)
-plotPR(hmm2)
-```
-
 Goodness-of-fit is slightly better in model 2. However, the model still needs to be tuned to capture more detailed features of the data. This is a good example of how it is important to do model checking before finalizing the model.  
 
 ---
