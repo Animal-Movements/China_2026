@@ -49,7 +49,7 @@ library(lubridate)
 library(tidyverse)
 ```
 
-# 1. Load Data
+## 1. Load Data
 The accelerometer data used in this module are saved in a proprietary format (i.e., .adf) from the  manufacterer (Vectronics Aerospace). In order to load the data into [R](https://cran.r-project.org/), I first used the manufacturer's software to convert them to a R-readable format (i.e., .csv). 
 
 For the purposes of this demonstration, we take the summarized activity data from the raw accelerometer from two individuals: ID 32866-Juba and ID 32733-Pacoca. Accelerometer data is different than GPS data, with activity data provided at much finer temporal scales. 
@@ -64,7 +64,7 @@ act_32733 <- read.csv("data/ACT_Collar32733_20260401143616.csv")
 act_32866 <- read.csv("data/ACT_Collar32866_20260401143833.csv")
 ```
 
-# 2. Clean Timestamps 
+## 2. Clean Timestamps 
 Note that the date and time columns (UTC_Date and UTC_Time, respectively) are organized as separately.  Because these columns are "character" columns, we need to join them together and then convert them to a date/time field.
 
 ```{r time-conversion, message=FALSE, warning=FALSE, echo=TRUE}
@@ -87,7 +87,7 @@ plot(table(diff(act_32866$time)), xlim = c(0, 600),
 
 Although our data do not have issues with temporal irregularity, it is always important to check and deal with temporal irregularity before fitting a HMM.  You now know how to do this, which would require a few additional steps to fill in the data with NAs so that the temporal interval was consistent.
 
-## 2.1 Calculating ODBA
+### 2.1 Calculating ODBA
 Unlike GPS data, activity data do not include location information such as coordinates (e.g., Easting/Northing or latitude/longitude). Instead, activity data capture movement using proxy variables. In our data, these activity data are labeled as 'ActivityX', 'ActivityY', and 'ActivityZ', measuring motion along three dimensions (X, Y, and Z - surge, sway, and heave). These values are recorded at summarized at regular intervals (e.g., every 5 minutes) and reflect how the animal is moving rather than where it is.
 
 These three measurements are often combined into a single summary metric called *Overall Dynamic Body Acceleration* or *ODBA*, representing the overall intensity of movement. ODBA is commonly used as an indicator of activity or energy expenditure. Let's calculate ODBA for our data.
@@ -98,7 +98,7 @@ act_32733$ODBA <- rowSums(act_32733[, c("ActivityX", "ActivityY", "ActivityZ")],
 act_32866$ODBA <- rowSums(act_32866[, c("ActivityX", "ActivityY", "ActivityZ")], na.rm = TRUE)
 ```
 
-## 2.2 Further Data Wrangling 
+### 2.2 Further Data Wrangling 
 Let's select several columns of interest for the analysis and combine both animals into a single dataframe.
 
 ```{r final-data, message=FALSE, warning=FALSE, echo=TRUE}
@@ -122,10 +122,10 @@ data <- rbind(pacoca, juba)
 summary(data)
 ```
 
-# 3. The MomentuHMM Workflow
+## 3. The MomentuHMM Workflow
 The data are now ready to be used in [momentuHMM](https://cran.r-project.org/web/packages/momentuHMM/index.html), following a similar set of steps that we are now familiar with, inclusive of the covariate temperature.  
 
-## 3.1 Data preparation
+### 3.1 Data preparation
 Note that we do not handle the location data like the GPS example. With GPS data, we derive step lengths and turning angles from the locations. Here, we set the 'coordNames' argument to NULL within the function 'prepData'. 
 
 ```{r prep-data1, message=FALSE, warning=FALSE, echo=TRUE}
@@ -133,7 +133,7 @@ Note that we do not handle the location data like the GPS example. With GPS data
 data_hmm <- prepData(data, coordNames = NULL, covNames = "temp")
 ```
 
-## 3.2 Model Fitting 
+### 3.2 Model Fitting 
 [MomentuHMM](https://cran.r-project.org/web/packages/momentuHMM/index.html) is quite flexible and can handle multiple datastreams, inclusive of GPS data for coarse-scale movements. Here, we will focus intently on the activity data only, using the function `fitHMM()` to fit models like we used previously.
 
 We are interested in two states, State 1 or *'Low Activity'* and State 2 or *'High Activity'*.  To get started, we need to specify two things: 
@@ -182,7 +182,7 @@ hmm1 <- fitHMM(data_hmm,
 hmm1
 ```
 
-## 3.3 Model Visualization 
+### 3.3 Model Visualization 
 Similar to previous exercises, we see summary statistics and regression coefficients for model output. We can also plot the estimated distributions to visualize the findings.
 
 ```{r look-hmm1, fig.keep = 1:4}
@@ -205,7 +205,7 @@ ggplot(data_hmm, aes(x = time, y = ODBA, col = state_2st, group = ID))+
   facet_wrap(~ID)
 ```
 
-## 3.4 Model Formulation: Covariates
+### 3.4 Model Formulation: Covariates
 Now, following the same structure as previously, we will include the temperature measurements collected by the tag at each time of observation. Here, we aim to answer if temperature impacts maned wolf activity patterns. To do so, we'll estimate the effect of temperature on the transition probabilities. 
 
 ```{r fit-hmm2, message=FALSE, warning=FALSE, echo=TRUE}
@@ -230,7 +230,7 @@ plotStationary(hmm2,
 
 Thes plot suggests that the maned wolves were more likely to be in state 2 (high activity) at low temperatures and in state 1 (low activity) at high temperatures.
 
-## 3.5 Model Comparison 
+### 3.5 Model Comparison 
 We then use the function `AIC()` for model selection, comparing the model without the covariate versus model with the temperature covariate.
 
 ```{r AIC}
@@ -241,7 +241,7 @@ AIC(hmm1,
 
 These results indicate that the model (model 2) with the temperature covariate has more statistical support. 
 
-## 3.6 Model Checking
+### 3.6 Model Checking
 We can further evaluate whether a model sufficiently represents the key characteristics of the data. One common method of model checking for HMM's is pseudo-residuals. When the model provides a perfect fit, these pseudo-residuals should follow a standard normal distribution. Any departure from this pattern may suggest that the model does not fully capture the data structure.
 
 The function `plotPR()` can be used to genereate three diagnostic plots for each variable:

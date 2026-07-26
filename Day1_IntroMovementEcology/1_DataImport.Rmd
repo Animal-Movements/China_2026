@@ -99,7 +99,7 @@ We will demonstrate two methods for downloading data for analysis. In the first 
 ### 2.2 Movebank
 [Movebank](https://www.movebank.org) is the world's largest repository of animal tracking data, hosting data for thousands of studies across various taxa. The `move2` package provides a direct interface to [Movebank](https://www.movebank.org), allowing you to download data directly into [R](https://cran.r-project.org/) for analysis.  
 
-###### 2.2.1 Store your Credentials (Once per Computer)
+#### 2.2.1 Store your Credentials (Once per Computer)
 Provide your credentials to access the [Movebank](https://www.movebank.org) API.
 
 ```{r Credentials, eval=FALSE}
@@ -131,16 +131,16 @@ WB.mv2 <- movebank_download_study(
 )
 
 # You may be prompted to accept the data license. If so, you can append the license number to your code and run again, like this:
-WB.mv2 <- movebank_download_study(
-  study_id = 208413731,
-  #study_id = "White-bearded wildebeest (Connochaetes taurinus) movements - Kenya"
-  'license-md5'='xxxxxx' # <- copy license number here
-)
+# WB.mv2 <- movebank_download_study(
+#   study_id = 208413731,
+#   #study_id = "White-bearded wildebeest (Connochaetes taurinus) movements - Kenya"
+#   'license-md5'='xxxxxx' # <- copy license number here
+# )
 ```
 
 For these exercises, we will load a pre-downloaded version to avoid delays. This object is identical to what `movebank_download_study()` would return. 
 
-```{r Load RData, echo=FALSE}
+```{r Load RData, echo=TRUE, eval=TRUE}
 # Load
 load("./Data/wildebeest_data.rdata")
 ```
@@ -148,7 +148,7 @@ load("./Data/wildebeest_data.rdata")
 ### 2.3 CSV Import
 If you are unable to connect to [Movebank](https://www.movebank.org) or if your data exists elsewhere, you can import from a .CSV and convert to a `move2` object using `mt_as_move2()`.  Make sure you force the 'timestamp' field to be read as raw text ('col_character'), rather than letting `read_csv()` set the datetime. Always verify that the timestamp was imported properly.   
 
-```{r csv_import, eval=FALSE}
+```{r csv_import, echo=TRUE, eval=FALSE}
 # Import file, changing the date format (formatted here as ymd_hms()) to match your dataset
 WB.csv <- read_csv("Data/WB_FullDataset.csv",
                    col_types = cols(timestamp = col_character())) %>% 
@@ -209,7 +209,7 @@ A `move2` object holds two distinct types of information:
 2. Track metadata: One row per individual — sex, deployment dates, study site
 
 ```{r track_data}
-# mt_track_data() returns a data.frame contianing the track attribute data
+# mt_track_data() returns a data.frame containing the track attribute data
 # glimpse() can then be used to provide a brief summary (a transposed version of print())
 track_info <- mt_track_data(WB.mv2)
 glimpse(track_info)
@@ -440,7 +440,7 @@ p +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) #tilt the labels on the axis
 ```
 
-> Based on this graph, there seems to be two system-wide outages, one that we identified in red and another in early 2012 that impacts nearly every individual.
+> Based on this graph, there seems to be two system-wide outages, one that we identified in red and another in early 2011 that impacts nearly every individual.
 
 ---
 
@@ -459,7 +459,7 @@ WB.sf <- st_as_sf(as.data.frame(WB.mv2))
 
 # Create graph, plotting a subset of the data for speed
 WB.sf %>%
-  slice_sample(n = 2000) %>%    # random subset for speed
+  slice_sample(n = 2000) %>%    # random subset of 2000 points
   mapview(zcol = "individual_local_identifier",
           layer.name = "Individual",
           cex = 2,

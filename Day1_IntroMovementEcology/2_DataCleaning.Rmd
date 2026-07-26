@@ -37,7 +37,7 @@ By the end of this module you will be able to:
 
 A GPS fix is an estimate, not a fact. Every location carries some amount of error. That error is rarely random or harmless. A handful of bad fixes can inflate steplengths into biologically impossible "teleports", bias a home range estimate outward, or manufacture an apparent "fast directed movement" behavioral state that never happened. For wide-ranging grazers like wildebeest moving across open, fenced, and increasingly developed landscapes, these artifacts can directly mislead conservation conclusions. 
 
-The wildebeest dataset we downloaded in Module 1 pooled data across several wildebeest populations in Kenya. Before we can say anything about *this* population's movement, we need to: (1) isolate the right subset of animals and time window, and (2) remove fixes that don't meet a minimum precision standard. This dataset does both, providing a reusable template for QC-ing your own tracking data.
+The wildebeest dataset we downloaded in Module 1 pooled data across several wildebeest populations in Kenya. Before we can say anything about *this* population's movement, we need to: (1) isolate the right subset of animals and time window, and (2) remove fixes that don't meet a minimum precision standard. Here we will do both items, providing a reusable template for QC-ing your own tracking data.
 
 ---
 
@@ -88,6 +88,7 @@ Some attributes — sex, study site, deployment start/end — describe an *indiv
 track_meta <- mt_track_data(WB.mv2)
 glimpse(track_meta)
 ```
+
 Wildebeest included in this dataset were tracked across three study areas (Athi-Kaputiei Plains, Amboseli Basin, and the Masai Mara Ecosystem
 ). Prior to analysis, we will first subset these data and work only from animals tracked across the Athi-Kaputiei Plains.
 
