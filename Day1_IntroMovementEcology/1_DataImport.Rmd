@@ -493,3 +493,14 @@ Now that you have uploaded and manipulated the wildebeest dataset in [R](https:/
 * What is the sampling interval of your data? Is it regularly sampled?
 * Are there any obvious spatial outliers?  Do you notice any gaps or suspicious points?
 * What patterns do you notice?
+
+---
+
+# Key functions reference
+
+| Function | Package | Purpose |
+|---|---|---|
+
+---
+
+*Next:* **Module 2 — Data Cleaning.** Now that we have imported our data, we'll begin steps to clean the dataset for analysis.

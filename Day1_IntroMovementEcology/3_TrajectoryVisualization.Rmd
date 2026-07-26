@@ -323,4 +323,4 @@ Now build and visualize trajectories for your own dataset.
 
 ---
 
-*Next: **Day 2 — Movement Metrics** — having built and visualized individual trajectories, we pick `trk_all` back up to check each animal's sampling rate, resample to regular bursts, and quantify movement itself: speed, turning angles, and net displacement, as a foundation for behavioral segmentation.*
+*Next:* **Day 2 — Movement Metrics** — having built and visualized individual trajectories, we pick `trk_all` back up to check each animal's sampling rate, resample to regular bursts, and quantify movement itself: speed, turning angles, and net displacement, as a foundation for behavioral segmentation.
