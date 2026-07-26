@@ -1,5 +1,5 @@
 ---
-title: "M3: AKDE, Home Range Meta-Analysis, Population Ranges"
+title: "M2-b: AKDE, Home Range Meta-Analysis, Population Ranges"
 subtitle: "Day 3 — Home Range Estimation"
 author: "Animal Movement Analyses for Ecologists | SYSU Shenzhen, July 2026"
 date: "`r Sys.Date()`"
@@ -54,9 +54,9 @@ library(ctmm)
 
 ```
 
-The main function we will be working with for range estimation is `akde` for **autocorrelated kernel density estimator (AKDE)**, which is a *kernel density estimation (KDE)* method with a debiasing adjustment, as it is conditioned on the selected autocorrelation model. KDE is nonparametric, so we are estimating without assuming a known model and its parameters. By default, KDE puts equal weights on all points; however, for AKDE, the weights are optimized, such that less weight is given to over-sampled points and more weight is given to under-sampled points. Additionally, if you have tracked multiple individuals and wish to estimate a population-wide range, you may use the `pkde` function (*more to come*).
+The main function we will be working with for range estimation is `akde` for **autocorrelated kernel density estimator (AKDE)**, which is a *kernel density estimation (KDE)* method with a debiasing adjustment, as it is conditioned on the selected autocorrelation model. KDE is nonparametric, so we are estimating without assuming a known model and its parameters. By default, KDE puts equal weights on all points; however, for AKDE, the weights can be optimized, such that less weight is given to over-sampled points and more weight is given to under-sampled points. Additionally, if you have tracked multiple individuals and wish to estimate a population-wide range, you may use the `pkde` function (*more to come*).
 
-KDE also requires the bandwidth (smoothing parameter, $h$) to be optimized, which is performed via the `bandwidth` function called internally to the `akde` function. The bandwidth determines the spread of the kernels that are placed. Note that we do not set the bandwidth, because there is no true value of $h$ that best characterizes an animal. This is a parameter that is optimized using a Gaussian optimization function, given the data and movement model. We can, however, set boundaries by including raster files, if the kernels spill over into areas where the animal cannot go (e.g., a fish on land).
+KDE also requires the bandwidth (smoothing parameter, $h$) to be optimized, which is performed via the `bandwidth` function called internally to the `akde` function. The bandwidth determines the spread of the kernels that are placed. Note that we do not set the bandwidth, because there is no true value of $h$ that best characterizes an animal. This is a parameter that is optimized using a Gaussian optimization function, given the data and movement model. We can, however, set boundaries by including shape files (.shp), if the kernels spill over into areas where the animal cannot go (e.g., a fish on land).
 
 ```{r import_data2, eval = FALSE}
 
@@ -133,7 +133,7 @@ summary(IID)
 
 > But why intentionally discard data that was costly to collect?
 
-Here, we emphasize that a better solution to the challenges of home-range estimation is to use **autocorrelated kernel density estimation (AKDE)**. AKDE is a KDE-based method that explicitly assumes the data represents a sample from a *nonstationary, autocorrelated, continuous movement process*. AKDE predicts a range distribution that represents the **home range** space used by an animal, given that they maintain the same behaviors. This method provides accurate confidence intervals at levels specified by the user (e.g., 50% CI or 95% CI) that help determine when there are insufficient data to provide a "good" home range estimate. In cases where data do not provide sufficient information, the home range estimate confidence intervals will be much wider. Note that an AKDE conditioned on an IID model is equivalent to a regular KDE, as it does not consider autocorrelation.
+Here, we emphasize that a better solution to the challenges of home-range estimation is to use **autocorrelated kernel density estimation (AKDE)**. AKDE is a KDE-based method that explicitly assumes the data represents a sample from an *autocorrelated, continuous movement process*. AKDE predicts a range distribution that represents the **home range** space used by an animal, given that they maintain the same behaviors. This method provides accurate confidence intervals at levels specified by the user (e.g., 50% CI or 95% CI) that help determine when there are insufficient data to provide a "good" home range estimate. In cases where data do not provide sufficient information, the home range estimate confidence intervals will be much wider. Note that an AKDE conditioned on an IID model is equivalent to a regular KDE, as it does not consider autocorrelation.
 
 ```{r akde}
 
@@ -245,7 +245,7 @@ Note how the 95% distribution contour shape and the 50% core area change between
 
 ### Over-Smoothing Bias Correction
 
-The Gaussian reference function that is used for our AKDEs tends to over-smooth, which can result in overly large CIs. By default, all AKDEs produced by `akde` have the over-smoothing bias correction (AKDE$_c$), which is recommended, although it can be turned off by setting `debias = FALSE` as shown below.
+The Gaussian reference function (GRF) that is used for our AKDEs tends to over-smooth, which can result in overly large distribution estimates. This issue is often masked by the negative bias of unmodeled autocorrelation. By default, all AKDEs produced by `akde` have the over-smoothing bias correction (AKDE$_c$), which is recommended, although it can be turned off by setting `debias = FALSE` as shown below.
 
 ```{r osakde, fig.keep = "none"}
 
@@ -258,7 +258,7 @@ osAKDE <- akde(DATA, FIT, weights = TRUE, debias = FALSE)  # no bias correction
 ```{r osakde2}
 
 plot(DATA, osAKDE, main = "Uncorrected wAKDE")
-## makes CIs too big
+## GRF coverage area is too big
 
 ```
 
@@ -357,7 +357,7 @@ The North and South subgroups are not significantly different from each other (C
 
 ### `metafor` Package
 
-To perform more general meta-analytic regressions, we can use the `metafor` package. However, `metafor` assumes a normal distribution, and thus, estimates that are not normally-distributed will need to be log-transformed to be able to use the models in the package. We can first use the `Log` function in `ctmm` to log-transform parameter estimates and their uncertainties, before feeding them to the `metafor` package.
+To perform more general meta-analytic regressions, we can use the `metafor` package. However, `metafor` assumes a normal distribution, and thus, parameter estimates that are strictly positive will need to be log-transformed to be able to use the models in the package. We can first use the `Log` function in `ctmm` to log-transform parameter estimates and their uncertainties, before feeding them to the `metafor` package.
 
 ```{r meta6, eval = FALSE}
 
@@ -441,5 +441,5 @@ How many individuals do we need to get a population range? Other methods for cal
 
 ---
 
-_Next: **Day 4 — Behaviour Analysis Part 1** — We will explore various aspects of animal behaviour through movement through their movement ecology: barrier behaviour (BaBA), encounters and interactions between individuals, periodic patterns in space use. We will also try to reconstruct an animal's path and simulate its movement._
+_Next: **Module 3 — Occurrence vs. Range Distributions** — We discuss utilization distributions, common misconceptions about their use, and the difference between occurrence and range distributions._
 

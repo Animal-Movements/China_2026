@@ -1,5 +1,5 @@
 ---
-title: "M2-b: Effective Sample Sizes"
+title: "M2-a: Effective Sample Sizes"
 subtitle: "Day 3 — Home Range Estimation"
 author: "Animal Movement Analyses for Ecologists | SYSU Shenzhen, July 2026"
 date: "`r Sys.Date()`"
@@ -41,13 +41,15 @@ When working with our data, it is important to distinguish between the **absolut
 >
 > *Answer:* In terms of telemetry data, this is the total number of tracked locations. 
 >
-> The absolute sample size is the product of the sampling duration (how long the animal was tracked for) and the sampling frequency (how often locations were recorded). This is can be calculated as: $$n=\frac{\text{sampling duration}}{\text{sampling interval}}=\frac{T}{\Delta t}$$
+> The absolute sample size is the product of the sampling duration (how long the animal was tracked for) and the sampling frequency (how often locations were recorded). This is can be calculated as: 
+> $$n=\frac{\text{sampling duration}}{\text{sampling interval}}=\frac{T}{\Delta t}$$
 
 > What is an **effective sample size**?
 >
 > *Answer:* This is the number of independent locations that would produce the same quality home range (or speed) estimate as the absolute sample size. This is also known as the "degrees of freedom" (DOF).
 >
-> In other words, this represents the amount of actual information content present in our data. Because the ESS relates to the different autocorrelation timescales (i.e., position autocorrelation, $\tau_p$, and velocity autocorrelation, $\tau_v$), the ESS is different for home range estimation ($N_{\text{area}}$) and speed estimation ($N_{\text{speed}}$). The home-range area ESS can be roughly estimated as: $$N_{\text{area}}=\frac{\text{sampling duration}}{\text{average home range crossing time, position autocorrelation}}=\frac{T}{\tau_p}$$
+> In other words, this represents the amount of actual information content present in our data. Because the ESS relates to the different autocorrelation timescales (i.e., position autocorrelation, $\tau_p$, and velocity autocorrelation, $\tau_v$), the ESS is different for home range estimation ($N_{\text{area}}$) and speed estimation ($N_{\text{speed}}$). The home-range area ESS can be roughly estimated as: 
+> $$N_{\text{area}}\approx\frac{\text{sampling duration}}{\text{average home range crossing time, position autocorrelation}}\approx\frac{T}{\tau_p}$$
 
 For independent data, the ESS is the same as the absolute sample size ($n=N_{ESS}$), however, if the data is autocorrelated, each new data point does not give completely new and independent information, so ESS is less than the absolute sample size ($n>N_{ESS}$. In the case of range resident animals, the ESS often is much smaller than the amount of data we collect, especially for home-range estimation ($n\gg N_{ESS}$).
 
@@ -133,7 +135,7 @@ summary(FIT)  # OUF anisotropic selected
 
 ```
 
-Take note of the sampling period and interval of the data. Here, the absolute sample size of location points is 866. However, the ESS for estimating the central location of the individual (DOF[mean]) is ~2.1 and the ESS for the home range area (DOF[area]) is ~2.4 location points. Therefore, there are approximately 2 effective data points for continuous-time estimation, but ~372 (note the DOF[diffusion] for habitat selection (RSFs/SSFs, *more to come*).
+Take note of the sampling period and interval of the data. Here, the absolute sample size of location points is 866. However, the ESS for estimating the central location of the individual (DOF[mean]) is ~2.1 and the ESS for the home range area (DOF[area]) is ~2.4 location points. Therefore, there are approximately 2 effective data points for continuous-time estimation, but ~372 (note the DOF[diffusion] for habitat selection with SSFs (*more to come*).
 
 ```{r ESS2}
 
@@ -225,5 +227,5 @@ BOOT <- ctmm.boot(DATA, FIT, cores = -1)
 
 ---
 
-_Next: **Module 3 — AKDE, Home Range Meta-Analysis, Population Ranges** — We estimate home ranges using autocorrelated kernel density estimation (AKDE), perform a meta-analysis to compare home ranges across individuals, and estimate population-level range distributions._
+_Next: **Module 2 Part b — AKDE, Home Range Meta-Analysis, Population Ranges** — We estimate home ranges using autocorrelated kernel density estimation (AKDE), perform a meta-analysis to compare home ranges across individuals, and estimate population-level range distributions._
 

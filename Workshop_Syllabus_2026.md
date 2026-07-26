@@ -142,8 +142,8 @@ Please complete the following **before arriving**:
 | AM | **Field trip** |
 | 1:00–1:30 | Q&A + mini lecture: home range |
 | 1:30–2:00 | M1: Discrete home range — MCP & KDE & home range comparison (`amt`) |
-| 2:15–3:00 | M2-a: Occurrence vs. range distributions & M2-b: Effective sample sizes (`ctmm`) |
-| 3:15–4:15 | M3: AKDE, Home Range Meta-Analysis, Population Ranges (`ctmm`) |
+| 2:15–3:15 | M2-a: Effective sample sizes (`ctmm`) & M2-b: AKDE, Home Range Meta-Analysis, Population Ranges (`ctmm`) |
+| 3:30–4:15 | M3: Occurrence vs. range distributions (`ctmm`) |
 
 #### Day 4 — Behaviour Analysis (Jul 31)
 
