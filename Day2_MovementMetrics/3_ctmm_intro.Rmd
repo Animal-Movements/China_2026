@@ -447,7 +447,7 @@ help("ctmm.select")
 > * Brownian Motion (BM)
 > * Integrated Ornstein Uhlenbeck (IOU)
 > * Ornstein-Uhlenbeck (OU)
-> * Ornstein-Uhlenbeck $\Omega$ "omega" (OU$\Omega$) <!-- <-- CONFIRM THIS MODEL -->
+> * Ornstein-Uhlenbeck $\Omega$ "omega" (OU$\Omega$) 
 > * Ornstein-Uhlenbeck foraging (OUF), and its modifications (e.g., OUf)
 
 In the next 2 sections, we will go through the model selection steps for models that are restricted in space (range resident models), and models that are not restricted in space (non-resident models).

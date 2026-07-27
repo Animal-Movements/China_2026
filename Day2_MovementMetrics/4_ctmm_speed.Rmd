@@ -119,7 +119,9 @@ The summary of parameter estimates output from model selection gives a value for
 
 $$\text{RMS Speed}=\hat{v}_{RMS}=\sqrt{E[v^2]}$$
 
-$$\text{Mean Speed}=\hat{\bar{v}}=E[v]=\frac{1}{t_n-t_1}\times\int_{t_1}^{t_n}{v(t)\space dt}$$
+$$\text{Mean Speed}=\hat{\bar{v}}=E[v]$$
+
+$$\text{Mean Speed (over tracked period)}=\frac{1}{t_n-t_1}\times\int_{t_1}^{t_n}{v(t)\space dt}$$
 
 Both speed estimates assume Gaussian (Normal) distributed locations and speeds.
 
