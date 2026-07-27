@@ -440,7 +440,11 @@ p +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) #tilt the labels on the axis
 ```
 
-> Based on this graph, there seems to be two system-wide outages, one that we identified in red and another in early 2011 that impacts nearly every individual. **always** visualize your data on a map. This is the fastest way to spot obvious errors — locations in places where the should not be (i.e., a position in the ocean for a terrestrial mammal), impossible coordinates, or fixes far outside the study area.  The `mapview` package provides tools that allow for interactive mapping.  To do so, we need to first convert the object to a "Simple Features" object (`sf`).
+> Based on this graph, there seems to be two system-wide outages, one that we identified in red and another in early 2011 that impacts nearly every individual. 
+
+## 5. Graph the Data Collected
+
+Before doing any cleaning or analysis, **always** visualize your data on a map. This is the fastest way to spot obvious errors — locations in places where the should not be (i.e., a position in the ocean for a terrestrial mammal), impossible coordinates, or fixes far outside the study area.  The `mapview` package provides tools that allow for interactive mapping.  To do so, we need to first convert the object to a "Simple Features" object (`sf`).
 
 The [sf](https://search.r-project.org/CRAN/refmans/sf/html/sf-package.html) class is an extension of a dataframe. Essentially, [sf](https://search.r-project.org/CRAN/refmans/sf/html/sf-package.html) objects can be treated as dataframes that also contain spatial data, as opposed to spatial data that may or may not also contain data frames. This enables [sf](https://search.r-project.org/CRAN/refmans/sf/html/sf-package.html) objects to fit within the [tidyverse](https://cran.r-project.org/web/packages/tidyverse/index.html) workflow, making it possible to manipulate them with the [dplyr](https://cran.r-project.org/web/packages/tidyverse/index.html) commands we used previously.
 

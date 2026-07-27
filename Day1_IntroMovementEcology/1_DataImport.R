@@ -1,8 +1,8 @@
-## ----setup, include=FALSE----------------------------------------------------------------
+## ----setup, include=FALSE----------------------------------------------------------------------------------------
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 
 
-## ----Load Libraries----------------------------------------------------------------------
+## ----Load Libraries----------------------------------------------------------------------------------------------
 # Clear R's memory
 rm(list=ls())
 
@@ -17,7 +17,8 @@ library(mapview)     # Quick interactive maps
 library(units)       # Provides support for measurement units
 library(gt)          # Makes presentation-ready display tables
 
-## ----Set UTM Zone------------------------------------------------------------------------
+
+## ----Set UTM Zone------------------------------------------------------------------------------------------------
 # Set TimeZone
 tz_utc <- "UTC"
 tz_local <- "Africa/Nairobi"  # East Africa Time (EAT = UTC+3)
@@ -26,12 +27,12 @@ tz_local <- "Africa/Nairobi"  # East Africa Time (EAT = UTC+3)
 latlong_crs <- "EPSG:4326"   # WGS84 geographic — standard for GPS and Movebank
 
 
-## ----Credentials, eval=FALSE-------------------------------------------------------------
+## ----Credentials, eval=FALSE-------------------------------------------------------------------------------------
 ## # Run this once — credentials are stored securely in your system keychain
 ## movebank_store_credentials("your_username", "your_password")
 
 
-## ----Search Studies, eval=FALSE----------------------------------------------------------
+## ----Search Studies, eval=FALSE----------------------------------------------------------------------------------
 ## # Search for open-data studies that you can download data from
 ## movebank_download_study_info(
 ##   license_type = "CC_0",
@@ -40,7 +41,7 @@ latlong_crs <- "EPSG:4326"   # WGS84 geographic — standard for GPS and Moveban
 ## )
 
 
-## ----Download Movebank, eval=FALSE-------------------------------------------------------
+## ----Download Movebank, eval=FALSE-------------------------------------------------------------------------------
 ## WB.mv2 <- movebank_download_study(
 ##   study_id = 208413731 # Use the Movebank ID or the Study Name
 ##   #study_id = "White-bearded wildebeest (Connochaetes taurinus) movements - Kenya"
@@ -54,12 +55,12 @@ latlong_crs <- "EPSG:4326"   # WGS84 geographic — standard for GPS and Moveban
 ## # )
 
 
-## ----Load RData, echo=TRUE, eval=TRUE----------------------------------------------------
+## ----Load RData, echo=TRUE, eval=TRUE----------------------------------------------------------------------------
 # Load
 load("./Data/wildebeest_data.rdata")
 
 
-## ----csv_import, echo=TRUE, eval=FALSE---------------------------------------------------
+## ----csv_import, echo=TRUE, eval=FALSE---------------------------------------------------------------------------
 ## # Import file, changing the date format (formatted here as ymd_hms()) to match your dataset
 ## WB.csv <- read_csv("Data/WB_FullDataset.csv",
 ##                    col_types = cols(timestamp = col_character())) %>%
@@ -80,7 +81,7 @@ load("./Data/wildebeest_data.rdata")
 ## # Note, the reference information was not imported, although it is provided in the Data directory (Data/wildebeest_ref.csv).  If imported, the dataframe would need to be joined to the original by a common field.  This could be easily accomplished using the `left_join()` function on a shared field (e.g., ID).
 
 
-## ----Mv2 Functions-----------------------------------------------------------------------
+## ----Mv2 Functions-----------------------------------------------------------------------------------------------
 # Print the move2 object class
 class(WB.mv2)   # move2, sf, tbl_df, tbl, data.frame
 
@@ -103,7 +104,7 @@ mt_track_id_column(WB.mv2)
 range(mt_time(WB.mv2), na.rm = TRUE)
 
 
-## ----track_data--------------------------------------------------------------------------
+## ----track_data--------------------------------------------------------------------------------------------------
 # mt_track_data() returns a data.frame containing the track attribute data
 # glimpse() can then be used to provide a brief summary (a transposed version of print())
 track_info <- mt_track_data(WB.mv2)
@@ -113,14 +114,14 @@ glimpse(track_info)
 names(WB.mv2) # Same as colnames(WB.mv2)
 
 
-## ----dimensions--------------------------------------------------------------------------
+## ----dimensions--------------------------------------------------------------------------------------------------
 nrow(WB.mv2) # Total number of rows in the dataset
 ncol(WB.mv2) # Total number of columns in the dataset
 dim(WB.mv2) # Total number of rows and columns
 glimpse(WB.mv2) # Get a quick view of each column
 
 
-## ----individual_summary------------------------------------------------------------------
+## ----individual_summary------------------------------------------------------------------------------------------
 wb.Summary <- WB.mv2 %>%
   as_tibble() %>%
   summarise(Locations = n(), 
@@ -171,7 +172,7 @@ gt_gnu
 gtsave(gt_gnu, filename = "Output/summary_gnu.html")
 
 
-## ----sampling_interval-------------------------------------------------------------------
+## ----sampling_interval-------------------------------------------------------------------------------------------
 # mt_time_lags() returns the time difference to the NEXT location for each row in the dataset
 time_lags <- WB.mv2 %>%
   arrange(individual_local_identifier, timestamp) %>%
@@ -217,7 +218,7 @@ time_lags %>%
   theme_minimal()
 
 
-## ----interval_by_hour--------------------------------------------------------------------
+## ----interval_by_hour--------------------------------------------------------------------------------------------
 # Pull out the hour of the timestamp using the hour() function, converting the result to local time.
 # Check to see if (~1h) vs. long (~3h) intervals separate by time of day.
 time_lags <- time_lags %>%
@@ -235,7 +236,7 @@ time_lags %>%
   theme_minimal()
 
 
-## ----gap_diagnostics---------------------------------------------------------------------
+## ----gap_diagnostics---------------------------------------------------------------------------------------------
 # Flag long gaps (> 1 day) and ask: Are these gaps spread randomly across individuals and dates? Or, do many individuals lose/regain signal together?
 gap_threshold_h <- 24
 
@@ -261,7 +262,7 @@ synchronized_gaps <- long_gaps %>%
 head(synchronized_gaps)
 
 
-## ----outage_window-----------------------------------------------------------------------
+## ----outage_window-----------------------------------------------------------------------------------------------
 # Treat the week with the most individuals affected as a candidate system-wide outage (require >= 5 individuals so isolated coincidences don't get flagged). Then recover the full span -- earliest signal loss to latest signal recovery -- so that the temporal coverage can be plotted.
 outage_start <- as.POSIXct(NA)
 outage_end <- as.POSIXct(NA)
@@ -279,7 +280,7 @@ if (nrow(synchronized_gaps) > 0 & synchronized_gaps$n_individuals_affected[1] >=
 }
 
 
-## ----temporal_plot-----------------------------------------------------------------------
+## ----temporal_plot-----------------------------------------------------------------------------------------------
 # Setup a blank graph with all indiviudals
 p <- WB.mv2 %>%
   as_tibble() %>%
@@ -307,7 +308,7 @@ p +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) #tilt the labels on the axis
 
 
-## ----quick_map---------------------------------------------------------------------------
+## ----quick_map---------------------------------------------------------------------------------------------------
 # Convert to sf object
 WB.sf <- st_as_sf(as.data.frame(WB.mv2))
 
@@ -320,7 +321,7 @@ WB.sf %>%
           alpha = 0.7)
 
 
-## ----Save, eval=T------------------------------------------------------------------------
+## ----Save, eval=T------------------------------------------------------------------------------------------------
 save(WB.mv2, WB.sf, file = "Data/WB_raw.rdata")
 cat("Saved WB.mv2 —", n_distinct(mt_track_id(WB.mv2)), "animals,", nrow(WB.mv2), "fixes\n")
 

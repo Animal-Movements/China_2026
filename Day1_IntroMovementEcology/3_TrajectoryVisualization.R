@@ -1,8 +1,8 @@
-## ----setup, include=FALSE-------------------------------------------------------------------------------------------------------------------
+## ----setup, include=FALSE----------------------------------------------------------------------------------------
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 
 
-## ----packages-------------------------------------------------------------------------------------------------------------------------------
+## ----packages----------------------------------------------------------------------------------------------------
 # install.packages(c("amt", "sf", "move2", "tidyverse", "lubridate", "gt", "mapview", "gganimate"))
 
 library(amt)         # Tracks, resampling, step metrics
@@ -13,18 +13,18 @@ library(lubridate)   # Timestamps and durations
 library(mapview)     # Quick interactive maps
 
 
-## ----load-----------------------------------------------------------------------------------------------------------------------------------
+## ----load--------------------------------------------------------------------------------------------------------
 load("Data/WB_clean.rdata")   # loads WB.mv2, saved at the end of Module 2
 
 cat("Starting point:", n_distinct(mt_track_id(WB.mv2)), "animals,", nrow(WB.mv2), "fixes\n")
 
 
-## ----crs------------------------------------------------------------------------------------------------------------------------------------
+## ----crs---------------------------------------------------------------------------------------------------------
 latlong_crs <- "EPSG:4326"   # WGS84 geographic — what move2/Movebank gives us
 utm_crs     <- "EPSG:32737"  # UTM Zone 37S — metric, appropriate for Athi-Kaputiei, Kenya
 
 
-## ----flatten--------------------------------------------------------------------------------------------------------------------------------
+## ----flatten-----------------------------------------------------------------------------------------------------
 WB_df <- WB.mv2 %>%
   mutate(x = sf::st_coordinates(.)[, 1],
          y = sf::st_coordinates(.)[, 2]) %>%
@@ -37,21 +37,21 @@ WB_df <- WB.mv2 %>%
 head(WB_df)
 
 
-## ----make_track-----------------------------------------------------------------------------------------------------------------------------
+## ----make_track--------------------------------------------------------------------------------------------------
 trk_all <- make_track(WB_df, x, y, t, id = id, crs = latlong_crs)
 
 class(trk_all)     # track_xyt, track_xy, tbl_df, tbl, data.frame
-has_crs(trk_all)   # TRUE — crs was set at creation
 head(trk_all)
 
 
-## ----reproject------------------------------------------------------------------------------------------------------------------------------
+## ----reproject---------------------------------------------------------------------------------------------------
 trk_all <- transform_coords(trk_all, utm_crs)
 
-st_crs(trk_all)$epsg   # 32737
+head(trk_all)
+plot(trk_all)
 
 
-## ----sf_lines-------------------------------------------------------------------------------------------------------------------------------
+## ----sf_lines----------------------------------------------------------------------------------------------------
 WB.sf <- sf::st_as_sf(as.data.frame(WB.mv2)) %>%
   sf::st_transform(utm_crs)
 
@@ -63,7 +63,7 @@ WB.lines <- WB.sf %>%
 WB.lines
 
 
-## ----sf_static_map--------------------------------------------------------------------------------------------------------------------------
+## ----sf_static_map-----------------------------------------------------------------------------------------------
 ggplot() +
   geom_sf(data = WB.lines, aes(color = individual_local_identifier), linewidth = 0.4) +
   scale_color_viridis_d(name = "Individual") +
@@ -72,13 +72,13 @@ ggplot() +
   theme_minimal()
 
 
-## ----sf_interactive_map---------------------------------------------------------------------------------------------------------------------
+## ----sf_interactive_map------------------------------------------------------------------------------------------
 mapview(WB.lines, zcol = "individual_local_identifier", layer.name = "Trajectories", lwd = 2) +
   mapview(WB.sf %>% slice_sample(n = 2000), zcol = "individual_local_identifier",
           layer.name = "Fixes", cex = 1.5, alpha = 0.6)
 
 
-## ----nnp_overlay, eval=FALSE----------------------------------------------------------------------------------------------------------------
+## ----nnp_overlay, eval=FALSE-------------------------------------------------------------------------------------
 ## # Read in your boundary (reproject to match your trajectories' CRS):
 ## # boundary <- sf::st_read("Data/your_boundary.shp", quiet = TRUE) %>%
 ## #   sf::st_transform(utm_crs)
@@ -87,7 +87,7 @@ mapview(WB.lines, zcol = "individual_local_identifier", layer.name = "Trajectori
 ## #   mapview(boundary, col.regions = "green", alpha.regions = 0.3, layer.name = "Reserve boundary")
 
 
-## ----animation_subset-----------------------------------------------------------------------------------------------------------------------
+## ----animation_subset--------------------------------------------------------------------------------------------
 # install.packages(c("gganimate", "gifski", "moveVis", "units"))
 library(gganimate)   # animate ggplot2 plots through time
 
@@ -112,7 +112,7 @@ WB_demo_df <- WB_demo %>%
 cat(n_distinct(WB_demo_df$id), "animals,", nrow(WB_demo_df), "fixes in the demo window\n")
 
 
-## ----gganimate_build, eval=FALSE------------------------------------------------------------------------------------------------------------
+## ----gganimate_build, eval=FALSE---------------------------------------------------------------------------------
 ## anim <- ggplot(WB_demo_df, aes(x = x, y = y, color = id)) +
 ##   geom_point(size = 3) +
 ##   scale_color_viridis_d(name = "Individual") +
@@ -120,20 +120,20 @@ cat(n_distinct(WB_demo_df$id), "animals,", nrow(WB_demo_df), "fixes in the demo 
 ##   labs(title = "Wildebeest movement — {format(frame_time, '%Y-%m-%d %H:%M')}",
 ##        x = "Longitude", y = "Latitude") +
 ##   theme_minimal() +
-##   transition_time(t) +
-##   shadow_wake(wake_length = 0.2, size = TRUE)
+##   transition_time(t) + # maps `t` onto animation frames and linearly interpolates each individual's position between consecutive real fixes. Effective for visualization but not robust enough for analyses
+##   shadow_wake(wake_length = 0.2, size = TRUE) # leaves each point a short fading trail so direction of travel is easy to read.
 ## 
 ## animate(anim, nframes = 100, fps = 10, width = 800, height = 600,
 ##         renderer = gifski_renderer())   # preview
 
 
-## ----gganimate_render, eval=FALSE-----------------------------------------------------------------------------------------------------------
+## ----gganimate_render, eval=FALSE--------------------------------------------------------------------------------
 ## anim_gif <- animate(anim, nframes = 200, fps = 12, width = 900, height = 700,
 ##                      renderer = gifski_renderer())
 ## anim_save("wildebeest_movement.gif", anim_gif)
 
 
-## ----source_align_move_fixed----------------------------------------------------------------------------------------------------------------
+## ----source_align_move_fixed-------------------------------------------------------------------------------------
 # install.packages(c("moveVis", "units"))
 library(moveVis)
 library(units)
@@ -141,7 +141,7 @@ library(units)
 source("./align_move_fixed.R")
 
 
-## ----movevis_align, eval=FALSE--------------------------------------------------------------------------------------------------------------
+## ----movevis_align, eval=FALSE-----------------------------------------------------------------------------------
 ## WB_aligned <- align_move_fixed(WB_demo, res = units::set_units(6, "hours"))
 ## 
 ## # sanity check: the original bug collapsed every individual's interpolated
@@ -152,7 +152,7 @@ source("./align_move_fixed.R")
 ##        function(x) length(unique(sf::st_coordinates(x)[, 1])))
 
 
-## ----movevis_frames, eval=FALSE-------------------------------------------------------------------------------------------------------------
+## ----movevis_frames, eval=FALSE----------------------------------------------------------------------------------
 ## frames <- frames_spatial(WB_aligned, map_service = "osm", map_type = "topographic",
 ##                           path_legend = TRUE, path_legend_title = "Individual") %>%
 ##   add_northarrow(position = "bottomleft") %>%
@@ -163,6 +163,6 @@ source("./align_move_fixed.R")
 ## frames[[1]]   # preview a single frame before rendering the full animation
 
 
-## ----movevis_render, eval=FALSE-------------------------------------------------------------------------------------------------------------
+## ----movevis_render, eval=FALSE----------------------------------------------------------------------------------
 ## animate_frames(frames, out_file = "wildebeest_movement_movevis.gif", overwrite = TRUE)
 
