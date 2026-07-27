@@ -213,11 +213,11 @@ Now, let's fit an iRSF with autocorrelation-informed weights. We use a post-hoc 
 tictoc::tic()
 RSF <- rsf.fit(DATA, AKDE, R = R)
 ## Monte-Carlo integration used by default (`integrator = "MonteCarlo"`)
-tictoc::toc()  # sec elapsed
+tictoc::toc()  # 107.488 sec elapsed
 
 ```
 
-We normalize the RSF, by dividing by **Monte-Carlo integration** for a probability distribution likelihood function. For demonstration purposes, we used the `tictoc` package to track the run-time of the RSF using Monte-Carlo integration, which ended up taking ... to run. This can be substituted by **Riemann integration** for faster computation speed, under cases where all the data are under the same projection and resolution. 
+We normalize the RSF, by dividing by a normalization constant that is traditionally computed via **Monte-Carlo integration**. For demonstration purposes, we used the `tictoc` package to track the run-time of the RSF using Monte-Carlo integration, which ended up taking ~2 minutes to run, but can take substantially longer if you have more data and/or individuals. This can be substituted by **Riemann integration** for faster computation speed, under cases where all the data are under the same projection and resolution. 
 
 Unless you want to integrate once per point in time, there is no particular reason for using Monte-Carlo integration, so we recommend saving time with Riemann integration (assuming same integration for each time point). The difference between the two models will be very slight, negligible unless the data is bad.
 
@@ -298,7 +298,7 @@ Advantages of `rsf.fit()`/`rsf.select()` iRSFs over regular RSFs:
 | **Discrete-time method** | Depends | YES | Regular RSFs and SSFs cannot handle irregular data, but iRSFs can account for irregular sampling and autocorrelation |
 | **Scale of selection** | Home-range level <br> DOF[RSF] ~ DOF[area] | Fine-scale, step-level <br> DOF[SSF] ~ DOF[diffusion] | SSFs may have larger effective sample sizes (DOFs) for fine-scale data |
 
-**We interpret RSF and SSF outputs differently** — RSFs directly output utilization-distribution (UD) information (resource utilization and space utilization), while SSF selection parameters have a different meaning, and the SSF UD is non-trivial.
+**We interpret RSF and SSF outputs differently** — RSFs directly output utilization-distribution (UD) information (resource utilization and space utilization), while SSF selection parameters have a different meaning, and calculating the SSF UD is non-trivial.
 
 > For integrated step-selection functions (iSSFs) and analysis (iSSA), see the `amt` R package.
 
