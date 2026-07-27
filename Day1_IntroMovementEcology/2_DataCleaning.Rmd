@@ -335,7 +335,15 @@ Now run the same QC workflow on your own dataset.  Please do the following:
 
 | Function | Package | Purpose |
 |---|---|---|
-| | | |
+| `mt_track_data()` | `move2` | Return track-level attributes |
+| `st_as_sf()` | `sf` | Convert a data frame to a spatial object |
+| `st_coordinates()` | `sf` | Extract coordinate matrix from an sf object |
+| `mapview()` | `mapview` | Interactive mapping of spatial objects |
+| `geom_histogram()` | `ggplot` | Plot histograms |
+| `geom_vline()` | `ggplot` | Add vertical reference lines |
+| `facet_wrap() ` | `ggplot` | Create faceted plots |
+| `reorder()` | `ggplot` | Reorder factor levels based on another variable |
+| `gt()` | `gt` | Create a formatted table |
 
 ---
 
