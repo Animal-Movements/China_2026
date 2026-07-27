@@ -186,7 +186,8 @@ FIT.SUB <- ctmm.select(SUB, FIT.SUB, trace = FALSE)  # fits more quickly w/ less
 ## won't get speed estimate if too coarse 
 
 summary(FIT.SUB)  # wider CIs
-# Gaussian (regular speed - not RMS)
+## Gaussian (regular speed - not RMS)
+## Note the diffusion rate
 
 # Mean speed
 speed(FIT.SUB, trace = FALSE)  
@@ -208,7 +209,6 @@ Let's repeat this process again, now 4-hour sampling...
 SUB <- SUB[as.logical(1:nrow(SUB)%%2),]
 FIT.SUB <- ctmm.select(SUB, FIT.SUB, trace = FALSE)  # fits more quickly w/ less data
 ## the speed estimate here is RMS Gaussian
-## won't get speed estimate if too coarse 
 
 summary(FIT.SUB)  # wider CIs
 # Gaussian (regular speed - not RMS)
@@ -235,7 +235,6 @@ Let's repeat the coarsening process one last time, now 8-hour sampling.
 SUB <- SUB[as.logical(1:nrow(SUB)%%2),]
 FIT.SUB <- ctmm.select(SUB, FIT.SUB, trace = FALSE)  # fits more quickly w/ less data
 ## the speed estimate here is RMS Gaussian
-## won't get speed estimate if too coarse 
 
 summary(FIT.SUB)  # wider CIs
 # Gaussian (regular speed - not RMS)
@@ -251,7 +250,7 @@ speed(SUB, FIT.SUB, trace = FALSE)  # fits more slowly w/ less data
 
 ```
 
-Although, we can no longer estimate the animal's speed, we can still estimate her diffusion rate, which has stayed relatively insensitive to the sampling interval, and does not require a model with velocity autocorrelation.
+Although, we can no longer estimate the animal's speed, we can still estimate her diffusion rate, which has stayed relatively insensitive to the sampling interval (remains more accurate and precise than speed), and does not require a model with velocity autocorrelation.
 
 ## Population Mean Speed
 
@@ -298,18 +297,23 @@ load("Data/buffalo_speeds.rda")  # mean speed estimates for each buffalo
 # Inspect the results for each individual by printing the `speeds` output
 SPEEDS
 
-# Meta-analysis
+# Speed meta-analysis
 meta(SPEEDS, sort = TRUE)  # mean = population mean of mean speeds
+
+# Diffusion rate meta-analysis
+meta(FITS, variable = "diffusion", sort = TRUE)  # mean = population mean diffusion rate
 
 ```
 
 In the meta-analysis above, the model selection is performed with 2 models: inverse-Gaussian and Dirac-$\delta$, with the inverse-Gaussian being the selected model (lower AICc). The average of mean speeds across buffalo is about 12.3 km/day, highlighted in bold with its 95% CI on the output figure. This figure is a forest plot that compares the mean speed estimates of each individual and 95% CI bars, as well as the meta-analysis mean.
 
+Here we can see from the population mean diffusion rate (and mean speed) estimate, that Toni and Gabs are relatively less active. [DeNicola et al. (2025)](https://doi.org/10.1101/2025.07.17.665364) have found the diffusion rate to be a more reliable measure of movement activity across a wider range of datasets. This includes data where the resolution is too low to fit a model with a velocity autocorrelation parameter that would allow us to estimate mean speed. Together, the CTSD speed and diffusion rate estimates provide more robust metrics for animal movement activity and space use.
+
 ## Instantaneous Speeds
 
 The mean speed provides a summary statistic of an animals activity, however, we are often more interested in calculating the instantaneous speed of an animal at a particular given time. For example, if we are concerned about an animals behavior around roads, we may want to know whether the animal crosses the road quickly or spends time dwelling around the edge before crossing. Instantaneous speeds can also provide an insight on changes in activity level during the course of its movement, either across different areas of its habitat or at different times of day. Instantaneous speeds and CTSD mean speed can also be used to derive the total distance traveled over the course of the study.
 
-Here, we will use the `speeds` function to calculate the CTSD instantaneous speed for our first buffalo (Cilla) at all timestamps, conditioned on our telemetry data and movement model. This includes both the estimated speed, as well as low and high CI bounds. We will then calculate the total distance traveled as: $d=\sum_i{\Delta t_i|v(t_i)|}=\bar{v}\times\sum_j(\Delta t_j)$ , which is the product of the mean speed and total time traveled (sampling duration).
+Here, we will use the `speeds` function to calculate the CTSD instantaneous speed for our first buffalo (Cilla) at all timestamps, conditioned on our telemetry data and movement model. This includes both the estimated speed, as well as low and high CI bounds. We will then calculate the total distance traveled as: $$d=\sum_i{\Delta t_i|v(t_i)|}=\bar{v}\times\sum_j(\Delta t_j)$$ which is the product of the mean speed and total time traveled (sampling duration).
 
 ```{r ctmm_instant_speed}
 
