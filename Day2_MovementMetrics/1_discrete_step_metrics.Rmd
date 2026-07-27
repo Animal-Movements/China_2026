@@ -123,7 +123,7 @@ sampling_rates
 > Even when the collared were programmed to sample locations regularly, the real data will still likely show variations in temporal intervals. Duty-cycled collars, missed fixes, and satellite-visibility gaps all produce a mix of intervals in almost any real deployment. 
 
 ### 2.2 Picking comparable steps with `track_resample()`
-Step length, turning angle, and speed are only comparable across steps if every step spans roughly the same time interval — a step computed over 1 hour and one computed over 3 hours describe different things, even though both are perfectly valid fixes from the same deliberate duty cycle. `track_resample()` doesn't repair anything; it lets us state explicitly which consecutive fixes should count as a step for the analysis at hand.
+Step length, turning angle, and speed are only comparable across steps if every step spans roughly the same time interval — a step computed over 1 hour and one computed over 3 hours describe different things, even though both are perfectly valid fixes from the same deliberate duty cycle. `track_resample()` lets us state explicitly which consecutive fixes should count as a step for the analysis at hand.
 
 Here, we target the daytime's nominal 1-hour rate, with a 15-minute tolerance to absorb ordinary GPS jitter without stitching genuinely separate fixes together into a false step:
 
@@ -136,17 +136,15 @@ trk_resampled <- trk_nested %>%
 head(trk_resampled)
 ```
 
-> **Note:** `track_resample()` adds a `burst_` column — a run of consecutive fixes that all fall within `tolerance` of the target `rate`. With `rate = hours(1)`, the daytime's roughly-hourly fixes form long, usable bursts, while the night's ~3-hour gaps mostly exceed the 15-minute tolerance and start a new burst — which tells the next step (`steps_by_burst()`) not to compute a step across that gap. That's a deliberate choice for this `rate`, not an error. Section 3 describes daytime movement specifically. Section 2.3 shows the alternative — targeting the night's coarser 3-hour rate instead, so day and night become directly comparable to each other.
+> **Note:** `track_resample()` adds a `burst_` column, but it does not delete every fix that falls outside the target rate the way "resample" might suggest. Internally it walks the timestamps against `rate ± tolerance`, relative to whichever fix is currently anchoring the burst: a fix that arrives *too soon* is dropped from the returned track entirely; a fix that arrives *inside* the tolerance window continues the current burst; and a fix that arrives *late* is **kept, not deleted** — it simply starts a new `burst_` number. With `rate = hours(1)`, the daytime's roughly-hourly fixes form long, usable bursts, while the night's ~3-hour gaps exceed the 15-minute tolerance and each night fix becomes the start of its own new burst. `steps_by_burst()` then only computes a step within a burst, so no step is silently computed across the day/night gap — but the location itself is retained in the data.
+>
+> This burst-tagging is enough on its own if everything downstream also runs in `amt` (`steps_by_burst()` respects `burst_` automatically). It is **not** the same thing as inserting `NA` at every missing regular timestamp, which is what "regularizing" means for some packages outside `amt`. 
+
 
 ### 2.3 An alternative: one shared 3-hour interval
 If the goal is a single, consistent step length across the *whole* diel cycle rather than daytime resolution, target the night's native rate instead. This keeps roughly one fix every 3 hours and drops the extra daytime fixes in between, so every resulting step — day or night — spans the same nominal interval:
 
 ```{r resample_3h}
-# trk_resampled_3h <- trk_nested %>%
-#   mutate(resampled = map(data, ~ track_resample(.x, rate = hours(3), tolerance = minutes(15)))) %>%
-#   select(id, resampled) %>%
-#   unnest(resampled)
-
 trk_resampled_3h <- trk_nested |>
   mutate(resampled = map(data, function(x)
     x |> track_resample(rate = hours(3), tolerance = minutes(15)))) |> 
@@ -163,7 +161,7 @@ trk_resampled_3h <- trk_nested |>
 head(trk_resampled_3h)
 ```
 
-> **Note:** Same function, coarser target `rate` — `track_resample()` looks for the fix nearest each 3-hour mark within `tolerance` and keeps that one. The hourly version resolves fine-scale daytime behavior at the cost of treating night steps as a separate, shorter regime. This 3-hour version provides an "apples-to-apples" step length across the full cycle at the cost of discarding daytime fixes that were collected at a higher resolution. The rest of this module continues with the hourly (`trk_resampled`) version, since Section 3's goal is to demonstrate the step-metric workflow at the finer of the two resolutions — substitute `trk_resampled_3h` in Section 3 if whole-cycle comparability matters more for your question.
+> **Note:** The hourly version in 2.2 resolves fine-scale daytime behavior at the cost of treating night locations will not form effective steps as they are treated as differnet bursts. This 3-hour version provides an "apples-to-apples" step length across the full cycle at the cost of discarding extra daytime fixes that were collected at a higher resolution. The rest of this module continues with the hourly (`trk_resampled`) version, since Section 3's goal is to demonstrate the step-metric workflow at the finer of the two resolutions — substitute `trk_resampled_3h` in Section 3 if whole-cycle comparability matters more for your question.
 
 This same regular 3-hour dataset is useful well beyond this module — anything downstream that wants one comparable time interval across the full day/night cycle can reuse it directly rather than re-deriving it from scratch. We save it here once so later modules can just load it:
 

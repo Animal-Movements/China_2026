@@ -37,7 +37,7 @@ By the end of this module you will be able to:
 
 ## Background
 
-As modern wildlife monitoring technologies allow for fine-scale data collection, we gain more information and have the potential to learn so much more about an animal's ecology and activities. However, this is gain is coupled with challenges and biases of finely-sampled location data, including location error. Location error is error associated with pinpointing the exact location of a tracked animal; essentially the difference between the coordinates provided by the tracking device and the true position. When using devices that relay with the Global Positioning System (GPS) or through other networks (e.g., ARGOS, e-obs, telonics, etc.), there will be some uncertainty associated with each recorded location point, due to the configuration of the relay network (i.e., satellites) at that given location and time and potential signal interference (e.g., atmospheric, multipath effects [reflection off other surfaces], obstruction by foliage or weather, etc.). 
+As modern wildlife monitoring technologies allow for fine-scale data collection, we gain more information and have the potential to learn so much more about an animal's ecology and activities. However, this is gain is coupled with challenges and biases of finely-sampled location data, including location error. Location error is error associated with pinpointing the exact location of a tracked animal; essentially the difference between the coordinates provided by the tracking device and the true position. When using devices that relay with the Global Positioning System (GPS) or through other networks (e.g., ARGOS), there will be some uncertainty associated with each recorded location point, due to the configuration of the relay network (i.e., satellites) at that given location and time and potential signal interference (e.g., atmospheric, multipath effects [reflection off other surfaces], obstruction by foliage or weather, etc.). 
 
 Location error was not as large of a concern when data were collected at coarser scales, however, now it is an issue that can heavily bias our results if ignored, especially when tracking smaller species that may not move far between successive timestamps. Rather than discarding data with poorer accuracy or fitting movement and error parameters simultaneously, we propose a framework under CTMM that can account for location error. This has been tested across various species, using 190 GPS, cellular, and acoustic devices, representing 27 models from 14 manufacturers, as described in [Fleming et al. (2020)](https://doi.org/10.1101/2020.06.12.130195).
 
@@ -78,7 +78,7 @@ If your data needs calibration... What columns do you have available in your dat
 
 ## Data Preparation
 
-We will be using tracking data for wood turtles (*Glyptemys insculpta*), collected by T. Akre, to walk through how we can calibrate our telemetry data to account for GPS location error in our movement models. When dealing with telemetry (location) error, the DOP columns in your data are important to consider. Depending on the device and species, different error metrics may be recorded and location points may be classified by their quality. For our wood turtle data, we have HDOP (horizontal dilution of precision), which is proportional to the error circle around the recorded location estimate. We will want to make sure that our data’s DOP and error columns import correctly into `ctmm`.
+We will be using Tom Akre's tracking data on wood turtles (*Glyptemys insculpta*) to walk through how we can calibrate our telemetry data to account for GPS location error in our movement models. When dealing with telemetry (location) error, the DOP columns in your data are important to consider. Depending on the device and species, different error metrics may be recorded and location points may be classified by their quality. For our wood turtle data, we have HDOP (horizontal dilution of precision), which is proportional to the error circle around the recorded location estimate. We will want to make sure that our data’s DOP and error columns import correctly into `ctmm`.
 
 ```{r import_data}
 
@@ -234,8 +234,9 @@ uere(turtle) <- UERES$all  # assign error model to be the error of dataset
 head(turtle[[1]])
 ## also now includes a per-time error estimate (error circle)
 
-# We can now see error in indiv turtle movement (most of the variation is explained by error)
-plot(turtle[[1]])  # most of the variation is explained by error
+# We can now see error in individual turtle movement
+plot(turtle[[1]])  # calibration data (device not moved)
+## a lot of the variation in the position of the device is explained by error
 
 ```
 

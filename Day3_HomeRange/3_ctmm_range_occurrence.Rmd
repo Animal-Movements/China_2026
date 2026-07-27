@@ -1,5 +1,5 @@
 ---
-title: 'M2-a: Occurrence vs. Range Distributions'
+title: 'M3: Occurrence vs. Range Distributions'
 subtitle: "Day 3 — Home Range Estimation"
 author: "Animal Movement Analyses for Ecologists | SYSU Shenzhen, July 2026"
 date: "`r Sys.Date()`"
@@ -36,7 +36,7 @@ By the end of this module you will be able to:
 
 ## Background
 
-When researching animal behavior and movement ecology, describing spatial-temporal patterns of space use is fundamental. We often characterize space use through home-range estimation. A home range is the area repeatedly used throughout an animal’s lifetime for all its normal behaviors and activities, excluding occasional exploratory excursions. However, before we can estimate a home range, it is important to understand what a utilization distribution is, and how to distinguish between [occurrence distributions and range distributions](https://doi.org/10.1101/2022.09.29.509951).
+When researching animal behavior and movement ecology, describing spatial-temporal patterns of space use is fundamental. We often characterize space use through home-range estimation. A home range is the area repeatedly used throughout an animal’s lifetime for all its normal behaviors and activities, excluding occasional exploratory excursions. However, to be able to properly estimate a home range, it is important to understand what a utilization distribution is, and how to distinguish between [occurrence distributions and range distributions](https://doi.org/10.1101/2022.09.29.509951).
 
 ## Data Preparation
 
@@ -61,7 +61,7 @@ load("Data/cilla.rda")
 
 ## Utilization Distributions
 
-A utilization distribution (UD) represents an animal’s probability of space use throughout an area. Traditionally, occurrence distributions built with Brownian motion models (Brownian Bridge movement model) were used to model an animal's space use, however, these do not describe an animal's home range. More recently, range distributions have been used to map individual and population "home" ranges. So how do these two types of "utilization" distributions compare?
+A utilization distribution (UD) represents an animal’s probability of space use throughout an area. Traditionally, occurrence distributions built with Brownian motion models (Brownian Bridge movement model) were used to model an animal's space use, however, these do not describe an animal's home range. On the other hand, range distributions have been used to map individual and population "home" ranges. So how do these two types of "utilization" distributions compare?
 
 > What is the **occurrence distribution**?
 >
@@ -142,11 +142,11 @@ plot(OD, col.level = NA, ext = EXT, main = "OUF Krige")
 
 ```
 
-While the occurrence distribution predicts well for finely sampled data, it is negatively biased (biases too small for home ranges). However, with the Kriging process incorporated, it performs better than the base BM model.
+While the occurrence distribution predicts well for finely sampled data, it is negatively biased if used to estimate the home range. However, with the Kriging process incorporated, it performs better than the base BM model.
 
 ### Range Distribution
 
-Now, we will compare the kriged occurrence distribution to a range distribution, which we reccommend for home-range estimation. This uses the `akde` function for autocorrelated kernel density estimation (AKDE). This will be further explained in Module 3: AKDE, Home Range Meta-Analysis, Population Ranges. The key point for this module is that the `akde` function can be fit to the telemetry data with the best-fit movement model to produce a range distribution that should better capture the potential space use of a range-resident animal. Assuming that the animal maintains these behaviors, this range distribution would be representative of its home range.
+Now, we will compare the kriged occurrence distribution to a range distribution, which we recommend for home-range estimation. Prior to modern, more powerful GPS tracking devices, kernel density estimation (KDE) was used to model home ranges for independent (IID) data, however with finer resolution data collection, we need better tools able to estimate range distributions that are debiased. Here, we use the `akde` function in `ctmm` for autocorrelated kernel density estimation (AKDE). This is further explained in Day 3 "Module 2-b: AKDE, Home Range Meta-Analysis, Population Ranges". The key point for this module is that the `akde` function can be fit to the telemetry data with the best-fit movement model to produce a range distribution that should better capture the potential space use of a range-resident animal. Assuming that the animal maintains these behaviors, this range distribution would be representative of its home range.
 
 ```{r range, fig.height = 8, fig.width = 8}
 
@@ -457,5 +457,5 @@ Here, the range distribution does not change much, but it will become less detai
 
 ---
 
-_Next: **Module 2 Part b — Effective Sample Sizes** — We examine effective sample sizes and how the information content in your data can affect your analysis._
+_Next: **Day 4 — Behaviour Analysis Part 1** — We will explore various aspects of animal behaviour through their movement ecology: barrier behaviour (BaBA), encounters and interactions between individuals, periodic patterns in space use. We will also try to reconstruct an animal's path and simulate its movement._
 
