@@ -319,4 +319,4 @@ Please do the following:
 
 ---
 
-*Next: **Module 2 — Summary Movement Traits** — having quantified step-by-step movement, we zoom out to individual-level summary traits over longer windows: displacement, maximum displacement, and diurnality — part of the same set of metrics used by the MoveTraits database to compare movement behavior across species.*
+*Next:* **Module 2 — Summary Movement Traits** — having quantified step-by-step movement, we zoom out to individual-level summary traits over longer windows: displacement, maximum displacement, and diurnality — part of the same set of metrics used by the MoveTraits database to compare movement behavior across species.
