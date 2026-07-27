@@ -500,6 +500,15 @@ Now that you have uploaded and manipulated the wildebeest dataset in [R](https:/
 
 | Function | Package | Purpose |
 |---|---|---|
+| `movebank_store_credentials()` | `move2` | Stores your login credentials locally on your machine |
+| `movebank_download_study()` | `move2` | Allows for direction connection/download to the movebank data repository |
+| `mt_as_move2()` | `move2` | Converts a data.frame to a `move2` object |
+| `mt_track_data()` | `move2` | Returns a data.frame containing the track attribute data |
+| `n_distinct()` | `dplyr` | Counts the number of unique/distinct combinations in a set of one or more vectors |
+| `class()` | `base` | Generic function to return the attribute of the file |
+| `gtsave()` | `gt` | Saves a `gt` formatted table to .html format |
+| `st_as_sf()` | `sf` | Converts a data.frame to a `sf` object, maitaining the data.frame but making the data spatial with geographic coordinates. Required for mapping or displaying data spatially |
+| `slice_sample()` | `dplyr` | Subsets a sample of rows in a data.frame or tibble |
 
 ---
 
