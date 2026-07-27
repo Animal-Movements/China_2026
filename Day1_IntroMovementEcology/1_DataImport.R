@@ -17,7 +17,6 @@ library(mapview)     # Quick interactive maps
 library(units)       # Provides support for measurement units
 library(gt)          # Makes presentation-ready display tables
 
-
 ## ----Set UTM Zone------------------------------------------------------------------------
 # Set TimeZone
 tz_utc <- "UTC"
