@@ -173,11 +173,8 @@ WB.mv2 %>%
 
 Create a histogram of the graph of GPS fix quality 
 ```{r dop_before}
-dop_before <- WB.mv2 %>%
-  as_tibble() %>%
-  filter(!is.na(gps_dop), gps_fix_type_raw %in% c("2D", "3D"))
-
-plot.raw <- ggplot(dop_before, aes(x = gps_dop)) +
+# Plot
+plot.raw <- ggplot(WB.mv2, aes(x = gps_dop)) +
   geom_histogram(bins = 30, fill = "steelblue", color = "white") +
   geom_vline(data = tibble(gps_fix_type_raw = c("2D", "3D"), thresh = c(5, 10)),
              aes(xintercept = thresh), color = "firebrick", linetype = "dashed") +
@@ -188,7 +185,7 @@ plot.raw <- ggplot(dop_before, aes(x = gps_dop)) +
   theme_minimal()
 
 # Print to view the plot
-#plot.raw
+plot.raw
 ```
 
 ### 4.2 DOP Filter
