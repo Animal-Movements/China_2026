@@ -22,62 +22,127 @@ source("utility_functions.R")
 # Load data 
 
 ## ID: 32733 - pacoca
-act_32733 <- read.csv("data/ACT_Collar32733_20260401143616.csv")
+pacoca <- read.csv("data/32733_PACOCA/2022_pacoca_ACC.csv")
 
 ## ID: 32866 - juba
-act_32866 <- read.csv("data/ACT_Collar32866_20260401143833.csv")
+juba <- read.csv("data/32866_JUBA/2022_juba_ACC.csv")
 
 
 ## ----time-conversion, message=FALSE, warning=FALSE, echo=TRUE----------------------------
-## currently, the data contains several date/time columns -- date and time need to combine into one column first 
-act_32733$datetime_str <- paste(act_32733$UTC_Date, act_32733$UTC_Time)
-act_32866$datetime_str <- paste(act_32866$UTC_Date, act_32866$UTC_Time)
+## create ID for each dataframe 
+pacoca$ID <- "32733"
+juba$ID <- "32866"
 
-## convert to POSIXct 
-act_32733$time <- lubridate::mdy_hms(act_32733$datetime_str, tz = "UTC")
-act_32866$time <- lubridate::mdy_hms(act_32866$datetime_str, tz = "UTC")
+## create year column for each dataframe 
+pacoca$year <- "2022"
+juba$year <- "2022"
 
-## change the CollarID to ID 
-colnames(act_32733)[2] <- "ID"
-colnames(act_32866)[2] <- "ID"
+## currently, the data contains several date/time columns -- year and date and time need to combine into one column first 
+## combine year, date, and time
+pacoca$datetime_str <- paste(pacoca$year,
+                             pacoca$UTC_Date,
+                             pacoca$UTC_Time)
+
+juba$datetime_str <- paste(juba$year,
+                           juba$UTC_Date,
+                           juba$UTC_Time)
+
+## convert to POSIXct
+pacoca$time <- lubridate::parse_date_time(
+  pacoca$datetime_str,
+  orders = "Y d-b HMS",
+  tz = "UTC"
+)
+
+juba$time <- lubridate::parse_date_time(
+  juba$datetime_str,
+  orders = "Y d-b HMS",
+  tz = "UTC"
+)
+
+## only select columns that will be used for this study 
+pacoca <- pacoca %>% dplyr::select(ID, time, x, y, z, temp)
+juba <- juba %>% dplyr::select(ID, time, x, y, z, temp)
 
 ## ----diff-time, message=FALSE, warning=FALSE, echo=TRUE----------------------------------
 # Table of time intervals in data - can apply to both individuals
-plot(table(diff(act_32866$time)), xlim = c(0, 600),
+plot(table(diff(juba$time)), xlim = c(0, 200000),
+     xlab = "time interval (sec)", ylab = "count")
+
+plot(table(diff(pacoca$time)), xlim = c(0, 200000),
      xlab = "time interval (sec)", ylab = "count")
 
 # Check the large gaps in the tracks
-dt_32733 <- as.numeric(diff(act_32733$time), units = "secs")
-dt_32733[dt_32733 > 300]
+diff_pacoca <- as.numeric(diff(pacoca$time), units = "secs")
+diff_pacoca[diff_pacoca > 2]
 
-dt_32866 <- as.numeric(diff(act_32866$time), units = "secs")
-dt_32866[dt_32866 > 300]
+diff_juba <- as.numeric(diff(juba$time), units = "secs")
+diff_juba[diff_juba > 2]
 
 # Use function from utility_function.R to split data at gaps > 30 minutes
-data_split_act_32866 <- split_at_gap(data = act_32866, max_gap = 30, shortest_track = 0)
-data_split_act_32733 <- split_at_gap(data = act_32733, max_gap = 30, shortest_track = 0)
+data_split_juba <- split_at_gap(data = juba, max_gap = 30, shortest_track = 0)
+data_split_pacoca <- split_at_gap(data = pacoca, max_gap = 30, shortest_track = 0)
 
 ## ----ODBA, message=FALSE, warning=FALSE, echo=TRUE---------------------------------------
 ## use a single summary activity variable - ODBA
-data_split_act_32733$ODBA <-
-    rowSums(data_split_act_32733[, c("ActivityX","ActivityY","ActivityZ")])
+data_split_pacoca$ODBA <-
+  rowSums(abs(data_split_pacoca[, c("x", "y", "z")]))
 
-data_split_act_32866$ODBA <-
-    rowSums(data_split_act_32866[, c("ActivityX","ActivityY","ActivityZ")])
+data_split_juba$ODBA <-
+  rowSums(abs(data_split_juba[, c("x", "y", "z")]))
 
+
+## ----fill NAs, message=FALSE, warning=FALSE, echo=TRUE---------------------------------
+## Function to pad each split track to a regular 2-second time series
+pad_time_series <- function(df, interval = 2){
+
+  ## create regular timestamp sequence
+  full_time <- data.frame(
+    time = seq(
+      from = min(df$time),
+      to   = max(df$time),
+      by   = interval
+    )
+  )
+
+  ## merge observations onto regular timeline
+  full_data <- dplyr::left_join(
+    full_time,
+    df,
+    by = "time"
+  )
+
+  ## restore ID for inserted NA rows
+  full_data$ID <- unique(df$ID)
+
+  ## arrange columns
+  full_data <- full_data %>%
+    dplyr::select(ID, time, x, y, z, temp, ODBA)
+
+  return(full_data)
+}
+
+## Apply padding separately to each split track
+pacoca_regular <- data_split_pacoca %>%
+  group_split(ID) %>%
+  purrr::map_dfr(pad_time_series)
+
+juba_regular <- data_split_juba %>%
+  group_split(ID) %>%
+  purrr::map_dfr(pad_time_series)
 
 ## ----final-data, message=FALSE, warning=FALSE, echo=TRUE---------------------------------
-# select the columns of interest
-ppacoca <- data_split_act_32733 %>%
-    select(ID, ODBA, time, temp = Temp...C.)
+# select columns of interest
+pacoca <- pacoca_regular %>%
+  select(ID, ODBA, time, temp)
 
-juba <- data_split_act_32866 %>%
-    select(ID, ODBA, time, temp = Temp...C.)
+juba <- juba_regular %>%
+  select(ID, ODBA, time, temp)
 
-# combine the datasets
+# combine datasets
 data <- rbind(pacoca, juba)
 
-# Summarize
+# check the data summary
 summary(data)
 
 
@@ -87,34 +152,41 @@ data_hmm <- prepData(data, coordNames = NULL, covNames = "temp")
 
 
 ## ----fit-hmm1, message=FALSE, warning=FALSE, echo=TRUE-----------------------------------
-# Observation distributions (ODBA)
+# Observation distribution for ODBA
+# ODBA is continuous and strictly positive, so a gamma distribution is appropriate.
+# Missing ODBA values (created during temporal regularization) are retained in data_hmm
+# and handled by momentuHMM.
 dist <- list(ODBA = "gamma")
 
-# Initial parameters
-# Use simple rules-of-thumb based on the data:
-# - Low activity state (state 1): roughly half the mean ODBA
-# - High activity state (state 2): roughly 1.5 times the mean ODBA
-# The 1e-2 ensures strictly positive values.  Not necessary here, but might save you some problems.
-mu1 <- max(mean(data$ODBA) * 0.5, 1e-2)  # state 1: low activity 
-mu2 <- max(mean(data$ODBA) * 1.5, 1e-2)  # state 2: high activity
+# Initial parameter values (Par0)
+# Remove only missing values temporarily for calculating starting parameters.
+# The original NA values remain in data_hmm for HMM fitting.
+ODBA_obs <- data$ODBA[!is.na(data$ODBA)]
 
-# Use the standard deviation of the positive observations as a guide.
-# Ensure strictly positive values (1e-2) to satisfy momentuHMM bounds.
-sd1 <- max(sd(data$ODBA) * 0.5, 1e-2)
-sd2 <- max(sd(data$ODBA) * 1.5, 1e-2)
+# Define initial means for the two activity states
+# State 1: low-activity state
+# Initialized using the lower half of observed ODBA values.
+mu1 <- mean(ODBA_obs[ODBA_obs <= median(ODBA_obs)])  
 
-# Zero-inflation: probability of observing exact zeros
-# Can estimate from data, or use small non-zero values as starting points -- Must be strictly < 1
-zm1 <- 0.01
-zm2 <- 0.01
+# State 2: high-activity state
+# Initialized using the upper quartile of observed ODBA values.
+mu2 <- mean(ODBA_obs[ODBA_obs >= quantile(ODBA_obs, 0.75)])
+
+# Define initial standard deviations for each state
+# These values describe the expected variability within each activity state.
+# Small positive values are required because gamma parameters cannot be zero.
+sd1 <- sd(ODBA_obs[ODBA_obs <= median(ODBA_obs)])
+sd2 <- sd(ODBA_obs[ODBA_obs >= quantile(ODBA_obs, 0.75)])
 
 # Combine into Par0
-# The order is important: c(mu1, mu2, sd1, sd2, zm1, zm2)
+# The order is important: c(mu1, mu2, sd1, sd2)
 Par0_2s <- list(
-  ODBA = c(mu1, mu2, sd1, sd2, zm1, zm2)
+  ODBA = c(mu1, mu2, sd1, sd2)
 )
 
 # Fit a 2-state HMM
+# Missing ODBA observations from the regularized time series remain as NA
+# and are handled internally by momentuHMM.
 hmm1 <- fitHMM(data_hmm, 
                nbStates = 2, 
                dist = dist, 
@@ -164,10 +236,3 @@ plotStationary(hmm2,
 # Compare models using AIC 
 AIC(hmm1, 
     hmm2)
-
-
-## ----pseudo-res--------------------------------------------------------------------------
-# plot pseudo-residuals for 2-state models 
-plotPR(hmm1)
-plotPR(hmm2)
-
