@@ -1,8 +1,8 @@
-## ----setup, include=FALSE----------------------------------------------------------------
+## ----setup, include=FALSE---------------------------------------------------------------------------
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 
 
-## ----load-pacakages, message=FALSE, warning=FALSE, echo=TRUE-----------------------------
+## ----load-pacakages, message=FALSE, warning=FALSE, echo=TRUE----------------------------------------
 # Remove items from memory/clean your workspace
 rm(list=ls())
 
@@ -18,7 +18,8 @@ library(adehabitatLT)
 # Load functions for later
 source("utility_functions.R")
 
-## ----load-data, message=FALSE, warning=FALSE, echo=TRUE----------------------------------
+
+## ----load-data, message=FALSE, warning=FALSE, echo=TRUE---------------------------------------------
 # Load data 
 
 ## ID: 32733 - pacoca
@@ -28,7 +29,7 @@ pacoca <- read.csv("data/32733_PACOCA/2022_pacoca_ACC.csv")
 juba <- read.csv("data/32866_JUBA/2022_juba_ACC.csv")
 
 
-## ----time-conversion, message=FALSE, warning=FALSE, echo=TRUE----------------------------
+## ----time-conversion, message=FALSE, warning=FALSE, echo=TRUE---------------------------------------
 ## create ID for each dataframe 
 pacoca$ID <- "32733"
 juba$ID <- "32866"
@@ -64,7 +65,8 @@ juba$time <- lubridate::parse_date_time(
 pacoca <- pacoca %>% dplyr::select(ID, time, x, y, z, temp)
 juba <- juba %>% dplyr::select(ID, time, x, y, z, temp)
 
-## ----diff-time, message=FALSE, warning=FALSE, echo=TRUE----------------------------------
+
+## ----diff-time, message=FALSE, warning=FALSE, echo=TRUE---------------------------------------------
 # Table of time intervals in data - can apply to both individuals
 plot(table(diff(juba$time)), xlim = c(0, 200000),
      xlab = "time interval (sec)", ylab = "count")
@@ -72,18 +74,22 @@ plot(table(diff(juba$time)), xlim = c(0, 200000),
 plot(table(diff(pacoca$time)), xlim = c(0, 200000),
      xlab = "time interval (sec)", ylab = "count")
 
-# Check the large gaps in the tracks
+
+## ----identify gaps, message=FALSE, warning=FALSE, echo=TRUE-----------------------------------------
 diff_pacoca <- as.numeric(diff(pacoca$time), units = "secs")
 diff_pacoca[diff_pacoca > 2]
 
 diff_juba <- as.numeric(diff(juba$time), units = "secs")
 diff_juba[diff_juba > 2]
 
+
+## ----utility gaps, message=FALSE, warning=FALSE, echo=TRUE------------------------------------------
 # Use function from utility_function.R to split data at gaps > 30 minutes
 data_split_juba <- split_at_gap(data = juba, max_gap = 30, shortest_track = 0)
 data_split_pacoca <- split_at_gap(data = pacoca, max_gap = 30, shortest_track = 0)
 
-## ----ODBA, message=FALSE, warning=FALSE, echo=TRUE---------------------------------------
+
+## ----ODBA, message=FALSE, warning=FALSE, echo=TRUE--------------------------------------------------
 ## use a single summary activity variable - ODBA
 data_split_pacoca$ODBA <-
   rowSums(abs(data_split_pacoca[, c("x", "y", "z")]))
@@ -92,7 +98,7 @@ data_split_juba$ODBA <-
   rowSums(abs(data_split_juba[, c("x", "y", "z")]))
 
 
-## ----fill NAs, message=FALSE, warning=FALSE, echo=TRUE---------------------------------
+## ----fill NAs, message=FALSE, warning=FALSE, echo=TRUE----------------------------------------------
 ## Function to pad each split track to a regular 2-second time series
 pad_time_series <- function(df, interval = 2){
 
@@ -122,6 +128,7 @@ pad_time_series <- function(df, interval = 2){
   return(full_data)
 }
 
+
 ## Apply padding separately to each split track
 pacoca_regular <- data_split_pacoca %>%
   group_split(ID) %>%
@@ -131,7 +138,8 @@ juba_regular <- data_split_juba %>%
   group_split(ID) %>%
   purrr::map_dfr(pad_time_series)
 
-## ----final-data, message=FALSE, warning=FALSE, echo=TRUE---------------------------------
+
+## ----final-data, message=FALSE, warning=FALSE, echo=TRUE--------------------------------------------
 # select columns of interest
 pacoca <- pacoca_regular %>%
   select(ID, ODBA, time, temp)
@@ -146,12 +154,14 @@ data <- rbind(pacoca, juba)
 summary(data)
 
 
-## ----prep-data1, message=FALSE, warning=FALSE, echo=TRUE---------------------------------
+## ----prep-data1, message=FALSE, warning=FALSE, echo=TRUE--------------------------------------------
 # Prepare data for HMM 
 data_hmm <- prepData(data, coordNames = NULL, covNames = "temp")
 
+data_hmm
 
-## ----fit-hmm1, message=FALSE, warning=FALSE, echo=TRUE-----------------------------------
+
+## ----fit-hmm1, message=FALSE, warning=FALSE, echo=TRUE----------------------------------------------
 # Observation distribution for ODBA
 # ODBA is continuous and strictly positive, so a gamma distribution is appropriate.
 # Missing ODBA values (created during temporal regularization) are retained in data_hmm
@@ -196,12 +206,12 @@ hmm1 <- fitHMM(data_hmm,
 hmm1
 
 
-## ----look-hmm1, fig.keep = 1:4-----------------------------------------------------------
+## ----look-hmm1, fig.keep = 1:4----------------------------------------------------------------------
 # Plot estimated distributions and state-coloured tracks
 plot(hmm1, ask = FALSE)
 
 
-## ----viterbi, message=FALSE, warning=FALSE, echo=TRUE------------------------------------
+## ----viterbi, message=FALSE, warning=FALSE, echo=TRUE-----------------------------------------------
 # get most likely sequence of states 
 head(viterbi(hmm1))
 
@@ -214,7 +224,7 @@ ggplot(data_hmm, aes(x = time, y = ODBA, col = state_2st, group = ID))+
   facet_wrap(~ID)
 
 
-## ----fit-hmm2, message=FALSE, warning=FALSE, echo=TRUE-----------------------------------
+## ----fit-hmm2, message=FALSE, warning=FALSE, echo=TRUE----------------------------------------------
 # Fit 2-state HMM with temperature covariate 
 hmm2 <- fitHMM(data_hmm, 
                nbStates = 2, 
@@ -226,13 +236,14 @@ hmm2 <- fitHMM(data_hmm,
 hmm2
 
 
-## ----look-hmm2---------------------------------------------------------------------------
+## ----look-hmm2--------------------------------------------------------------------------------------
 # plot stationary state probabilities as functions of temperature 
 plotStationary(hmm2, 
                plotCI = TRUE)
 
 
-## ----AIC---------------------------------------------------------------------------------
+## ----AIC--------------------------------------------------------------------------------------------
 # Compare models using AIC 
 AIC(hmm1, 
     hmm2)
+

@@ -532,3 +532,24 @@ As an additional/practical exercise, it can be useful to collect GPS data on you
 3. Practice downloading the data from your phone and uploading the dataset into [R](https://cran.r-project.org/).
 4. Clean the data as appropriate to fit a hidden Markov model of your behaviors.
 5. Experiment with how the data are collected to evaluate how your ability to detect these three behaviors (resting, walking, running) changes with the resolution of your GPS track (i.e., 5-minute interval versus a 1-hour temporal interval).
+
+---
+
+## Key functions reference
+
+| Function | Package | Purpose |
+|---|---|---|
+| `right_join()`, `left_join()` | `dplyr` | Join two datasets, keeping all rows from the right table |
+| `arrange()` | `dplyr` | Sort rows by specified variables. |
+| `hour()` | `lubridate` | Extract hour from datetime |
+| `prepData()` | `momentuHMM` | Prepare movement data for HMM fitting (compute steps, angles, covariates) |
+| `fitHMM()` | `momentuHMM` | Fit hidden Markov models to movement data |
+| `viterbi()` | `momentuHMM` | Decode most likely state sequence |
+| `stateProbs()` | `momentuHMM` | Compute state probabilities for each observation |
+| `plotStates()` | `momentuHMM` | Plot state sequences |
+| `plotStationary()` | `momentuHMM` | Plot stationary state probabilities vs covariates |
+| `cosinor()` |`momentuHMM` | Build cyclic covariate (e.g., diel cycle) |
+
+---
+
+*Next:* **Day 5 — Behavior Analysis Pt 2** — Now we will take one additional step and fit a HMM to accelerometer data.
