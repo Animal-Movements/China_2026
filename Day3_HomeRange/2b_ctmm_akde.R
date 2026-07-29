@@ -2,185 +2,261 @@
 # AKDE
 ##########
 
+# Load ctmm package
 library(ctmm)
 
-help("akde") # main function and new `pkde()` function for population-wide data (tracked multiple indivs)
-## kernel density methods (non-parametric), best for if model isn't known
-## debiasing: conditioned on autocorrelation model, not IID
-### default kde puts equal weights for all points, but akde is weighted nonparametric method (weights are optimized
-### -- less weight on over-sampled points and more weight on under-sampled points (# weights (optimization parameters) = # datapoints)
-help("bandwidth")
-## bandwidth = spread of kernels
-## kernels will spillover into areas where animal can't go, can set boundaries if kernels are smaller than the polygon
-# uses Gaussian optimization function
+help("akde") # main function and new `pkde()` function for population-wide data
+## less weight on over-sampled points and more weight on under-sampled points 
+## (number of weights (optimization parameters) = number of data points)
 
-# load buffalo data
+help("bandwidth")  # bandwidth = spread of kernels
+## kernels will spillover into areas where animal can't go, can set boundaries if kernels are smaller than the polygon
+## uses Gaussian optimization function
+
+
+###################
+# IMPORT AND VISUALIZE DATA
+###################
+
+# Load buffalo data
 data(buffalo)
-projection(buffalo) <- median(buffalo)  
+projection(buffalo) <- median(buffalo)  # center projection on median of locations
 
 names(buffalo)
 
-# here we will work with Pepper
+# Here we will work with Pepper
 DATA <- buffalo$Pepper
 
-COL <- color(DATA,by="time")
-plot(DATA,col=COL,main="Pepper")
+COL <- color(DATA, by = "time")  # color location points by time
+plot(DATA, col = COL, main = "Pepper")
 
-# this dataset has problems
-dt.plot(DATA)
-## time intervals in data sorted by size, most of the sampling intervals are 2 hours, some greater, some around 1 hour
-## collar malfunctioned a lot (ideally it would be a flat line at the desired interval)
+# This dataset has problems
+dt.plot(DATA)  # diagnose sampling schedule
+## time intervals in data sorted by size, 
+## most of the sampling intervals are 2 hours, some greater, some around 1 hour
 
-# selected autocorrelation model
-GUESS <- ctmm.guess(DATA,interactive=FALSE)
-FIT <- ctmm.select(DATA,GUESS,trace=3)
-# save(FIT,file="pepper.rda")
-# I've already run this
-load("Day3_HomeRange/Data/pepper.rda")
+
+####################
+# MODEL SELECTION
+####################
+
+# Selected autocorrelation model
+GUESS <- ctmm.guess(DATA, interactive = FALSE)
+FIT <- ctmm.select(DATA, GUESS, trace = 3)
+# save(FIT, file = "Data/pepper.rda")
+
+# Load saved model selection results
+load("Data/pepper.rda")
 
 summary(FIT)
 ## velocity autocorrelation ~ 30-40 mins
 ## position autocorrelation ~ 7-24 days
 
-# analogous IID model
+# Analogous IID model
 IID <- ctmm.fit(DATA)
 
 summary(IID)
 
-# regular KDE
-KDE <- akde(DATA,IID) ## with IID model
-## anisotropic kernel
-## wouldn't want symmetric kernels here (want elongated kernels)
 
-# default AKDE
-AKDE <- akde(DATA,FIT) ## with autocorrelation model
+#####################
+# HOME RANGE ESTIMATION (AKDE)
+#####################
 
-# optimally weighted AKDE
-wAKDE <- akde(DATA,FIT,weights=TRUE)
-# you only need this with irregular sampling (i.e. Pepper's collar malfunction for sampling times) - can be slow
-# unweighted AKDE places too much density on oversampled times
+# Regular KDE
+KDE <- akde(DATA, IID)  # with IID model
+## Anisotropic kernel
+## would not want symmetric kernels here (want elongated kernels)
+
+plot(DATA, KDE, main = "KDE")
+summary(KDE)
+
+# Default AKDE
+AKDE <- akde(DATA, FIT)  # with selected autocorrelation model (OUF anisotropic)
+
+# Plot the home range
+plot(DATA, AKDE, main = "AKDE")
+summary(AKDE)
+## Larger point estimates and CIs
+
+
+#######################
+# WEIGHTED AKDE
+#######################
+
+# Optimally weighted AKDE
+wAKDE <- akde(DATA, FIT, weights = TRUE)
+## Only needed for irregular sampling - can be slow
 
 # Pepper's optimal weights
-plot(DATA$timestamp,wAKDE$weights,xlab="time",ylab="weight",main="Optimal Weights")
+plot(DATA$timestamp, wAKDE$weights, 
+     xlab = "time", ylab = "weight", main = "Optimal Weights")
 
-plot(DATA$timestamp,wAKDE$weights,xlab="time",ylab="weight",main="Optimal Weights",ylim=c(0,0.005))
-## more weight ascribed to 2 hour data
-## if there are large gaps in the weights of data, the higher weighted/more unique datapoints are more valuable
+# Zoom into the lower weights
+plot(DATA$timestamp, wAKDE$weights, ylim = c(0,0.005),
+     xlab = "time", ylab = "weight", main = "Optimal Weights (zoomed in)")
+## More weight ascribed to 2 hour data
+## higher weighted/more unique datapoints are more valuable
 
-# matching extent for plotting
-EXT <- extent(list(KDE,AKDE,wAKDE))  # useful to determine tiles for sensing data
+# Pepper's sampling interval
+plot(DATA$timestamp, 'hour' %#% c(0, diff(DATA$t)), ylim = c(0,20),
+     xlab = "Date", ylab = "Sampling interval (hours)", main = "Pepper's Sampling Intervals")
 
-plot(DATA,KDE,ext=EXT,main="KDE")
-# note CIs, grid, etc...
-summary(KDE) ## RE: IID model
-## can't see the CIs due to high assumed certainty from high effective sample size (area in DOF)
+# Match extent for plotting to the largest of the three distributions
+EXT <- extent(list(KDE, AKDE, wAKDE))
 
-plot(DATA,AKDE,ext=EXT,main="AKDE")
+# Plot the IID KDE
+plot(DATA, KDE, ext = EXT, main = "Regular IID KDE")
+summary(KDE)
+
+# Plot the AKDE
+plot(DATA, AKDE, ext = EXT, main = "Uniformly-weighted AKDE")  # uniform weights
 summary(AKDE)
-# Larger point estimates and can see grid much more (scale + orientation of bandwidth)
-# interpret like a histogram
-## larger CIs due to lower effective sample size
 
-plot(DATA,wAKDE,ext=EXT,main="optimally weighted AKDE")
+# Plot the weighted AKDE
+plot(DATA, wAKDE, ext = EXT, main = "Optimally-weighted AKDE")  # optimal weights
 summary(wAKDE)
 ## Note diff shape for akde: 1-hour data further up (less weight), more weight on the 2-hour sampling lower down
 ## more representative visualization of movement data instead of sampling data
 
-# Over-smoothing bias
-osAKDE <- akde(DATA,FIT,weights=TRUE,debias=FALSE) 
-## no over-smoothing bias correction (Gaussian reference function akde over-smooths)
 
-plot(DATA,osAKDE,ext=EXT,main="uncorrected wAKDE")
-## makes CIs too big
+# Let's compare the 3 distributions more directly by overlaying them
+# Create custom colors for data by sampling interval
+DATA$interval <- "hour" %#% c(3600, diff(DATA$t))  # sampling intervals
+DATA$color <- NA  # empty column to fill with colors
+
+DATA$color[0.94 < DATA$interval & DATA$interval < 1.05] <- "gold"  # ~1-hour sampling
+DATA$color[1.85 < DATA$interval & DATA$interval < 2.15] <- "red2"  # ~2-hour sampling
+DATA$color[DATA$interval > 2.5] <- "darkgray"        # >2 hours
+DATA$color[DATA$interval < 0.94] <- "lightgray"      # <1 hour
+
+# Plot all distributions overlayed
+plot(DATA, KDE, ext = EXT, col = DATA$color, level.UD = c(0.5,0.95), level = NA,
+     col.level = "gray", col.grid = NA, col.UD = "transparent", 
+     main = "Overlayed KDE, AKDE, wAKDE") 
+legend("topright", inset = 0.05, legend = c("1-hour", "2-hour", "other"), 
+       col = c("gold", "red2", "gray"), bty = "n", pch = 16) 
+text(-22, 68, labels = "KDE", col = "gray") 
+text(19, 50, labels = "AKDE", col = "blue") 
+text(-20, 20, labels = "wAKDE", col = "red")
+plot(AKDE, ext = EXT, level.UD = c(0.5,0.95), level = NA, col.level = "blue",
+     col.grid = NA, col.UD = "transparent", add = TRUE)
+plot(wAKDE, ext = EXT, level.UD = c(0.5,0.95), level = NA, col.level = "red",
+     col.grid = NA, col.UD = "transparent", add = TRUE)
+
+
+#######################
+# OVER-SMOOTHING BIAS CORRECTION
+#######################
+
+# Over-smoothing bias 
+osAKDE <- akde(DATA, FIT, weights = TRUE, debias = FALSE)  # no bias correction
+## Gaussian reference function akde over-smooths
+
+plot(DATA, osAKDE, main = "Uncorrected wAKDE")
+## GRF coverage area is too big
+
 
 ###########################
-# Home-range meta-analysis
+# HOME-RANGE META-ANALYSIS
 ###########################
 
 help("meta")
-## meta-analysis: hierarchical model that propagates indiv parameters into population-wide and conducts model selection
+help('meta', package = "ctmm")
+## meta-analysis: hierarchical model that propagates individual parameters into population-wide
 
+# Model selection for each buffalo
 FITS <- list()
 for(i in 1:length(buffalo))
 {
-  GUESS <- ctmm.guess(buffalo[[i]],interactive=FALSE)
-  FITS[[i]] <- ctmm.select(buffalo[[i]],GUESS,trace=3)
+  GUESS <- ctmm.guess(buffalo[[i]], interactive = FALSE)
+  FITS[[i]] <- ctmm.select(buffalo[[i]], GUESS, trace = 3)
 }
 names(FITS) <- names(buffalo)
-# save(FITS,file="data/buffalo.rda")
-load("Day3_HomeRange/Data/buffalo.rda")
+# save(FITS, file = "Data/buffalo.rda")
 
 # calculate AKDES on a consistent grid
-AKDES <- akde(buffalo,FITS,weights=TRUE)
-# save(AKDES,file="data/buffalo_akdes.rda")
-load("Day3_HomeRange/Data/buffalo_akdes.rda")
+AKDES <- akde(buffalo, FITS, weights = TRUE)
+# save(AKDES, file = "Data/buffalo_akdes.rda")
 
-# color to be spatially distinct
-COL <- color(AKDES,by='individual')
-## indivs closer together spatially, have more distinct colours
+# Load in saved model selection results
+load("Data/buffalo.rda")
 
-# plot AKDEs
-plot(AKDES,col.UD=COL,col.level=COL,col.grid=NA,level=NA,main="African buffalo AKDEs")
+# Load in saved AKDE results
+load("Data/buffalo_akdes.rda")
 
+# Color individuals to be spatially distinct
+COL <- color(AKDES, by = 'individual')
+## individuals closer together in space have more distinct colours
+
+# Plot individual AKDEs
+plot(AKDES, col.UD = COL, col.level = COL, col.grid = NA, level = NA, 
+     main = "African buffalo AKDEs")
+
+# Calculate manually
 # Mean buffalo HR "the old way"
-AREA <- vector("numeric", length = length(AKDES))
-for(i in 1:length(AKDES))
-{ AREA[i] <- summary(AKDES[[i]], units = FALSE)$CI[2] } # turn off units when making tables (units will be diff)
-AREA
+AREA <- vector("numeric", length = length(AKDES))  # empty vector to store HR areas
+
+for(i in 1:length(AKDES)) { 
+  AREA[i] <- summary(AKDES[[i]], units = FALSE)$CI[2]  # turn off units when making tables (units will be diff)
+}
+AREA  # vector of HR areas
+
 mean(AREA) # mean
 sqrt(var(AREA)/length(AREA)) # SE
 
-
-help('meta',package="ctmm")
-
 # meta-analysis of buffalo home-range areas
-meta(AKDES,col=c(COL,'black'),sort=TRUE)
-# model selection: Dirac-delta > inverse-Gaussian for pop-level parameters
-### -- here Dirac-delta singular (no variance), can't estimate st.dev/mean (can if turning of model selection, but not selected feature)
+meta(AKDES, col = c(COL,'black'), sort = TRUE)
+## Model selection: Dirac-delta > inverse-Gaussian for pop-level parameters
+### -- here Dirac-delta singular (no variance)
+
 ## Forest plot
-## indiv HR estimates (a lot of uncertainty), will overestimate variance (can't distinguish sampling error from statistical error)
-## hierarchical meta-analysis model that better estimates mean (standard is normal mean, normal variance, but here we don't use that)
+## individual HR estimates (a lot of uncertainty)
+## hierarchical meta-analysis model that better estimates mean
 
-# force inverse-Gaussian population distribution
-meta(AKDES,plot=FALSE,IC=NA)
-# since CoV isn't a selected feature, its underestimated here
+# Force inverse-Gaussian population distribution
+meta(AKDES, plot = FALSE, IC = NA)
+## Since CoV is not a selected feature, its underestimated here
 
-# comparing sub-groups (north vs south don't look significantly different)
-BUFFALO <- list(South=AKDES[1:3],North=AKDES[4:6])
+# Compare sub-groups (North vs South don't look significantly different)
+BUFFALO <- list(South = AKDES[1:3], North = AKDES[4:6])
 META <- meta(BUFFALO)
 
 META
 META['South/','/North',]  # ratio of mean southern HR to mean northern HR
-# not significantly diff (CIs overlap)
+# Not significantly different (CIs overlap)
 
-# more general meta-analytic regressions
-help("Log") ## log-transform to make estimates more normal for `metafor`
-# then you can use the 'metafor' R package
-Log(FITS, variable = "speed")
+# General meta-analytic regressions
+help("Log")  # log-transform to make estimates more normal for `metafor`
+## then you can use the 'metafor' R package
+
+# Speed example
+## log-transform speed estimates
+Log(FITS, variable = "speed")  # then you can use the 'metafor' R package
 
 
 #########################
-# Population density
+# POPULATION RANGE ESTIMATION
 #########################
 
-# this is a straight mean of the individual densities that doesn't model population variance
-help("mean.UD")
-# note the 'sample' argument for correct CIs
-# Ex. want to average summer and winter ranges or have indiv that switches btwn nests (estimate separately then average)
+# Mean of individual densities doesn't model population variance
+help("mean.UD")  # doesn't model population variance
+## note the 'sample' argument for correct CIs
+## e.g., averaging summer and winter ranges (estimate separately then average)
 
-# straight mean - for a population of 6 buffalo
-MEAN <- mean(AKDES,sample=FALSE)
+# Straight mean of HRs - for a population of 6 buffalo
+MEAN <- mean(AKDES, sample = FALSE)
 
-plot(buffalo,MEAN,col=COL,main="Mean African buffalo AKDE")
+plot(buffalo, MEAN, col = COL, main = "Mean African buffalo AKDE")
 
-# this is a population kernel density estimate (paper coming)
+# Population kernel density estimate (Anand et al., 2025, bioRxiv)
 help("pkde")  # population KDE: bandwidth optimization after choosing hierarchical model
 
-PKDE <- pkde(buffalo,AKDES)  # runs mean on fitted movement models (meta-analysis hierarchical model)
+# Estimate population range
+PKDE <- pkde(buffalo, AKDES, trace = FALSE)  # runs mean on fitted movement models
 ## does model selection across many parameters due to all the parameters for each indiv
 ## tests which correlations btwn parameters can be supported (outputs delta AIC)
 
-plot(buffalo,PKDE,col=COL,main="African buffalo PKDE")
+plot(buffalo, PKDE, col = COL, main = "African buffalo PKDE")
 ## much larger and much more uncertain due to low sampling (but at least doesn't bias too small)
 ## other methods tend to estimate too small or look at saturation curves of crude pop range estimate
 

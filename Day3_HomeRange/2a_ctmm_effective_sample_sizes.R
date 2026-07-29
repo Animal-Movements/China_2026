@@ -18,66 +18,95 @@
 # For autocorrelatd data, N<n. The effective sample size is less than the nominal sample size
 # If you had N IID data points, then you would get the same quality estimate
 
+######################
+# IMPORT AND VISUALIZE DATA
+######################
+
+# Load ctmm package
 library(ctmm)
 
-# load gazelle data
+# Import gazelle data
 data(gazelle)
 
-# select 18th gazelle
+# Select the 18th gazelle individual
 DATA <- gazelle[[18]]
 
-COL <- color(DATA,by='time')
-plot(DATA,col=COL)
+# Summarize the data
+summary(DATA)  # longitude and latitude not publicly shared
+
+# Let's visualize this individual's tracks
+COL <- color(DATA, by = 'time')  # color location points by time
+plot(DATA, col = COL)
 ## seasonal nomadic range crossing time
 ## weak site fidelity
 ## this particular indiv crosses range 2-3 times
 
-# guestimate model parameters
-GUESS <- ctmm.guess(DATA,interactive=FALSE)
+plot(DATA, col = COL, error = FALSE,  # can be hard to see points if error = TRUE
+     pch = 16, cex = 0.6)  # solid fill data points
 
-# select best model
-FIT <- ctmm.select(DATA,GUESS,trace=3)
-# save("FIT",file="gazelle.rda")
-load("Day3_HomeRange/Data/gazelle.rda")
 
-# summarize data
-summary(DATA)
-# note the sampling period
+#####################
+# MODEL SELECTION
+#####################
 
-# summarize model
-summary(FIT)
-# note the effective sample sizes (DOF for mean and area)
-## central location and size of area
-## here, approx. 2 effective data points for continuous time, but ~372 for RSF/SSFs
+# Guestimate model parameters
+GUESS <- ctmm.guess(DATA, interactive = FALSE)
+
+# Select best model
+FIT <- ctmm.select(DATA, GUESS, trace = 3)
+# save(FIT, file = "Data/gazelle.rda")
+
+load("Data/gazelle.rda")  # load saved model selection results
+
+
+#######################
+# EFFECTIVE SAMPLE SIZE
+#######################
+
+# Note the sampling period
+summary(DATA)[3]  # ~1 year
+
+# Absolute sample size
+nrow(DATA)
+
+# Summarize model
+summary(FIT)  # OUF anisotropic selected
+## Note the effective sample sizes (DOF[mean] and DOF[area])
+## DOF[mean] = central location ESS
+## DOF[area] = size of area ESS
+## here, approx. 2 effective data points for mean and area, but ~372 for SSFs
 
 # SI units converter
-help("%#%")
-1 %#% 'hr'
+1 %#% 'hr'  # how many seconds in an hour
 
-# approximate effective sample size
-(12.22181 %#% "month") / (5.741925 %#% "month")  # period of data/HR estimation (should be about the # of HR crossings)
+# Approximate effective sample size
+## period of data / HR estimation autocorrelation (should be about the # of HR crossings)
+(12.22181 %#% "month") / (5.741925 %#% "month")  # N_area = T / tau_p
 
-# compare to estimate
+# Compare to estimate
 summary(FIT)$DOF
 ## high bias (only 2 effective data points)
 
 # ctmm.fit/ctmm.select help file
 help("ctmm.fit")
-# note the methods argument
-# default is not max likelihood ML, need specific min effective sample sizes to work properly
+## Note the "methods" argument
+## Default method is not maximum likelihood (ML), 
+### need specific minimum effective sample sizes to work properly
 
-############################
-# For a target bias of O(5%)
-# ctmm.fit method="ML" requires DOF[area] >= 20 points       (CONVENTIONAL)
-# ctmm.fit method="pHREML" requires DOF[area] >= 4-5 points  (DEFAULT)
-# ctmm.boot method="pHREML" requires DOF[area] >= 2-3 points (SLOW)
-# but in all cases DOF[area] is an estimate
+# For a target bias of O(5%):
+## ctmm.fit method="ML" requires DOF[area] >= 20 points       (CONVENTIONAL)
+## ctmm.fit method="pHREML" requires DOF[area] >= 4-5 points  (DEFAULT)
+## ctmm.boot method="pHREML" requires DOF[area] >= 2-3 points (SLOW)
 
-help("ctmm.boot")
 
-# this will take a while
-BOOT <- ctmm.boot(DATA,FIT,cores=-1)
-## will take a long time (fitting as many times needed to reach threshold)
+####################
+# BOOTSTRAPPING
+####################
 
-# discuss daily, weekly, monthly, seasonal home-range estimates
-## timescale of estimates depends on specific species/pop and sampling
+help("ctmm.boot")  # bootstrapping function
+
+# This will take a long time if running on full data
+BOOT <- ctmm.boot(DATA, FIT, cores = -1)
+## fitting as many times as needed to reach threshold
+
+

@@ -86,7 +86,8 @@ plot(DATA, col = COL, main = "Pepper")
 
 # This dataset has problems
 dt.plot(DATA)  # diagnose sampling schedule
-## time intervals in data sorted by size, most of the sampling intervals are 2 hours, some greater, some around 1 hour
+## time intervals in data sorted by size, 
+## most of the sampling intervals are 2 hours, some greater, some around 1 hour
 
 ```
 
@@ -180,7 +181,7 @@ plot(DATA$timestamp, wAKDE$weights,
 
 # Zoom into the lower weights
 plot(DATA$timestamp, wAKDE$weights, ylim = c(0,0.005),
-     , xlab = "time", ylab = "weight", main = "Optimal Weights (zoomed in)")
+     xlab = "time", ylab = "weight", main = "Optimal Weights (zoomed in)")
 ## More weight ascribed to 2 hour data
 
 # Pepper's sampling interval
@@ -283,7 +284,7 @@ for(i in 1:length(buffalo))
 names(FITS) <- names(buffalo)
 save(FITS, file = "Data/buffalo.rda")
 
-# calculate AKDES on a consistent grid
+# Calculate AKDES on a consistent grid
 AKDES <- akde(buffalo, FITS, weights = TRUE)
 save(AKDES, file = "Data/buffalo_akdes.rda")
 
@@ -385,7 +386,7 @@ Perhaps, we could just average across the individual distributions? We could use
 
 ```{r pkde, eval = FALSE}
 
-# mean of individual densities doesn't model population variance
+# Mean of individual densities doesn't model population variance
 help("mean.UD")  # doesn't model population variance
 ## note the 'sample' argument for correct CIs
 
