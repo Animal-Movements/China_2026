@@ -148,7 +148,7 @@ pad_time_series <- function(df, interval = 2){
 
   # arrange columns
   full_data <- full_data %>%
-    dplyr::select(ID, time, x, y, z, temp, ODBA)
+    dplyr::select(ID, time, x, y, z, temp)
 
   return(full_data)
 }
@@ -158,15 +158,8 @@ data_regular <- data %>%
   group_split(ID) %>%
   map_dfr(pad_time_series)
 
-# select columns of interest
-data <- data_regular %>%
-  dplyr::select(ID, ODBA, time, temp)
-
 # check the data summary
-summary(data)
-
-# Clean things up
-rm(data_regular, diff_data)
+summary(data_regular)
 ```
 
 ### 2.3 Calculating ODBA
@@ -179,6 +172,12 @@ Let's calculate ODBA for our data - simply the sum of the absolute values of the
 ```{r ODBA, message=FALSE, warning=FALSE, echo=TRUE}
 ## use a single summary activity variable - ODBA
 data$ODBA <- rowSums(abs(data[, c("x", "y", "z")]))
+
+# Clean up dataframe and files
+data <- data %>%
+    dplyr::select(ID, time, temp, ODBA)
+# Remove files no longer necessary
+rm(data_regular, diff_data)
 ```
 
 ## 3. The MomentuHMM Workflow
