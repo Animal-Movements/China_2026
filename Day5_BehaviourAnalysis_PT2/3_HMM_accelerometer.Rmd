@@ -25,12 +25,13 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 # Learning Objectives
 By the end of this module you will be able to:
 
-1. Fit a HMM to accelerometer data
-2. Assess issues in the regular sampling interval of the data and correct as necessary
-3. Become comfortable with the [HMM] workflow
+1. Fit a Hidden Markov model to accelerometer data
+2. Assess irregulaties common to regularly sampled data
+3. Calculate *Overall Dynamic Body Acceleration*
+3. Fit multiple models to assess activity
 3. Visualize output
 
-**Packages used:** `momentuHMM`, `lubridate`, `tidyverse`
+**Packages used:** `momentuHMM`, `lubridate`, `tidyverse`, `dplyr`, `stringr`
 
 # Introduction
   >Many thanks to Dr. Dongmin Kim for assistance in developing this material
@@ -42,13 +43,14 @@ We've now learned the basics of fitting an HMM. We'll now take this one step fur
 rm(list=ls())
 
 # You may need to install these packages first
-#install.packages('momentuHMM', 'lubridate', 'tidyverse', `dplyr`)
+#install.packages('momentuHMM', 'lubridate', 'tidyverse', `dplyr`, `stringr`)
 
 # Load libraries
 library(momentuHMM)
 library(lubridate)
 library(tidyverse)
 library(dplyr)
+library(stringr)
 
 # Load functions for later
 source("utility_functions.R")
@@ -90,7 +92,7 @@ data <- data %>%
                                  tz = "UTC")) %>%
   dplyr::select(ID, time, x, y, z, temp)
 
-# Remove unecessary files
+# Remove unnecessary files
 rm(pacoca, juba)
 ```
 
@@ -109,24 +111,23 @@ diff_data[diff_data > 2]
 
 Inspection of the sampling intervals indicates that most observations were collected at the expected interval (i.e., 2 seconds). However, we see some irregularities. These are common with accelerometer tags due to processing delays or device issues. 
 
-Long gaps (1 day): We see that the logger stopped recording for periods lasting about 1 day (86,403 seconds). Because these long interruptions likely represent periods when no data were collected, we will split the data into gaps greater than 30 minutes using the split_at_gap() utility function that we loaded at start-up.
-
-Small gaps (3-12 seconds): There are also missing observations within an otherwise regular sampling schedule. 
+#### 2.1.1 Long gaps (1 day)
+We see that the logger stopped recording for periods lasting about 1 day (86,403 seconds). Because these long interruptions likely represent periods when no data were collected, we will split the data into gaps greater than 30 minutes using the split_at_gap() utility function that we loaded at start-up.
 
 ```{r utility gaps, message=FALSE, warning=FALSE, echo=TRUE}
 # Use function from utility_function.R to split data at gaps > 30 minutes
 data <- split_at_gap(data, max_gap = 30, shortest_track = 0)
 ```
 
-### 2.2 Regular Time Intervals using NAs 
-Let's fix the last temporal irregularity in the data (3-12 second gaps), since HMMs assume regular time intervals. Rather than splitting the tracks further, we retain these short interruptions and explicitly represent the missing observations by inserting rows with NA values (i.e., like bursts in the movement track where gaps are filled with NAs). 
+#### 2.1.2 Small gaps (3-12 seconds)
+Now let's fix the small gaps in the data (3-12 second gaps), since HMMs assume regular time intervals. Rather than splitting the tracks further, we retain these short interruptions and explicitly represent the missing observations by inserting rows with NA values (i.e., like bursts in the movement track where gaps are filled with NAs). 
 
-We will create a complete sequence of timestamps at the expected 2-second sampling interval and merge the observed data onto this regular time grid. Any missing observations remain as NA and can be accommodated by [momentuHMM](https://cran.r-project.org/web/packages/momentuHMM/index.html).
+We will create a complete sequence of timestamps at the expected 2-second sampling interval. Any missing observations remain as NA and can be accommodated by [momentuHMM](https://cran.r-project.org/web/packages/momentuHMM/index.html).
 
 ```{r fill NAs, message=FALSE, warning=FALSE, echo=TRUE}
 # Function to pad each split track to a regular 2-second time series
 pad_time_series <- function(df, interval = 2){
-  # create regular timestamp sequence
+  # Create a full (regular) time sequence for the entire tracking period (min and max)
   full_time <- data.frame(
     time = seq(
       from = min(df$time),
@@ -135,7 +136,8 @@ pad_time_series <- function(df, interval = 2){
     )
   )
 
-  # merge observations onto regular timeline
+  # Merge observations together.
+  # This will automatically put a NA in the time series where a record previously did not exist
   full_data <- left_join(
     full_time,
     df,
@@ -145,23 +147,19 @@ pad_time_series <- function(df, interval = 2){
   # restore ID for inserted NA rows
   full_data$ID <- unique(df$ID)
 
-  # arrange columns
-  full_data <- full_data %>%
-    dplyr::select(ID, time, x, y, z, temp)
-
   return(full_data)
 }
 
-# Apply padding to each split track
-data_regular <- data %>%
+# Apply padding to each track, split by the ID we created.
+data <- data %>%
   group_split(ID) %>%
   map_dfr(pad_time_series)
 
 # check the data summary
-summary(data_regular)
+summary(data)
 ```
 
-### 2.3 Calculating ODBA
+### 2.2 Calculate ODBA
 Unlike GPS data, activity data do not include location information such as coordinates (e.g., Easting/Northing or latitude/longitude). Instead, activity data capture movement using proxy variables. In our data, these activity data are labeled as 'x', 'y', and 'z', measuring motion along three dimensions (X, Y, and Z - surge, sway, and heave). These values are recorded every 2 seconds.
 
 These three measurements are often combined into a single summary metric called *Overall Dynamic Body Acceleration* or *ODBA*, representing the overall intensity of movement. ODBA is commonly used as an indicator of activity or energy expenditure. 
@@ -172,11 +170,28 @@ Let's calculate ODBA for our data - simply the sum of the absolute values of the
 ## use a single summary activity variable - ODBA
 data$ODBA <- rowSums(abs(data[, c("x", "y", "z")]))
 
-# Clean up dataframe and files
+# Clean dataframe and correct the ID field, removing the burst IDs
 data <- data %>%
-    dplyr::select(ID, time, temp, ODBA)
-# Remove files no longer necessary
-rm(data_regular, diff_data)
+  # Remove the old ID
+  mutate(ID = str_remove(ID, "-.*")) %>%
+  dplyr::select(ID, time, temp, ODBA)
+
+# CLean up unneeded objects
+rm(diff_data)
+
+# Plot
+plot.ODBA <- ggplot(data, aes(x = time, y = ODBA, color = ID)) +
+  geom_point(alpha = 0.5) +
+  facet_wrap(~ ID) +
+  theme_minimal() +
+  labs(
+    x = "Time",
+    y = "ODBA",
+    title = "ODBA over time by Individual"
+  )
+
+# Print to view the plot
+plot.ODBA
 ```
 
 ## 3. The MomentuHMM Workflow
@@ -196,7 +211,7 @@ data_hmm
 
 We are interested in two states, State 1 or *'Low Activity'* and State 2 or *'High Activity'*.  To get started, we need to specify two things: 
 
-1. Observation distributions - Each observed variable needs a probability distribution to define each activity state. ODBA is continuous and strictly positive (except for exact zeros), allowing us to once again use the gamma distribution.
+1. Observation distributions - Each observed variable needs a probability distribution to define each activity state. ODBA is continuous and strictly positive, allowing us to once again use the gamma distribution.
 
 2. Initial parameter values - The `fitHMM()` function uses numerical optimization to find maximum likelihood estimates. The optimization requires a starting point. For a gamma distribution, each state requires two parameters. As before, these are: (1) mean ($\bar{x}$) of the gamma and (2) standard deviation ($\sigma{x}$) of the gamma for each state.
 
@@ -236,8 +251,7 @@ Par0_2s <- list(
 )
 
 # Fit a 2-state HMM
-# Missing ODBA observations from the regularized time series remain as NA
-# and are handled internally by momentuHMM.
+# Missing ODBA observations from the regularized time series remain as NA and are handled internally by momentuHMM.
 hmm1 <- fitHMM(data_hmm, 
                nbStates = 2, 
                dist = dist, 
@@ -296,7 +310,7 @@ plotStationary(hmm2,
 This plot suggests that the maned wolves were more likely to be in state 2 (high activity) at high temperatures.
 
 ### 3.5 Model Comparison 
-We then used the function `AIC()` for model selection, comparing the model without the covariate versus the model with the temperature covariate.
+We then use the function `AIC()` for model selection, comparing the model without the covariate versus the model with the temperature covariate.
 
 ```{r AIC}
 # Compare models using AIC 
@@ -304,12 +318,12 @@ AIC(hmm1,
     hmm2)
 ```
 
-These results indicate that the model (model 2) with the temperature covariate has more statistical support. 
+These results indicate that model 2, inclusive of temperature, has more statistical support. 
 
 ---
 
 # Exercise: Apply to your own data
-If you have accelerometer data, try to apply these lesson materials to your own data.  Make sure you investigate the quality of your data closely and assess the percentage of time that your animal spends in one activity compared to another. 
+If you have accelerometer data, try to apply these lesson materials to your own data.  Make sure you investigate the quality of your data closely and assess the percentage of time that your animal spends in one activity compared to another. Otherwise, please study this lecture to increase your understanding of key concepts.
 
 ---
 
@@ -317,6 +331,14 @@ If you have accelerometer data, try to apply these lesson materials to your own 
 
 | Function | Package | Purpose |
 |---|---|---|
+| `parse_date_time()` | `lubridate` | Convert combined date/time strings to POSIXct timestamps |
+| `group_split()` | `dplyr` | Split data frame by ID into list of data frames |
+| `map_dfr()` | `purrr` | Apply padding function to each track and row‑bind results |
+| `str_remove()` | `stringr` | Remove burst suffix from ID field |
+| `prepData()` | `momentuHMM` | Prepare movement data for HMM fitting (compute steps, angles, covariates) |
+| `fitHMM()` | `momentuHMM` | Fit hidden Markov models to movement data |
+| `viterbi()` | `momentuHMM` | Decode most likely state sequence |
+| `plotStationary()` | `momentuHMM` | Plot stationary state probabilities vs covariates |
 
 ---
 

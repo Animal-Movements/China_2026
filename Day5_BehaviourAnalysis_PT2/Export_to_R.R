@@ -1,5 +1,8 @@
 # extract R code
 library(knitr)
+file.exists("01_environmental_annotation.Rmd")
+purl("01_environmental_annotation.Rmd")
+
 file.exists("2_HMMs.Rmd")
 purl("2_HMMs.Rmd")
 
