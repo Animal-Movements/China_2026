@@ -26,7 +26,8 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 By the end of this module you will be able to:
 
 1. Fit a HMM to accelerometer data
-2. Become comfortable with the Hmm workflow
+2. Assess issues in the regular sampling interval of the data and correct as necessary
+3. Become comfortable with the [HMM] workflow
 3. Visualize output
 
 **Packages used:** `momentuHMM`, `lubridate`, `tidyverse`
@@ -165,15 +166,15 @@ data <- data_regular %>%
 summary(data)
 
 # Clean things up
-rm(data_regular)
+rm(data_regular, diff_data)
 ```
 
 ### 2.3 Calculating ODBA
-Unlike GPS data, activity data do not include location information such as coordinates (e.g., Easting/Northing or latitude/longitude). Instead, activity data capture movement using proxy variables. In our data, these activity data are labeled as 'x', 'y', and 'z', measuring motion along three dimensions (X, Y, and Z - surge, sway, and heave). These values are recorded every 2 seconds and measure acceleration along the three body axes (X, Y, and Z; surge, sway, and heave).
+Unlike GPS data, activity data do not include location information such as coordinates (e.g., Easting/Northing or latitude/longitude). Instead, activity data capture movement using proxy variables. In our data, these activity data are labeled as 'x', 'y', and 'z', measuring motion along three dimensions (X, Y, and Z - surge, sway, and heave). These values are recorded every 2 seconds.
 
 These three measurements are often combined into a single summary metric called *Overall Dynamic Body Acceleration* or *ODBA*, representing the overall intensity of movement. ODBA is commonly used as an indicator of activity or energy expenditure. 
 
-Let's calculate ODBA for our data - the sum of the absolute values of the dynamic acceleration on each axis.
+Let's calculate ODBA for our data - simply the sum of the absolute values of the dynamic acceleration on each axis.
 
 ```{r ODBA, message=FALSE, warning=FALSE, echo=TRUE}
 ## use a single summary activity variable - ODBA
@@ -184,12 +185,11 @@ data$ODBA <- rowSums(abs(data[, c("x", "y", "z")]))
 The data are now ready to be used in [momentuHMM](https://cran.r-project.org/web/packages/momentuHMM/index.html), following a similar set of steps that we are now familiar with, inclusive of the covariate temperature.  
 
 ### 3.1 Data preparation
-Note that we do not handle the location data like the GPS example. With GPS data, we derive step lengths and turning angles from the locations. Here, we set the 'coordNames' argument to NULL within the function 'prepData'. 
+Note that we do not handle the location data like the GPS example. Here, we set the 'coordNames' argument to NULL within the function 'prepData' since location data are not included with the accelerometer.
 
 ```{r prep-data1, message=FALSE, warning=FALSE, echo=TRUE}
 # Prepare data for HMM 
 data_hmm <- prepData(data, coordNames = NULL, covNames = "temp")
-
 data_hmm
 ```
 
