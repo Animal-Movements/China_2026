@@ -42,23 +42,22 @@ We've now learned the basics of fitting an HMM. We'll now take this one step fur
 rm(list=ls())
 
 # You may need to install these packages first
-#install.packages('momentuHMM', 'lubridate', 'tidyverse', `dplyr`, `adehabitatLT)
+#install.packages('momentuHMM', 'lubridate', 'tidyverse', `dplyr`)
 
 # Load libraries
 library(momentuHMM)
 library(lubridate)
 library(tidyverse)
 library(dplyr)
-library(adehabitatLT)
 
 # Load functions for later
 source("utility_functions.R")
 ```
 
 ## 1. Load Data
-The accelerometer data used in this module are saved in a proprietary format (i.e., .binv2) from the manufacterer (Vectronics Aerospace). In order to load the data into [R](https://cran.r-project.org/), I first used the manufacturer's software to convert them to a R-readable format (i.e., .csv). 
+The accelerometer data used in this module are saved in a proprietary format (i.e., .binv2) from the manufacturer (Vectronics Aerospace). To load the data into [R](https://cran.r-project.org/), I first used the manufacturer's software to convert them into an R-readable format (i.e., .csv). 
 
-For the purposes of this demonstration, we only use the accelerometer data spanning from August 17, 2022 to December 31, 2022 for two individuals: ID 32866-Juba and ID 32733-Pacoca. The Hz of the raw data is 0.5 Hz, which means the data contains one accelerometer measurment every 2 seconds. Accelerometer data is different than GPS data, with activity data provided at much finer temporal scales in three axes.
+For this demonstration, we use only the accelerometer data from August 17, 2022 to December 31, 2022 for two individuals: ID 32866-Juba and ID 32733-Pacoca. The Hz of the raw data is 0.5 Hz, which means the data contains one accelerometer measurement every 2 seconds. Accelerometer data is different than GPS data, with activity data provided at much finer temporal scales in three axes.
 
 ```{r load-data, message=FALSE, warning=FALSE, echo=TRUE}
 # Load data 
@@ -96,7 +95,7 @@ rm(pacoca, juba)
 ```
 
 ### 2.1 Dealing with Data Gaps
-The base time interval between observations is 2 seconds (0.5 Hz) in this study. We still need confirm that any missing observations were handled correctly.   
+The base time interval between observations is 2 seconds (0.5 Hz) in this study. We still need to confirm that any missing observations were handled correctly.   
 
 ```{r diff-time, message=FALSE, warning=FALSE, echo=TRUE}
 # Table of time intervals in data
@@ -120,7 +119,7 @@ data <- split_at_gap(data, max_gap = 30, shortest_track = 0)
 ```
 
 ### 2.2 Regular Time Intervals using NAs 
-Let's fix the last temporal irregularity in the data (3-12 seconds gaps), since HMMs assume regular time intervals. Rather than splitting the tracks further, we retain these short interruptions and explicitly represent the missing observations by inserting rows with NA values (i.e., like bursts in the movement track where gaps are filled with NAs). 
+Let's fix the last temporal irregularity in the data (3-12 second gaps), since HMMs assume regular time intervals. Rather than splitting the tracks further, we retain these short interruptions and explicitly represent the missing observations by inserting rows with NA values (i.e., like bursts in the movement track where gaps are filled with NAs). 
 
 We will create a complete sequence of timestamps at the expected 2-second sampling interval and merge the observed data onto this regular time grid. Any missing observations remain as NA and can be accommodated by [momentuHMM](https://cran.r-project.org/web/packages/momentuHMM/index.html).
 
@@ -193,13 +192,13 @@ data_hmm
 ```
 
 ### 3.2 Model Fitting 
-[MomentuHMM](https://cran.r-project.org/web/packages/momentuHMM/index.html) is quite flexible and can handle multiple datastreams, inclusive of GPS data for coarse-scale movements. Here, we will focus intently on the activity data only, using the function `fitHMM()` to fit models like we used previously.
+[MomentuHMM](https://cran.r-project.org/web/packages/momentuHMM/index.html) is quite flexible and can handle multiple datastreams, including GPS data for coarse-scale movements. Here, we will focus intently on the activity data only, using the function `fitHMM()` to fit models as we used previously.
 
 We are interested in two states, State 1 or *'Low Activity'* and State 2 or *'High Activity'*.  To get started, we need to specify two things: 
 
-1. Observation distributions - Each observed variable needs a probability distribution to define each activity state. ODBA is continuous and strictly positive (except for exact zeros), allowing us to once again use the gamma distribution. Since many zeros exist in our data, we need to use a zero-inflated gamma distribution and account for zero mass as we did in our previous analysis. 
+1. Observation distributions - Each observed variable needs a probability distribution to define each activity state. ODBA is continuous and strictly positive (except for exact zeros), allowing us to once again use the gamma distribution.
 
-2. Initial parameter values - The `fitHMM()` function uses numerical optimization to find maximum likelihood estimates. The optimization requires a starting point. For a gamma distribution with zero-inflation, each state requires three parameters. As before, these are: (1) mean ($\bar{x}$) of the gamma, (2) standard deviation ($\sigma{x}$) of the gamma, and (3) probability of exact zero (i.e., zero-mass) for each state.
+2. Initial parameter values - The `fitHMM()` function uses numerical optimization to find maximum likelihood estimates. The optimization requires a starting point. For a gamma distribution, each state requires two parameters. As before, these are: (1) mean ($\bar{x}$) of the gamma and (2) standard deviation ($\sigma{x}$) of the gamma for each state.
 
 Please once again refer to the [moveHMM](https://cran.r-project.org/web/packages/moveHMM/index.html) guide on selecting initial parameter values, as this can be very tricky: [A short guide to choosing initial parameter values for the estimation in moveHMM](https://cran.r-project.org/web/packages/moveHMM/vignettes/moveHMM-starting-values.pdf).
 
@@ -272,7 +271,7 @@ ggplot(data_hmm, aes(x = time, y = ODBA, col = state_2st, group = ID))+
 ```
 
 ### 3.4 Model Formulation: Covariates
-Now, following the same structure as previously, we will include the temperature measurements collected by the tag at each time of observation. Here, we aim to answer if temperature impacts maned wolf activity patterns. To do so, we'll estimate the effect of temperature on the transition probabilities. 
+Now, following the same structure as previously, we will include the temperature measurements collected by the tag at each time of observation. Here, we aim to answer whether temperature impacts maned wolf activity patterns. To do so, we'll estimate the effect of temperature on the transition probabilities. 
 
 ```{r fit-hmm2, message=FALSE, warning=FALSE, echo=TRUE}
 # Fit 2-state HMM with temperature covariate 
@@ -286,7 +285,7 @@ hmm2 <- fitHMM(data_hmm,
 hmm2
 ```
 
-Visualizae the stationary state probabilities as a function of the temperature covariate. 
+Visualize the stationary state probabilities as a function of the temperature covariate. 
 
 ```{r look-hmm2}
 # plot stationary state probabilities as functions of temperature 
@@ -294,10 +293,10 @@ plotStationary(hmm2,
                plotCI = TRUE)
 ```
 
-Thes plot suggests that the maned wolves were more likely to be in state 2 (high activity) at low temperatures and in state 1 (low activity) at high temperatures.
+This plot suggests that the maned wolves were more likely to be in state 2 (high activity) at high temperatures.
 
 ### 3.5 Model Comparison 
-We then use the function `AIC()` for model selection, comparing the model without the covariate versus model with the temperature covariate.
+We then used the function `AIC()` for model selection, comparing the model without the covariate versus the model with the temperature covariate.
 
 ```{r AIC}
 # Compare models using AIC 
@@ -310,7 +309,7 @@ These results indicate that the model (model 2) with the temperature covariate h
 ---
 
 # Exercise: Apply to your own data
-If you have accelerometer data, try to apply this lesson materials to your own data.  Make sure you investigate the quality of your data closely and assess the percentage of time that your animal spends in one activity compared to another. 
+If you have accelerometer data, try to apply these lesson materials to your own data.  Make sure you investigate the quality of your data closely and assess the percentage of time that your animal spends in one activity compared to another. 
 
 ---
 
@@ -321,4 +320,4 @@ If you have accelerometer data, try to apply this lesson materials to your own d
 
 ---
 
-*Next:* **Day 5 — CTMM Error** — Now, we'll return to CTMM and discuss error inherent in your positional data.
+*Next:* **Day 5 — CTMM Error** — Now, we'll return to CTMM and discuss the errors inherent in your positional data.
