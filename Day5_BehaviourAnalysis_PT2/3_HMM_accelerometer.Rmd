@@ -201,9 +201,14 @@ The data are now ready to be used in [momentuHMM](https://cran.r-project.org/web
 Note that we do not handle the location data like the GPS example. Here, we set the 'coordNames' argument to NULL within the function 'prepData' since location data are not included with the accelerometer.
 
 ```{r prep-data1, message=FALSE, warning=FALSE, echo=TRUE}
+# Create a subset for analysis .... for demonstration purposes
+data <- data %>%
+  group_by(ID) %>%
+  slice_tail(prop = 0.20)
+
 # Prepare data for HMM 
 data_hmm <- prepData(data, coordNames = NULL, covNames = "temp")
-data_hmm
+head(data_hmm)
 ```
 
 ### 3.2 Model Fitting 
