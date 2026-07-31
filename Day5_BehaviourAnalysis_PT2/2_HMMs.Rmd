@@ -440,8 +440,8 @@ AIC(WB.null,
 WB.tod.2state
 
 # Plot the results
-plot(WB.tod.2state,
-     ask = FALSE)
+# plot(WB.tod.2state,
+#      ask = FALSE)
 
 # Plot an individual
 plot(WB.tod.2state,
