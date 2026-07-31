@@ -51,6 +51,9 @@ library(lubridate)
 library(tidyverse)
 library(dplyr)
 library(stringr)
+
+# Load functions for later
+source("utility_functions.R")
 ```
 
 ## 1. Load Data
@@ -108,7 +111,18 @@ diff_data[diff_data > 2]
 
 Inspection of the sampling intervals indicates that most observations were collected at the expected interval (i.e., 2 seconds). However, we see some irregularities. These are common with accelerometer tags due to processing delays or device issues. 
 
-To correct for these issues, we can create a function that generates a sequence that is the same length as our dataset. This allows us to automatically fill in the dataset with NAs. 
+#### 2.1.1 Long gaps (1 day)
+We see that the logger stopped recording for periods lasting about 1 day (86,403 seconds). Because these long interruptions likely represent periods when no data were collected, we will split the data into gaps greater than 30 minutes using the split_at_gap() utility function that we loaded at start-up.
+
+```{r utility gaps, message=FALSE, warning=FALSE, echo=TRUE}
+# Use function from utility_function.R to split data at gaps > 30 minutes
+data <- split_at_gap(data, max_gap = 30, shortest_track = 0)
+```
+
+#### 2.1.2 Small gaps (3-12 seconds)
+Now let's fix the small gaps in the data (3-12 second gaps), since HMMs assume regular time intervals. Rather than splitting the tracks further, we retain these short interruptions and explicitly represent the missing observations by inserting rows with NA values (i.e., like bursts in the movement track where gaps are filled with NAs). 
+
+We will create a complete sequence of timestamps at the expected 2-second sampling interval. Any missing observations remain as NA and can be accommodated by [momentuHMM](https://cran.r-project.org/web/packages/momentuHMM/index.html).
 
 ```{r fill NAs, message=FALSE, warning=FALSE, echo=TRUE}
 # Function to pad each split track to a regular 2-second time series
@@ -156,9 +170,14 @@ Let's calculate ODBA for our data - simply the sum of the absolute values of the
 ## use a single summary activity variable - ODBA
 data$ODBA <- rowSums(abs(data[, c("x", "y", "z")]))
 
-# Select the fields of interest
+# Clean dataframe and correct the ID field, removing the burst IDs
 data <- data %>%
+  # Remove the old ID
+  mutate(ID = str_remove(ID, "-.*")) %>%
   dplyr::select(ID, time, temp, ODBA)
+
+# CLean up unneeded objects
+rm(diff_data)
 
 # Plot
 plot.ODBA <- ggplot(data, aes(x = time, y = ODBA, color = ID)) +
@@ -173,9 +192,6 @@ plot.ODBA <- ggplot(data, aes(x = time, y = ODBA, color = ID)) +
 
 # Print to view the plot
 plot.ODBA
-
-# Clean up unneeded objects
-rm(diff_data)
 ```
 
 ## 3. The MomentuHMM Workflow
@@ -185,34 +201,14 @@ The data are now ready to be used in [momentuHMM](https://cran.r-project.org/web
 Note that we do not handle the location data like the GPS example. Here, we set the 'coordNames' argument to NULL within the function 'prepData' since location data are not included with the accelerometer.
 
 ```{r prep-data1, message=FALSE, warning=FALSE, echo=TRUE}
-# To have this run quicker, let's analyze 10% of the data, selected from the tail of the dataset
+# Create a subset for analysis .... for demonstration purposes
 data <- data %>%
   group_by(ID) %>%
-  slice_tail(prop = 0.10)
-
-# Summarize dataset being used
-# data %>%
-#   group_by(ID) %>%
-#   summarise(n_na = sum(is.na(ODBA)),
-#             n_records = n(),
-#             Prop = n_na / n_records)
-
-# Plot
-# plot.ODBA <- ggplot(data, aes(x = time, y = ODBA, color = ID)) +
-#   geom_point(alpha = 0.5) +
-#   facet_wrap(~ ID) +
-#   theme_minimal() +
-#   labs(
-#     x = "Time",
-#     y = "ODBA",
-#     title = "ODBA over time by Individual"
-#   )
-# 
-# # Print to view the plot
-# plot.ODBA
+  slice_tail(prop = 0.20)
 
 # Prepare data for HMM 
 data_hmm <- prepData(data, coordNames = NULL, covNames = "temp")
+head(data_hmm)
 ```
 
 ### 3.2 Model Fitting 
