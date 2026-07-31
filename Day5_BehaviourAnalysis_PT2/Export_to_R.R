@@ -9,5 +9,5 @@ purl("2_HMMs.Rmd")
 file.exists("3_HMM_accelerometer.Rmd")
 purl("3_HMM_accelerometer.Rmd")
 
-file.exists("3_HMM_accelerometer_b.Rmd")
-purl("3_HMM_accelerometer_b.Rmd")
+file.exists("3_HMM_accelerometer_internal.Rmd")
+purl("3_HMM_accelerometer_internal.Rmd")
