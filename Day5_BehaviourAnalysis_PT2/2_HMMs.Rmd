@@ -136,7 +136,7 @@ The [MomentuHMM](https://cran.r-project.org/web/packages/momentuHMM/index.html) 
 
 ```{r Move Summary, message=FALSE, warning=FALSE, echo=TRUE}
 # Summarize the object
-#summary(WB.move)
+summary(WB.move)
 
 # What are the column headings included in this move object?
 names(WB.move)
