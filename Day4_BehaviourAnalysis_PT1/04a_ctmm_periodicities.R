@@ -6,8 +6,6 @@
 # Load ctmm package
 library(ctmm)
 
-vignette("variogram")
-
 # Import maned wolf data
 data(wolf)
 
@@ -86,10 +84,10 @@ GUESS <- ctmm.guess(DATA, variogram = SVF, CTMM = PROTO, interactive = FALSE)
 # Periodic movement model selection
 PFITS <- ctmm.select(DATA, GUESS, verbose = TRUE, trace = 2)  # return all models
 ## checks for harmonics
-# save(PFITS, file = "Day4_BehaviourAnalysis_PT1/Data/wolf_periodic.rda")
+# save(PFITS, file = "Data/wolf_periodic.rda")
 
 # Load saved model selection results
-load(file = "Day4_BehaviourAnalysis_PT1/Data/wolf_periodic.rda")
+load(file = "Data/wolf_periodic.rda")
 
 # Model selection results
 summary(PFITS)
