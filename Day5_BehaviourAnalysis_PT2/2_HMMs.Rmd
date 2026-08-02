@@ -160,7 +160,6 @@ plot(WB.move[WB.move$ID == "Kikaya",],
 #          na.rm = TRUE)
 # hist(WB.move$angle)
 ```
-
 ## 3. Fitting a Hidden Markov Model
 To begin modeling, we need to set starting values for all relevant estimable parameters. This is arguably the most challenging aspect of fitting a HMM. [MomentuHMM](https://cran.r-project.org/web/packages/momentuHMM/index.html) includes a number of functions, including `GetPar`, `getPar0`, `getParDM`, and `checkPar0`, to help with specification of starting values. Use the `help()` function for tips and tricks. A short guide is also provided with the [moveHMM](https://cran.r-project.org/web/packages/moveHMM/index.html) package that provides a series of recommendations to select initial parameter values. See [A short guide to choosing initial parameter values for the estimation in moveHMM](https://cran.r-project.org/web/packages/moveHMM/vignettes/moveHMM-starting-values.pdf), for more information. [HmmTMB](https://cran.r-project.org/web/packages/hmmTMB/index.html) also contains a function (i.e., `suggest_initial()`) that can help in providing or suggesting initial starting values based on your data. Investigating the movements of your animals and being clear about the behaviors of interest (as opposed to simply data mining) will help with informing what these starting values should be. 
 
@@ -426,9 +425,10 @@ WB.tod.3state
 ```
 
 ## 5. Model Comparison
-Now we'll use AIC to evaluate which model is best fit to the data. Results indicate that the 2-state time of day model has the best statistical support. The temperature model has the worst statistical support, ranking lower than our NULL model. Other models, with more relevant predictors are likely to have greater support, but this at least provides a starting point for how to construct these types of models. 
+Now we'll use AIC to evaluate which model is best fit to the data. Results indicate that the 3-state time of day model has the best statistical support. The temperature model has the worst statistical support of models containing a covariate. Other models, with more relevant predictors, could have better statistical support and are worthy of investigation. 
 
-When we plot the results, we are able to investigate the steplength and turning angle distributions as we did previously. We can also examine a plot of the trajectory, with colors coinciding with behaviors identified. We can also examine how the state probabilities change in relation to time of day. Our results indicate a very early transition from state 1 (resident/encamped) to state 2 (exploratory) and then back from state 2 to state 1. 
+When we plot the results, we are able to investigate the steplength and turning angle distributions as we did previously. We can also examine a plot of the trajectory, with colors coinciding with behaviors identified. We could also examine how the state probabilities change in relation to time of day.  
+
 ```{r Model Comparison, message=FALSE, warning=FALSE, echo=TRUE}
 # Which of these two models is a better fit to the data?
 # Results indicate that the 2 state cosinor model is the best
@@ -437,25 +437,28 @@ AIC(WB.null,
     WB.tod.2state,
     WB.tod.3state)
 
-WB.tod.2state
+WB.tod.3state
 
 # Plot the results
-# plot(WB.tod.2state,
+# plot(WB.tod.3state,
 #      ask = FALSE)
 
 # Plot an individual
-plot(WB.tod.2state,
+plot(WB.tod.3state,
       animals = "Kiranto",
       ask = FALSE)
 ```
 
 ## 6. Further Applications
-Similar to activities demonstrated above, we could encode the behavioral states identified to our original dataframe to our best fitting model. By doing so, we would be able to calculate how much time animals remain in particular behavioral states, compare differences in animal behavior between study areas, or identify areas that are associated with certain behavioral states. This could be particularly helpful if your goal was to separate the data to create seasonal home range where animals are mostly resident. 
+While the 3-state model was selected as the best model, it is unclear what this third state is? As a result and even though this model was selected based on AIC, adding this additional is of limited value.
 
-As an example, let's filter the data by state behaviors and plot each behavior separately. We'll follow the same procedure that we demonstrated above. The output shows some clear areas where one of the wildebeest (Sawani) spent large periods in a encamped state, but there are quite a few points where these areas overlap. This kind of approach could reasonably be explored for your data/other species.
+Similar to activities demonstrated above, we will encode the behavioral states of the 2-state model with the covariate for time of day to our original dataframe. By doing so, we can calculate how much time animals remain in particular behavioral states, compare differences in animal behavior between study areas, or identify areas that are associated with certain behavioral states. This could be particularly helpful if your goal was to separate the data to create seasonal home ranges where animals are mostly in a residential movement state. 
+
+Here, we filter the data by state behaviors and plot each behavior separately. We'll follow the same procedure that we demonstrated above. The output shows some clear areas where one of the wildebeest (Sawani) spent large periods in a encamped state, but there are quite a few points where these areas overlap. This kind of approach could be explored for your data/other species.
 
 ```{r Applications, message=FALSE, warning=FALSE, echo=TRUE}
 # Encode the behaviors using the Viterbi algorithm
+# NOTE that we are mapping the 2 state model here
 WB.tod.states <- viterbi(WB.tod.2state)
 
 # add to the dataset and remove some extra fiels
