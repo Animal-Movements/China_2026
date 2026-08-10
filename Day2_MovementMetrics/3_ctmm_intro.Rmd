@@ -83,10 +83,14 @@ browseURL("https://www.moveapps.org/apps/browser?q=ctmm")
 
 ## Data Preparation
 
-```{r load_packages}
+```{r load_packages, eval = FALSE}
 
 # Install the latest version of ctmm from GitHub
-# remotes::install_github("ctmm-initiative/ctmm")
+remotes::install_github("ctmm-initiative/ctmm")
+
+```
+
+```{r load_packages2}
 
 # Load the ctmm package
 library(ctmm)
@@ -382,7 +386,7 @@ Less common in movement ecology are spectrograms. These are visualized as a heat
 
 ## Model Selection
 
-In this section, we will first “ eyeball fit” models to the variograms and then perform model selection across various continuous-time models. This "eyeball fit" is not a rigorous statistical fitting, but a good way of choosing candidate movement models and guessing at their parameters. The variogram-fit parameter guess estimates will then be fed into maximum likelihood estimation, which requires good initial guesses for non-linear optimization.
+In this section, we will first “eyeball fit” models to the variograms and then perform model selection across various continuous-time models. This "eyeball fit" is not a rigorous statistical fitting, but a good way of choosing candidate movement models and guessing at their parameters. The variogram-fit parameter guess estimates will then be fed into maximum likelihood estimation, which requires good initial guesses for non-linear optimization.
 
 First, let's get good initial parameter values for our autocorrelation model:
 
@@ -568,8 +572,20 @@ Estimates (est) and Confidence Intervals (CIs):
 
 ```{r ctmm.select_OUF2}
 
-# 95% location autocorrelation remaining
-exp(-3)
+# How many times does Cilla need to cross their home range to reach 5% autocorrelation?
+seq <- exp(seq(0, -4, by = -0.1))
+timescale <- seq(0, 4, by = 0.1)
+plot(x = timescale, y = seq, type = "l",
+     xlab = "Home range crossings", ylab = "Position autocorrelation remaining (%)",
+     main = expression(bold(paste("Decay in position autocorrelation (", 
+                             tau[p], ")", sep = ""))))
+points(x = seq(1:3), y = exp(c(-1:-3)), pch = 16)
+abline(h = 0.05, lty = 2, col = "red2")
+arrows(x0 = 3, x1 = 3, y0 = 0.3, y1 = 0.12, col = "red2", length = 0.18, lwd = 2)
+text(x = 0.5, y = 0.1, labels = "5% autocorrelation", cex = 0.9, col = "red2")
+
+# 5% location autocorrelation remaining
+exp(-3)  # about 3 home range crossings
 summary(FITS[[1]])$CI[2,] * 3  # position autocorrelation estimate: 7.504067
 ## position autocorrelation disappears in ~22.5 days
 
