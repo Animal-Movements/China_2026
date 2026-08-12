@@ -262,7 +262,7 @@ plot(DATA, CTMM = UD_period)
 
 ```
 
-Note that there is very little change in the home range estimate in this case. It would have been difficult to identify the daily patterns in space use without checking the periodogram, as they are not obvious in the raw tracking data. Péron et al. (2016) determined that all 8 individual maned wolves in the full data set patrol their home ranges along daily-repeated routes, a pattern that was otherwise masked by aperiodic background noise.
+Note that there is very little change in the home range estimate in this case. It would have been difficult to identify the daily patterns in space use without checking the periodogram, as they are not obvious in the raw tracking data. Péron et al. (2016) determined that all 8 individual maned wolves in the full data set patrol their home ranges along daily-repeated routes, a pattern that was otherwise masked by aperiodic stochastic movement.
 
 ---
 

@@ -37,6 +37,8 @@ By the end of this module you will be able to:
 
 ## Background
 
+Often, a core reason for tracking animals is to attempt to link individual behavior with higher-level ecological processes. This holds especially true for studying intraspecific and interspecific interactions, from which we can gain a better understanding of processes such as disease transmission dynamics, mating, predator-prey dynamics, and social interactions, among others. Many of these ecological phenomena are governed by how the movement behavior of individuals translates to encounter rates between individuals. We can extend encounter theory to animal tracking and movement modeling in particular, by studying the spatiotemporal relationships between the animals we track. To better examine these relationships, we can model the overlap in space use, as well as spatiotemporal overlap in movement, from which we obtain specific metrics that describe the probability for encounters, which can give rise to interactions.
+
 In this module, we will cover the following methods that can be used for studying interactions between individuals:
 
 * Home-range overlap
@@ -110,6 +112,12 @@ overlap(akde(list(buffalo$Pepper, buffalo$Queen), list(FITS$Pepper, FITS$Queen))
 # All overlaps
 OVER
 
+```
+
+The overlap function returns an object of class `overlap`, which is a list with elements `DOF` and `CI`. The `DOF` slot contains information on the degrees of freedom of each estimated overlap value, whereas the `CI` slot contains the estimated overlap values and their confidence intervals. Because the Bhattacharyya coefficient is a symmetric measure of overlap (ranging from 0-1), the resulting matrix is also symmetric. To extract overlap values for specific pairs, we can easily pull out of the overlap object either by row/column names, or by their numerical indices. To extract the matrix of the point estimates, subset to the `est` slot within `CI`.
+
+```{r HR_overlap5}
+
 # Pairwise confidence intervals (CIs) 
 OVER$CI["Pepper","Toni",]
 OVER$CI["Queen","Toni",]
@@ -125,7 +133,9 @@ OVER$CI[,,"est"]
 
 *Where encounters are expected to take place?* 
 
-Much of the research in encounter theory has focused on how animal movement relates to encounter rates (*more to come*), leaving a research gap for how animal movement relates to the locations where encounters between individuals may occur. In this section, we will calculate the **conditional distribution of encounters (CDE)** to estimate the areas where animals are likely to encounter each other (while assuming that individuals are moving independently when not encountering each other). This method describes the long-term encounter location probabilities for movement that occurs within home ranges (see [Noonan et al. (2021)](https://doi.org/10.1111/2041-210X.13597)), so that we can determine where we expect majority of encounters to take place.
+Much of the research in encounter theory has focused on how animal movement relates to encounter rates (*more to come*), leaving a research gap for how animal movement relates to the locations where encounters between individuals may occur. In this section, we will calculate the **conditional distribution of encounters (CDE)** to estimate the areas where animals are likely to encounter each other (while assuming that individuals are moving independently when not encountering each other). 
+
+While home-range overlap is a single number that describes the potential for interactions to occur, the CDE method describes the long-term encounter location probabilities for movement that occurs within home ranges (see [Noonan et al. (2021)](https://doi.org/10.1111/2041-210X.13597)), so that we can determine where we expect majority of encounters to take place. This is presented as a spatially-defined probability density function (PDF), similar to what we calculate for a home range.
 
 ```{r CDE, eval = FALSE}
 
@@ -155,13 +165,13 @@ plot(buffalo[c("Pepper", "Queen")], UD = CDE,
 
 ```
 
-Note how the CDE corresponds with areas where the individual home ranges overlap.
+Note how the CDE corresponds with areas where the individual home ranges overlap. This makes sense, because individuals are most likely to encounter each other in the spaces that they share. We caution that any bias in the home-range estimates is propagated to the estimated CDE, because the CDE is estimated directly from the home-ranges areas.
 
 ## Pairwise Metrics
 
-As mentioned above, we can use pairwise metrics to investigate whether individual animals are attracted to, or avoid, one another. There are several different functions available in `ctmm` to calculate relationships between individuals and their movement. In this section, we will discuss pairwise separation distances and proximity ratio.
+As mentioned above, we can use pairwise metrics to investigate whether individual animals are attracted to, or avoid, one another. There are several different functions available in `ctmm` to calculate spatiotemporal relationships between individuals and their movement. In this section, we will discuss pairwise separation distances and proximity ratio.
 
-```{r distance, eval = FALSE}
+```{r distances, eval = FALSE}
 
 # Metrics that take time into account (paper coming)
 help("proximity")  # ratio to determine if pairwise proximity differs from expectation
@@ -173,26 +183,52 @@ help("midpoint")  # predict the midpoints between pairwise locations
 
 ### Pairwise Distance
 
-```{r distance2}
+We can use the `distances` function to calculate the **pairwise separation distances**, the distance between two individuals at any given time (instantaneous distances). This does not necessarily have to be at timestamps where both individuals have known recorded locations. The distances will be calculated at all timestamps across the pair of individuals.
 
-# Let's use Cilla and Mvubu as an example
+Let's use Cilla and Mvubu as an example.
+
+```{r distances2}
+
+# Cilla and Mvubu telemetry data
 plot(list(buffalo$Cilla, buffalo$Mvubu), col = c("red2", "blue"))
 ## red = Cilla, blue = Mvubu
 
+```
+
+We can see substantial overlap between these two individuals, so we know they share the same space, but we do not know to what extent they tend to share the same space at the same time. The overlap estimates described above provide no information on spatiotemporal overlap, so we can instead calculate pairwise separation distances. This `distances` output contains the estimated separation distances, the confidence intervals on the estimates, and the timestamps.
+
+```{r distances3}
+
 # Pairwise separation distances
 DISTS <- distances(buffalo[c("Cilla","Mvubu")], FITS[c("Cilla","Mvubu")])
-## predicts distance btwn 2 indivs at given time, might have location
+## predicts distance btwn 2 individuals at given time
+
+# First 6 entries
+head(DISTS)  # dataframe with estimates and CIs at all timestamps
+## Includes estimate of potential encounter events
 
 # Visualize the separation distances
 plot(DISTS$est ~ DISTS$timestamp, type = "l", col = "#5e548e",
      xlab = "Time", ylab = "Separation Distance (m)",
      main = "Cilla-Mvubu Pairwise Separation Distances")
 
+```
+
+Although the average separation distance across their sampling period is about 3577 m (~3.6 km), we can identify three distinct periods where Cilla and Mvubu were extremely close to one another, versus four periods where they drifted apart.
+
+```{r distances4}
+
 # Internal plotting function [IN DEVELOPMENT]
 ctmm:::ts.plot(DISTS)  # work in progress (not yet an exported function in ctmm)
 
+```
+
+Separation distances can provide useful descriptions of the behaviour of pairs of animals, but how do we know if these distances meaningful? Can these distances provide insight into Cilla and Mvubu’s relationship? These distances could mean that they are actively staying close to one another or avoiding one another, however, unless we compare these results to a null model, we cannot make conclusions about their behavior. These observed separation distances could very well be the result of independent movement. To address these questions, we can generate a null model for independent motion via simulation (see `help("simulate")`).
+
+```{r distances5}
+
 # What would totally independent motion look like?
-## Simulate independent motion
+## Simulate independent motion (at same timestamps, without the original data)
 cilla_sim <- simulate(FITS$Cilla, t = buffalo$Cilla$t)
 mvubu_sim <- simulate(FITS$Mvubu, t = buffalo$Mvubu$t)
 
@@ -201,7 +237,7 @@ sim_dists <- distances(list(cilla_sim, mvubu_sim), FITS[c("Cilla","Mvubu")])
 
 ```
 
-```{r distance3, fig.height = 7, fig.width = 8}
+```{r distances6, fig.height = 7, fig.width = 8}
 
 # Plot the data
 par(mfrow = c(2,2))  # plot in 2x2 grid
@@ -226,7 +262,19 @@ plot(sim_dists$est ~ sim_dists$timestamp, type = "l", col = "#5e548e",
 
 ```
 
+The difference between the resulting separation distances suggests that Cilla and Mvubu are closer together at certain times of year than we would expect from random movement. It is not clear whether these were true encounters, though they did maintain close proximity to each other. 
+
+*But* this conclusion is based off of only one simulated track, which is only one of an infinitely large number of potential paths the animal could have taken. Ideally, you would repeat this process many, many times to obtain an average. We can do this by calculating the pairwise proximity ratio.
+
 ### Pairwise Proximity Ratio
+
+The `proximity` function outputs an estimated ratio with confidence intervals. For proximity ratio values:
+
+* **<1** — The two individuals are **closer** on average than expected from independent movement
+* **1** — There is no particular relationship between the movement of individuals (consistent with independent movement)
+* **>1** — The two individuals are **farther** from each other on average than expected for independent movement
+
+Therefore, if the confidence intervals contain 1, then the distance is *insignificant* with a p-value threshold of 1-level (two-sided) or half that for a one-sided test.
 
 ```{r proximity, eval = FALSE}
 
@@ -239,11 +287,14 @@ PROXIMITY <- proximity(buffalo[c("Cilla","Mvubu")],
 
 ```{r proximity2}
 
-load("Data/buffalo_proximity.rda")  # ond statistic only works if they are moving tog or actually avoiding each
+load("Data/buffalo_proximity.rda")  
+## statistic only works if they are moving tog or actually avoiding each other
 
 PROXIMITY  # >1 = farther apart than each other <1 closer together than expected
 
 ```
+
+We can compare this to the proximity ratio calculated from the simulated tracks for independent movement.
 
 ```{r proximity3, eval = FALSE}
 
@@ -262,38 +313,56 @@ SIM_PROXIMITY
 
 ## Encounter Rates
 
-[Fagan et al. (2023)](https://doi.org/10.1101/2023.06.07.544097)
+As mentioned at the beginning, we can relate many broader ecological processes to animal movement through estimating encounter rates. For example, frequent intraspecific encounters between territorial or competing individuals may results in gradual range shifts to avoid or reduce conflicts over space use (see [Fagan et al., 2023](https://doi.org/10.1101/2023.06.07.544097)).
+
+Note that using proximity as a measure of encounter probability can be sensitive, as it can depend on the threshold distance we choose to set for what is counted as an encounter. Additionally, if data are too coarse, this can miss many potential encounters. Observed separation distances contain information on the number of encounter events (and by extension encounter rates). We can work through this fairly simply by defining an **encounter radius** (threshold distance around individual throughout the sampling period).
 
 ```{r encounter, eval = FALSE}
 
-help("encounter")  ## encounters, encounter rates/freqs
-## old measure is prox, which is very sensitive (looks at whether they're w/in a certain threshold distance of each other)
-## but the issue is that this misses a lot of potential encounters if data is too coarse.
+help("encounter")  # encounters, encounter rates/frequencies
 
 ```
 
 ```{r encounter2}
 
 # Empirical encounters
-DISTS$encounter <- ifelse(DISTS$est <= 100, 1, 0)
+DISTS$encounter <- ifelse(DISTS$est <= 100, 1, 0)  
+## If pairwise distance is less than or equal to 100m, we assume an encounter occurred
 
 # Visualize the results
-par(mfrow = c(1,1))
-plot(DISTS$encounter ~ DISTS$timestamp)  # encounters over time
-cdplot(as.factor(DISTS$encounter) ~ DISTS$timestamp)  # conditional density plot
+plot(DISTS$encounter ~ DISTS$timestamp,   # encounters over time
+     xlab = "Time", ylab = "Encounter (yes = 1, no = 0)")
+cdplot(as.factor(DISTS$encounter) ~ DISTS$timestamp,  # conditional density plot
+       xlab = "Time", ylab = "Encounter (yes = 1, no = 0)")
+## how does the conditional distribution of encounters change over time
+
+```
+
+From this we can also estimate how many times Cilla and Mvubu encountered one another during the sampling period, as well as their **encounter rate**.
+
+```{r encounter3}
 
 # Empirical Encounter rate (n/day)
-n <- sum(DISTS$encounter)
-t <- "day" %#% (DISTS$t[nrow(DISTS)] - DISTS$t[1])
-n/t
+n <- sum(DISTS$encounter)  # number of encounters
+n
+t <- "day" %#% (DISTS$t[nrow(DISTS)] - DISTS$t[1])  # days in the sampling period
+n/t  # encounters per day
 
-# If you do this, run a sensitivity analysis
+```
+
+There were 829 estimated encounters between Cilla and Mvubu, which gives us an encounter rate of about 7.8 encounters/day.
+
+However, the choice of 100 m is arbitrary. Because the number of encounters estimated in the data can depend on the size of the encounter radius, it is recommended to perform a sensitivity analysis on the encounter radius value, if you wish to use this type of analysis. The sensitivity analysis will help assess whether the number of encounters changes significantly with varying encounter radius.
+
+```{r encounter4}
+
+# Define a range of distances to test for the encounter radius
 enc_rad <- 1:1000
 
-N <- vector("numeric", 1000)
+N <- vector("numeric", 1000)  # empty vector to store counted encounters
 for(i in 1:length(enc_rad)){
   
-  # ...
+  # Encounter occurs if pairwise distance is less than or equal to the encounter radius
   N[i] <- sum(ifelse(DISTS$est <= enc_rad[i], 1, 0))
 }
 
@@ -301,13 +370,30 @@ for(i in 1:length(enc_rad)){
 plot(N ~ enc_rad, col = "#5e548e", type = "l",
      ylab = "Encounters", xlab = "Encounter radius")
 
+```
+
+As an additional caveat, if a pair of individuals encounter one another, *a single encounter event may persist for some time*. Thus, depending on how finely sampled the data may be, there is the potential for counting a single encounter event as more than one encounter. Therefore, care must be taken when performing an encounter rate analysis.
+
+Alternatively, the `encounter` function in `ctmm` provides a measure of the **relative encounter rates** between individuals. This outputs an `overlap` class object with the `DOF` and `CI` (includes matrices for the relative encounter rate estimates, and low and high confidence interval bounds).
+
+```{r encounter5}
+
 # Estimate relative encounter rates
 RATES <- encounter(AKDES, method = "PDF")
-RATES$CI["Cilla","Mvubu",] * 1000^2  # good for small distances (spend about 1.2% of their time tog)
-tanh(sqrt(RATES$CI["Cilla","Mvubu",]) * 1000)^2  # more reliable
+RATES  # across all individuals
+
+# Relative encounter rate for Cilla and Mvubu
+RATES$CI["Cilla","Mvubu",] * 1000^2  
+## good for small distances (spend about 1.2% of their time tog)
+RATES$CI["Pepper","Toni",] * 1000^2  
+
+# This transformation can provide a more reliable estimate
+tanh(sqrt(RATES$CI["Cilla","Mvubu",]) * 1000)^2
 ## strong assumption that when they're not together, they're avoiding each other
 
 ```
+
+From the ratio of the estimates, we can see that Cilla and Mvubu tend to encounter to one another about three times as often as Pepper and Toni. Keep in mind that these are unitless measures of encounter rates because they are relative to each other.
 
 ---
 

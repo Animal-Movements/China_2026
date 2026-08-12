@@ -21,11 +21,11 @@ Introductory lectures and code from a course on analyzing animal movement data t
 ## Instructors
 **Jared Stabach**, Research Ecologist & Head - Conservation Technology & Innovation, *Smithsonian's National Zoo & Conservation Biology Institute*
 
-**Wenjing Xu**, Assistant Professor, Department of Environmental Conservation, *University of Massachusetts Amherst*
+**Wenjing Xu**, Assistant Professor - Department of Environmental Conservation, *University of Massachusetts Amherst*
 
 **Christen Fleming**, Assistant Professor & Head - Ecoinformatics Lab, Department of Biology, *University of Central Florida*
 
-**Erika Lin**, Graduate Student, Department of Biology, *University of Central Florida*
+**Erika Lin**, Graduate Student - Department of Biology, *University of Central Florida*
 
 ## Repository Structure
 

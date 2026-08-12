@@ -416,6 +416,7 @@ WB_sf %>%
 - Pettorelli N, Vik JO, Mysterud A, Gaillard J-M, Tucker CJ, Stenseth NC. 2005. Using the satellite-derived NDVI to assess ecological responses to environmental change. *Trends in Ecology & Evolution* 20(9):503–510.
 - Wilson MFJ, O'Connell B, Brown C, Guinan JC, Grehan AJ. 2007. Multiscale terrain analysis of multibeam bathymetry data for habitat mapping on the continental slope. *Marine Geodesy* 30(1-2):3-35.
 - Stabach JA, Hughey LF, Crego RD, Fleming CH, Hopcraft JGC, Leimgruber P, Morrison TA, Ogutu JO, Reid RS, Worden JS, Boone RB. 2022. Increasing anthropogenic disturbance restricts wildebeest movement across East African grazing systems. *Frontiers in Ecology and Evolution*. https://doi.org/10.3389/fevo.2022.846171
+- Crego, RD, Masolele, MM, Connette, G, Stabach, JA. 2021. Enhancing animal movement analyses: Spatiotemporal matching of animal positions with remotely sensed data using Google Earth Engine and R. *Remote Sensing* 13(20): 4154. [https://doi.org/10.3390/rs13204154](https://doi.org/10.3390/rs13204154)
 
 ---
 

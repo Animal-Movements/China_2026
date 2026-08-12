@@ -37,7 +37,7 @@ By the end of this module you will be able to:
 
 A GPS fix is an estimate, not a fact. Every location carries some amount of error. That error is rarely random or harmless. A handful of bad fixes can inflate steplengths into biologically impossible "teleports", bias a home range estimate outward, or manufacture an apparent "fast directed movement" behavioral state that never happened. For wide-ranging grazers like wildebeest moving across open, fenced, and increasingly developed landscapes, these artifacts can directly mislead conservation conclusions. 
 
-The wildebeest dataset we downloaded in Module 1 pooled data across several wildebeest populations in Kenya. Before we can say anything about *this* population's movement, we need to: (1) isolate the right subset of animals and time window, and (2) remove fixes that don't meet a minimum precision standard. This dataset does both, providing a reusable template for QC-ing your own tracking data.
+The wildebeest dataset we downloaded in Module 1 pooled data across several wildebeest populations in Kenya. Before we can say anything about *this* population's movement, we need to: (1) isolate the right subset of animals and time window, and (2) remove fixes that don't meet a minimum precision standard. Here we will do both items, providing a reusable template for QC-ing your own tracking data.
 
 ---
 
@@ -88,6 +88,7 @@ Some attributes — sex, study site, deployment start/end — describe an *indiv
 track_meta <- mt_track_data(WB.mv2)
 glimpse(track_meta)
 ```
+
 Wildebeest included in this dataset were tracked across three study areas (Athi-Kaputiei Plains, Amboseli Basin, and the Masai Mara Ecosystem
 ). Prior to analysis, we will first subset these data and work only from animals tracked across the Athi-Kaputiei Plains.
 
@@ -172,11 +173,8 @@ WB.mv2 %>%
 
 Create a histogram of the graph of GPS fix quality 
 ```{r dop_before}
-dop_before <- WB.mv2 %>%
-  as_tibble() %>%
-  filter(!is.na(gps_dop), gps_fix_type_raw %in% c("2D", "3D"))
-
-plot.raw <- ggplot(dop_before, aes(x = gps_dop)) +
+# Plot
+plot.raw <- ggplot(WB.mv2, aes(x = gps_dop)) +
   geom_histogram(bins = 30, fill = "steelblue", color = "white") +
   geom_vline(data = tibble(gps_fix_type_raw = c("2D", "3D"), thresh = c(5, 10)),
              aes(xintercept = thresh), color = "firebrick", linetype = "dashed") +
@@ -187,7 +185,7 @@ plot.raw <- ggplot(dop_before, aes(x = gps_dop)) +
   theme_minimal()
 
 # Print to view the plot
-#plot.raw
+plot.raw
 ```
 
 ### 4.2 DOP Filter
@@ -208,6 +206,10 @@ cat("After DOP/fix-type filter:", n_distinct(mt_track_id(WB.mv2)), "animals,", n
 Create a histogram of the data points after filtering has been completed. 
 
 ```{r dop_after}
+# First recorder so that graph plots in same was as plot.raw
+WB.mv2$gps_fix_type_raw <- reorder(WB.mv2$gps_fix_type_raw, WB.mv2$gps_dop)
+
+# Now plot the filtered subset
 plot.filt <- WB.mv2 %>%
   as_tibble() %>%
   ggplot(aes(x = gps_dop)) +
@@ -218,7 +220,7 @@ plot.filt <- WB.mv2 %>%
   theme_minimal()
 
 # Plot results with plot.raw to see results together
-# Use the patchwork package (| for side by side, \ for stacked)
+# Use the patchwork package (| for side by side, / for stacked)
 plot.raw / plot.filt
 ```
 
@@ -316,12 +318,30 @@ cat("Saved cleaned WB.mv2 —", n_distinct(mt_track_id(WB.mv2)), "animals,", nro
 
 ---
 
-# Exercise: 
-Now run the same QC workflow on your own dataset.
+# Exercise: Apply to your own data
+Now run the same QC workflow on your own dataset.  Please do the following:
 
 1. **Inspect your track metadata** with `mt_track_data()`. Does it include the fields you need to subset (study site, deployment dates, sex)? If a field is missing, where else might that information be located (a separate reference sheet, metadata you recorded yourself)?
 2. **Check what precision metric your tags report.** Look for DOP, HDOP, fix type, or a manufacturer-specific quality field. If your tags don't report precision at all, what other QC steps (speed filters, spatial outlier checks) might substitute?
-3. **Run the duplicate/invalid-coordinate check** — this step is universal regardless of tag type.
+3. **Run the duplicate/invalid-coordinate check.** This step is universal, regardless of tag type.
 4. **Build your own QC accounting table.** How much data survives each step? Is that consistent with what you'd expect given your species and study design?
 
-*Next: **Module 3 — Trajectory Creation & Visualization** — we convert the cleaned data into an `amt` track, check sampling regularity, and visualize trajectories.*
+---
+
+# Key functions reference
+
+| Function | Package | Purpose |
+|---|---|---|
+| `mt_track_data()` | `move2` | Return track-level attributes |
+| `st_as_sf()` | `sf` | Convert a data frame to a spatial object |
+| `st_coordinates()` | `sf` | Extract coordinate matrix from an sf object |
+| `mapview()` | `mapview` | Interactive mapping of spatial objects |
+| `geom_histogram()` | `ggplot` | Plot histograms |
+| `geom_vline()` | `ggplot` | Add vertical reference lines |
+| `facet_wrap() ` | `ggplot` | Create faceted plots |
+| `reorder()` | `ggplot` | Reorder factor levels based on another variable |
+| `gt()` | `gt` | Create a formatted table |
+
+---
+
+*Next:* **Module 3 — Trajectory Creation & Visualization.** We will convert the cleaned data into an `amt` track, check sampling regularity, and visualize trajectories.

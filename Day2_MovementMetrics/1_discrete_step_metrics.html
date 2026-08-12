@@ -1582,10 +1582,11 @@ utm_crs     &lt;- &quot;EPSG:32737&quot;  # UTM Zone 37S — metric, appropriate
   as_tibble() %&gt;%
   transmute(id = individual_local_identifier,
             x, y,
-            t = timestamp) %&gt;%
+            t = timestamp,
+            temp = external_temperature) %&gt;%
   arrange(id, t)
 
-trk_all &lt;- make_track(WB_df, x, y, t, id = id, crs = latlong_crs, lon = x, lat = y)
+trk_all &lt;- make_track(WB_df, x, y, t, temp, id = id, crs = latlong_crs, lon = x, lat = y)
 trk_all &lt;- transform_coords(trk_all, utm_crs)
 
 class(trk_all)        # track_xyt, track_xy, tbl_df, tbl, data.frame</code></pre>
@@ -1626,18 +1627,18 @@ trk_nested # try view(trk_nested) to see the dataframe in a separate window</cod
 <pre><code>## # A tibble: 12 × 2
 ##    id        data                   
 ##    &lt;fct&gt;     &lt;list&gt;                 
-##  1 Sotua     &lt;trck_xyt [4,809 × 5]&gt; 
-##  2 Laingoni  &lt;trck_xyt [7,806 × 5]&gt; 
-##  3 Ne Mpaash &lt;trck_xyt [7,353 × 5]&gt; 
-##  4 Noontare  &lt;trck_xyt [11,095 × 5]&gt;
-##  5 Ole Nagol &lt;trck_xyt [1,110 × 5]&gt; 
-##  6 Kiranto   &lt;trck_xyt [11,974 × 5]&gt;
-##  7 Paita     &lt;trck_xyt [11,114 × 5]&gt;
-##  8 Karbolo   &lt;trck_xyt [6,084 × 5]&gt; 
-##  9 Ntishya   &lt;trck_xyt [11,837 × 5]&gt;
-## 10 Peria     &lt;trck_xyt [11,840 × 5]&gt;
-## 11 Sawani    &lt;trck_xyt [3,586 × 5]&gt; 
-## 12 Kikaya    &lt;trck_xyt [10,769 × 5]&gt;</code></pre>
+##  1 Sotua     &lt;trck_xyt [4,809 × 6]&gt; 
+##  2 Laingoni  &lt;trck_xyt [7,806 × 6]&gt; 
+##  3 Ne Mpaash &lt;trck_xyt [7,353 × 6]&gt; 
+##  4 Noontare  &lt;trck_xyt [11,095 × 6]&gt;
+##  5 Ole Nagol &lt;trck_xyt [1,110 × 6]&gt; 
+##  6 Kiranto   &lt;trck_xyt [11,974 × 6]&gt;
+##  7 Paita     &lt;trck_xyt [11,114 × 6]&gt;
+##  8 Karbolo   &lt;trck_xyt [6,084 × 6]&gt; 
+##  9 Ntishya   &lt;trck_xyt [11,837 × 6]&gt;
+## 10 Peria     &lt;trck_xyt [11,840 × 6]&gt;
+## 11 Sawani    &lt;trck_xyt [3,586 × 6]&gt; 
+## 12 Kikaya    &lt;trck_xyt [10,769 × 6]&gt;</code></pre>
 <div id="check-the-sampling-rate-per-individual" class="section level3">
 <h3>2.1 Check the sampling rate per individual</h3>
 <pre class="r"><code>sampling_rates &lt;- trk_nested %&gt;%
@@ -1683,9 +1684,9 @@ produce a mix of intervals in almost any real deployment.</p>
 steps if every step spans roughly the same time interval — a step
 computed over 1 hour and one computed over 3 hours describe different
 things, even though both are perfectly valid fixes from the same
-deliberate duty cycle. <code>track_resample()</code> doesn’t repair
-anything; it lets us state explicitly which consecutive fixes should
-count as a step for the analysis at hand.</p>
+deliberate duty cycle. <code>track_resample()</code> lets us state
+explicitly which consecutive fixes should count as a step for the
+analysis at hand.</p>
 <p>Here, we target the daytime’s nominal 1-hour rate, with a 15-minute
 tolerance to absorb ordinary GPS jitter without stitching genuinely
 separate fixes together into a false step:</p>
@@ -1695,27 +1696,37 @@ separate fixes together into a false step:</p>
   unnest(resampled)
 
 head(trk_resampled)</code></pre>
-<pre><code>## # A tibble: 6 × 7
-##   id         x_       y_ t_                    lon   lat burst_
-## * &lt;fct&gt;   &lt;dbl&gt;    &lt;dbl&gt; &lt;dttm&gt;              &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;
-## 1 Sotua 260296. 9849694. 2010-10-15 13:00:00  36.8 -1.36      1
-## 2 Sotua 260329. 9849518. 2010-10-15 14:00:00  36.8 -1.36      1
-## 3 Sotua 260393. 9849505. 2010-10-15 15:00:00  36.8 -1.36      1
-## 4 Sotua 260432. 9849416. 2010-10-15 18:00:00  36.8 -1.36      2
-## 5 Sotua 260499. 9849319. 2010-10-15 21:00:00  36.8 -1.36      3
-## 6 Sotua 260365. 9849360. 2010-10-16 00:00:00  36.8 -1.36      4</code></pre>
+<pre><code>## # A tibble: 6 × 8
+##   id         x_       y_ t_                  temp   lon   lat burst_
+## * &lt;fct&gt;   &lt;dbl&gt;    &lt;dbl&gt; &lt;dttm&gt;              [°C] &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;
+## 1 Sotua 260296. 9849694. 2010-10-15 13:00:00   29  36.8 -1.36      1
+## 2 Sotua 260329. 9849518. 2010-10-15 14:00:00   28  36.8 -1.36      1
+## 3 Sotua 260393. 9849505. 2010-10-15 15:00:00   25  36.8 -1.36      1
+## 4 Sotua 260432. 9849416. 2010-10-15 18:00:00   21  36.8 -1.36      2
+## 5 Sotua 260499. 9849319. 2010-10-15 21:00:00   18  36.8 -1.36      3
+## 6 Sotua 260365. 9849360. 2010-10-16 00:00:00   18  36.8 -1.36      4</code></pre>
 <blockquote>
 <p><strong>Note:</strong> <code>track_resample()</code> adds a
-<code>burst_</code> column — a run of consecutive fixes that all fall
-within <code>tolerance</code> of the target <code>rate</code>. With
-<code>rate = hours(1)</code>, the daytime’s roughly-hourly fixes form
-long, usable bursts, while the night’s ~3-hour gaps mostly exceed the
-15-minute tolerance and start a new burst — which tells the next step
-(<code>steps_by_burst()</code>) not to compute a step across that gap.
-That’s a deliberate choice for this <code>rate</code>, not an error.
-Section 3 describes daytime movement specifically. Section 2.3 shows the
-alternative — targeting the night’s coarser 3-hour rate instead, so day
-and night become directly comparable to each other.</p>
+<code>burst_</code> column, but it does not delete every fix that falls
+outside the target rate the way “resample” might suggest. Internally it
+walks the timestamps against <code>rate ± tolerance</code>, relative to
+whichever fix is currently anchoring the burst: a fix that arrives
+<em>too soon</em> is dropped from the returned track entirely; a fix
+that arrives <em>inside</em> the tolerance window continues the current
+burst; and a fix that arrives <em>late</em> is <strong>kept, not
+deleted</strong> — it simply starts a new <code>burst_</code> number.
+With <code>rate = hours(1)</code>, the daytime’s roughly-hourly fixes
+form long, usable bursts, while the night’s ~3-hour gaps exceed the
+15-minute tolerance and each night fix becomes the start of its own new
+burst. <code>steps_by_burst()</code> then only computes a step within a
+burst, so no step is silently computed across the day/night gap — but
+the location itself is retained in the data.</p>
+<p>This burst-tagging is enough on its own if everything downstream also
+runs in <code>amt</code> (<code>steps_by_burst()</code> respects
+<code>burst_</code> automatically). It is <strong>not</strong> the same
+thing as inserting <code>NA</code> at every missing regular timestamp,
+which is what “regularizing” means for some packages outside
+<code>amt</code>.</p>
 </blockquote>
 </div>
 <div id="an-alternative-one-shared-3-hour-interval" class="section level3">
@@ -1725,30 +1736,36 @@ and night become directly comparable to each other.</p>
 night’s native rate instead. This keeps roughly one fix every 3 hours
 and drops the extra daytime fixes in between, so every resulting step —
 day or night — spans the same nominal interval:</p>
-<pre class="r"><code>trk_resampled_3h &lt;- trk_nested %&gt;%
-  mutate(resampled = map(data, ~ track_resample(.x, rate = hours(3), tolerance = minutes(30)))) %&gt;%
-  select(id, resampled) %&gt;%
-  unnest(resampled)
+<pre class="r"><code>trk_resampled_3h &lt;- trk_nested |&gt;
+  mutate(resampled = map(data, function(x)
+    x |&gt; track_resample(rate = hours(3), tolerance = minutes(15)))) |&gt; 
+  select(id, resampled) |&gt;
+  unnest(resampled) |&gt; 
+  # The track_resample function doesn&#39;t seem to be working properly.  Using this working around:
+  mutate(hour = hour(t_)) |&gt; 
+  filter(hour %in% c(0,3,6,9,12,15,18,21)) |&gt; 
+  select(!hour)
+
+# trk_resampled_3h$hour &lt;- hour(trk_resampled_3h$t_)
+# plot(trk_resampled_3h$hour)
 
 head(trk_resampled_3h)</code></pre>
-<pre><code>## # A tibble: 6 × 7
-##   id         x_       y_ t_                    lon   lat burst_
-## * &lt;fct&gt;   &lt;dbl&gt;    &lt;dbl&gt; &lt;dttm&gt;              &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;
-## 1 Sotua 260296. 9849694. 2010-10-15 13:00:00  36.8 -1.36      1
-## 2 Sotua 260432. 9849416. 2010-10-15 18:00:00  36.8 -1.36      2
-## 3 Sotua 260499. 9849319. 2010-10-15 21:00:00  36.8 -1.36      2
-## 4 Sotua 260365. 9849360. 2010-10-16 00:00:00  36.8 -1.36      2
-## 5 Sotua 260066. 9849895. 2010-10-16 03:00:00  36.8 -1.36      2
-## 6 Sotua 259962. 9849750. 2010-10-16 06:00:00  36.8 -1.36      2</code></pre>
+<pre><code>## # A tibble: 6 × 8
+##   id         x_       y_ t_                  temp   lon   lat burst_
+## * &lt;fct&gt;   &lt;dbl&gt;    &lt;dbl&gt; &lt;dttm&gt;              [°C] &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;
+## 1 Sotua 260432. 9849416. 2010-10-15 18:00:00   21  36.8 -1.36      2
+## 2 Sotua 260499. 9849319. 2010-10-15 21:00:00   18  36.8 -1.36      2
+## 3 Sotua 260365. 9849360. 2010-10-16 00:00:00   18  36.8 -1.36      2
+## 4 Sotua 260066. 9849895. 2010-10-16 03:00:00   17  36.8 -1.36      2
+## 5 Sotua 259962. 9849750. 2010-10-16 06:00:00   23  36.8 -1.36      2
+## 6 Sotua 260149. 9849651. 2010-10-16 09:00:00   28  36.8 -1.36      2</code></pre>
 <blockquote>
-<p><strong>Note:</strong> Same function, coarser target
-<code>rate</code> — <code>track_resample()</code> looks for the fix
-nearest each 3-hour mark within <code>tolerance</code> and keeps that
-one. The hourly version resolves fine-scale daytime behavior at the cost
-of treating night steps as a separate, shorter regime. This 3-hour
+<p><strong>Note:</strong> The hourly version in 2.2 resolves fine-scale
+daytime behavior at the cost of treating night locations will not form
+effective steps as they are treated as differnet bursts. This 3-hour
 version provides an “apples-to-apples” step length across the full cycle
-at the cost of discarding daytime fixes that were collected at a higher
-resolution. The rest of this module continues with the hourly
+at the cost of discarding extra daytime fixes that were collected at a
+higher resolution. The rest of this module continues with the hourly
 (<code>trk_resampled</code>) version, since Section 3’s goal is to
 demonstrate the step-metric workflow at the finer of the two resolutions
 — substitute <code>trk_resampled_3h</code> in Section 3 if whole-cycle

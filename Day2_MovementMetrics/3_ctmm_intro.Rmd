@@ -83,10 +83,14 @@ browseURL("https://www.moveapps.org/apps/browser?q=ctmm")
 
 ## Data Preparation
 
-```{r load_packages}
+```{r load_packages, eval = FALSE}
 
 # Install the latest version of ctmm from GitHub
-# remotes::install_github("ctmm-initiative/ctmm")
+remotes::install_github("ctmm-initiative/ctmm")
+
+```
+
+```{r load_packages2}
 
 # Load the ctmm package
 library(ctmm)
@@ -277,11 +281,11 @@ plot(buffalo, col = COL, main = "Azimuthal-equidistant projection") +
 
 ## Checking for Autocorrelation
 
-**Autocorrelation** is correlation of values in a variable with itself. In the case of tracking data, we are collecting a time-series of location points, so there is similarity between our data points as a function of time (temporal autocorrelation). Having autocorrelated data means that each location point is not independent of the next, so we must account for this in our analysis, because it can seriously bias our results and lead to overconfidence in our estimates. 
+**Autocorrelation** is correlation of a variable with itself. The variable is correlated with it self at different times, when time is the index of the process. In the case of tracking data, we are collecting a time-series of location points, so there is similarity between our data points as a function of time (temporal autocorrelation). Having autocorrelated data means that each location point is not independent of the next, so we must account for this in our analysis, because it can seriously bias our results and lead to overconfidence in our estimates. 
 
 > Autocorrelation in our data can help us identify if individuals exhibit **_range residency_**. Estimating the autocorrelation timescales in tracking data can inform us of the animals movement behaviors.
 
-Looking at the raw movement tracks is a good way to pick out any obvious migratory behaviors. In the future, we will have migration models to select, but for now all of our models are range resident and so only those portions of the data should be selected. These buffalo all look fairly range resident, and so we can move on to variograms.
+Looking at the raw movement tracks is a good way to pick out any obvious migratory behaviors. In the future, we will have migration models to select, but for now all of our models are range resident or dispersive, and so only those segments of the data should be selected. These buffalo all look fairly range resident, and so we can move on to variograms.
 
 ### Variograms
 
@@ -350,7 +354,7 @@ The initial quadratic curvature (if the data are clean and finely sampled) indic
 
 ### Other ways to visualize autocorrelation
 
-**Correlogram:** Plot showing the autocorrelation (y-axis) as a function of the time lag (x-axis). This is more robust than the `acf` function (biased estimator) and estimates the autocorrelation function parameter. The correlogram shows the autocorrelation variogram with where there is 0 autocorrelation and where the 95% CIs bounds are. It can be thought of as an upside-down variogram on a different scale.
+**Correlogram:** Plot showing the autocorrelation (y-axis) as a function of the time lag (x-axis). Although both the correlogram and `acf` function are biased estimators, `ctmm::correlogram` is more robust, as it can handle missing data and multiple dimensions, and it estimates the autocorrelation function parameter. The correlogram shows the autocorrelation variogram with where there is 0 autocorrelation and where the 95% CIs bounds are. It can be thought of as an upside-down variogram on a different scale.
 
 ```{r acf}
 
@@ -366,7 +370,8 @@ plot(ACF) # plot ACF correlogram
 
 ```
 
-**Periodogram:** Plot showing the log spectral density (akin to energy or activity) of the data (y-axis) across the period (x-axis). The period ($\frac{1}{frequency}$) is the timescale of the data. If we were analyzing acoustic data, white noise would produce a flat line in the periodogram (same energy at every frequency). Periodograms allow us to identify autocorrelated movement across timescales, which are characteristic of patterns in movement periodicity (periodic space use). For example, an albatross that hunts once each month would show a spike in activity at the one month mark.
+**Periodogram:** Plot showing the log spectral density (akin to energy or activity) of the data (y-axis) across the period (x-axis). The data are decomposed into frequencies or periods ($\frac{1}{frequency}$), and the Lomb-Scargle periodogram represents the contribution to the variance from each frequency (or period); periodicities show up as peaks in the periodogram, while aperiodic stochastic motion shows up as a smooth trend. For example, an albatross that hunts once each month would show a spike in activity at the one month mark.
+<!--If we were analyzing acoustic data, white noise would produce a flat line in the periodogram (same energy at every frequency). Periodograms allow us to identify autocorrelated movement across timescales, which are characteristic of patterns in movement periodicity (periodic space use). -->
 
 ```{r periodogram}
 
@@ -381,7 +386,7 @@ Less common in movement ecology are spectrograms. These are visualized as a heat
 
 ## Model Selection
 
-In this section we will first “fit” models the variograms and then perform model selection across various continuous-time models. This "fit" is not a rigorous statistical fitting, but a good way of choosing candidate movement models and guessing at their parameters. The variogram-fit parameter guess estimates will then be fed into maximum likelihood estimation, which requires good initial guesses for non-linear optimization.
+In this section, we will first “eyeball fit” models to the variograms and then perform model selection across various continuous-time models. This "eyeball fit" is not a rigorous statistical fitting, but a good way of choosing candidate movement models and guessing at their parameters. The variogram-fit parameter guess estimates will then be fed into maximum likelihood estimation, which requires good initial guesses for non-linear optimization.
 
 First, let's get good initial parameter values for our autocorrelation model:
 
@@ -393,7 +398,7 @@ help("ctmm.guess")
 
 ```
 
-The `ctmm.guess` function automatically fits a variogram to your data, but you can optionally include a variogram if one has already been calculated. By default `ctmm.guess` enters an interactive mode (`interactive = TRUE`), which plots the variogram and allows you to try how different combinations of parameters impact model fit. The function automates guesses for parameters that will be used in the optimization process later. See the gear icon at the top left corner to zoom into the variogram and to see the parameter estimates: variance (km$^2$), $\tau_p$ "tau_p" (position, day), $\tau_v$ "tau_v" (velocity, min).
+The `ctmm.guess` function automatically eyeball fits a variogram to your data, but you can optionally include a variogram if one has already been calculated. By default `ctmm.guess` enters an interactive mode (`interactive = TRUE`), which plots the variogram and allows you to try how different combinations of parameters impact model fit. The function automates guesses for parameters that will be used in the optimization process later. See the gear icon at the top left corner to zoom into the variogram and to see the parameter estimates: variance (km$^2$), $\tau_p$ "tau_p" (position, day), $\tau_v$ "tau_v" (velocity, min).
 
 > * **Variance** changes aymptote height
 > * **Position autocorrelation timescale ($\tau_p$):** how long it takes animal to cross range (i.e. home range if range resident). This changes the time taken to asymptote.
@@ -422,7 +427,7 @@ GUESS <- ctmm.guess(DATA, interactive = FALSE)
 
 The next step is to fit and select the best continuous-time movement model for our data. While each model is tested, the likelihood function is optimized to find the parameter values that best fit the data, starting from our initial values stored in GUESS.
 
-We use the `ctmm.select` function for AICc-based model selection. It will fit a bunch of autocorrelation and continuous-time models, tell us what models are being fit, and return the top models based on $\Delta$AICc. This process can be slow, but it can be parallelized to save time if your operating system allows for it (e.g., Unix systems), using all but one CPU core by default. The computation time is linearly proportional to the sample size: 10x more data = 10x longer to run.
+We use the `ctmm.select` function for AICc-based model selection. It will fit a bunch of continuous-time autocorrelation models, tell us what models are being fit, and return the top models based on $\Delta$AICc. This process can be slow, but it can be parallelized to save time if your operating system allows for it (e.g., Unix systems), using all but one CPU core by default. The computation time is proportional to the sample size: 10x more data = 10x longer to run.
 
 ```{r ctmm.select1, eval = FALSE}
 
@@ -446,7 +451,7 @@ help("ctmm.select")
 > * Brownian Motion (BM)
 > * Integrated Ornstein Uhlenbeck (IOU)
 > * Ornstein-Uhlenbeck (OU)
-> * Ornstein-Uhlenbeck $\Omega$ "omega" (OU$\Omega$) <!-- <-- CONFIRM THIS MODEL -->
+> * Ornstein-Uhlenbeck $\Omega$ "omega" (OU$\Omega$) 
 > * Ornstein-Uhlenbeck foraging (OUF), and its modifications (e.g., OUf)
 
 In the next 2 sections, we will go through the model selection steps for models that are restricted in space (range resident models), and models that are not restricted in space (non-resident models).
@@ -480,7 +485,7 @@ The top-selected model was the *OUF anisotropic model*. What does this mean?
 * **Ornstein-Uhlenbeck (OUF):** model includes both position autocorrelation and velocity autocorrelation. We should be considering both autocorrelation timescales for downstream analysis.
 * **Anisotropic:** The distribution can be elongated (ellipsoid). This fit better than the isotropic (uniform circular shape distribution, not elongated) models.
 * **Degrees of freedom (DOF):** effective sample size (*more to come*)
-  * DOF[area] = number of data points
+  * DOF[area] = effective sample size to estimate the home-range area
 * **AICc** increased as features/parameters were dropped. These are all nested models, and in this case, the most complex was the best fit for our buffalo's tracks.
 
 IID was not attempted because the nested-model hierarchy is OUF -> OU -> IID. But let's include them to see how they perform in comparison:
@@ -552,14 +557,14 @@ What do the different metrics mean?
 Degrees of freedom (DOF): Effective sample size (ESS)
 
 * **Mean (DOF[mean]):** Degrees of freedom worth of data (ESS) we have to estimate the stationary mean parameter, the mean location of the individual.
-* **Area (DOF[area], $N_{\text{area}}$):** ESS data points we have to estimate the home-range area. 
+* **Area (DOF[area], $N_{\text{area}}$):** ESS data points we have to estimate the home-range area. This represents the estimated number of home-range crossings.
   * Note the smaller effective sample size -- only ~18 data points due to autocorrelation.
-* **Diffusion (DOF[diffusion], $N_{\text{diffusion}}$):** ESS data points we have to estimate the diffusion.
+* **Diffusion (DOF[diffusion], $N_{\text{diffusion}}$):** ESS data points we have to estimate the diffusion rate.
 * **Speed (DOF[speed], $N_{\text{speed}}$):** ESS data points we have to estimate the root-mean squared speed.
 
 Estimates (est) and Confidence Intervals (CIs):
 
-* **Area:** Gaussian area, this represents the estimated # home-range crossings (and its lower and upper CI bounds).
+* **Area:** Gaussian area (and its lower and upper CI bounds).
 * **Speed:** Gaussian RMS (root-mean squared) speed. 
   * Note the narrow CIs (quick-and-dirty estimate).
 * **Diffusion rate:** This metric is more abstract than mean speed, but can be estimated at longer timescales/coarser data. 
@@ -567,8 +572,20 @@ Estimates (est) and Confidence Intervals (CIs):
 
 ```{r ctmm.select_OUF2}
 
-# 95% location autocorrelation remaining
-exp(-3)
+# How many times does Cilla need to cross their home range to reach 5% autocorrelation?
+seq <- exp(seq(0, -4, by = -0.1))
+timescale <- seq(0, 4, by = 0.1)
+plot(x = timescale, y = seq, type = "l",
+     xlab = "Home range crossings", ylab = "Position autocorrelation remaining (%)",
+     main = expression(bold(paste("Decay in position autocorrelation (", 
+                             tau[p], ")", sep = ""))))
+points(x = seq(1:3), y = exp(c(-1:-3)), pch = 16)
+abline(h = 0.05, lty = 2, col = "red2")
+arrows(x0 = 3, x1 = 3, y0 = 0.3, y1 = 0.12, col = "red2", length = 0.18, lwd = 2)
+text(x = 0.5, y = 0.1, labels = "5% autocorrelation", cex = 0.9, col = "red2")
+
+# 5% location autocorrelation remaining
+exp(-3)  # about 3 home range crossings
 summary(FITS[[1]])$CI[2,] * 3  # position autocorrelation estimate: 7.504067
 ## position autocorrelation disappears in ~22.5 days
 
@@ -582,6 +599,7 @@ summary(DATA)
 ```
 
 ```{r ctmm.select_OUF3, eval = FALSE}
+
 help("%#%") # converts dimensional quantities to and from SI units
 help(sigfig) # gives nice sig figs
 
@@ -615,6 +633,7 @@ plot(RES2, main = "OUF Residuals")
 ACF2 <- correlogram(RES2, res = 10)
 
 plot(ACF2, main = 'ACF of "OUF" Residuals')
+plot(ACF2, frac = 0.02, main = 'ACF of "OUF" Residuals (zoom)')
 ## Most of autocorrelation is explained by model
 
 ```

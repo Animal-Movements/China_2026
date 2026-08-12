@@ -3,13 +3,14 @@ title: 'M2: Introduction to Hidden Markov Models'
 subtitle: "Day 5 — Behavior Analysis Part 2"
 author: "Animal Movement Analyses for Ecologists | SYSU Shenzhen, July 2026"
 date: '`r format(Sys.time(), "%d %B %Y")`'
-output: 
+output:
   html_document:
     toc: true
-    toc_depth: 3
-    toc_float: true
-    toc_collapse: true
-    number_sections: true
+    toc_depth: 4
+    toc_float: 
+      collapsed: true
+      smooth_scroll: true
+    number_sections: false
 pdf_document: default
 ---
 
@@ -23,25 +24,26 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 
 # Learning Objectives
 
+By the end of this module you will be able to:
+
+1. Learn the analysis workflow for fitting hidden Markov models with [momentuHMM](https://cran.r-project.org/web/packages/momentuHMM/index.html)
+2. Practice investigation of impact of continuous covariates on state transition probabilities 
+3. Learn how to interpret the output from HMMs
+4. Practice methods for visualizing HMM output both spatially and graphically
+
+**Packages used:** `momentuHMM`, `lubridate`, `tidyverse`
+
 # Introduction
-  >Many thanks to Dr. Joseph Kolowski for assistance in developing this material
+  >Many thanks to Dr. Joseph Kolowski for assistance in developing this module
   
-There are two main packages for fitting discrete-time hidden Markov models (HMMs) in [R](https://cran.r-project.org/): [moveHMM](https://cran.r-project.org/web/packages/moveHMM/index.html) and [momentuHMM](https://cran.r-project.org/web/packages/momentuHMM/index.html).  These packages are very similar (i.e., the syntax is the same) and both packages are maintained by the same architects, Theo Michelot and Brett McClintock.  The difference between the two packages is the complexity of models that can be fitted, with [moveHMM](https://cran.r-project.org/web/packages/moveHMM/index.html) limited to estimating 2 or so biologically-meaningful behavior states from the data stream (i.e,. step length, turning angle). [MomentuHMM](https://cran.r-project.org/web/packages/momentuHMM/index.html), however, allows for the incorporation of auxiliary biotelemetry information (e.g., from pressure, conductivity, heart rate, or motion sensors), which results in less restrictions on the constraints to parameters and provides for greater possibilities in estimating additional behavioral states.
+There are three main packages for fitting discrete-time hidden Markov models (HMMs) in [R](https://cran.r-project.org/): [moveHMM](https://cran.r-project.org/web/packages/moveHMM/index.html), [momentuHMM](https://cran.r-project.org/web/packages/momentuHMM/index.html), and [hmmTMB](https://cran.r-project.org/web/packages/hmmTMB/index.html). These packages are very similar (i.e., the syntax is the same) and are maintained by the same architects, Theo Michelot and Brett McClintock. The difference between the packages are the complexity of models that can be fitted. [MoveHMM](https://cran.r-project.org/web/packages/moveHMM/index.html) is the most basic of the three packages, limited to estimating 2 or so biologically-meaningful behavior states from the data stream (i.e,. step length, turning angle). It offers a good starting point to HMMs. [MomentuHMM](https://cran.r-project.org/web/packages/momentuHMM/index.html) allows for the incorporation of auxiliary biotelemetry information (e.g., from pressure, conductivity, heart rate, or motion sensors), which results in less restrictions on the constraints to parameters and provides for greater possibilities in estimating additional behavioral states. [HmmTMB](https://cran.r-project.org/web/packages/hmmTMB/index.html) adds some very nice functionality, especially related to estimating initial starting values and inclusion of random effects.
 
-In this exercise, we will fit HMMs with the [momentuHMM](https://cran.r-project.org/web/packages/momentuHMM/index.html) package to assess changes in wildebeest behavior.  We will continue to use the dataset from previous exercises that has been cleaned and subset to the Athi-Kaputiei Plains in Kenya.  Remember that the data have been re-sampled to a 3-hour fix interval.  We'll investigate the role of temperature and time of day on the movement behaviors of wildebeest, but many other environmental variables (e.g., Anthropogenic Disturbance) could be added to further our understanding on potential impacts to animals.
+In this exercise, we will fit HMMs with the [momentuHMM](https://cran.r-project.org/web/packages/momentuHMM/index.html) package to assess changes in wildebeest behavior. We will continue to use the dataset from previous exercises that has been cleaned and subset to the Athi-Kaputiei Plains in Kenya. Remember that the data have been re-sampled to a 3-hour fix interval. We'll investigate the role of temperature and time of day on the movement behaviors of wildebeest, but many other environmental variables (e.g., Anthropogenic Disturbance) could be added to further our understanding on potential impacts to animals.
 
-Code is based on exercises developed by Joe Kolowski at the Smithsonian-Mason School of Conservation, with sections modified from the [momentuHMM](https://cran.r-project.org/web/packages/momentuHMM/index.html) guide. 
+The code provided is based on exercises developed by Joe Kolowski at the Smithsonian-Mason School of Conservation, with sections modified from the [momentuHMM](https://cran.r-project.org/web/packages/momentuHMM/index.html) guide. 
 
-In this exercise, we will:
-
-  * Learn the analysis workflow for fitting hidden Markov models with [momentuHMM](https://cran.r-project.org/web/packages/momentuHMM/index.html)
-  * Practice investigation of impact of continuous covariates on state transition probabilities 
-  * Learn how to interpret the output from HMMs
-  * Practice methods for visualizing HMM output both spatially and graphically
-  * Use model output to subset tracking datasets [MAYBE]
-  
-## Load Libraries
-Load the required libraries and remove everything held in [R's](https://cran.r-project.org/) memory.
+## 1. Setup
+Similar to other modules, we will load the required libraries and remove everything held in [R's](https://cran.r-project.org/) memory.
 
 ```{r Setup, message=FALSE, warning=FALSE, echo=TRUE}
 # Remove items from memory/clean your workspace
@@ -56,54 +58,81 @@ library(lubridate)
 library(tidyverse)
 ```
 
-## 1. Data Import & Formatting
+### 1.1 Data Import & Formatting
 Load the cleaned wildebeest dataset from the previous exercise. Before doing so, there are a few things to note:
 
-  * Data for analysis should have negligible location error.  If you are working with high levels of error (common to marine species that are being tracked by Argos) or if data are irregular, you should likely process it first before analysis. For example, you may try a state space approach, such as [crawl](https://cran.r-project.org/web/packages/crawl/index.html) or [aniMotum](https://ianjonsen.github.io/aniMotum/articles/Overview.html), or use [ctmm](https://cran.r-project.org/web/packages/ctmm/index.html) to correct for the GPS error and then use `predict()` to create the most likely path of your animal for incorporation in analysis. [MomentuHMM](https://cran.r-project.org/web/packages/momentuHMM/index.html) also provides a 2-stage imputation approach when data are temporarily-irregular or subject to measurement error.  See the `help()` for more information.
-  * Data should be analyzed in an ordered sequence (Neither [moveHMM](https://cran.r-project.org/web/packages/moveHMM/index.html) or [momentuHMM](https://cran.r-project.org/web/packages/momentuHMM/index.html) recognizes the time as a sequence.  Use `arrange()` to order by the time field.
+  * Data for analysis should have negligible location error. If you are working with high levels of error (common to marine species that are being tracked by Argos) or if data are irregular, you should likely process it first before analysis. For example, you may try a state space approach, such as [crawl](https://cran.r-project.org/web/packages/crawl/index.html) or [aniMotum](https://ianjonsen.github.io/aniMotum/articles/Overview.html), or use [ctmm](https://cran.r-project.org/web/packages/ctmm/index.html) to correct for the GPS error and then use `predict()` to create the most likely path of your animal for incorporation in analysis. If you are simulating large amounts of the trajectory to fill in portions of the trajectory where data are missing, it is recommended to create multiple simulated trajectories so that uncertainty can be quantified. [MomentuHMM](https://cran.r-project.org/web/packages/momentuHMM/index.html) has techniques for doing so and also provides a 2-stage imputation approach when data are temporarily-irregular or subject to measurement error. See the `help()` for more information.
+  * Data should be analyzed in an ordered sequence (Neither [moveHMM](https://cran.r-project.org/web/packages/moveHMM/index.html), [momentuHMM](https://cran.r-project.org/web/packages/momentuHMM/index.html), or [hmmTMB](https://cran.r-project.org/web/packages/hmmTMB/index.html) recognizes the time as a sequence. Use `arrange()` to order by the time field.
   * The animal id column must be named "ID".
   * When analyzing the data as UTMs, converting the coordinates to km by dividing by 1000 is helpful in estimating model parameters.
 
 ```{r Load, message=FALSE, warning=FALSE, echo=TRUE}
 # Read the dataset into R, selecting the necessary columns (x, y, date, id) for analyses.
-# We will also grab the temperature column and the sex of each animal and convert the x/y values to km (e.g., x/1000). 
-# We'll also create an hour field from the timestamp and make sex a numeric variable using the mutate() function. 
-WB.data1 <- load("Data/WB_3h_resampled.rdata")
-WB.data2 <- load("Data/wildebeest_3hr_data_old.rdata")
+# We will also grab the temperature column, convert the x/y values to km (e.g., x/1000), and create an hour field. 
+# We many also want to summarize results by the sex of each animal. Since sex is not included in our dataset, we can join this information from a reference table that we will import.
 
-WB.data <- read_rds("Data/wildebeest_3hr_adehabitat.rds") %>%
-  arrange(id, date) %>% # Not necessary here, but good practice
-  select(x,
-         y,
-         t = date,
+# Load dataset
+load("Data/WB_3h_resampled.rdata")
+
+# Read in Reference dataset
+WB.ref <- read_csv("data/WB_ref.csv")
+
+# Here, we'll do a little cleaning of the reference dataset, join to the 3h tracking dataset, and prepare the file for further analysis.
+WB.data <- WB.ref %>%
+  #filter(study_site == "Athi-Kaputiei Plains") %>%
+  mutate(id = as.factor(as.character(individual_local_identifier)), # Make format the same as trk_resampled_3h field
+         sex = as.numeric(as.factor(sex))) %>%
+  select(
+    id,
+    sex
+  ) %>%
+  right_join( # Keep all from trk_resampled_3h
+    trk_resampled_3h,
+    by = join_by(id)
+  ) %>%
+  # Now, arrange the dataframe, manipulate the columns, and select the fields of interest
+  arrange(id, t_) %>% # Not really necessary, but always good practice to make sure the data are in correct order
+  select(x = x_,
+         y = y_,
+         t = t_,
          ID = id,
          temp,
          sex) %>% 
   mutate(hour = hour(t),
          x = x/1000, 
          y = y/1000, 
-         sex = as.numeric(sex))
+         temp = as.numeric(temp)
+         ) %>%
+  # Convert to dataframe
+  as.data.frame()
+
+# Clean up your environment
+rm(trk_resampled_3h, WB.ref)
 ```
 
-# Create Move Object
-Now that we have imported the data, we will use the function `prepData` to prepare the data for analyses and create a `momenuHMMData` object.  If our data were provided as raw lat/long values, we could still import the data, but we would need to set the type = "LL" (default). We can specify the coordinate and covariate names explicity.  See `help(prepData)` for additional information. 
+## 2. Create Move Object
+Now that we have imported the data, we will use the function `prepData` to prepare the data for analyses and create a `momenuHMMData` object. If our data were provided as raw lat/long values, we could still import the data, but we would need to set the type = "LL" (default). We can specify the coordinate and covariate names explicity. See `help(prepData)` for additional information. 
 
 **Note** [MomentuHMM](https://cran.r-project.org/web/packages/momentuHMM/index.html) package only works with longitude/latitude and UTM projected data.
 
 ```{r Create, message=FALSE, warning=FALSE, echo=TRUE}
-# Create Object
-WB.move <- WB.data  %>% 
-  prepData(type = "UTM",
-           # Specify coordinate names
-           coordNames = c("x","y"), # Note the order: x, y
-           covNames = c("temp", "sex", "hour"))
+# Subset the dataset using the slice command so that analyses run more quickly.
+# Only for testing
+# WB.data <- WB.data %>%
+#   group_by(ID) %>%
+#   slice_head(prop = 0.20) %>%
+#   as.data.frame()
 
-# What's the class of the object?
-class(WB.move)
+# Create Object
+WB.move <- prepData(WB.data, 
+                    type = "UTM", 
+                    # Specify coordinate names
+                    coordNames = c("x","y"), 
+                    covNames = c("temp", "hour"))
 ```
 
-## Object Summary
-The [MomentuHMM](https://cran.r-project.org/web/packages/momentuHMM/index.html) package includes a number of functions to help summarize the content of the `momentuHMMData` object.  We'll see that we have movement data for all 12 wildebeest (a good check!).  We also see from above that the format is a data.frame, making it relatively easy to modify our object if we need to.  Also notice that the function `prepData` created two additional columns in our dataset, "step (steplength)" and "angle (turning angle)".  These are the two fields that will be used in all future modeling steps.  The plot function will show the movement trajectory and include plots of the steplengths and turning angles. 
+### 2.1 Object Summary
+The [MomentuHMM](https://cran.r-project.org/web/packages/momentuHMM/index.html) package includes a number of functions to help summarize the content of the `momentuHMMData` object. We'll see that we have movement data for all 12 wildebeest (a good check!). We also see from above that the format is a data.frame, making it relatively easy to modify our object if we need to. Also notice that the function `prepData` created two additional columns in our dataset, "step (steplength)" and "angle (turning angle)". These are the two fields that will be used in all future modeling steps. The plot function will show the movement trajectory and include plots of the steplengths and turning angles. 
 
 ```{r Move Summary, message=FALSE, warning=FALSE, echo=TRUE}
 # Summarize the object
@@ -112,9 +141,9 @@ summary(WB.move)
 # What are the column headings included in this move object?
 names(WB.move)
 
-# We can plot all animals together.  Please try!
+# We can plot all animals together. Please try!
 # plot(WB.move,
-#      compact = TRUE, # Make sure you specify compact = TRUE.  If you don't specify, each plot will be drawn separately, which can be tedious
+#      compact = TRUE, # Make sure you specify compact = TRUE. If you don't specify, each plot will be drawn separately, which can be tedious
 #      ask = FALSE)
 
 # Or, each animal separately
@@ -123,7 +152,7 @@ plot(WB.move[WB.move$ID == "Kikaya",],
      ask = FALSE)
 
 # We can also investigate the steplength and turning separately, using standard R commands
-# Note, however, the way these are writtent, they are summarizing all animals together
+# Note that these summaries are for all animals together
 # hist(WB.move$step)
 # summary(WB.move$step)
 # quantile(WB.move$step,
@@ -131,44 +160,69 @@ plot(WB.move[WB.move$ID == "Kikaya",],
 #          na.rm = TRUE)
 # hist(WB.move$angle)
 ```
+## 3. Fitting a Hidden Markov Model
+To begin modeling, we need to set starting values for all relevant estimable parameters. This is arguably the most challenging aspect of fitting a HMM. [MomentuHMM](https://cran.r-project.org/web/packages/momentuHMM/index.html) includes a number of functions, including `GetPar`, `getPar0`, `getParDM`, and `checkPar0`, to help with specification of starting values. Use the `help()` function for tips and tricks. A short guide is also provided with the [moveHMM](https://cran.r-project.org/web/packages/moveHMM/index.html) package that provides a series of recommendations to select initial parameter values. See [A short guide to choosing initial parameter values for the estimation in moveHMM](https://cran.r-project.org/web/packages/moveHMM/vignettes/moveHMM-starting-values.pdf), for more information. [HmmTMB](https://cran.r-project.org/web/packages/hmmTMB/index.html) also contains a function (i.e., `suggest_initial()`) that can help in providing or suggesting initial starting values based on your data. Investigating the movements of your animals and being clear about the behaviors of interest (as opposed to simply data mining) will help with informing what these starting values should be. 
 
-# Fitting a Hidden Markov Model
-To begin modeling, we need to set starting values for all relevant estimable parameters.  This is arguably the most challenging aspect of fitting a HMM.  [MomentuHMM](https://cran.r-project.org/web/packages/momentuHMM/index.html) includes a number of functions, including `GetPar`, `getPar0`, `getParDM`, and `checkPar0`, to help with specification of starting values.  See the `help()` for tips and tricks.  Investigating the movements of your animals and being clear about the behaviors of interest (as opposed to simply data mining) will help with informing what these starting values should be.   
+As a starting point, we will fit a 2-state model, without specifying covariates to influence behavioral transitions (i.e., a NULL model). We will then build a few, slightly more complex models where the covariate(s) inform the transition from one state to the next. To do so, we must first specify the number of behavioral states we want to identify, which require us to provide initial values for the vectors stepPar0 (for the step distributions) and anglePar0 (for the angle distributions). We then need to select a statistical distribution that best describe each of these vectors. 
 
-As a starting point, we will fit a 2-state model, without specifying covariates to influence behavioral transitions (i.e., a NULL model).  We will then build a few, slightly more complex models where the covariate(s) inform the transition from one state to the next.  
+[MomentuHMM](https://cran.r-project.org/web/packages/momentuHMM/index.html) includes a variety of distributions. We will use the gamma distribution to describe steplengths (because it is a strictly positive distribution) and the von Mises distribution for turning angles. Other common distributions for steplength include Weibull ("weibull"), exponential ("exp"), and log-normal ("lnorm"). Wrapped-Cauchy ("wrpcauchy") is commonly used as an alternative distribution to describe turning angles. You can experiment with these distributions (and others) to find the best fitting model. 
 
-First, we must specify the number of behavioral states we want to identify, which require us to provide initial values for the vectors stepPar0 (for the step distributions) and anglePar0 (for the angle distributions).  We then need to select a statistical distribution that best describe each of these vectors.  
+### 3.1 Set Starting Values
+The "gamma" distribution requires us to set two (and potentially three) parameters describing the steplengths of our animals: mean and standard deviation. The third potential parameter, called zero mass, is required if we have steplengths that are exactly zero. This parameter accounts for zero inflation in the gamma distribution. The "von Mises (vm)" distribution requires us to set two parameters describing the turning angles. These are the mean turning angle and the angle concentration, which reflects the variance in the turning angle distribution. 
 
-[MomentuHMM](https://cran.r-project.org/web/packages/momentuHMM/index.html) includes a variety of distributions.  We will use the gamma distribution to describe steplengths and the von Mises distribution for turning angles. Other common distributions for steplength include Weibull ("weibull"), exponential ("exp"), and log-normal ("lnorm").  Wrapped-Cauchy ("wrpcauchy") is commonly used as an alternative distribution to describe turning angles.  You can experiment with these distributions (and others) to find the best fitting model. 
-
-## Set Starting Values
-The "gamma" distribution requires us to set two (and potentially three) parameters describing the steplengths of our animals: mean and standard deviation. The third potential parameter, called zero mass, is required if we have steplengths that are exactly zero.  This parameter accounts for zero inflation in the gamma distribution - a strictly positive distribution.  The "von Mises (vm)" distribution requires us to set two parameters describing the turning angles.  These are the mean turning angle and the angle concentration, which reflects the variance in the turning angle distribution.  
-
-Here, we will choose initial values that correspond to commonly observed patterns in 2-state HMMs for animal movement data, with state 1 involving relatively short steps and many turns (small mean steplength and large mean turning angle - Slow tortuous movements) and state 2 involving longer steps and fewer turns (large mean steplength and small mean turning angle - Fast directory Movements).  For ungulates, this is often referred to as an "area restricted search", with animals switching from an "encamped" behavioral state to an "exploratory" behavioral state.  Once again, this is a good opportunity to look at the movements of your data to identify items of interest that we might be able to identify in the data.
+Here, we will choose initial values that correspond to commonly observed patterns in 2-state HMMs for animal movement data, with state 1 involving relatively short steps and many turns (small mean steplength and large mean turning angle - Slow tortuous movements) and state 2 involving longer steps and fewer turns (large mean steplength and small mean turning angle - Fast directed Movements). For ungulates, this is often referred to as an "area restricted search", with animals switching from an *"encamped"* behavioral state to an *"exploratory"* behavioral state. Once again, this is a good opportunity to look at the movements of your data to identify items of interest that we might be able to identify in the data. Below, we investigate the data by summarizing the steplengths and turning angles with a histogram.
 
 **Note:** To ensure starting values do not overly impact results, some authors will repeat model fitting with a range of starting values. This allows one to test the sensitivity of results to starting value decisions.
 
+```{r Zero Mass, message=FALSE, warning=FALSE, echo=TRUE}
+# Let's first determine if we have any step lengths of 0. If yes, we need to include a zero mass parameter. If no, setting a zeromass value is not necessary.
+
+# The slice_min() command allows us to view the 10 lowest values of the steplength parameter. It's a convenient function to order by the minimum steplengths.
+slice_min(WB.move,
+          order_by = step,
+          n = 10)
+
+# You could also query the dataset and summarize numerically 
+whichzero <- which(WB.move$step == 0) 
+
+# Calculate the proportion of steps of length zero 
+(prop.0 <- length(whichzero)/nrow(WB.move))
+```
+
+Since we do have a step = 0 for 'Kiranto', we need to include a zero mass parameter for the gamma distribution.
+
 ```{r Start, message=FALSE, warning=FALSE, echo=TRUE}
 # Check distributions
-# hist(WB.move$step) #Looks like gamma
-# hist(WB.move$angle) #Looks pretty normal
+hist(WB.move$step, xlab="Step Length") 
+hist(WB.move$angle, xlab="Turning Angle") 
 
 # Define Starting Values
 # ************************************
-# For Step Length (gamma distribution): c(mean1, mean2, sd1, sd2)
-stepPar0 <- c(0.1, 1, 0.1, 1)
+# For Step Length (gamma distribution): c(mean1, mean2, sd1, sd2, zeromass1, zeromass2)
+# Mean
+mu0 <- c(0.1, 1)
+
+# SD
+sigma0 <- c(1, 1)
+
+# Zero Mass
+zeromass0 <- c(prop.0, prop.0)
+
+# Combine together
+stepPar0 <- c(mu0, sigma0, zeromass0)
 
 # For Turning Angle (von mises distribution): c(mean1, mean2, concentration1, concentration2)
 # In radians, pi, or 3.14 represents 180 degrees.
-anglePar0 <- c(pi, 0, 1, 1)
+# We expect the concentration to be larger when directed movement (mean = 2) occurs
+anglePar0 <- c(pi, 0, 1, 10)
 ```
 
-## Model Fitting
-We will now use the function `fitHMM` to fit our NULL model.  We specify the properly formatted object, define the number of states, input our starting values, and identify our steplength and turning angle distributions.  Since this is our NULL model, we assume that no covariates influence behavioral transitions between states.  We specify the NULL using standard regression formula notation (i.e., ~ 1). 
+### 3.2 Model Fitting
+We will now use the function `fitHMM` to fit our NULL model. We specify the properly formatted object, define the number of states, input our starting values, and identify our steplength and turning angle distributions. Since this is our NULL model, we assume that no covariates influence behavioral transitions between states. We specify the NULL using standard regression formula notation (i.e., ~ 1).
 
-The model summary provides a detailed numeric output, including the mean steplength from each predicted state and the standard deviation.  We see that state 1 has a much smaller steplength (~ 287m) than state 2 (~ 694m).  For turning angle means, we see that the mean of state 2 is much closer to 0.  This would indicate continued movement in roughly the same direction (i.e., directed movement).  The mean turning angle for state 1 is closer to `pi`, indicating that the animal is moving in circles.  Since we did not test a regression equation, we only have an intercept regression coefficient. 
+The model summary provides a detailed numeric output, including the mean steplength from each predicted state and the standard deviation. We will see that state 1 has a much smaller steplength (~ 285m) than state 2 (~ 708m). For turning angle means, we also will see that the mean of state 2 is much closer to 0. This would indicate continued or correlated movement in roughly the same direction (i.e., directed movement). The mean turning angle for state 1 is closer to `pi`, indicating that the animal is moving in a much less directed way. Since we did not test a regression equation, we only have an intercept regression coefficient. 
 
-We are also provided with a matrix of predicted transitions, showing the average probability of transitioning from state 1 to state 2 (~3%) and vice versa.  The diagonals (the probability of remaining in each state) of the transition matrix are also very high (~95%), fitting in with what we'd expect behaviorally.  The resulting plots describe the distributions of steplengths and turning angles for our two states.  Paths are colored based on the predicted state for each animal, which is very interesting.
+We are also provided with a matrix of predicted transitions, showing the average probability of transitioning from state 1 to state 2 (~2.7%) and state 2 to state 1 (~ 4.6%). The diagonals (the probability of remaining in each state) of the transition matrix are also very high (96-97%), fitting in with what we'd expect behaviorally. The resulting plots describe the distributions of steplengths and turning angles for our two states. Paths are colored based on the predicted state for each animal, which is very interesting.
 
 ```{r Fitting, message=FALSE, warning=FALSE, echo=TRUE}
 # Fit NULL model
@@ -179,16 +233,16 @@ WB.null <- fitHMM(data = WB.move,
                   formula = ~ 1,
                   estAngleMean = list(angle=TRUE))
 
-# Examing the 2-state model
+# Examining the 2-state model
 WB.null
 ```
 
-## Plotting Results
+### 3.3 Plotting Results
 Now that we have a fitted model, we can plot the results to visualize the state predictions displayed in different colors.
 
 ```{r Fitting Plots, message=FALSE, warning=FALSE, echo=TRUE}
-# Plot the results of the predictions.  
-# Colored states (State 1 is orange; state 2 is blue) provide the predicted state in each trajectory.  
+# Plot the results of the predictions. 
+# Colored states (State 1 is orange; state 2 is blue) provide the predicted state in each trajectory. 
 # Plot all animals
 # plot(WB.null,
 #      ask = F)
@@ -199,17 +253,17 @@ plot(WB.null,
      ask = FALSE)
 ```
 
-## State Assignments & Probabilities
-To decode the state processes identified, we will implement the Viterbi algorithm using the function `viterbi()` and compute state probabilities using the function `stateProbs()`. The Viterbi algorithm computes the sequence of most probable states to have generated the observations under the fitted model. State probabilities computes the probabilities of the underlying Markov chain being in different states at each observation under the fitted model.  Both state assignments provide a predicted state for each location in our dataset, allowing us to look at (for example) the proportion of time spent in each state.  
+### 3.4 State Assignments & Probabilities
+To decode the state processes identified, we will implement the Viterbi algorithm using the function `viterbi()` and compute state probabilities using the function `stateProbs()`. The Viterbi algorithm computes the sequence of most probable states to have generated the observations under the fitted model. State probabilities computes the probabilities of the underlying Markov chain being in different states at each observation under the fitted model. Both state assignments provide a predicted state for each location in our dataset, allowing us to look at (for example) the proportion of time spent in each state. 
 
-### Viterbi Algorithm
-Results from using the Viterbi algorithm indicate that wildebeest spend about 66% of time in a resident/encamped movement state (state 1).  We can look at these statistics for the population or for each individual and graphically display this information by linking the predicted state information to each position.  These results are often a valuable first step and help a researcher think about other variables (e.g., season, breeding state) that could explain potential changes in behavior.
+#### 3.4.1 Viterbi Algorithm
+Results from using the Viterbi algorithm indicate that wildebeest spend about 63% of time in a resident/encamped movement state (state 1). We can look at these statistics for the population or for each individual and graphically display this information by linking the predicted state information to each position. These results are often a valuable first step and help a researcher think about other variables (e.g., season, breeding state, sex) that could explain potential changes in behavior.
 
 ```{r Viterbi, message=FALSE, warning=FALSE, echo=TRUE}
 # Run the algorithm on the fitted model
 WB.states <- viterbi(WB.null)
 
-# Look at the state assignments.  The result is just a simple vector of state assignments (class 1 or 2). 
+# Look at the state assignments. The result is just a simple vector of state assignments (class 1 or 2). 
 WB.states[1:25]
 
 # What's the proportion of time spent in each state?
@@ -218,24 +272,20 @@ prop.table(table(WB.states))
 # How does this differ between individuals?
 # To answer this question, we need to combine the state assignments with the move object
 WB.v.Props <- WB.move %>% 
-  # create state column
-  mutate(state = WB.states) %>%
-  
+  mutate(state = WB.states) %>%   # create state column from WB.states (merge this with the dataframe)
   # add new column that is the total locations for each animal...used to calculate percentages
   mutate(locs = n(),
          .by = ID) %>% 
-  
-  # summarize for each animal, and each state, the proportion of locations.  
-  # Using reframe, as summarize has been deprecated in latest version of dplyr
+  # summarize for each animal, and each state, the proportion of locations. Using the reframe() command here
   reframe(stateProp = n()/locs,
-            sex = unique(sex),
-            .by = c(ID, state)) %>% 
+          sex = unique(sex),
+          .by = c(ID, state)) %>%
   
-  # This reduces our data frame from the same initial size, to one with just the unique rows of information.
+  # Reduce dataset to one with just the unique rows of information.
   distinct() %>% 
   arrange(ID, state)
 
-# Graph results, color by sex to look for any potential patterns.  Just a graphical summary.
+# Graph results, color by sex to look for any potential patterns. Just a graph summary.
 WB.v.Props %>%
   filter(state == 1) %>% 
   mutate(ID = fct_reorder(ID, 
@@ -250,8 +300,8 @@ WB.v.Props %>%
   theme_bw()
 
 # Look at Kiranto
-# plot(WB.move[WB.move$ID == "Kiranto",],
-#      ask = FALSE)
+plot(WB.move[WB.move$ID == "Kiranto",],
+     ask = FALSE)
 # Interestingly, Kiranto made some long distance movements, although most of his time was spent in state 1
 
 # How does his movement compare with Paita, for example?
@@ -260,8 +310,8 @@ WB.v.Props %>%
 # A very different movement pattern, even though the amount of time in state 1 is very similar to Kiranto.
 ```
 
-### State Probabilities
-The `stateProbs()` function allows us to investigate the actual transitional probabilities between each point in the dataset.  The output of the function is a matrix, with probabilities for each state.  Values across rows should sum to 1. Note, the with highest probability according to `stateProbs()` might not be the same as the state in the most probable sequence returned by the `viterbi()` algorithm. This is because the Viterbi algorithm performs “global decoding”, whereas the state probabilities are “local decoding”. For more details, see Zucchini et al. (2016).
+#### 3.4.2 State Probabilities
+The `stateProbs()` function allows us to investigate the actual transitional probabilities between each point in the dataset. The output of the function is a matrix, with probabilities for each state. Values across rows should sum to 1. Note, the highest probability according to `stateProbs()` might not be the same as the state in the most probable sequence returned by the `viterbi()` algorithm. This is because the Viterbi algorithm performs “global decoding”, whereas the state probabilities are “local decoding”. For more details, see Zucchini et al. (2016).
 
 The `plotStats()` function will plot the most likely state sequence decoded by the Viterbi algorithm (top panel), as well as both columns of the matrix of state probabilities.
 
@@ -295,16 +345,15 @@ WB.move %>%
   labs(x = "Easting",
        y = "Northing",
        title = "Kiranto")
-
 ```
 
-# Model Comparison & Covariate Testing
-Now that we have stepped through the process of fitting a NULL model, we will investigate whether ambient temperature or time of day influences the probability of transitioning between behavioral states. We will also test if a 3-state model has more support than a 2-state model, using AIC to evaluate which model is the best fit to the data.  Various other variables could be included to explain behavioral transition probabilities.  For example, we might include distance to water or dense vegetation, the level of human disturbance, or season of the year.  Variables must be numeric to be included in models and should vary throughout the tracking period (e.g., pregnancy status would be a suitable variable to include, but sex would not since sex would not change).  Similar to other regression-based analyses, covariates could or should be standardized (i.e., centered based on the mean and standard deviation) before fitting the model to improve numerical stability.
+## 4. Model Covariates
+Now that we have stepped through the process of fitting a NULL model, we will investigate whether ambient temperature or time of day influences the probability of transitioning between behavioral states. We will also test if a 3-state model has more support than a 2-state model, using AIC to evaluate which model is the best fit to the data. Various other variables could be included to explain behavioral transition probabilities. For example, we might include distance to water or dense vegetation, the level of human disturbance, or season of the year. Variables must be numeric to be included in models and should vary throughout the tracking period (e.g., pregnancy status would be a suitable variable to include, but sex would not since an animals' sex does not change). Similar to other regression-based analyses, covariates could or should be standardized (i.e., centered based on the mean and standard deviation) before fitting the model to improve numerical stability.
 
-## Covariate Model - Temperature
-As a first example, we will fit a 2-state model with ambient temperature.  We use the same starting values and parameter distributions specified previously in this script, but will add a formula `~ temp` with temperature as a covariate. 
+### 4.1 Covariate Model - Temperature
+As a first example, we will fit a 2-state model with ambient temperature. We use the same starting values and parameter distributions specified previously in this script, but will add a formula `~ temp` tp add temperature as a covariate. 
 
-The resulting analyses indicate that the probability of being in state 1 (i.e., encamped/foraging) is very high when temperatures (degrees C) are low.  As temperature increases, however, we see that the probability of being in state 1 starts to decrease.  By the time we reach 40C, the state probability is about 50%.
+The resulting analyses indicate that the probability of being in state 1 (i.e., encamped/foraging) is low when temperatures (degrees C) are low. As temperature increases, however, we see that the probability of being in state 1 starts to increase. By the time we reach 40C, the state probability is about 40%.
 
 ```{r Temp Model, message=FALSE, warning=FALSE, echo=TRUE}
 # Fit covariate model - temperature
@@ -323,8 +372,8 @@ plotStationary(WB.temp,
                plotCI = TRUE)
 ```
 
-## Covariate Model - Time of Day
-Now let's test a model with time of day. Hour of the day is a challenging variable to model in a regression equation because the 23rd hour is very close to the zero hour.  But, if it is modeled as a regular number, this connection will be lost.  The conversion below using sine and cosine allows us to model the hour of the day in a circular format.  A short description of this conversation can be found [here](https://ianlondon.github.io/posts/encoding-cyclical-features-24-hour-time/).  We are again using the starting parameters included in previous models and the gamma and von Mises distributions. 
+### 4.2 Covariate Model - Time of Day
+Now let's test a model with time of day. Hour of the day is a challenging variable to model in a regression equation because the 23rd hour is very close to the zero hour. But, if it is modeled as a regular number, this connection will be lost. The conversion below using sine and cosine allows us to model the hour of the day in a circular format. A short description of this conversation can be found [here](https://ianlondon.github.io/posts/encoding-cyclical-features-24-hour-time/). We are again using the starting parameters included in previous models and the gamma and von Mises distributions. 
 
 ```{r Time Model, message=FALSE, warning=FALSE, echo=TRUE}
 # Fit covariate model
@@ -339,19 +388,29 @@ WB.tod.2state <- fitHMM(data = WB.move,
 WB.tod.2state
 ```
 
-## 3-State Model
+### 4.3 3-State Model
 Now let's expand the number of states we can identify in the tracking data while investigating the influence of the same covariate.
 
 ```{r MultiState, message=FALSE, warning=FALSE, echo=TRUE}
 # Starting Values - Steplengths
 # *****************************
-# For Step Length (gamma distribution): c(mean1, mean2, mean3, sd1, sd2, sd3)
-stepPar0 <- c(0.1, 0.5, 3, 0.1, 0.5, 1)
+# For Step Length (gamma distribution): c(mean1, mean2, sd1, sd2, zeromass1, zeromass2, zeromass3)
+# Mean
+mu0 <- c(0.1, 1, 3)
+
+# SD
+sigma0 <- c(1, 1, 1)
+
+# Zero Mass
+zeromass0 <- c(prop.0, prop.0, prop.0)
+
+# Combine together
+stepPar0 <- c(mu0, sigma0, zeromass0)
 
 # Starting values - Turning angles
 # ********************************
 # For turning angle (von mises): c(mean1, mean2, mean3, conc1, conc2, conc3)
-anglePar0 <- c(pi, 0, 1.5, 1, 1, 1)
+anglePar0 <- c(pi, 0, 1.5, 1, 10, 5)
 
 # Fit model
 WB.tod.3state <- fitHMM(data = WB.move,
@@ -365,37 +424,41 @@ WB.tod.3state <- fitHMM(data = WB.move,
 WB.tod.3state
 ```
 
-## Model Comparison
-Now we'll use AIC to evaluate which model is best fit to the data.  Results indicate that the 2-state time of day model has the best statistical support, with next to no difference between our NULL model and the model including ambient temperature.  Other models, with more relevant predictors are likely to have greater support, but this at least provides a starting point for how to construct these types of models. 
+## 5. Model Comparison
+Now we'll use AIC to evaluate which model is best fit to the data. Results indicate that the 3-state time of day model has the best statistical support. The temperature model has the worst statistical support of models containing a covariate. Other models, with more relevant predictors, could have better statistical support and are worthy of investigation. 
 
-When we plot the results, we are able to investigate the steplength and turning angle distributions as we did previously.  We can also examine a plot of the trajectory, with colors coinciding with behaviors identified. We can also examine how the state probabilities change in relation to time of day.  Our results generally indicate that wildebeest transition from state 1 (resident/encamped) to state 2 (exploratory) around 18:00 and from state 2 to state 1 around 10:00 local time.  
+When we plot the results, we are able to investigate the steplength and turning angle distributions as we did previously. We can also examine a plot of the trajectory, with colors coinciding with behaviors identified. We could also examine how the state probabilities change in relation to time of day.  
+
 ```{r Model Comparison, message=FALSE, warning=FALSE, echo=TRUE}
 # Which of these two models is a better fit to the data?
 # Results indicate that the 2 state cosinor model is the best
-AIC(WB.null)
-AIC(WB.temp)
-AIC(WB.tod.2state)
-AIC(WB.tod.3state)
+AIC(WB.null,
+    WB.temp,
+    WB.tod.2state,
+    WB.tod.3state)
 
-WB.tod.2state
+WB.tod.3state
 
 # Plot the results
-# plot(WB.tod.2state,
+# plot(WB.tod.3state,
 #      ask = FALSE)
 
 # Plot an individual
-plot(WB.tod.2state,
+plot(WB.tod.3state,
       animals = "Kiranto",
       ask = FALSE)
 ```
 
-# Further Applications
-Similar to activities demonstrated above, we could encode the behavioral states identified to our original dataframe to our best fitting model.  By doing so, we would be able to calculate how much time animals remain in particular behavioral states, compare differences in animal behavior between study areas, or identify areas that are associated with certain behavioral states.  This could be particularly helpful if your goal was to separate the data to create seasonal home range where animals are mostly resident.  
+## 6. Further Applications
+While the 3-state model was selected as the best model, it is unclear what this third state is? As a result and even though this model was selected based on AIC, adding this additional is of limited value.
 
-As an example, let's filter the data by state behaviors and plot each behavior separately.  We'll follow the same procedure that we demonstrated above.  The output shows some clear areas where one of the wildebeest (Sawani) spent large periods in a encamped state, but there are quite a few points where these areas over.  This is the kind of approach, however, that might work better for other species.
+Similar to activities demonstrated above, we will encode the behavioral states of the 2-state model with the covariate for time of day to our original dataframe. By doing so, we can calculate how much time animals remain in particular behavioral states, compare differences in animal behavior between study areas, or identify areas that are associated with certain behavioral states. This could be particularly helpful if your goal was to separate the data to create seasonal home ranges where animals are mostly in a residential movement state. 
+
+Here, we filter the data by state behaviors and plot each behavior separately. We'll follow the same procedure that we demonstrated above. The output shows some clear areas where one of the wildebeest (Sawani) spent large periods in a encamped state, but there are quite a few points where these areas overlap. This kind of approach could be explored for your data/other species.
 
 ```{r Applications, message=FALSE, warning=FALSE, echo=TRUE}
 # Encode the behaviors using the Viterbi algorithm
+# NOTE that we are mapping the 2 state model here
 WB.tod.states <- viterbi(WB.tod.2state)
 
 # add to the dataset and remove some extra fiels
@@ -458,3 +521,43 @@ ggsave(plot = two_plots,
        width = 6.5,
        height = 4)
 ```
+
+---
+
+# Exercise: Apply to your own data
+Now that you have learned the basics, adapt the code and fit a few models to your own dataset. Following this exercise, all that you need is a properly formatted data.frame with unique IDs and GPS coordinates. Make sure to first assess if your data represent a regular trajectory and refer to previous lectures to correct this item, if necessary. Verify that your dataset are arranged in order. Experiment with different model structures and distributions. 
+
+**Useful questions to answer for your own dataset:**
+
+* Does your data contain a parameter (or two) that could be integrated in your modeling framework to explain differences in behavior?
+* What other covariates could be added that would warrant further investigate?
+* How much movement do you see when decoding for different behavioral states?
+
+As an additional/practical exercise, it can be useful to collect GPS data on yourself so that you can keep a log of your behaviors and determine if you can recover these behaviors with a model. Try the following:
+
+1. Download a GPS tracking app to your phone (e.g., GeoTracker).
+2. Spend a few hours tracking yourself, recording the precise time you sit down and rest, when you stand and walk around, and when you go for a run or ride your bike. These represent very different behavioral states.
+3. Practice downloading the data from your phone and uploading the dataset into [R](https://cran.r-project.org/).
+4. Clean the data as appropriate to fit a hidden Markov model of your behaviors.
+5. Experiment with how the data are collected to evaluate how your ability to detect these three behaviors (resting, walking, running) changes with the resolution of your GPS track (i.e., 5-minute interval versus a 1-hour temporal interval).
+
+---
+
+## Key functions reference
+
+| Function | Package | Purpose |
+|---|---|---|
+| `right_join()`, `left_join()` | `dplyr` | Join two datasets, keeping all rows from the right table |
+| `arrange()` | `dplyr` | Sort rows by specified variables. |
+| `hour()` | `lubridate` | Extract hour from datetime |
+| `prepData()` | `momentuHMM` | Prepare movement data for HMM fitting (compute steps, angles, covariates) |
+| `fitHMM()` | `momentuHMM` | Fit hidden Markov models to movement data |
+| `viterbi()` | `momentuHMM` | Decode most likely state sequence |
+| `stateProbs()` | `momentuHMM` | Compute state probabilities for each observation |
+| `plotStates()` | `momentuHMM` | Plot state sequences |
+| `plotStationary()` | `momentuHMM` | Plot stationary state probabilities vs covariates |
+| `cosinor()` |`momentuHMM` | Build cyclic covariate (e.g., diel cycle) |
+
+---
+
+*Next:* **Day 5 — Behavior Analysis Pt 2** — Now we will take one additional step and fit a HMM to accelerometer data.

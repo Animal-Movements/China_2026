@@ -1,8 +1,8 @@
-## ----setup, include=FALSE-------------------------------------------------------------------------------------------------------------------
+## ----setup, include=FALSE------------------------------------------------------------------------------------
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 
 
-## ----packages-------------------------------------------------------------------------------------------------------------------------------
+## ----packages------------------------------------------------------------------------------------------------
 # Clear R's memory
 rm(list=ls())
 
@@ -17,14 +17,14 @@ library(mapview)     # Quick interactive maps
 library(patchwork)   # Plot composer
 
 
-## ----load-----------------------------------------------------------------------------------------------------------------------------------
+## ----load----------------------------------------------------------------------------------------------------
 load("Data/WB_raw.rdata")   # loads WB.mv2, saved at the end of Module 1
 
 # Text summary of import
 cat("Starting point:", n_distinct(mt_track_id(WB.mv2)), "animals,", nrow(WB.mv2), "fixes\n")
 
 
-## ----qc_log_init----------------------------------------------------------------------------------------------------------------------------
+## ----qc_log_init---------------------------------------------------------------------------------------------
 qc_log <- tibble(
   step      = "0. Raw data (Module 1 output)",
   n_fixes   = nrow(WB.mv2),
@@ -32,19 +32,19 @@ qc_log <- tibble(
 )
 
 
-## ----track_meta-----------------------------------------------------------------------------------------------------------------------------
+## ----track_meta----------------------------------------------------------------------------------------------
 track_meta <- mt_track_data(WB.mv2)
 glimpse(track_meta)
 
 
-## ----study_sites----------------------------------------------------------------------------------------------------------------------------
+## ----study_sites---------------------------------------------------------------------------------------------
 # How many study sites are mixed into this Movebank study?
 track_meta %>%
   count(study_site, name = "n_animals") %>%
   arrange(desc(n_animals))
 
 
-## ----map_by_site----------------------------------------------------------------------------------------------------------------------------
+## ----map_by_site---------------------------------------------------------------------------------------------
 WB.sf_all <- st_as_sf(as.data.frame(WB.mv2)) %>% # Here, we are making the data spatial, as we did in the previous exercise
   mutate(study_site = track_meta$study_site[match(individual_local_identifier,
                                                   track_meta$individual_local_identifier)]) # Can you guess what the function "match()" does?
@@ -54,7 +54,7 @@ WB.sf_all %>%
   mapview(zcol = "study_site", layer.name = "Study site", cex = 2, alpha = 0.7)
 
 
-## ----subset_site_deploy---------------------------------------------------------------------------------------------------------------------
+## ----subset_site_deploy--------------------------------------------------------------------------------------
 # Build per-track lookup vectors from the track metadata
 site_lookup <- setNames(as.character(track_meta$study_site),
                          as.character(track_meta$individual_local_identifier))
@@ -75,31 +75,28 @@ cat("After filter:", n_distinct(mt_track_id(WB.mv2)), "animals,", nrow(WB.mv2), 
 print(table(mt_track_data(WB.mv2)$study_site))   # expect: only Athi-Kaputiei Plains
 
 
-## ----qc_log_1-------------------------------------------------------------------------------------------------------------------------------
+## ----qc_log_1------------------------------------------------------------------------------------------------
 qc_log <- qc_log %>%
   add_row(step      = "1. Subset to study site + deployment window",
            n_fixes   = nrow(WB.mv2),
            n_animals = n_distinct(mt_track_id(WB.mv2)))
 
 
-## ----units_fix------------------------------------------------------------------------------------------------------------------------------
+## ----units_fix-----------------------------------------------------------------------------------------------
 WB.mv2 <- WB.mv2 %>% 
   mutate(gps_dop = as.numeric(gps_dop))
 
 
-## ----dop_explore----------------------------------------------------------------------------------------------------------------------------
+## ----dop_explore---------------------------------------------------------------------------------------------
 # Create a tibble with the count of each raw gps fix
 WB.mv2 %>%
   as_tibble() %>%
   count(gps_fix_type_raw)
 
 
-## ----dop_before-----------------------------------------------------------------------------------------------------------------------------
-dop_before <- WB.mv2 %>%
-  as_tibble() %>%
-  filter(!is.na(gps_dop), gps_fix_type_raw %in% c("2D", "3D"))
-
-plot.raw <- ggplot(dop_before, aes(x = gps_dop)) +
+## ----dop_before----------------------------------------------------------------------------------------------
+# Plot
+plot.raw <- ggplot(WB.mv2, aes(x = gps_dop)) +
   geom_histogram(bins = 30, fill = "steelblue", color = "white") +
   geom_vline(data = tibble(gps_fix_type_raw = c("2D", "3D"), thresh = c(5, 10)),
              aes(xintercept = thresh), color = "firebrick", linetype = "dashed") +
@@ -110,10 +107,10 @@ plot.raw <- ggplot(dop_before, aes(x = gps_dop)) +
   theme_minimal()
 
 # Print to view the plot
-#plot.raw
+plot.raw
 
 
-## ----dop_filter-----------------------------------------------------------------------------------------------------------------------------
+## ----dop_filter----------------------------------------------------------------------------------------------
 # Note: fixes with a missing DOP value, or a fix type other than "2D"/"3D",
 # evaluate to NA here and are dropped by filter() along with the low-precision fixes.
 WB.mv2 <- WB.mv2 %>%
@@ -125,7 +122,11 @@ WB.mv2 <- WB.mv2 %>%
 cat("After DOP/fix-type filter:", n_distinct(mt_track_id(WB.mv2)), "animals,", nrow(WB.mv2), "fixes\n")
 
 
-## ----dop_after------------------------------------------------------------------------------------------------------------------------------
+## ----dop_after-----------------------------------------------------------------------------------------------
+# First recorder so that graph plots in same was as plot.raw
+WB.mv2$gps_fix_type_raw <- reorder(WB.mv2$gps_fix_type_raw, WB.mv2$gps_dop)
+
+# Now plot the filtered subset
 plot.filt <- WB.mv2 %>%
   as_tibble() %>%
   ggplot(aes(x = gps_dop)) +
@@ -136,18 +137,18 @@ plot.filt <- WB.mv2 %>%
   theme_minimal()
 
 # Plot results with plot.raw to see results together
-# Use the patchwork package (| for side by side, \ for stacked)
+# Use the patchwork package (| for side by side, / for stacked)
 plot.raw / plot.filt
 
 
-## ----qc_log_2-------------------------------------------------------------------------------------------------------------------------------
+## ----qc_log_2------------------------------------------------------------------------------------------------
 qc_log <- qc_log %>%
   add_row(step      = "2. GPS precision filter (DOP × fix type)",
            n_fixes   = nrow(WB.mv2),
            n_animals = n_distinct(mt_track_id(WB.mv2)))
 
 
-## ----dedup----------------------------------------------------------------------------------------------------------------------------------
+## ----dedup---------------------------------------------------------------------------------------------------
 # How many rows exist in the datast?
 n_before_dedup <- nrow(WB.mv2)
 
@@ -165,21 +166,21 @@ WB.mv2 <- WB.mv2 %>%
 cat("Removed", n_before_dedup - nrow(WB.mv2), "duplicate/invalid fixes\n")
 
 
-## ----qc_log_3-------------------------------------------------------------------------------------------------------------------------------
+## ----qc_log_3------------------------------------------------------------------------------------------------
 qc_log <- qc_log %>%
   add_row(step      = "3. Remove duplicates + invalid coordinates",
            n_fixes   = nrow(WB.mv2),
            n_animals = n_distinct(mt_track_id(WB.mv2)))
 
 
-## ----qc_summary-----------------------------------------------------------------------------------------------------------------------------
+## ----qc_summary----------------------------------------------------------------------------------------------
 qc_log <- qc_log %>%
   mutate(pct_of_raw = round(100 * n_fixes / first(n_fixes), 1))
 
 qc_log
 
 
-## ----qc_gt----------------------------------------------------------------------------------------------------------------------------------
+## ----qc_gt---------------------------------------------------------------------------------------------------
 qc_log %>%
   gt() %>%
   opt_row_striping() %>%
@@ -192,7 +193,7 @@ qc_log %>%
   cols_align(align = "center", columns = c(n_fixes, n_animals, pct_of_raw))
 
 
-## ----quick_map_clean------------------------------------------------------------------------------------------------------------------------
+## ----quick_map_clean-----------------------------------------------------------------------------------------
 WB.sf_clean <- st_as_sf(as.data.frame(WB.mv2))
 
 WB.sf_clean %>%
@@ -200,7 +201,7 @@ WB.sf_clean %>%
   mapview(zcol = "individual_local_identifier", layer.name = "Individual", cex = 2, alpha = 0.7)
 
 
-## ----save-----------------------------------------------------------------------------------------------------------------------------------
+## ----save----------------------------------------------------------------------------------------------------
 save(WB.mv2, file = "Data/WB_clean.rdata")
 cat("Saved cleaned WB.mv2 —", n_distinct(mt_track_id(WB.mv2)), "animals,", nrow(WB.mv2), "fixes\n")
 
