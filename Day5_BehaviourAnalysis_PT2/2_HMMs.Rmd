@@ -34,7 +34,7 @@ By the end of this module you will be able to:
 **Packages used:** `momentuHMM`, `lubridate`, `tidyverse`
 
 # Introduction
-  >Many thanks to Dr. Joseph Kolowski for assistance in developing this module
+  >Many thanks to Drs. Joseph Kolowski and Autumn-Lynn Harrison for assistance in developing this module
   
 There are three main packages for fitting discrete-time hidden Markov models (HMMs) in [R](https://cran.r-project.org/): [moveHMM](https://cran.r-project.org/web/packages/moveHMM/index.html), [momentuHMM](https://cran.r-project.org/web/packages/momentuHMM/index.html), and [hmmTMB](https://cran.r-project.org/web/packages/hmmTMB/index.html). These packages are very similar (i.e., the syntax is the same) and are maintained by the same architects, Theo Michelot and Brett McClintock. The difference between the packages are the complexity of models that can be fitted. [MoveHMM](https://cran.r-project.org/web/packages/moveHMM/index.html) is the most basic of the three packages, limited to estimating 2 or so biologically-meaningful behavior states from the data stream (i.e,. step length, turning angle). It offers a good starting point to HMMs. [MomentuHMM](https://cran.r-project.org/web/packages/momentuHMM/index.html) allows for the incorporation of auxiliary biotelemetry information (e.g., from pressure, conductivity, heart rate, or motion sensors), which results in less restrictions on the constraints to parameters and provides for greater possibilities in estimating additional behavioral states. [HmmTMB](https://cran.r-project.org/web/packages/hmmTMB/index.html) adds some very nice functionality, especially related to estimating initial starting values and inclusion of random effects.
 
